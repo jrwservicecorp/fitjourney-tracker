@@ -1,40 +1,26 @@
 
-function toggleMenu() {
-  const menuItems = document.getElementById('menu-items');
-  menuItems.classList.toggle('visible');
-}
-
-function navigateToApp(mode) {
-  // Hide the landing page and show the main app
+document.getElementById('guest-btn').addEventListener('click', () => {
   document.getElementById('landing-page').classList.add('hidden');
   document.getElementById('main-app').classList.remove('hidden');
-  if (mode === 'guest') {
-    console.log('Guest mode activated.');
-  } else if (mode === 'login') {
-    console.log('Login mode activated.');
-  }
-}
-
-function navigateTo(pageId) {
-  const pages = document.querySelectorAll('.page');
-  pages.forEach(page => page.classList.add('hidden'));
-  document.getElementById(pageId).classList.remove('hidden');
-
-  // Close menu after navigation
-  const menuItems = document.getElementById('menu-items');
-  menuItems.classList.remove('visible');
-}
-
-function logout() {
-  alert('Logging out...');
-  location.reload();
-}
-
-// Attach event listeners for guest and login buttons
-document.getElementById('guest-btn').addEventListener('click', () => {
-  navigateToApp('guest');
+  loadDashboard();
 });
 
 document.getElementById('login-btn').addEventListener('click', () => {
-  navigateToApp('login');
+  document.getElementById('landing-page').classList.add('hidden');
+  document.getElementById('main-app').classList.remove('hidden');
+  loadDashboard();
 });
+
+function loadDashboard() {
+  // Dynamic goal tracking (mock progress for now)
+  document.getElementById('goal-progress').textContent = "50%";
+  // Update milestones dynamically
+  const milestoneList = document.getElementById('milestone-list');
+  const milestones = ["Hit 30-Day Streak! 🎉", "Lost First 5 lbs! 🎉"];
+  milestoneList.innerHTML = ""; // Clear existing milestones
+  milestones.forEach(milestone => {
+    const li = document.createElement('li');
+    li.textContent = milestone;
+    milestoneList.appendChild(li);
+  });
+}
