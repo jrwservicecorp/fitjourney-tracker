@@ -5,8 +5,14 @@ function toggleMenu() {
 }
 
 function navigateToApp(mode) {
+  // Hide the landing page and show the main app
   document.getElementById('landing-page').classList.add('hidden');
   document.getElementById('main-app').classList.remove('hidden');
+  if (mode === 'guest') {
+    console.log('Guest mode activated.');
+  } else if (mode === 'login') {
+    console.log('Login mode activated.');
+  }
 }
 
 function navigateTo(pageId) {
