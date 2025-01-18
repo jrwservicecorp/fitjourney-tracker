@@ -34,9 +34,9 @@
       </div>
       <ul id="menu-items" class="hidden">
         <li><a href="#" onclick="navigateTo('home')"><i class="fas fa-home"></i> Home</a></li>
-        <li><a href="#" onclick="navigateTo('about')"><i class="fas fa-info-circle"></i> About</a></li>
+        <li><a href="#" onclick="navigateTo('measurements')"><i class="fas fa-ruler"></i> Measurements</a></li>
+        <li><a href="#" onclick="navigateTo('workouts')"><i class="fas fa-dumbbell"></i> Workouts</a></li>
         <li><a href="#" onclick="navigateTo('features')"><i class="fas fa-star"></i> Features</a></li>
-        <li><a href="#" onclick="navigateTo('support')"><i class="fas fa-question-circle"></i> Support</a></li>
         <li><a href="#" onclick="navigateTo('settings')"><i class="fas fa-cog"></i> Settings</a></li>
         <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
       </ul>
@@ -80,29 +80,50 @@
       </div>
     </div>
 
-    <div id="about" class="page hidden">
-      <h2>About FitJourney Tracker</h2>
-      <p>FitJourney Tracker helps you visualize your fitness progress and stay motivated on your journey.</p>
+    <div id="measurements" class="page hidden">
+      <h2>Body Measurements</h2>
+      <form id="measurements-form">
+        <div class="form-group">
+          <label for="biceps">Biceps (inches):</label>
+          <input type="number" id="biceps" required>
+        </div>
+        <div class="form-group">
+          <label for="chest">Chest (inches):</label>
+          <input type="number" id="chest" required>
+        </div>
+        <div class="form-group">
+          <label for="waist">Waist (inches):</label>
+          <input type="number" id="waist" required>
+        </div>
+        <button type="submit" class="btn">
+          <i class="fas fa-save"></i> Save Measurements
+        </button>
+      </form>
     </div>
 
-    <div id="features" class="page hidden">
-      <h2>Features</h2>
-      <ul>
-        <li>Track your weight over time.</li>
-        <li>Upload and view progress photos.</li>
-        <li>Generate and view progress charts.</li>
-        <li>Share progress to social media.</li>
-      </ul>
-    </div>
-
-    <div id="support" class="page hidden">
-      <h2>Support</h2>
-      <p>For assistance, contact us at <a href="mailto:support@fitjourney.com">support@fitjourney.com</a>.</p>
-    </div>
-
-    <div id="settings" class="page hidden">
-      <h2>Settings</h2>
-      <p>Adjust your preferences here.</p>
+    <div id="workouts" class="page hidden">
+      <h2>Workout Logs</h2>
+      <form id="workout-form">
+        <div class="form-group">
+          <label for="exercise">Exercise:</label>
+          <input type="text" id="exercise" required>
+        </div>
+        <div class="form-group">
+          <label for="sets">Sets:</label>
+          <input type="number" id="sets" required>
+        </div>
+        <div class="form-group">
+          <label for="reps">Reps:</label>
+          <input type="number" id="reps" required>
+        </div>
+        <div class="form-group">
+          <label for="weight-used">Weight Used (lbs):</label>
+          <input type="number" id="weight-used" required>
+        </div>
+        <button type="submit" class="btn">
+          <i class="fas fa-dumbbell"></i> Log Workout
+        </button>
+      </form>
     </div>
   </div>
 
