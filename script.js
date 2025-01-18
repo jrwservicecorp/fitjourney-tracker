@@ -24,6 +24,22 @@ function logout() {
   location.reload();
 }
 
+// Event listener for tracking preferences
+document.getElementById('tracking-options-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  alert('Tracking preferences saved!');
+});
+
+// Event listener for archive filtering
+document.getElementById('archive-filter-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const startDate = document.getElementById('start-date').value;
+  const endDate = document.getElementById('end-date').value;
+
+  alert(`Showing progress from ${startDate} to ${endDate}`);
+  document.getElementById('archive-results').classList.remove('hidden');
+}
+
 function shareProgress() {
   alert('Sharing progress to social media platforms!');
 }

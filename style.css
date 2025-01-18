@@ -7,6 +7,12 @@ body {
   background: linear-gradient(to bottom, #e3f2fd, #f1f8e9);
   color: #212529;
 }
+header {
+  text-align: center;
+  background: #007bff;
+  color: #fff;
+  padding: 10px;
+}
 .hidden {
   display: none;
 }

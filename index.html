@@ -4,17 +4,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FitJourney Tracker</title>
+  <title>FitJourney Tracker v1.0</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+  <header>
+    <h1>FitJourney Tracker</h1>
+    <p>Version 1.0</p>
+  </header>
+
   <!-- Landing Page -->
   <div id="landing-page" class="container">
-    <h1><i class="fas fa-dumbbell"></i> Welcome to FitJourney Tracker</h1>
-    <p>Your fitness journey, visualized and simplified.</p>
+    <h2><i class="fas fa-dumbbell"></i> Welcome to FitJourney Tracker</h2>
+    <p>Track and visualize your fitness journey your way.</p>
     <div class="button-group">
       <button class="btn" onclick="navigateToApp('guest')">
         <i class="fas fa-user"></i> Use as Guest
@@ -34,96 +39,55 @@
       </div>
       <ul id="menu-items" class="hidden">
         <li><a href="#" onclick="navigateTo('home')"><i class="fas fa-home"></i> Home</a></li>
-        <li><a href="#" onclick="navigateTo('measurements')"><i class="fas fa-ruler"></i> Measurements</a></li>
-        <li><a href="#" onclick="navigateTo('workouts')"><i class="fas fa-dumbbell"></i> Workouts</a></li>
-        <li><a href="#" onclick="navigateTo('features')"><i class="fas fa-star"></i> Features</a></li>
+        <li><a href="#" onclick="navigateTo('customization')"><i class="fas fa-sliders-h"></i> Customization</a></li>
+        <li><a href="#" onclick="navigateTo('archive')"><i class="fas fa-archive"></i> Archive</a></li>
         <li><a href="#" onclick="navigateTo('settings')"><i class="fas fa-cog"></i> Settings</a></li>
         <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
       </ul>
     </nav>
 
     <div id="home" class="page">
-      <h1>FitJourney Tracker</h1>
-      <div class="card">
-        <!-- User Input Form -->
-        <form id="progress-form">
-          <div class="form-group">
-            <label for="weight"><i class="fas fa-weight"></i> Enter Current Weight (lbs):</label>
-            <input type="number" id="weight" required>
-          </div>
-          <div class="form-group">
-            <label for="date"><i class="fas fa-calendar-alt"></i> Date:</label>
-            <input type="date" id="date" required>
-          </div>
-          <div class="form-group">
-            <label for="photo"><i class="fas fa-camera"></i> Upload Progress Photo:</label>
-            <input type="file" id="photo" accept="image/*">
-          </div>
-          <button type="submit" class="btn">
-            <i class="fas fa-plus-circle"></i> Add Progress
-          </button>
-        </form>
-      </div>
-      <div class="card">
-        <!-- Photo Gallery -->
-        <h2><i class="fas fa-images"></i> Photo Gallery</h2>
-        <div class="photo-gallery" id="photo-gallery"></div>
-      </div>
-      <div class="card">
-        <!-- Progress Chart -->
-        <h2><i class="fas fa-chart-line"></i> Progress Chart</h2>
+      <h2>Welcome Back to FitJourney Tracker</h2>
+      <p>Select an option from the menu to get started.</p>
+    </div>
+
+    <div id="customization" class="page hidden">
+      <h2>Choose What to Track</h2>
+      <form id="tracking-options-form">
+        <div class="form-group">
+          <input type="checkbox" id="track-weight" value="weight">
+          <label for="track-weight">Track Body Weight</label>
+        </div>
+        <div class="form-group">
+          <input type="checkbox" id="track-measurements" value="measurements">
+          <label for="track-measurements">Track Measurements</label>
+        </div>
+        <div class="form-group">
+          <input type="checkbox" id="track-photos" value="photos">
+          <label for="track-photos">Upload Progress Photos</label>
+        </div>
+        <button type="submit" class="btn">
+          <i class="fas fa-save"></i> Save Preferences
+        </button>
+      </form>
+    </div>
+
+    <div id="archive" class="page hidden">
+      <h2>Progress Archive</h2>
+      <form id="archive-filter-form">
+        <label for="start-date">Start Date:</label>
+        <input type="date" id="start-date" required>
+        <label for="end-date">End Date:</label>
+        <input type="date" id="end-date" required>
+        <button type="submit" class="btn">
+          <i class="fas fa-search"></i> View Progress
+        </button>
+      </form>
+      <div id="archive-results" class="card hidden">
+        <h3>Results</h3>
+        <div id="before-after-photos"></div>
         <canvas id="progress-chart" width="400" height="200"></canvas>
       </div>
-      <div class="card">
-        <h2>Share Your Progress</h2>
-        <button class="btn" onclick="shareProgress()"><i class="fas fa-share"></i> Share to Social Media</button>
-      </div>
-    </div>
-
-    <div id="measurements" class="page hidden">
-      <h2>Body Measurements</h2>
-      <form id="measurements-form">
-        <div class="form-group">
-          <label for="biceps">Biceps (inches):</label>
-          <input type="number" id="biceps" required>
-        </div>
-        <div class="form-group">
-          <label for="chest">Chest (inches):</label>
-          <input type="number" id="chest" required>
-        </div>
-        <div class="form-group">
-          <label for="waist">Waist (inches):</label>
-          <input type="number" id="waist" required>
-        </div>
-        <button type="submit" class="btn">
-          <i class="fas fa-save"></i> Save Measurements
-        </button>
-      </form>
-    </div>
-
-    <div id="workouts" class="page hidden">
-      <h2>Workout Logs</h2>
-      <form id="workout-form">
-        <div class="form-group">
-          <label for="exercise">Exercise:</label>
-          <input type="text" id="exercise" required>
-        </div>
-        <div class="form-group">
-          <label for="sets">Sets:</label>
-          <input type="number" id="sets" required>
-        </div>
-        <div class="form-group">
-          <label for="reps">Reps:</label>
-          <input type="number" id="reps" required>
-        </div>
-        <div class="form-group">
-          <label for="weight-used">Weight Used (lbs):</label>
-          <input type="number" id="weight-used" required>
-        </div>
-        <button type="submit" class="btn">
-          <i class="fas fa-dumbbell"></i> Log Workout
-        </button>
-      </form>
     </div>
   </div>
 
