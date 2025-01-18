@@ -2,13 +2,15 @@
 document.getElementById('guest-btn').addEventListener('click', () => {
   document.getElementById('landing-page').classList.add('hidden');
   document.getElementById('main-app').classList.remove('hidden');
-  navigateTo('dashboard'); // Ensure dashboard is loaded
+  loadDashboard();
+  navigateTo('dashboard');
 });
 
 document.getElementById('login-btn').addEventListener('click', () => {
   document.getElementById('landing-page').classList.add('hidden');
   document.getElementById('main-app').classList.remove('hidden');
-  navigateTo('dashboard'); // Ensure dashboard is loaded
+  loadDashboard();
+  navigateTo('dashboard');
 });
 
 // Function to navigate between pages
@@ -23,9 +25,20 @@ function navigateTo(pageId) {
 
 // Ensure default content loads on the Dashboard
 function loadDashboard() {
-  document.getElementById('current-streak').textContent = "7 days";
-  document.getElementById('weight-lost').textContent = "10 lbs";
-  document.getElementById('milestones').textContent = "3";
+  const dashboard = document.getElementById('dashboard');
+  if (dashboard) {
+    dashboard.innerHTML = `
+      <h2>Your Dashboard</h2>
+      <div class="card">
+        <h3>Welcome Back!</h3>
+        <p>Here's a summary of your progress:</p>
+        <ul>
+          <li>Current Streak: <span id="current-streak">7 days</span></li>
+          <li>Weight Lost: <span id="weight-lost">10 lbs</span></li>
+          <li>Milestones Achieved: <span id="milestones">3</span></li>
+        </ul>
+      </div>`;
+  }
 }
 
 // Theme toggles
@@ -56,3 +69,9 @@ document.getElementById('save-profile-btn').addEventListener('click', () => {
 document.getElementById('export-data-btn').addEventListener('click', () => {
   alert("Exporting your data as a JSON file (placeholder).");
 });
+
+// Ensure the Dashboard loads by default when the app starts
+window.onload = () => {
+  navigateTo('dashboard');
+  loadDashboard();
+};
