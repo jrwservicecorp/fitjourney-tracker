@@ -7,11 +7,6 @@ function toggleMenu() {
 function navigateToApp(mode) {
   document.getElementById('landing-page').classList.add('hidden');
   document.getElementById('main-app').classList.remove('hidden');
-  if (mode === 'guest') {
-    console.log('Using app as guest.');
-  } else {
-    console.log('Navigating to login...');
-  }
 }
 
 function navigateTo(pageId) {
@@ -26,5 +21,5 @@ function logout() {
 }
 
 function shareProgress() {
-  alert('Sharing your progress to social media! This functionality will integrate with APIs for Facebook, Instagram, and Twitter.');
+  alert('Sharing progress to social media platforms!');
 }
