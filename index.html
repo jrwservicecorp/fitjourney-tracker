@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FitJourney Tracker v1.1</title>
+  <title>FitJourney Tracker v1.2</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>Version 1.1</p>
+    <p>Version 1.2</p>
   </header>
 
   <!-- Landing Page -->
@@ -21,10 +21,10 @@
     <h2><i class="fas fa-dumbbell"></i> Welcome to FitJourney Tracker</h2>
     <p>Track and visualize your fitness journey your way.</p>
     <div class="button-group">
-      <button class="btn" onclick="navigateToApp('guest')">
+      <button id="guest-btn" class="btn">
         <i class="fas fa-user"></i> Use as Guest
       </button>
-      <button class="btn" onclick="navigateToApp('login')">
+      <button id="login-btn" class="btn">
         <i class="fas fa-sign-in-alt"></i> Login
       </button>
     </div>
@@ -49,45 +49,6 @@
     <div id="home" class="page">
       <h2>Welcome Back to FitJourney Tracker</h2>
       <p>Select an option from the menu to get started.</p>
-    </div>
-
-    <div id="customization" class="page hidden">
-      <h2>Choose What to Track</h2>
-      <form id="tracking-options-form">
-        <div class="form-group">
-          <input type="checkbox" id="track-weight" value="weight">
-          <label for="track-weight">Track Body Weight</label>
-        </div>
-        <div class="form-group">
-          <input type="checkbox" id="track-measurements" value="measurements">
-          <label for="track-measurements">Track Measurements</label>
-        </div>
-        <div class="form-group">
-          <input type="checkbox" id="track-photos" value="photos">
-          <label for="track-photos">Upload Progress Photos</label>
-        </div>
-        <button type="submit" class="btn">
-          <i class="fas fa-save"></i> Save Preferences
-        </button>
-      </form>
-    </div>
-
-    <div id="archive" class="page hidden">
-      <h2>Progress Archive</h2>
-      <form id="archive-filter-form">
-        <label for="start-date">Start Date:</label>
-        <input type="date" id="start-date" required>
-        <label for="end-date">End Date:</label>
-        <input type="date" id="end-date" required>
-        <button type="submit" class="btn">
-          <i class="fas fa-search"></i> View Progress
-        </button>
-      </form>
-      <div id="archive-results" class="card hidden">
-        <h3>Results</h3>
-        <div id="before-after-photos"></div>
-        <canvas id="progress-chart" width="400" height="200"></canvas>
-      </div>
     </div>
   </div>
 
