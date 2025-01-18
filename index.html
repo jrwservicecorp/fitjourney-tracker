@@ -10,40 +10,90 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <div class="container">
-    <h1><i class="fas fa-dumbbell"></i> FitJourney Tracker</h1>
+  <!-- Landing Page -->
+  <div id="landing-page" class="container">
+    <h1><i class="fas fa-dumbbell"></i> Welcome to FitJourney Tracker</h1>
+    <p>Your fitness journey, visualized and simplified.</p>
+    <div class="button-group">
+      <button class="btn" onclick="navigateToApp('guest')">
+        <i class="fas fa-user"></i> Use as Guest
+      </button>
+      <button class="btn" onclick="navigateToApp('login')">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </button>
+    </div>
+  </div>
 
-    <div class="card">
-      <!-- User Input Form -->
-      <form id="progress-form">
-        <div class="form-group">
-          <label for="weight"><i class="fas fa-weight"></i> Enter Current Weight (lbs):</label>
-          <input type="number" id="weight" required>
-        </div>
-        <div class="form-group">
-          <label for="date"><i class="fas fa-calendar-alt"></i> Date:</label>
-          <input type="date" id="date" required>
-        </div>
-        <div class="form-group">
-          <label for="photo"><i class="fas fa-camera"></i> Upload Progress Photo:</label>
-          <input type="file" id="photo" accept="image/*">
-        </div>
-        <button type="submit" class="btn">
-          <i class="fas fa-plus-circle"></i> Add Progress
-        </button>
-      </form>
+  <!-- Main App Section -->
+  <div id="main-app" class="container hidden">
+    <!-- Navigation Menu -->
+    <nav class="menu">
+      <ul>
+        <li><a href="#" onclick="navigateTo('home')"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="#" onclick="navigateTo('about')"><i class="fas fa-info-circle"></i> About</a></li>
+        <li><a href="#" onclick="navigateTo('features')"><i class="fas fa-star"></i> Features</a></li>
+        <li><a href="#" onclick="navigateTo('support')"><i class="fas fa-question-circle"></i> Support</a></li>
+        <li><a href="#" onclick="navigateTo('settings')"><i class="fas fa-cog"></i> Settings</a></li>
+        <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
+    </nav>
+
+    <div id="home" class="page">
+      <h1>FitJourney Tracker</h1>
+      <div class="card">
+        <!-- User Input Form -->
+        <form id="progress-form">
+          <div class="form-group">
+            <label for="weight"><i class="fas fa-weight"></i> Enter Current Weight (lbs):</label>
+            <input type="number" id="weight" required>
+          </div>
+          <div class="form-group">
+            <label for="date"><i class="fas fa-calendar-alt"></i> Date:</label>
+            <input type="date" id="date" required>
+          </div>
+          <div class="form-group">
+            <label for="photo"><i class="fas fa-camera"></i> Upload Progress Photo:</label>
+            <input type="file" id="photo" accept="image/*">
+          </div>
+          <button type="submit" class="btn">
+            <i class="fas fa-plus-circle"></i> Add Progress
+          </button>
+        </form>
+      </div>
+      <div class="card">
+        <!-- Photo Gallery -->
+        <h2><i class="fas fa-images"></i> Photo Gallery</h2>
+        <div class="photo-gallery" id="photo-gallery"></div>
+      </div>
+      <div class="card">
+        <!-- Progress Chart -->
+        <h2><i class="fas fa-chart-line"></i> Progress Chart</h2>
+        <canvas id="progress-chart" width="400" height="200"></canvas>
+      </div>
     </div>
 
-    <div class="card">
-      <!-- Photo Gallery -->
-      <h2><i class="fas fa-images"></i> Photo Gallery</h2>
-      <div class="photo-gallery" id="photo-gallery"></div>
+    <div id="about" class="page hidden">
+      <h2>About FitJourney Tracker</h2>
+      <p>FitJourney Tracker helps you visualize your fitness progress and stay motivated on your journey.</p>
     </div>
 
-    <div class="card">
-      <!-- Progress Chart -->
-      <h2><i class="fas fa-chart-line"></i> Progress Chart</h2>
-      <canvas id="progress-chart" width="400" height="200"></canvas>
+    <div id="features" class="page hidden">
+      <h2>Features</h2>
+      <ul>
+        <li>Track your weight over time.</li>
+        <li>Upload and view progress photos.</li>
+        <li>Generate and view progress charts.</li>
+      </ul>
+    </div>
+
+    <div id="support" class="page hidden">
+      <h2>Support</h2>
+      <p>For assistance, contact us at <a href="mailto:support@fitjourney.com">support@fitjourney.com</a>.</p>
+    </div>
+
+    <div id="settings" class="page hidden">
+      <h2>Settings</h2>
+      <p>Adjust your preferences here.</p>
     </div>
   </div>
 

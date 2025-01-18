@@ -1,65 +1,21 @@
 
-const progressForm = document.getElementById('progress-form');
-const photoGallery = document.getElementById('photo-gallery');
-const ctx = document.getElementById('progress-chart').getContext('2d');
-
-let progressData = [];
-let chart;
-
-function updateChart() {
-  const labels = progressData.map(entry => entry.date);
-  const weights = progressData.map(entry => entry.weight);
-
-  if (chart) {
-    chart.destroy();
+function navigateToApp(mode) {
+  document.getElementById('landing-page').classList.add('hidden');
+  document.getElementById('main-app').classList.remove('hidden');
+  if (mode === 'guest') {
+    console.log('Using app as guest.');
+  } else {
+    console.log('Navigating to login...');
   }
-
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Weight Progress',
-        data: weights,
-        borderColor: '#007bff',
-        borderWidth: 2,
-        fill: false,
-      }],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: true,
-        },
-      },
-    },
-  });
 }
 
-progressForm.addEventListener('submit', (e) => {
-  e.preventDefault();
+function navigateTo(pageId) {
+  const pages = document.querySelectorAll('.page');
+  pages.forEach(page => page.classList.add('hidden'));
+  document.getElementById(pageId).classList.remove('hidden');
+}
 
-  const weight = document.getElementById('weight').value;
-  const date = document.getElementById('date').value;
-  const photo = document.getElementById('photo').files[0];
-
-  if (weight && date) {
-    progressData.push({ weight, date });
-    updateChart();
-
-    if (photo) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        photoGallery.appendChild(img);
-      };
-      reader.readAsDataURL(photo);
-    }
-
-    progressForm.reset();
-  } else {
-    alert('Please fill in all fields.');
-  }
-});
+function logout() {
+  alert('Logging out...');
+  location.reload();
+}
