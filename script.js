@@ -12,15 +12,30 @@ document.getElementById('login-btn').addEventListener('click', () => {
 });
 
 function loadDashboard() {
-  // Dynamic goal tracking (mock progress for now)
-  document.getElementById('goal-progress').textContent = "50%";
-  // Update milestones dynamically
-  const milestoneList = document.getElementById('milestone-list');
-  const milestones = ["Hit 30-Day Streak! 🎉", "Lost First 5 lbs! 🎉"];
-  milestoneList.innerHTML = ""; // Clear existing milestones
-  milestones.forEach(milestone => {
-    const li = document.createElement('li');
-    li.textContent = milestone;
-    milestoneList.appendChild(li);
-  });
+  console.log("Dashboard loaded!");
 }
+
+document.getElementById('light-mode-btn').addEventListener('click', () => {
+  document.body.style.background = "#ffffff";
+  document.body.style.color = "#000000";
+});
+
+document.getElementById('dark-mode-btn').addEventListener('click', () => {
+  document.body.style.background = "#121212";
+  document.body.style.color = "#ffffff";
+});
+
+document.getElementById('save-reminders-btn').addEventListener('click', () => {
+  const frequency = document.getElementById('reminder-frequency').value;
+  alert(`Reminder frequency set to ${frequency}.`);
+});
+
+document.getElementById('save-profile-btn').addEventListener('click', () => {
+  const name = document.getElementById('profile-name').value;
+  const email = document.getElementById('profile-email').value;
+  alert(`Profile updated: Name - ${name}, Email - ${email}`);
+});
+
+document.getElementById('export-data-btn').addEventListener('click', () => {
+  alert("Exporting your data as a JSON file (placeholder).");
+});

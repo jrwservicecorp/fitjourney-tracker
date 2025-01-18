@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FitJourney Tracker v2.6</title>
+  <title>FitJourney Tracker v2.7</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -13,10 +13,9 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>Version 2.6</p>
+    <p>Version 2.7</p>
   </header>
 
-  <!-- Landing Page -->
   <div id="landing-page" class="container">
     <h2><i class="fas fa-dumbbell"></i> Welcome to FitJourney Tracker</h2>
     <p>Track and visualize your fitness journey your way.</p>
@@ -30,9 +29,7 @@
     </div>
   </div>
 
-  <!-- Main App Section -->
   <div id="main-app" class="container hidden">
-    <!-- Hamburger Menu -->
     <nav class="menu">
       <div class="hamburger" onclick="toggleMenu()">
         <i class="fas fa-bars"></i>
@@ -44,32 +41,35 @@
       </ul>
     </nav>
 
-    <!-- Dashboard -->
-    <div id="dashboard" class="page hidden">
-      <h2>Your Dashboard</h2>
+    <div id="settings" class="page hidden">
+      <h2>Settings</h2>
       <div class="card">
-        <h3>Welcome Back!</h3>
-        <p>Here's a summary of your progress:</p>
-        <ul>
-          <li>Current Streak: <span id="current-streak">7 days</span></li>
-          <li>Weight Lost: <span id="weight-lost">10 lbs</span></li>
-          <li>Milestones Achieved: <span id="milestones">3</span></li>
-        </ul>
+        <h3>Theme Selection</h3>
+        <button id="light-mode-btn" class="btn small">Light Mode</button>
+        <button id="dark-mode-btn" class="btn small">Dark Mode</button>
       </div>
-
       <div class="card">
-        <h3>Active Goals</h3>
-        <ul id="active-goals">
-          <li>Lose 10 lbs by March 2025 - Progress: <span id="goal-progress">50%</span></li>
-        </ul>
+        <h3>Reminder Preferences</h3>
+        <label for="reminder-frequency">Reminder Frequency:</label>
+        <select id="reminder-frequency">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+        <button id="save-reminders-btn" class="btn">Save Preferences</button>
       </div>
-
       <div class="card">
-        <h3>Milestones</h3>
-        <ul id="milestone-list">
-          <li>Hit 30-Day Streak! 🎉</li>
-          <li>Lost First 5 lbs! 🎉</li>
-        </ul>
+        <h3>Account Management</h3>
+        <p>Update your profile information:</p>
+        <label for="profile-name">Name:</label>
+        <input type="text" id="profile-name" placeholder="Enter your name">
+        <label for="profile-email">Email:</label>
+        <input type="email" id="profile-email" placeholder="Enter your email">
+        <button id="save-profile-btn" class="btn">Save Changes</button>
+      </div>
+      <div class="card">
+        <h3>Export Data</h3>
+        <button id="export-data-btn" class="btn">Export Data</button>
       </div>
     </div>
   </div>

@@ -45,3 +45,7 @@ button {
 button:hover {
   background: #0056b3;
 }
+button.small {
+  padding: 5px 10px;
+  font-size: 0.9em;
+}
