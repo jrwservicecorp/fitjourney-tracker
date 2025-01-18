@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FitJourney Tracker v2.7</title>
+  <title>FitJourney Tracker v2.8</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -13,9 +13,10 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>Version 2.7</p>
+    <p>Version 2.8</p>
   </header>
 
+  <!-- Landing Page -->
   <div id="landing-page" class="container">
     <h2><i class="fas fa-dumbbell"></i> Welcome to FitJourney Tracker</h2>
     <p>Track and visualize your fitness journey your way.</p>
@@ -29,7 +30,9 @@
     </div>
   </div>
 
+  <!-- Main App Section -->
   <div id="main-app" class="container hidden">
+    <!-- Hamburger Menu -->
     <nav class="menu">
       <div class="hamburger" onclick="toggleMenu()">
         <i class="fas fa-bars"></i>
@@ -41,6 +44,21 @@
       </ul>
     </nav>
 
+    <!-- Dashboard -->
+    <div id="dashboard" class="page hidden">
+      <h2>Your Dashboard</h2>
+      <div class="card">
+        <h3>Welcome Back!</h3>
+        <p>Here's a summary of your progress:</p>
+        <ul>
+          <li>Current Streak: <span id="current-streak">7 days</span></li>
+          <li>Weight Lost: <span id="weight-lost">10 lbs</span></li>
+          <li>Milestones Achieved: <span id="milestones">3</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Settings Page -->
     <div id="settings" class="page hidden">
       <h2>Settings</h2>
       <div class="card">
