@@ -4,7 +4,7 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+  background: linear-gradient(to bottom, #e3f2fd, #f1f8e9);
   color: #212529;
 }
 .hidden {
