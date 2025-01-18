@@ -20,7 +20,7 @@ h1, h2 {
   color: #007bff;
 }
 .menu {
-  position: fixed;
+  position: sticky;
   top: 0;
   width: 100%;
   background: #007bff;
@@ -31,7 +31,7 @@ h1, h2 {
   justify-content: space-between;
   padding: 10px 15px;
 }
-.hamburger {
+.menu .hamburger {
   cursor: pointer;
   font-size: 1.5rem;
 }
@@ -41,6 +41,9 @@ h1, h2 {
   padding: 0;
   display: none;
   flex-direction: column;
+}
+.menu ul.visible {
+  display: flex;
 }
 .menu ul li a {
   color: #fff;
