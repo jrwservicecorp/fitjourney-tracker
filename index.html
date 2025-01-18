@@ -26,9 +26,12 @@
 
   <!-- Main App Section -->
   <div id="main-app" class="container hidden">
-    <!-- Navigation Menu -->
+    <!-- Hamburger Menu -->
     <nav class="menu">
-      <ul>
+      <div class="hamburger" onclick="toggleMenu()">
+        <i class="fas fa-bars"></i>
+      </div>
+      <ul id="menu-items" class="hidden">
         <li><a href="#" onclick="navigateTo('home')"><i class="fas fa-home"></i> Home</a></li>
         <li><a href="#" onclick="navigateTo('about')"><i class="fas fa-info-circle"></i> About</a></li>
         <li><a href="#" onclick="navigateTo('features')"><i class="fas fa-star"></i> Features</a></li>
@@ -70,6 +73,10 @@
         <h2><i class="fas fa-chart-line"></i> Progress Chart</h2>
         <canvas id="progress-chart" width="400" height="200"></canvas>
       </div>
+      <div class="card">
+        <h2>Share Your Progress</h2>
+        <button class="btn" onclick="shareProgress()"><i class="fas fa-share"></i> Share to Social Media</button>
+      </div>
     </div>
 
     <div id="about" class="page hidden">
@@ -83,6 +90,7 @@
         <li>Track your weight over time.</li>
         <li>Upload and view progress photos.</li>
         <li>Generate and view progress charts.</li>
+        <li>Share progress to social media.</li>
       </ul>
     </div>
 
