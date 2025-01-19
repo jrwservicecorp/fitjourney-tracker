@@ -1,5 +1,5 @@
 
-const appVersion = "v2.31";
+const appVersion = "v2.32";
 
 // Tracker Data
 let progressData = JSON.parse(localStorage.getItem('progressData')) || [];
@@ -7,10 +7,12 @@ let photoData = JSON.parse(localStorage.getItem('photoData')) || [];
 
 // Initialize Navigation
 function setupNavigation() {
+  console.log("Initializing navigation...");
   document.querySelectorAll('.navbar a').forEach((link) => {
     link.addEventListener('click', (event) => {
       event.preventDefault();
       const pageId = link.getAttribute('data-page');
+      console.log(`Navigating to page: ${pageId}`);
       navigateTo(pageId);
     });
   });
@@ -22,6 +24,7 @@ function navigateTo(pageId) {
   pages.forEach((page) => page.classList.add('hidden'));
   const targetPage = document.getElementById(pageId);
   if (targetPage) {
+    console.log(`Displaying page: ${pageId}`);
     targetPage.classList.remove('hidden');
     highlightActiveLink(pageId);
     updatePageTitle(pageId);
@@ -56,6 +59,7 @@ function updatePageTitle(pageId) {
 
 // Load Dashboard with Logging and Photo Upload Functionality
 function loadDashboard() {
+  console.log("Loading dashboard...");
   const dashboard = document.getElementById('dashboard');
   if (dashboard) {
     dashboard.innerHTML = `
@@ -91,34 +95,83 @@ function loadDashboard() {
   }
 }
 
-// Load Settings Page
-function loadSettings() {
-  const settings = document.getElementById('settings');
-  settings.innerHTML = `
-    <div class="settings-header">
-      <h2>Settings</h2>
-      <p>Customize your preferences.</p>
-    </div>
-    <div class="settings-options">
-      <h3>Theme Customization</h3>
-      <button id="light-mode" class="btn">Light Mode</button>
-      <button id="dark-mode" class="btn">Dark Mode</button>
-    </div>`;
+// Set Up Progress Logging
+function setupProgressLogging() {
+  console.log("Setting up progress logging...");
+  const logBtn = document.getElementById('log-progress-btn');
+  if (logBtn) {
+    logBtn.addEventListener('click', () => {
+      const weight = parseFloat(document.getElementById('log-weight').value);
+      const date = document.getElementById('log-date').value;
 
-  document.getElementById('light-mode').addEventListener('click', () => {
-    document.body.classList.remove('dark');
-    localStorage.setItem('theme', 'light');
+      if (weight && date) {
+        progressData.push({ weight, date });
+        localStorage.setItem('progressData', JSON.stringify(progressData));
+        alert('Progress logged successfully!');
+        console.log('Progress logged:', { weight, date });
+      } else {
+        alert('Please fill out all fields.');
+      }
+    });
+  } else {
+    console.error("Log Progress button not found.");
+  }
+}
+
+// Set Up Photo Uploads
+function setupPhotoUploads() {
+  console.log("Setting up photo uploads...");
+  const photoInput = document.getElementById('upload-photo');
+  if (photoInput) {
+    photoInput.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      files.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          photoData.push({ url: event.target.result, date: new Date().toISOString().split('T')[0] });
+          localStorage.setItem('photoData', JSON.stringify(photoData));
+          renderPhotoGallery();
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  } else {
+    console.error("Photo input not found.");
+  }
+}
+
+// Render Photo Gallery
+function renderPhotoGallery() {
+  console.log("Rendering photo gallery...");
+  const gallery = document.getElementById('photo-gallery');
+  gallery.innerHTML = '';
+  photoData.forEach((photo) => {
+    const img = document.createElement('img');
+    img.src = photo.url;
+    img.alt = `Photo from ${photo.date}`;
+    img.classList.add('photo-item');
+    gallery.appendChild(img);
   });
+}
 
-  document.getElementById('dark-mode').addEventListener('click', () => {
-    document.body.classList.add('dark');
-    localStorage.setItem('theme', 'dark');
-  });
-
-  // Apply saved theme
-  const currentTheme = localStorage.getItem('theme') || 'light';
-  if (currentTheme === 'dark') {
-    document.body.classList.add('dark');
+// Set Up Measurement Tracking
+function setupMeasurementTracking() {
+  console.log("Setting up measurement tracking...");
+  const addMeasurementBtn = document.getElementById('add-measurement-btn');
+  if (addMeasurementBtn) {
+    addMeasurementBtn.addEventListener('click', () => {
+      const measurement = prompt('Enter measurement name (e.g., Chest, Waist):');
+      if (measurement) {
+        const measurementList = document.getElementById('measurement-list');
+        const input = document.createElement('div');
+        input.innerHTML = `
+          <label for="${measurement}">${measurement} (inches):</label>
+          <input type="number" id="${measurement}" placeholder="Enter ${measurement} measurement">`;
+        measurementList.appendChild(input);
+      }
+    });
+  } else {
+    console.error("Add Measurement button not found.");
   }
 }
 
@@ -126,7 +179,7 @@ function loadSettings() {
 function displayVersion() {
   const header = document.querySelector('header');
   const existingVersions = header.querySelectorAll('.app-version');
-  existingVersions.forEach((el) => el.remove()); // Remove duplicate versions
+  existingVersions.forEach((el) => el.remove());
 
   const versionElement = document.createElement('p');
   versionElement.classList.add('app-version');
