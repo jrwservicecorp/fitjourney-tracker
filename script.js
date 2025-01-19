@@ -27,6 +27,8 @@ function navigateTo(pageId) {
     updatePageTitle(pageId);
     if (pageId === 'dashboard') loadDashboard();
     if (pageId === 'settings') loadSettings();
+  } else {
+    console.error(`Page with ID '${pageId}' not found.`);
   }
 }
 
@@ -89,71 +91,42 @@ function loadDashboard() {
   }
 }
 
-// Set Up Progress Logging
-function setupProgressLogging() {
-  document.getElementById('log-progress-btn').addEventListener('click', () => {
-    const weight = parseFloat(document.getElementById('log-weight').value);
-    const date = document.getElementById('log-date').value;
+// Load Settings Page
+function loadSettings() {
+  const settings = document.getElementById('settings');
+  settings.innerHTML = `
+    <div class="settings-header">
+      <h2>Settings</h2>
+      <p>Customize your preferences.</p>
+    </div>
+    <div class="settings-options">
+      <h3>Theme Customization</h3>
+      <button id="light-mode" class="btn">Light Mode</button>
+      <button id="dark-mode" class="btn">Dark Mode</button>
+    </div>`;
 
-    if (weight && date) {
-      progressData.push({ weight, date });
-      localStorage.setItem('progressData', JSON.stringify(progressData));
-      alert('Progress logged successfully!');
-    } else {
-      alert('Please fill out all fields.');
-    }
+  document.getElementById('light-mode').addEventListener('click', () => {
+    document.body.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
   });
+
+  document.getElementById('dark-mode').addEventListener('click', () => {
+    document.body.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  });
+
+  // Apply saved theme
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  if (currentTheme === 'dark') {
+    document.body.classList.add('dark');
+  }
 }
 
-// Set Up Photo Uploads
-function setupPhotoUploads() {
-  document.getElementById('upload-photo').addEventListener('change', (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        photoData.push({ url: event.target.result, date: new Date().toISOString().split('T')[0] });
-        localStorage.setItem('photoData', JSON.stringify(photoData));
-        renderPhotoGallery();
-      };
-      reader.readAsDataURL(file);
-    });
-  });
-}
-
-// Render Photo Gallery
-function renderPhotoGallery() {
-  const gallery = document.getElementById('photo-gallery');
-  gallery.innerHTML = '';
-  photoData.forEach((photo) => {
-    const img = document.createElement('img');
-    img.src = photo.url;
-    img.alt = `Photo from ${photo.date}`;
-    img.classList.add('photo-item');
-    gallery.appendChild(img);
-  });
-}
-
-// Set Up Measurement Tracking
-function setupMeasurementTracking() {
-  const measurementList = document.getElementById('measurement-list');
-  document.getElementById('add-measurement-btn').addEventListener('click', () => {
-    const measurement = prompt('Enter measurement name (e.g., Chest, Waist):');
-    if (measurement) {
-      const input = document.createElement('div');
-      input.innerHTML = `
-        <label for="${measurement}">${measurement} (inches):</label>
-        <input type="number" id="${measurement}" placeholder="Enter ${measurement} measurement">`;
-      measurementList.appendChild(input);
-    }
-  });
-}
-
-// Prevent Duplicate Version Display
+// Fix Version Display
 function displayVersion() {
   const header = document.querySelector('header');
   const existingVersions = header.querySelectorAll('.app-version');
-  existingVersions.forEach((el) => el.remove());
+  existingVersions.forEach((el) => el.remove()); // Remove duplicate versions
 
   const versionElement = document.createElement('p');
   versionElement.classList.add('app-version');
