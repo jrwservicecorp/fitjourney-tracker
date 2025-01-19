@@ -1,17 +1,16 @@
 
-const appVersion = "v2.22";
+const appVersion = "v2.23";
 
-document.getElementById('guest-btn').addEventListener('click', () => {
-  document.getElementById('landing-page').classList.add('hidden');
-  document.getElementById('main-app').classList.remove('hidden');
-  navigateTo('home');
-});
-
-document.getElementById('login-btn').addEventListener('click', () => {
-  document.getElementById('landing-page').classList.add('hidden');
-  document.getElementById('main-app').classList.remove('hidden');
-  navigateTo('home');
-});
+// Function to initialize navigation
+function setupNavigation() {
+  document.querySelectorAll('.navbar a').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      const pageId = link.getAttribute('data-page');
+      navigateTo(pageId);
+    });
+  });
+}
 
 // Function to navigate between pages
 function navigateTo(pageId) {
@@ -27,10 +26,12 @@ function navigateTo(pageId) {
 
 // Highlight the active menu link
 function highlightActiveLink(pageId) {
-  const links = document.querySelectorAll('.navbar a');
-  links.forEach((link) => link.classList.remove('active'));
-  const activeLink = document.querySelector(`[data-page="${pageId}"]`);
-  if (activeLink) activeLink.classList.add('active');
+  document.querySelectorAll('.navbar a').forEach((link) => {
+    link.classList.remove('active');
+    if (link.getAttribute('data-page') === pageId) {
+      link.classList.add('active');
+    }
+  });
 }
 
 // Update the page title dynamically
@@ -48,5 +49,6 @@ function updatePageTitle(pageId) {
 // Initialize app
 window.onload = () => {
   document.querySelector('header').innerHTML += `<p>App Version: ${appVersion}</p>`;
-  navigateTo('home');
+  setupNavigation();
+  navigateTo('home'); // Default to home page on load
 };
