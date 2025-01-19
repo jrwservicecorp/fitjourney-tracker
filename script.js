@@ -1,9 +1,12 @@
 
-const appVersion = "v2.26";
+const appVersion = "v2.28";
 
 // Tracker Data
 let progressData = JSON.parse(localStorage.getItem('progressData')) || [];
 let photoData = JSON.parse(localStorage.getItem('photoData')) || [];
+
+// Theme Preference
+let theme = localStorage.getItem('theme') || 'light';
 
 // Initialize Navigation
 function setupNavigation() {
@@ -26,6 +29,7 @@ function navigateTo(pageId) {
     highlightActiveLink(pageId);
     updatePageTitle(pageId);
     if (pageId === 'dashboard') loadDashboard();
+    if (pageId === 'settings') loadSettings();
   }
 }
 
@@ -51,43 +55,33 @@ function updatePageTitle(pageId) {
   pageTitle.textContent = titles[pageId] || 'FitJourney Tracker';
 }
 
-// Load Dashboard
+// Load Dashboard with Enhanced Widgets and Charts
 function loadDashboard() {
   const dashboard = document.getElementById('dashboard');
   if (dashboard) {
     dashboard.innerHTML = `
       <h2>Your Dashboard</h2>
-      <div class="card">
-        <h3>Progress Charts</h3>
-        <canvas id="weight-chart" width="400" height="200"></canvas>
-        <canvas id="measurements-chart" width="400" height="200"></canvas>
-      </div>
-      <div class="card">
-        <h3>Customize Your Dashboard</h3>
-        <p>Drag and drop widgets to rearrange your dashboard layout.</p>
-        <div class="dashboard-widgets" id="dashboard-widgets">
-          <div class="widget" draggable="true">Weight Progress</div>
-          <div class="widget" draggable="true">Measurement Changes</div>
-          <div class="widget" draggable="true">Milestones</div>
+      <div class="grid-container">
+        <div class="grid-item widget" draggable="true" id="widget-weight">
+          <h3><i class="fas fa-weight"></i> Weight Progress</h3>
+          <canvas id="weight-chart" width="300" height="200"></canvas>
         </div>
-      </div>
-      <div class="card">
-        <h3>Create Social Post</h3>
-        <label for="select-date-range">Select Date Range:</label>
-        <input type="date" id="start-date"> to <input type="date" id="end-date">
-        <div id="social-preview" class="wysiwyg-editor">
-          <p>Drag and drop elements to customize your post.</p>
+        <div class="grid-item widget" draggable="true" id="widget-measurements">
+          <h3><i class="fas fa-ruler-combined"></i> Measurement Changes</h3>
+          <canvas id="measurements-chart" width="300" height="200"></canvas>
         </div>
-        <button id="share-btn" class="btn">Share to Social Media</button>
+        <div class="grid-item widget" draggable="true" id="widget-streak">
+          <h3><i class="fas fa-fire"></i> Streak Tracker</h3>
+          <p>Current Streak: <span id="current-streak">0</span> days</p>
+        </div>
       </div>`;
 
     renderCharts();
-    setupDashboardCustomization();
-    setupSocialSharing();
+    setupWidgetInteractions();
   }
 }
 
-// Render Progress Charts
+// Render Enhanced Charts
 function renderCharts() {
   const weightCtx = document.getElementById('weight-chart').getContext('2d');
   const measurementsCtx = document.getElementById('measurements-chart').getContext('2d');
@@ -103,12 +97,16 @@ function renderCharts() {
         label: 'Weight Progress',
         data: weights,
         borderColor: '#1a73e8',
+        backgroundColor: 'rgba(26, 115, 232, 0.1)',
         borderWidth: 2,
-        fill: false,
+        fill: true,
       }],
     },
     options: {
       responsive: true,
+      plugins: {
+        tooltip: { enabled: true },
+      },
     },
   });
 
@@ -126,35 +124,58 @@ function renderCharts() {
     },
     options: {
       responsive: true,
+      plugins: {
+        tooltip: { enabled: true },
+      },
     },
   });
 }
 
-// Setup Dashboard Customization
-function setupDashboardCustomization() {
+// Setup Widget Drag-and-Drop
+function setupWidgetInteractions() {
   const widgets = document.querySelectorAll('.widget');
   widgets.forEach((widget) => {
     widget.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/plain', widget.id);
     });
   });
-  const dashboard = document.getElementById('dashboard-widgets');
-  dashboard.addEventListener('dragover', (e) => {
+  const gridContainer = document.querySelector('.grid-container');
+  gridContainer.addEventListener('dragover', (e) => {
     e.preventDefault();
   });
-  dashboard.addEventListener('drop', (e) => {
+  gridContainer.addEventListener('drop', (e) => {
     e.preventDefault();
     const id = e.dataTransfer.getData('text/plain');
     const draggedWidget = document.getElementById(id);
-    dashboard.appendChild(draggedWidget);
+    gridContainer.appendChild(draggedWidget);
   });
 }
 
-// Setup Social Sharing
-function setupSocialSharing() {
-  document.getElementById('share-btn').addEventListener('click', () => {
-    alert('Social sharing functionality coming soon!');
+// Load Settings Page
+function loadSettings() {
+  const settings = document.getElementById('settings');
+  settings.innerHTML = `
+    <h2>Settings</h2>
+    <div>
+      <h3>Theme Customization</h3>
+      <button id="light-mode" class="btn">Light Mode</button>
+      <button id="dark-mode" class="btn">Dark Mode</button>
+    </div>`;
+
+  document.getElementById('light-mode').addEventListener('click', () => {
+    document.body.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
   });
+
+  document.getElementById('dark-mode').addEventListener('click', () => {
+    document.body.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  });
+
+  // Apply saved theme
+  if (theme === 'dark') {
+    document.body.classList.add('dark');
+  }
 }
 
 // Prevent Duplicate Version Display
