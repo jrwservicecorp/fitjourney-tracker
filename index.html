@@ -11,66 +11,39 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: v2.21</p>
+    <p>App Version: v2.22</p>
   </header>
   <div class="navbar">
-    <a href="#" class="active" onclick="navigateTo('dashboard')">
-      <i class="fas fa-home"></i> Dashboard
+    <a href="#" class="active" data-page="home" onclick="navigateTo('home')">
+      <i class="fas fa-home"></i> Home
     </a>
-    <a href="#" onclick="navigateTo('settings')">
+    <a href="#" data-page="dashboard" onclick="navigateTo('dashboard')">
+      <i class="fas fa-chart-line"></i> Dashboard
+    </a>
+    <a href="#" data-page="settings" onclick="navigateTo('settings')">
       <i class="fas fa-cog"></i> Settings
+    </a>
+    <a href="#" data-page="about" onclick="navigateTo('about')">
+      <i class="fas fa-info-circle"></i> About
     </a>
   </div>
   <div id="main-app">
-    <div id="dashboard" class="page">
+    <div class="page-title"></div>
+    <div id="home" class="page">
+      <h2>Welcome to FitJourney Tracker</h2>
+      <p>Start tracking your fitness journey today!</p>
+    </div>
+    <div id="dashboard" class="page hidden">
       <h2>Dashboard</h2>
-      <div class="card">
-        <h3>Log Your Progress</h3>
-        <label for="log-weight">Weight (lbs):</label>
-        <input type="number" id="log-weight" placeholder="Enter weight">
-        <label for="log-date">Date:</label>
-        <input type="date" id="log-date">
-        <h4>Measurements</h4>
-        <label for="log-chest">Chest (in):</label>
-        <input type="number" id="log-chest" placeholder="Chest size">
-        <label for="log-waist">Waist (in):</label>
-        <input type="number" id="log-waist" placeholder="Waist size">
-        <label for="log-hips">Hips (in):</label>
-        <input type="number" id="log-hips" placeholder="Hip size">
-        <label for="log-arms">Arms (in):</label>
-        <input type="number" id="log-arms" placeholder="Arm size">
-        <label for="log-thighs">Thighs (in):</label>
-        <input type="number" id="log-thighs" placeholder="Thigh size">
-        <button id="log-progress-btn" class="btn">Save Progress</button>
-      </div>
-      <div class="card">
-        <h3>Photo Upload</h3>
-        <label for="upload-photo">Upload Photos:</label>
-        <input type="file" id="upload-photo" accept="image/*" multiple>
-        <div id="photo-gallery" class="photo-gallery"></div>
-      </div>
-      <div class="card">
-        <h3>Progress Entries</h3>
-        <table id="progress-table" class="progress-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Weight</th>
-              <th>Chest</th>
-              <th>Waist</th>
-              <th>Hips</th>
-              <th>Arms</th>
-              <th>Thighs</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+      <p>Welcome to your dashboard!</p>
     </div>
     <div id="settings" class="page hidden">
       <h2>Settings</h2>
-      <p>Update your preferences here.</p>
-      <!-- Additional settings content can go here -->
+      <p>Adjust your preferences here.</p>
+    </div>
+    <div id="about" class="page hidden">
+      <h2>About FitJourney Tracker</h2>
+      <p>FitJourney Tracker helps you visualize your fitness progress and stay motivated.</p>
     </div>
   </div>
   <script src="script.js"></script>
