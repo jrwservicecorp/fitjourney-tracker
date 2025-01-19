@@ -42,19 +42,25 @@ function loadDashboard() {
       <div class="card">
         <h3>Photo Upload</h3>
         <p>Upload your progress photos:</p>
-        <input type="file" id="photo-upload" accept="image/*">
+        <input type="file" id="photo-upload" accept="image/*" multiple>
         <div id="photo-preview" style="margin-top: 10px;"></div>
       </div>
       <div class="card">
         <h3>Goals</h3>
         <p>Track your fitness goals:</p>
+        <input type="text" id="new-goal" placeholder="Enter a new goal">
+        <button id="add-goal-btn" class="btn">Add Goal</button>
         <ul id="goals-list">
           <li>Lose 5 lbs by March 2025</li>
           <li>Run 5 miles non-stop</li>
         </ul>
+      </div>
+      <div class="card">
+        <h3>Progress Chart</h3>
+        <canvas id="progress-chart" width="400" height="200"></canvas>
       </div>`;
 
-    // Handle photo upload preview
+    // Initialize photo upload preview
     const photoUpload = document.getElementById('photo-upload');
     const photoPreview = document.getElementById('photo-preview');
     photoUpload.addEventListener('change', (e) => {
@@ -71,6 +77,44 @@ function loadDashboard() {
         };
         reader.readAsDataURL(file);
       });
+    });
+
+    // Initialize goal tracking
+    const addGoalBtn = document.getElementById('add-goal-btn');
+    const goalsList = document.getElementById('goals-list');
+    addGoalBtn.addEventListener('click', () => {
+      const newGoalInput = document.getElementById('new-goal');
+      const newGoal = newGoalInput.value;
+      if (newGoal) {
+        const li = document.createElement('li');
+        li.textContent = newGoal;
+        goalsList.appendChild(li);
+        newGoalInput.value = "";
+      }
+    });
+
+    // Initialize progress chart
+    const ctx = document.getElementById('progress-chart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        datasets: [{
+          label: 'Weight Progress',
+          data: [200, 195, 190, 185],
+          borderColor: '#007bff',
+          borderWidth: 2,
+          fill: false,
+        }],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+          },
+        },
+      },
     });
   }
 }
