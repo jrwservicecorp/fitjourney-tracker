@@ -1,5 +1,5 @@
 
-const appVersion = "v2.20";
+const appVersion = "v2.21";
 
 document.getElementById('guest-btn').addEventListener('click', () => {
   document.getElementById('landing-page').classList.add('hidden');
@@ -26,139 +26,127 @@ function navigateTo(pageId) {
   }
 }
 
-// Dashboard with new user control panel features
+// Dashboard with restored photo upload and progress logging
 function loadDashboard() {
   const dashboard = document.getElementById('dashboard');
   if (dashboard) {
     dashboard.innerHTML = `
       <h2>Your Dashboard</h2>
       <div class="card">
-        <h3>Profile</h3>
-        <div class="profile-section">
-          <img src="${localStorage.getItem('profilePic') || 'default-profile.png'}" alt="Profile Picture" id="profile-pic" class="profile-pic">
-          <input type="file" id="upload-profile-pic" accept="image/*">
-          <p>Total Weight Lost: <span id="total-weight-lost">${calculateTotalWeightLost()}</span> lbs</p>
-          <p>Current Streak: <span id="current-streak">7 days</span></p>
-        </div>
+        <h3>Log Your Progress</h3>
+        <label for="log-weight">Weight (lbs):</label>
+        <input type="number" id="log-weight" placeholder="Enter weight">
+        <label for="log-date">Date:</label>
+        <input type="date" id="log-date">
+        <h4>Measurements</h4>
+        <label for="log-chest">Chest (in):</label>
+        <input type="number" id="log-chest" placeholder="Enter chest size">
+        <label for="log-waist">Waist (in):</label>
+        <input type="number" id="log-waist" placeholder="Enter waist size">
+        <label for="log-hips">Hips (in):</label>
+        <input type="number" id="log-hips" placeholder="Enter hip size">
+        <label for="log-arms">Arms (in):</label>
+        <input type="number" id="log-arms" placeholder="Enter arm size">
+        <label for="log-thighs">Thighs (in):</label>
+        <input type="number" id="log-thighs" placeholder="Enter thigh size">
+        <button id="log-progress-btn" class="btn">Log Progress</button>
       </div>
       <div class="card">
-        <h3>Measurement Progress</h3>
-        <canvas id="measurement-chart" width="400" height="200"></canvas>
+        <h3>Photo Upload</h3>
+        <label for="upload-photo">Upload Photos:</label>
+        <input type="file" id="upload-photo" accept="image/*" multiple>
+        <div id="photo-gallery" class="photo-gallery"></div>
       </div>
       <div class="card">
-        <h3>Before/After View</h3>
-        <div id="before-after-view">
-          <label for="before-date">Before:</label>
-          <select id="before-date"></select>
-          <label for="after-date">After:</label>
-          <select id="after-date"></select>
-          <button id="compare-btn" class="btn">Compare</button>
-        </div>
-        <div id="comparison-result" class="comparison-view"></div>
+        <h3>Progress Entries</h3>
+        <table id="progress-table" class="progress-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Weight</th>
+              <th>Chest</th>
+              <th>Waist</th>
+              <th>Hips</th>
+              <th>Arms</th>
+              <th>Thighs</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>`;
 
-    // Initialize features
-    initProfilePicUpload();
-    renderMeasurementChart();
-    populateBeforeAfterDates();
-    setupComparison();
-  }
-}
-
-// Calculate total weight lost
-function calculateTotalWeightLost() {
-  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
-  if (progressData.length < 2) return 0;
-  const startWeight = progressData[0].weight;
-  const currentWeight = progressData[progressData.length - 1].weight;
-  return Math.max(0, startWeight - currentWeight).toFixed(1);
-}
-
-// Profile picture upload
-function initProfilePicUpload() {
-  const profilePicInput = document.getElementById('upload-profile-pic');
-  const profilePic = document.getElementById('profile-pic');
-
-  profilePicInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      localStorage.setItem('profilePic', event.target.result);
-      profilePic.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-// Render measurement progress chart
-function renderMeasurementChart() {
-  const ctx = document.getElementById('measurement-chart').getContext('2d');
-  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
-  const dates = progressData.map(entry => entry.date);
-  const weights = progressData.map(entry => entry.weight);
-
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: dates,
-      datasets: [{
-        label: 'Weight (lbs)',
-        data: weights,
-        borderColor: '#1a73e8',
-        borderWidth: 2,
-        fill: false,
-      }],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: true,
-        },
-      },
-    },
-  });
-}
-
-// Populate before/after dropdowns
-function populateBeforeAfterDates() {
-  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
-  const beforeSelect = document.getElementById('before-date');
-  const afterSelect = document.getElementById('after-date');
-
-  beforeSelect.innerHTML = '';
-  afterSelect.innerHTML = '';
-
-  progressData.forEach((entry, index) => {
-    const option = `<option value="${index}">${entry.date}</option>`;
-    beforeSelect.innerHTML += option;
-    afterSelect.innerHTML += option;
-  });
-}
-
-// Setup comparison for before/after photos
-function setupComparison() {
-  const compareBtn = document.getElementById('compare-btn');
-  const comparisonResult = document.getElementById('comparison-result');
-
-  compareBtn.addEventListener('click', () => {
+    // Initialize progress data
     const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
-    const beforeIndex = document.getElementById('before-date').value;
-    const afterIndex = document.getElementById('after-date').value;
+    const photoData = JSON.parse(localStorage.getItem('photoData')) || [];
 
-    if (beforeIndex && afterIndex) {
-      const beforePhoto = progressData[beforeIndex]?.photo || 'no-photo.png';
-      const afterPhoto = progressData[afterIndex]?.photo || 'no-photo.png';
+    // Update the progress table
+    const updateTable = () => {
+      const tableBody = document.querySelector('#progress-table tbody');
+      tableBody.innerHTML = '';
+      progressData.forEach((entry) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${entry.date}</td>
+          <td>${entry.weight}</td>
+          <td>${entry.chest}</td>
+          <td>${entry.waist}</td>
+          <td>${entry.hips}</td>
+          <td>${entry.arms}</td>
+          <td>${entry.thighs}</td>`;
+        tableBody.appendChild(row);
+      });
+    };
 
-      comparisonResult.innerHTML = `
-        <div class="photo-comparison">
-          <div><img src="${beforePhoto}" alt="Before"></div>
-          <div><img src="${afterPhoto}" alt="After"></div>
-        </div>`;
-    } else {
-      alert('Please select both before and after dates.');
-    }
-  });
+    // Update the photo gallery
+    const updatePhotoGallery = () => {
+      const gallery = document.getElementById('photo-gallery');
+      gallery.innerHTML = '';
+      photoData.forEach((photo) => {
+        const img = document.createElement('img');
+        img.src = photo.url;
+        img.alt = `Photo taken on ${photo.date}`;
+        img.classList.add('photo-item');
+        gallery.appendChild(img);
+      });
+    };
+
+    // Handle logging progress
+    document.getElementById('log-progress-btn').addEventListener('click', () => {
+      const date = document.getElementById('log-date').value;
+      const weight = parseFloat(document.getElementById('log-weight').value);
+      const chest = parseFloat(document.getElementById('log-chest').value);
+      const waist = parseFloat(document.getElementById('log-waist').value);
+      const hips = parseFloat(document.getElementById('log-hips').value);
+      const arms = parseFloat(document.getElementById('log-arms').value);
+      const thighs = parseFloat(document.getElementById('log-thighs').value);
+
+      if (date && !isNaN(weight)) {
+        progressData.push({ date, weight, chest, waist, hips, arms, thighs });
+        localStorage.setItem('progressData', JSON.stringify(progressData));
+        updateTable();
+      } else {
+        alert('Please enter valid data for date and weight!');
+      }
+    });
+
+    // Handle photo uploads
+    document.getElementById('upload-photo').addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      files.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          photoData.push({ url: event.target.result, date: new Date().toISOString().split('T')[0] });
+          localStorage.setItem('photoData', JSON.stringify(photoData));
+          updatePhotoGallery();
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // Initial render
+    updateTable();
+    updatePhotoGallery();
+  }
 }
 
 // Initialize app
