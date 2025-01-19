@@ -1,5 +1,5 @@
 
-const appVersion = "v2.24";
+const appVersion = "v2.25";
 
 // Tracker Data
 let progressData = JSON.parse(localStorage.getItem('progressData')) || [];
@@ -51,7 +51,7 @@ function updatePageTitle(pageId) {
   pageTitle.textContent = titles[pageId] || 'FitJourney Tracker';
 }
 
-// Load Dashboard with Tracker Functionality
+// Load Dashboard
 function loadDashboard() {
   const dashboard = document.getElementById('dashboard');
   if (dashboard) {
@@ -63,11 +63,6 @@ function loadDashboard() {
         <input type="number" id="log-weight" placeholder="Enter weight">
         <label for="log-date">Date:</label>
         <input type="date" id="log-date">
-        <h4>Measurements</h4>
-        <label for="log-chest">Chest (in):</label>
-        <input type="number" id="log-chest" placeholder="Enter chest size">
-        <label for="log-waist">Waist (in):</label>
-        <input type="number" id="log-waist" placeholder="Enter waist size">
         <button id="log-progress-btn" class="btn">Log Progress</button>
       </div>
       <div class="card">
@@ -75,36 +70,10 @@ function loadDashboard() {
         <label for="upload-photo">Upload Photos:</label>
         <input type="file" id="upload-photo" accept="image/*" multiple>
         <div id="photo-gallery" class="photo-gallery"></div>
-      </div>
-      <div class="card">
-        <h3>Progress Entries</h3>
-        <table id="progress-table" class="progress-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Weight</th>
-              <th>Chest</th>
-              <th>Waist</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="card">
-        <h3>Create Social Post</h3>
-        <label for="select-date-range">Select Date Range:</label>
-        <input type="date" id="start-date"> to <input type="date" id="end-date">
-        <div id="social-preview" class="wysiwyg-editor">
-          <p>Drag and drop elements to customize your post.</p>
-        </div>
-        <button id="share-btn" class="btn">Share to Social Media</button>
       </div>`;
 
-    // Initialize Events
     setupProgressLogging();
     setupPhotoUploads();
-    setupSocialSharing();
-    renderProgressEntries();
     renderPhotoGallery();
   }
 }
@@ -114,27 +83,12 @@ function setupProgressLogging() {
   document.getElementById('log-progress-btn').addEventListener('click', () => {
     const date = document.getElementById('log-date').value;
     const weight = parseFloat(document.getElementById('log-weight').value);
-    const chest = parseFloat(document.getElementById('log-chest').value);
-    const waist = parseFloat(document.getElementById('log-waist').value);
-
     if (date && !isNaN(weight)) {
-      progressData.push({ date, weight, chest, waist });
+      progressData.push({ date, weight });
       localStorage.setItem('progressData', JSON.stringify(progressData));
-      renderProgressEntries();
     } else {
       alert('Please enter valid data!');
     }
-  });
-}
-
-// Render Progress Entries
-function renderProgressEntries() {
-  const tableBody = document.querySelector('#progress-table tbody');
-  tableBody.innerHTML = '';
-  progressData.forEach((entry) => {
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${entry.date}</td><td>${entry.weight}</td><td>${entry.chest}</td><td>${entry.waist}</td>`;
-    tableBody.appendChild(row);
   });
 }
 
@@ -167,16 +121,20 @@ function renderPhotoGallery() {
   });
 }
 
-// Setup Social Sharing
-function setupSocialSharing() {
-  document.getElementById('share-btn').addEventListener('click', () => {
-    alert('Social sharing functionality coming soon!');
-  });
+// Prevent Duplicate Version Display
+function displayVersion() {
+  const header = document.querySelector('header');
+  if (!header.querySelector('.app-version')) {
+    const versionElement = document.createElement('p');
+    versionElement.classList.add('app-version');
+    versionElement.textContent = `App Version: ${appVersion}`;
+    header.appendChild(versionElement);
+  }
 }
 
 // Initialize App
 window.onload = () => {
-  document.querySelector('header').innerHTML += `<p>App Version: ${appVersion}</p>`;
+  displayVersion();
   setupNavigation();
   navigateTo('home'); // Default to home page
 };
