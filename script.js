@@ -1,5 +1,5 @@
 
-const appVersion = "v2.28";
+const appVersion = "v2.30";
 
 // Tracker Data
 let progressData = JSON.parse(localStorage.getItem('progressData')) || [];
@@ -47,37 +47,42 @@ function highlightActiveLink(pageId) {
 function updatePageTitle(pageId) {
   const pageTitle = document.querySelector('.page-title');
   const titles = {
-    home: 'Home',
-    dashboard: 'Dashboard',
+    home: 'Welcome to FitJourney Tracker',
+    dashboard: 'Your Dashboard',
     settings: 'Settings',
     about: 'About FitJourney Tracker',
   };
   pageTitle.textContent = titles[pageId] || 'FitJourney Tracker';
 }
 
-// Load Dashboard with Enhanced Widgets and Charts
+// Load Dashboard with Updated Layout
 function loadDashboard() {
   const dashboard = document.getElementById('dashboard');
   if (dashboard) {
     dashboard.innerHTML = `
-      <h2>Your Dashboard</h2>
-      <div class="grid-container">
-        <div class="grid-item widget" draggable="true" id="widget-weight">
-          <h3><i class="fas fa-weight"></i> Weight Progress</h3>
+      <div class="dashboard-header">
+        <h2>Your Dashboard</h2>
+        <p>Track your fitness progress and achievements.</p>
+      </div>
+      <div class="dashboard-cards">
+        <div class="card">
+          <h3><i class="fas fa-chart-line"></i> Weight Progress</h3>
           <canvas id="weight-chart" width="300" height="200"></canvas>
         </div>
-        <div class="grid-item widget" draggable="true" id="widget-measurements">
+        <div class="card">
           <h3><i class="fas fa-ruler-combined"></i> Measurement Changes</h3>
           <canvas id="measurements-chart" width="300" height="200"></canvas>
         </div>
-        <div class="grid-item widget" draggable="true" id="widget-streak">
-          <h3><i class="fas fa-fire"></i> Streak Tracker</h3>
-          <p>Current Streak: <span id="current-streak">0</span> days</p>
+        <div class="card">
+          <h3><i class="fas fa-bullseye"></i> Milestones</h3>
+          <ul>
+            <li>10 lbs lost milestone achieved!</li>
+            <li>Current streak: <span id="current-streak">5 days</span></li>
+          </ul>
         </div>
       </div>`;
 
     renderCharts();
-    setupWidgetInteractions();
   }
 }
 
@@ -131,32 +136,15 @@ function renderCharts() {
   });
 }
 
-// Setup Widget Drag-and-Drop
-function setupWidgetInteractions() {
-  const widgets = document.querySelectorAll('.widget');
-  widgets.forEach((widget) => {
-    widget.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('text/plain', widget.id);
-    });
-  });
-  const gridContainer = document.querySelector('.grid-container');
-  gridContainer.addEventListener('dragover', (e) => {
-    e.preventDefault();
-  });
-  gridContainer.addEventListener('drop', (e) => {
-    e.preventDefault();
-    const id = e.dataTransfer.getData('text/plain');
-    const draggedWidget = document.getElementById(id);
-    gridContainer.appendChild(draggedWidget);
-  });
-}
-
-// Load Settings Page
+// Load Settings Page with Light/Dark Theme
 function loadSettings() {
   const settings = document.getElementById('settings');
   settings.innerHTML = `
-    <h2>Settings</h2>
-    <div>
+    <div class="settings-header">
+      <h2>Settings</h2>
+      <p>Customize your preferences.</p>
+    </div>
+    <div class="settings-options">
       <h3>Theme Customization</h3>
       <button id="light-mode" class="btn">Light Mode</button>
       <button id="dark-mode" class="btn">Dark Mode</button>
@@ -178,7 +166,7 @@ function loadSettings() {
   }
 }
 
-// Prevent Duplicate Version Display
+// Fix Version Display
 function displayVersion() {
   const header = document.querySelector('header');
   const existingVersions = header.querySelectorAll('.app-version');
