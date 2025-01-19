@@ -24,7 +24,7 @@ function navigateTo(pageId) {
   }
 }
 
-// Ensure default content loads on the Dashboard
+// Ensure complete features load on the Dashboard
 function loadDashboard() {
   const dashboard = document.getElementById('dashboard');
   if (dashboard) {
@@ -38,7 +38,40 @@ function loadDashboard() {
           <li>Weight Lost: <span id="weight-lost">10 lbs</span></li>
           <li>Milestones Achieved: <span id="milestones">3</span></li>
         </ul>
+      </div>
+      <div class="card">
+        <h3>Photo Upload</h3>
+        <p>Upload your progress photos:</p>
+        <input type="file" id="photo-upload" accept="image/*">
+        <div id="photo-preview" style="margin-top: 10px;"></div>
+      </div>
+      <div class="card">
+        <h3>Goals</h3>
+        <p>Track your fitness goals:</p>
+        <ul id="goals-list">
+          <li>Lose 5 lbs by March 2025</li>
+          <li>Run 5 miles non-stop</li>
+        </ul>
       </div>`;
+
+    // Handle photo upload preview
+    const photoUpload = document.getElementById('photo-upload');
+    const photoPreview = document.getElementById('photo-preview');
+    photoUpload.addEventListener('change', (e) => {
+      const files = e.target.files;
+      photoPreview.innerHTML = "";
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = document.createElement('img');
+          img.src = event.target.result;
+          img.style.width = "100px";
+          img.style.marginRight = "10px";
+          photoPreview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
   }
 }
 
@@ -59,32 +92,3 @@ window.onload = () => {
   initializeMenu();
   navigateTo('dashboard');
 };
-
-// Theme toggles
-document.getElementById('light-mode-btn').addEventListener('click', () => {
-  document.body.style.background = "#ffffff";
-  document.body.style.color = "#000000";
-});
-
-document.getElementById('dark-mode-btn').addEventListener('click', () => {
-  document.body.style.background = "#121212";
-  document.body.style.color = "#ffffff";
-});
-
-// Save reminders
-document.getElementById('save-reminders-btn').addEventListener('click', () => {
-  const frequency = document.getElementById('reminder-frequency').value;
-  alert(`Reminder frequency set to ${frequency}.`);
-});
-
-// Save profile information
-document.getElementById('save-profile-btn').addEventListener('click', () => {
-  const name = document.getElementById('profile-name').value;
-  const email = document.getElementById('profile-email').value;
-  alert(`Profile updated: Name - ${name}, Email - ${email}`);
-});
-
-// Export data
-document.getElementById('export-data-btn').addEventListener('click', () => {
-  alert("Exporting your data as a JSON file (placeholder).");
-});
