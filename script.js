@@ -1,4 +1,6 @@
 
+const appVersion = "v2.13";
+
 document.getElementById('guest-btn').addEventListener('click', () => {
   document.getElementById('landing-page').classList.add('hidden');
   document.getElementById('main-app').classList.remove('hidden');
@@ -129,7 +131,7 @@ function loadDashboard() {
   }
 }
 
-// Initialize menu navigation
+// Ensure menu links are functional
 function initializeMenu() {
   const menuLinks = document.querySelectorAll('.menu a');
   menuLinks.forEach((link) => {
@@ -141,8 +143,17 @@ function initializeMenu() {
   });
 }
 
-// Ensure menu and dashboard are loaded on app start
+// Ensure version is displayed in the header
+function displayVersion() {
+  const header = document.querySelector('header');
+  const versionElement = document.createElement('p');
+  versionElement.textContent = `App Version: ${appVersion}`;
+  header.appendChild(versionElement);
+}
+
+// Initialize app on load
 window.onload = () => {
   initializeMenu();
+  displayVersion();
   navigateTo('dashboard');
 };
