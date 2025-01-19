@@ -1,12 +1,9 @@
 
-const appVersion = "v2.30";
+const appVersion = "v2.31";
 
 // Tracker Data
 let progressData = JSON.parse(localStorage.getItem('progressData')) || [];
 let photoData = JSON.parse(localStorage.getItem('photoData')) || [];
-
-// Theme Preference
-let theme = localStorage.getItem('theme') || 'light';
 
 // Initialize Navigation
 function setupNavigation() {
@@ -55,122 +52,108 @@ function updatePageTitle(pageId) {
   pageTitle.textContent = titles[pageId] || 'FitJourney Tracker';
 }
 
-// Load Dashboard with Updated Layout
+// Load Dashboard with Logging and Photo Upload Functionality
 function loadDashboard() {
   const dashboard = document.getElementById('dashboard');
   if (dashboard) {
     dashboard.innerHTML = `
       <div class="dashboard-header">
         <h2>Your Dashboard</h2>
-        <p>Track your fitness progress and achievements.</p>
+        <p>Track your fitness progress and visualize changes.</p>
       </div>
       <div class="dashboard-cards">
         <div class="card">
-          <h3><i class="fas fa-chart-line"></i> Weight Progress</h3>
-          <canvas id="weight-chart" width="300" height="200"></canvas>
+          <h3><i class="fas fa-chart-line"></i> Log Your Progress</h3>
+          <label for="log-weight">Weight (lbs):</label>
+          <input type="number" id="log-weight" placeholder="Enter weight">
+          <label for="log-date">Date:</label>
+          <input type="date" id="log-date">
+          <button id="log-progress-btn" class="btn">Log Progress</button>
         </div>
         <div class="card">
-          <h3><i class="fas fa-ruler-combined"></i> Measurement Changes</h3>
-          <canvas id="measurements-chart" width="300" height="200"></canvas>
+          <h3><i class="fas fa-image"></i> Upload Progress Photos</h3>
+          <input type="file" id="upload-photo" accept="image/*" multiple>
+          <div id="photo-gallery" class="photo-gallery"></div>
         </div>
         <div class="card">
-          <h3><i class="fas fa-bullseye"></i> Milestones</h3>
-          <ul>
-            <li>10 lbs lost milestone achieved!</li>
-            <li>Current streak: <span id="current-streak">5 days</span></li>
-          </ul>
+          <h3><i class="fas fa-ruler"></i> Measurement Changes</h3>
+          <button id="add-measurement-btn" class="btn">Add Measurement</button>
+          <div id="measurement-list"></div>
         </div>
       </div>`;
 
-    renderCharts();
+    setupProgressLogging();
+    setupPhotoUploads();
+    setupMeasurementTracking();
+    renderPhotoGallery();
   }
 }
 
-// Render Enhanced Charts
-function renderCharts() {
-  const weightCtx = document.getElementById('weight-chart').getContext('2d');
-  const measurementsCtx = document.getElementById('measurements-chart').getContext('2d');
+// Set Up Progress Logging
+function setupProgressLogging() {
+  document.getElementById('log-progress-btn').addEventListener('click', () => {
+    const weight = parseFloat(document.getElementById('log-weight').value);
+    const date = document.getElementById('log-date').value;
 
-  // Weight Chart
-  const dates = progressData.map(entry => entry.date);
-  const weights = progressData.map(entry => entry.weight);
-  new Chart(weightCtx, {
-    type: 'line',
-    data: {
-      labels: dates,
-      datasets: [{
-        label: 'Weight Progress',
-        data: weights,
-        borderColor: '#1a73e8',
-        backgroundColor: 'rgba(26, 115, 232, 0.1)',
-        borderWidth: 2,
-        fill: true,
-      }],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        tooltip: { enabled: true },
-      },
-    },
-  });
-
-  // Measurements Chart
-  const chests = progressData.map(entry => entry.chest);
-  const waists = progressData.map(entry => entry.waist);
-  new Chart(measurementsCtx, {
-    type: 'bar',
-    data: {
-      labels: dates,
-      datasets: [
-        { label: 'Chest', data: chests, backgroundColor: '#3498db' },
-        { label: 'Waist', data: waists, backgroundColor: '#e74c3c' },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        tooltip: { enabled: true },
-      },
-    },
+    if (weight && date) {
+      progressData.push({ weight, date });
+      localStorage.setItem('progressData', JSON.stringify(progressData));
+      alert('Progress logged successfully!');
+    } else {
+      alert('Please fill out all fields.');
+    }
   });
 }
 
-// Load Settings Page with Light/Dark Theme
-function loadSettings() {
-  const settings = document.getElementById('settings');
-  settings.innerHTML = `
-    <div class="settings-header">
-      <h2>Settings</h2>
-      <p>Customize your preferences.</p>
-    </div>
-    <div class="settings-options">
-      <h3>Theme Customization</h3>
-      <button id="light-mode" class="btn">Light Mode</button>
-      <button id="dark-mode" class="btn">Dark Mode</button>
-    </div>`;
-
-  document.getElementById('light-mode').addEventListener('click', () => {
-    document.body.classList.remove('dark');
-    localStorage.setItem('theme', 'light');
+// Set Up Photo Uploads
+function setupPhotoUploads() {
+  document.getElementById('upload-photo').addEventListener('change', (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        photoData.push({ url: event.target.result, date: new Date().toISOString().split('T')[0] });
+        localStorage.setItem('photoData', JSON.stringify(photoData));
+        renderPhotoGallery();
+      };
+      reader.readAsDataURL(file);
+    });
   });
-
-  document.getElementById('dark-mode').addEventListener('click', () => {
-    document.body.classList.add('dark');
-    localStorage.setItem('theme', 'dark');
-  });
-
-  // Apply saved theme
-  if (theme === 'dark') {
-    document.body.classList.add('dark');
-  }
 }
 
-// Fix Version Display
+// Render Photo Gallery
+function renderPhotoGallery() {
+  const gallery = document.getElementById('photo-gallery');
+  gallery.innerHTML = '';
+  photoData.forEach((photo) => {
+    const img = document.createElement('img');
+    img.src = photo.url;
+    img.alt = `Photo from ${photo.date}`;
+    img.classList.add('photo-item');
+    gallery.appendChild(img);
+  });
+}
+
+// Set Up Measurement Tracking
+function setupMeasurementTracking() {
+  const measurementList = document.getElementById('measurement-list');
+  document.getElementById('add-measurement-btn').addEventListener('click', () => {
+    const measurement = prompt('Enter measurement name (e.g., Chest, Waist):');
+    if (measurement) {
+      const input = document.createElement('div');
+      input.innerHTML = `
+        <label for="${measurement}">${measurement} (inches):</label>
+        <input type="number" id="${measurement}" placeholder="Enter ${measurement} measurement">`;
+      measurementList.appendChild(input);
+    }
+  });
+}
+
+// Prevent Duplicate Version Display
 function displayVersion() {
   const header = document.querySelector('header');
   const existingVersions = header.querySelectorAll('.app-version');
-  existingVersions.forEach((el) => el.remove()); // Remove any existing version elements
+  existingVersions.forEach((el) => el.remove());
 
   const versionElement = document.createElement('p');
   versionElement.classList.add('app-version');
