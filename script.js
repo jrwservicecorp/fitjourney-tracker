@@ -2,14 +2,12 @@
 document.getElementById('guest-btn').addEventListener('click', () => {
   document.getElementById('landing-page').classList.add('hidden');
   document.getElementById('main-app').classList.remove('hidden');
-  loadDashboard();
   navigateTo('dashboard');
 });
 
 document.getElementById('login-btn').addEventListener('click', () => {
   document.getElementById('landing-page').classList.add('hidden');
   document.getElementById('main-app').classList.remove('hidden');
-  loadDashboard();
   navigateTo('dashboard');
 });
 
@@ -20,6 +18,9 @@ function navigateTo(pageId) {
   const targetPage = document.getElementById(pageId);
   if (targetPage) {
     targetPage.classList.remove('hidden');
+    if (pageId === 'dashboard') {
+      loadDashboard();
+    }
   }
 }
 
@@ -40,6 +41,24 @@ function loadDashboard() {
       </div>`;
   }
 }
+
+// Ensure menu links are functional
+function initializeMenu() {
+  const menuLinks = document.querySelectorAll('.menu a');
+  menuLinks.forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetPage = link.getAttribute('onclick').match(/'([^']+)'/)[1];
+      navigateTo(targetPage);
+    });
+  });
+}
+
+// Initialize menu and navigate to the default page on load
+window.onload = () => {
+  initializeMenu();
+  navigateTo('dashboard');
+};
 
 // Theme toggles
 document.getElementById('light-mode-btn').addEventListener('click', () => {
@@ -69,9 +88,3 @@ document.getElementById('save-profile-btn').addEventListener('click', () => {
 document.getElementById('export-data-btn').addEventListener('click', () => {
   alert("Exporting your data as a JSON file (placeholder).");
 });
-
-// Ensure the Dashboard loads by default when the app starts
-window.onload = () => {
-  navigateTo('dashboard');
-  loadDashboard();
-};

@@ -4,94 +4,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FitJourney Tracker v2.8</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="./style.css">
+  <script defer src="./script.js"></script>
 </head>
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>Version 2.8</p>
   </header>
-
-  <!-- Landing Page -->
-  <div id="landing-page" class="container">
-    <h2><i class="fas fa-dumbbell"></i> Welcome to FitJourney Tracker</h2>
-    <p>Track and visualize your fitness journey your way.</p>
-    <div class="button-group">
-      <button id="guest-btn" class="btn">
-        <i class="fas fa-user"></i> Use as Guest
-      </button>
-      <button id="login-btn" class="btn">
-        <i class="fas fa-sign-in-alt"></i> Login
-      </button>
-    </div>
+  <div id="landing-page">
+    <h2>Welcome to FitJourney Tracker</h2>
+    <button id="guest-btn">Use as Guest</button>
+    <button id="login-btn">Login</button>
   </div>
-
-  <!-- Main App Section -->
-  <div id="main-app" class="container hidden">
-    <!-- Hamburger Menu -->
-    <nav class="menu">
-      <div class="hamburger" onclick="toggleMenu()">
-        <i class="fas fa-bars"></i>
-      </div>
-      <ul id="menu-items" class="hidden">
-        <li><a href="#" onclick="navigateTo('dashboard')"><i class="fas fa-home"></i> Dashboard</a></li>
-        <li><a href="#" onclick="navigateTo('settings')"><i class="fas fa-cog"></i> Settings</a></li>
-        <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+  <div id="main-app" class="hidden">
+    <nav>
+      <ul class="menu">
+        <li><a href="#" onclick="navigateTo('dashboard')">Dashboard</a></li>
+        <li><a href="#" onclick="navigateTo('settings')">Settings</a></li>
       </ul>
     </nav>
-
-    <!-- Dashboard -->
-    <div id="dashboard" class="page hidden">
-      <h2>Your Dashboard</h2>
-      <div class="card">
-        <h3>Welcome Back!</h3>
-        <p>Here's a summary of your progress:</p>
-        <ul>
-          <li>Current Streak: <span id="current-streak">7 days</span></li>
-          <li>Weight Lost: <span id="weight-lost">10 lbs</span></li>
-          <li>Milestones Achieved: <span id="milestones">3</span></li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Settings Page -->
+    <div id="dashboard" class="page hidden"></div>
     <div id="settings" class="page hidden">
       <h2>Settings</h2>
-      <div class="card">
-        <h3>Theme Selection</h3>
-        <button id="light-mode-btn" class="btn small">Light Mode</button>
-        <button id="dark-mode-btn" class="btn small">Dark Mode</button>
-      </div>
-      <div class="card">
-        <h3>Reminder Preferences</h3>
-        <label for="reminder-frequency">Reminder Frequency:</label>
-        <select id="reminder-frequency">
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-        </select>
-        <button id="save-reminders-btn" class="btn">Save Preferences</button>
-      </div>
-      <div class="card">
-        <h3>Account Management</h3>
-        <p>Update your profile information:</p>
-        <label for="profile-name">Name:</label>
-        <input type="text" id="profile-name" placeholder="Enter your name">
-        <label for="profile-email">Email:</label>
-        <input type="email" id="profile-email" placeholder="Enter your email">
-        <button id="save-profile-btn" class="btn">Save Changes</button>
-      </div>
-      <div class="card">
-        <h3>Export Data</h3>
-        <button id="export-data-btn" class="btn">Export Data</button>
-      </div>
+      <button id="light-mode-btn">Light Mode</button>
+      <button id="dark-mode-btn">Dark Mode</button>
     </div>
   </div>
-
-  <script src="./script.js"></script>
 </body>
 </html>
