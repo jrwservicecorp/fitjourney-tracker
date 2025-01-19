@@ -1,5 +1,5 @@
 
-const appVersion = "v2.13";
+const appVersion = "v2.14";
 
 document.getElementById('guest-btn').addEventListener('click', () => {
   document.getElementById('landing-page').classList.add('hidden');
@@ -23,10 +23,13 @@ function navigateTo(pageId) {
     if (pageId === 'dashboard') {
       loadDashboard();
     }
+    if (pageId === 'settings') {
+      loadUserSettings();
+    }
   }
 }
 
-// Full Dashboard with restored features
+// Full Dashboard with all features
 function loadDashboard() {
   const dashboard = document.getElementById('dashboard');
   if (dashboard) {
@@ -131,6 +134,37 @@ function loadDashboard() {
   }
 }
 
+// User Settings page
+function loadUserSettings() {
+  const settings = document.getElementById('settings');
+  if (settings) {
+    settings.innerHTML = `
+      <h2>User Settings</h2>
+      <div class="card">
+        <h3>Profile Information</h3>
+        <label for="profile-name">Name:</label>
+        <input type="text" id="profile-name" placeholder="Your name">
+        <label for="profile-email">Email:</label>
+        <input type="email" id="profile-email" placeholder="Your email">
+        <button id="save-profile-btn" class="btn">Save Changes</button>
+      </div>
+      <div class="card">
+        <h3>Preferences</h3>
+        <label for="reminder-frequency">Reminder Frequency:</label>
+        <select id="reminder-frequency">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+        <button id="save-reminders-btn" class="btn">Save Preferences</button>
+      </div>
+      <div class="card">
+        <h3>Export Data</h3>
+        <button id="export-data-btn" class="btn">Export Progress Data</button>
+      </div>`;
+  }
+}
+
 // Ensure menu links are functional
 function initializeMenu() {
   const menuLinks = document.querySelectorAll('.menu a');
@@ -143,7 +177,7 @@ function initializeMenu() {
   });
 }
 
-// Ensure version is displayed in the header
+// Display version in the header
 function displayVersion() {
   const header = document.querySelector('header');
   const versionElement = document.createElement('p');
