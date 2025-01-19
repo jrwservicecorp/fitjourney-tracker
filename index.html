@@ -1,9 +1,38 @@
 
-<div class="navbar">
-  <a href="#" class="active" onclick="navigateTo('dashboard')">
-    <i class="fas fa-home"></i> Dashboard
-  </a>
-  <a href="#" onclick="navigateTo('settings')">
-    <i class="fas fa-cog"></i> Settings
-  </a>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitJourney Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <header>
+    <h1>FitJourney Tracker</h1>
+    <p>App Version: v2.20</p>
+  </header>
+  <div class="navbar">
+    <a href="#" class="active" onclick="navigateTo('dashboard')">
+      <i class="fas fa-home"></i> Dashboard
+    </a>
+    <a href="#" onclick="navigateTo('settings')">
+      <i class="fas fa-cog"></i> Settings
+    </a>
+  </div>
+  <div id="main-app">
+    <div id="dashboard" class="page">
+      <h2>Dashboard</h2>
+      <p>Welcome to your fitness journey tracker!</p>
+      <!-- Add additional dashboard features here -->
+    </div>
+    <div id="settings" class="page hidden">
+      <h2>Settings</h2>
+      <p>Update your preferences here.</p>
+      <!-- Add additional settings features here -->
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
