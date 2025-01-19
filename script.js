@@ -181,13 +181,13 @@ function loadSettings() {
 // Prevent Duplicate Version Display
 function displayVersion() {
   const header = document.querySelector('header');
-  const existingVersion = header.querySelector('.app-version');
-  if (!existingVersion) {
-    const versionElement = document.createElement('p');
-    versionElement.classList.add('app-version');
-    versionElement.textContent = `App Version: ${appVersion}`;
-    header.appendChild(versionElement);
-  }
+  const existingVersions = header.querySelectorAll('.app-version');
+  existingVersions.forEach((el) => el.remove()); // Remove any existing version elements
+
+  const versionElement = document.createElement('p');
+  versionElement.classList.add('app-version');
+  versionElement.textContent = `App Version: ${appVersion}`;
+  header.appendChild(versionElement);
 }
 
 // Initialize App
