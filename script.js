@@ -1,5 +1,5 @@
 
-const appVersion = "v2.25";
+const appVersion = "v2.26";
 
 // Tracker Data
 let progressData = JSON.parse(localStorage.getItem('progressData')) || [];
@@ -58,66 +58,102 @@ function loadDashboard() {
     dashboard.innerHTML = `
       <h2>Your Dashboard</h2>
       <div class="card">
-        <h3>Log Your Progress</h3>
-        <label for="log-weight">Weight (lbs):</label>
-        <input type="number" id="log-weight" placeholder="Enter weight">
-        <label for="log-date">Date:</label>
-        <input type="date" id="log-date">
-        <button id="log-progress-btn" class="btn">Log Progress</button>
+        <h3>Progress Charts</h3>
+        <canvas id="weight-chart" width="400" height="200"></canvas>
+        <canvas id="measurements-chart" width="400" height="200"></canvas>
       </div>
       <div class="card">
-        <h3>Photo Upload</h3>
-        <label for="upload-photo">Upload Photos:</label>
-        <input type="file" id="upload-photo" accept="image/*" multiple>
-        <div id="photo-gallery" class="photo-gallery"></div>
+        <h3>Customize Your Dashboard</h3>
+        <p>Drag and drop widgets to rearrange your dashboard layout.</p>
+        <div class="dashboard-widgets" id="dashboard-widgets">
+          <div class="widget" draggable="true">Weight Progress</div>
+          <div class="widget" draggable="true">Measurement Changes</div>
+          <div class="widget" draggable="true">Milestones</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Create Social Post</h3>
+        <label for="select-date-range">Select Date Range:</label>
+        <input type="date" id="start-date"> to <input type="date" id="end-date">
+        <div id="social-preview" class="wysiwyg-editor">
+          <p>Drag and drop elements to customize your post.</p>
+        </div>
+        <button id="share-btn" class="btn">Share to Social Media</button>
       </div>`;
 
-    setupProgressLogging();
-    setupPhotoUploads();
-    renderPhotoGallery();
+    renderCharts();
+    setupDashboardCustomization();
+    setupSocialSharing();
   }
 }
 
-// Setup Progress Logging
-function setupProgressLogging() {
-  document.getElementById('log-progress-btn').addEventListener('click', () => {
-    const date = document.getElementById('log-date').value;
-    const weight = parseFloat(document.getElementById('log-weight').value);
-    if (date && !isNaN(weight)) {
-      progressData.push({ date, weight });
-      localStorage.setItem('progressData', JSON.stringify(progressData));
-    } else {
-      alert('Please enter valid data!');
-    }
+// Render Progress Charts
+function renderCharts() {
+  const weightCtx = document.getElementById('weight-chart').getContext('2d');
+  const measurementsCtx = document.getElementById('measurements-chart').getContext('2d');
+
+  // Weight Chart
+  const dates = progressData.map(entry => entry.date);
+  const weights = progressData.map(entry => entry.weight);
+  new Chart(weightCtx, {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: 'Weight Progress',
+        data: weights,
+        borderColor: '#1a73e8',
+        borderWidth: 2,
+        fill: false,
+      }],
+    },
+    options: {
+      responsive: true,
+    },
+  });
+
+  // Measurements Chart
+  const chests = progressData.map(entry => entry.chest);
+  const waists = progressData.map(entry => entry.waist);
+  new Chart(measurementsCtx, {
+    type: 'bar',
+    data: {
+      labels: dates,
+      datasets: [
+        { label: 'Chest', data: chests, backgroundColor: '#3498db' },
+        { label: 'Waist', data: waists, backgroundColor: '#e74c3c' },
+      ],
+    },
+    options: {
+      responsive: true,
+    },
   });
 }
 
-// Setup Photo Uploads
-function setupPhotoUploads() {
-  document.getElementById('upload-photo').addEventListener('change', (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        photoData.push({ url: event.target.result, date: new Date().toISOString().split('T')[0] });
-        localStorage.setItem('photoData', JSON.stringify(photoData));
-        renderPhotoGallery();
-      };
-      reader.readAsDataURL(file);
+// Setup Dashboard Customization
+function setupDashboardCustomization() {
+  const widgets = document.querySelectorAll('.widget');
+  widgets.forEach((widget) => {
+    widget.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', widget.id);
     });
   });
+  const dashboard = document.getElementById('dashboard-widgets');
+  dashboard.addEventListener('dragover', (e) => {
+    e.preventDefault();
+  });
+  dashboard.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData('text/plain');
+    const draggedWidget = document.getElementById(id);
+    dashboard.appendChild(draggedWidget);
+  });
 }
 
-// Render Photo Gallery
-function renderPhotoGallery() {
-  const gallery = document.getElementById('photo-gallery');
-  gallery.innerHTML = '';
-  photoData.forEach((photo) => {
-    const img = document.createElement('img');
-    img.src = photo.url;
-    img.alt = `Photo taken on ${photo.date}`;
-    img.classList.add('photo-item');
-    gallery.appendChild(img);
+// Setup Social Sharing
+function setupSocialSharing() {
+  document.getElementById('share-btn').addEventListener('click', () => {
+    alert('Social sharing functionality coming soon!');
   });
 }
 
