@@ -1,0 +1,105 @@
+
+/* General Styles */
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+  color: #f5f5f5;
+}
+header {
+  background: #1a73e8;
+  color: #fff;
+  text-align: center;
+  padding: 15px 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+header p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+.container {
+  max-width: 900px;
+  margin: 20px auto;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+/* Enhanced Menu Styles */
+.navbar {
+  display: flex;
+  justify-content: center;
+  padding: 15px 0;
+  background: #2c3e50;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  gap: 20px;
+}
+.navbar a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 25px;
+  text-decoration: none;
+  background: #3498db;
+  color: white;
+  font-size: 18px;
+  border-radius: 30px;
+  font-weight: bold;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+.navbar a:hover {
+  background: #1a73e8;
+  transform: scale(1.1);
+}
+.navbar a.active {
+  background: #1abc9c;
+  color: white;
+  font-weight: bold;
+}
+
+/* Placeholder Section */
+.placeholder {
+  text-align: center;
+  padding: 20px;
+  border: 2px dashed #3498db;
+  border-radius: 10px;
+  margin-top: 20px;
+  background: rgba(52, 152, 219, 0.1);
+}
+.placeholder h4 {
+  font-size: 18px;
+  color: #3498db;
+}
+.placeholder p {
+  font-size: 14px;
+  margin: 10px 0;
+}
+.placeholder .btn {
+  background: #1abc9c;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.placeholder .btn:hover {
+  background: #16a085;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar {
+    flex-wrap: wrap;
+  }
+  .navbar a {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+}
