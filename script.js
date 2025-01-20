@@ -1,5 +1,5 @@
 
-const appVersion = "v2.32";
+const appVersion = "v2.35";
 
 // Tracker Data
 let progressData = JSON.parse(localStorage.getItem('progressData')) || [];
@@ -7,12 +7,10 @@ let photoData = JSON.parse(localStorage.getItem('photoData')) || [];
 
 // Initialize Navigation
 function setupNavigation() {
-  console.log("Initializing navigation...");
   document.querySelectorAll('.navbar a').forEach((link) => {
     link.addEventListener('click', (event) => {
       event.preventDefault();
       const pageId = link.getAttribute('data-page');
-      console.log(`Navigating to page: ${pageId}`);
       navigateTo(pageId);
     });
   });
@@ -24,172 +22,107 @@ function navigateTo(pageId) {
   pages.forEach((page) => page.classList.add('hidden'));
   const targetPage = document.getElementById(pageId);
   if (targetPage) {
-    console.log(`Displaying page: ${pageId}`);
     targetPage.classList.remove('hidden');
-    highlightActiveLink(pageId);
-    updatePageTitle(pageId);
     if (pageId === 'dashboard') loadDashboard();
-    if (pageId === 'settings') loadSettings();
-  } else {
-    console.error(`Page with ID '${pageId}' not found.`);
   }
 }
 
-// Highlight Active Menu Link
-function highlightActiveLink(pageId) {
-  document.querySelectorAll('.navbar a').forEach((link) => {
-    link.classList.remove('active');
-    if (link.getAttribute('data-page') === pageId) {
-      link.classList.add('active');
-    }
+// Load Dashboard
+function loadDashboard() {
+  const dashboard = document.getElementById('dashboard');
+  dashboard.innerHTML = `
+    <div class="dashboard-header">
+      <h2>Your Dashboard</h2>
+      <p>Track your progress and visualize your journey.</p>
+    </div>
+    <div class="dashboard-content">
+      <div class="chart-section">
+        <h3>Weight Progress</h3>
+        <label for="date-range-start">Start Date:</label>
+        <input type="date" id="date-range-start">
+        <label for="date-range-end">End Date:</label>
+        <input type="date" id="date-range-end">
+        <button id="filter-chart-btn" class="btn">Filter</button>
+        <canvas id="weight-chart" width="400" height="200"></canvas>
+      </div>
+      <div class="gallery-section">
+        <h3>Photo Gallery</h3>
+        <div id="photo-gallery" class="photo-gallery"></div>
+      </div>
+    </div>`;
+
+  setupChart();
+  setupPhotoGallery();
+}
+
+// Setup Weight Chart
+function setupChart() {
+  const ctx = document.getElementById('weight-chart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: progressData.map(entry => entry.date),
+      datasets: [{
+        label: 'Weight Progress',
+        data: progressData.map(entry => entry.weight),
+        borderColor: '#3498db',
+        fill: false,
+        borderWidth: 2,
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true },
+      },
+    },
+  });
+
+  document.getElementById('filter-chart-btn').addEventListener('click', () => {
+    const startDate = document.getElementById('date-range-start').value;
+    const endDate = document.getElementById('date-range-end').value;
+    const filteredData = progressData.filter(entry => {
+      return (!startDate || entry.date >= startDate) && (!endDate || entry.date <= endDate);
+    });
+    chart.data.labels = filteredData.map(entry => entry.date);
+    chart.data.datasets[0].data = filteredData.map(entry => entry.weight);
+    chart.update();
   });
 }
 
-// Update Page Title
-function updatePageTitle(pageId) {
-  const pageTitle = document.querySelector('.page-title');
-  const titles = {
-    home: 'Welcome to FitJourney Tracker',
-    dashboard: 'Your Dashboard',
-    settings: 'Settings',
-    about: 'About FitJourney Tracker',
-  };
-  pageTitle.textContent = titles[pageId] || 'FitJourney Tracker';
-}
-
-// Load Dashboard with Logging and Photo Upload Functionality
-function loadDashboard() {
-  console.log("Loading dashboard...");
-  const dashboard = document.getElementById('dashboard');
-  if (dashboard) {
-    dashboard.innerHTML = `
-      <div class="dashboard-header">
-        <h2>Your Dashboard</h2>
-        <p>Track your fitness progress and visualize changes.</p>
-      </div>
-      <div class="dashboard-cards">
-        <div class="card">
-          <h3><i class="fas fa-chart-line"></i> Log Your Progress</h3>
-          <label for="log-weight">Weight (lbs):</label>
-          <input type="number" id="log-weight" placeholder="Enter weight">
-          <label for="log-date">Date:</label>
-          <input type="date" id="log-date">
-          <button id="log-progress-btn" class="btn">Log Progress</button>
-        </div>
-        <div class="card">
-          <h3><i class="fas fa-image"></i> Upload Progress Photos</h3>
-          <input type="file" id="upload-photo" accept="image/*" multiple>
-          <div id="photo-gallery" class="photo-gallery"></div>
-        </div>
-        <div class="card">
-          <h3><i class="fas fa-ruler"></i> Measurement Changes</h3>
-          <button id="add-measurement-btn" class="btn">Add Measurement</button>
-          <div id="measurement-list"></div>
-        </div>
-      </div>`;
-
-    setupProgressLogging();
-    setupPhotoUploads();
-    setupMeasurementTracking();
-    renderPhotoGallery();
-  }
-}
-
-// Set Up Progress Logging
-function setupProgressLogging() {
-  console.log("Setting up progress logging...");
-  const logBtn = document.getElementById('log-progress-btn');
-  if (logBtn) {
-    logBtn.addEventListener('click', () => {
-      const weight = parseFloat(document.getElementById('log-weight').value);
-      const date = document.getElementById('log-date').value;
-
-      if (weight && date) {
-        progressData.push({ weight, date });
-        localStorage.setItem('progressData', JSON.stringify(progressData));
-        alert('Progress logged successfully!');
-        console.log('Progress logged:', { weight, date });
-      } else {
-        alert('Please fill out all fields.');
-      }
-    });
-  } else {
-    console.error("Log Progress button not found.");
-  }
-}
-
-// Set Up Photo Uploads
-function setupPhotoUploads() {
-  console.log("Setting up photo uploads...");
-  const photoInput = document.getElementById('upload-photo');
-  if (photoInput) {
-    photoInput.addEventListener('change', (e) => {
-      const files = Array.from(e.target.files);
-      files.forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          photoData.push({ url: event.target.result, date: new Date().toISOString().split('T')[0] });
-          localStorage.setItem('photoData', JSON.stringify(photoData));
-          renderPhotoGallery();
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-  } else {
-    console.error("Photo input not found.");
-  }
-}
-
-// Render Photo Gallery
-function renderPhotoGallery() {
-  console.log("Rendering photo gallery...");
+// Setup Photo Gallery
+function setupPhotoGallery() {
   const gallery = document.getElementById('photo-gallery');
   gallery.innerHTML = '';
-  photoData.forEach((photo) => {
+  photoData.forEach(photo => {
     const img = document.createElement('img');
     img.src = photo.url;
     img.alt = `Photo from ${photo.date}`;
     img.classList.add('photo-item');
+    img.addEventListener('click', () => enlargePhoto(photo));
     gallery.appendChild(img);
   });
 }
 
-// Set Up Measurement Tracking
-function setupMeasurementTracking() {
-  console.log("Setting up measurement tracking...");
-  const addMeasurementBtn = document.getElementById('add-measurement-btn');
-  if (addMeasurementBtn) {
-    addMeasurementBtn.addEventListener('click', () => {
-      const measurement = prompt('Enter measurement name (e.g., Chest, Waist):');
-      if (measurement) {
-        const measurementList = document.getElementById('measurement-list');
-        const input = document.createElement('div');
-        input.innerHTML = `
-          <label for="${measurement}">${measurement} (inches):</label>
-          <input type="number" id="${measurement}" placeholder="Enter ${measurement} measurement">`;
-        measurementList.appendChild(input);
-      }
-    });
-  } else {
-    console.error("Add Measurement button not found.");
-  }
-}
+// Enlarge Photo
+function enlargePhoto(photo) {
+  const modal = document.createElement('div');
+  modal.classList.add('modal');
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <img src="${photo.url}" alt="Photo from ${photo.date}" class="enlarged-photo">
+      <p>Date: ${photo.date}</p>
+    </div>`;
+  document.body.appendChild(modal);
 
-// Fix Version Display
-function displayVersion() {
-  const header = document.querySelector('header');
-  const existingVersions = header.querySelectorAll('.app-version');
-  existingVersions.forEach((el) => el.remove());
-
-  const versionElement = document.createElement('p');
-  versionElement.classList.add('app-version');
-  versionElement.textContent = `App Version: ${appVersion}`;
-  header.appendChild(versionElement);
+  modal.querySelector('.close-btn').addEventListener('click', () => {
+    modal.remove();
+  });
 }
 
 // Initialize App
 window.onload = () => {
-  displayVersion();
   setupNavigation();
-  navigateTo('home'); // Default to home page
+  navigateTo('home');
 };
