@@ -1,10 +1,12 @@
-const appVersion = "v2.44";
+const appVersion = "v2.45";
 
 // Initialize App
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('app-version').textContent = appVersion;
   setupNavigation();
   setupLogWeight();
+  setupDateFilter();
+  setupExportButton();
   navigateTo('home');
 });
 
@@ -13,7 +15,6 @@ function setupNavigation() {
   const links = document.querySelectorAll('.navbar a');
   links.forEach((link) => {
     const pageId = link.getAttribute('data-page');
-    console.log(`Setting up navigation for: ${pageId}`); // Debug log
     link.addEventListener('click', (event) => {
       event.preventDefault();
       navigateTo(pageId);
@@ -23,23 +24,18 @@ function setupNavigation() {
 
 // Navigate Between Pages
 function navigateTo(pageId) {
-  console.log(`Navigating to page: ${pageId}`); // Log the page being navigated to
   const pages = document.querySelectorAll('.page');
   pages.forEach(page => {
     if (page.id === pageId) {
-      page.style.display = 'block'; // Force display for the target page
+      page.style.display = 'block';
       page.classList.remove('hidden');
-      console.log(`Showing page: ${page.id}`);
     } else {
-      page.style.display = 'none'; // Force hiding other pages
+      page.style.display = 'none';
       page.classList.add('hidden');
-      console.log(`Hiding page: ${page.id}`);
     }
   });
 
-  // Specific logic for the Dashboard page
   if (pageId === 'dashboard') {
-    console.log('Loading dashboard...');
     loadDashboard();
   }
 }
@@ -60,34 +56,79 @@ function setupLogWeight() {
     localStorage.setItem('progressData', JSON.stringify(progressData));
     alert('Weight logged successfully!');
     weightInput.value = ''; // Clear input
+    loadDashboard(); // Update the chart dynamically
   });
 }
 
-// Load Dashboard with Chart
-function loadDashboard() {
-  if (typeof Chart === 'undefined') {
-    console.error('Chart.js is not loaded. Ensure the library is included in index.html.');
-    return;
-  }
+// Setup Date Filter
+function setupDateFilter() {
+  const filterBtn = document.getElementById('filter-btn');
+  filterBtn.addEventListener('click', () => {
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+    const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
 
-  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
-  const chartContainer = document.getElementById('weight-chart-container');
-  if (progressData.length === 0) {
-    chartContainer.innerHTML = '<p>No data available. Log your weight to get started!</p>';
-  } else {
-    chartContainer.innerHTML = '<canvas id="weight-chart"></canvas>';
-    const ctx = document.getElementById('weight-chart').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: progressData.map(entry => entry.date),
-        datasets: [{
-          label: 'Weight Progress',
-          data: progressData.map(entry => entry.weight),
-          borderColor: '#3498db',
-          fill: false,
-        }],
-      },
+    const filteredData = progressData.filter(entry => {
+      return (!startDate || entry.date >= startDate) && (!endDate || entry.date <= endDate);
     });
+
+    updateChart(filteredData);
+  });
+}
+
+// Setup Export Button
+function setupExportButton() {
+  const exportBtn = document.getElementById('export-btn');
+  exportBtn.addEventListener('click', () => {
+    const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
+    const csvContent = 'Date,Weight\n' + progressData.map(entry => `${entry.date},${entry.weight}`).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'weight_progress.csv';
+    link.click();
+  });
+}
+
+// Update Milestones
+function updateMilestones() {
+  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
+  const milestoneList = document.getElementById('milestone-list');
+  milestoneList.innerHTML = '';
+
+  if (progressData.length > 0) {
+    milestoneList.innerHTML += '<li>First weight logged!</li>';
   }
+  if (progressData.length >= 7) {
+    milestoneList.innerHTML += '<li>7-day logging streak! Great consistency!</li>';
+  }
+  if (progressData.length >= 30) {
+    milestoneList.innerHTML += '<li>30-day streak! You’re amazing!</li>';
+  }
+}
+
+// Update Chart
+function updateChart(data) {
+  const chartContainer = document.getElementById('weight-chart-container');
+  chartContainer.innerHTML = '<canvas id="weight-chart"></canvas>';
+  const ctx = document.getElementById('weight-chart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map(entry => entry.date),
+      datasets: [{
+        label: 'Weight Progress',
+        data: data.map(entry => entry.weight),
+        borderColor: '#3498db',
+        fill: false,
+      }],
+    },
+  });
+}
+
+// Load Dashboard
+function loadDashboard() {
+  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
+  updateChart(progressData);
+  updateMilestones();
 }
