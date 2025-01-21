@@ -11,7 +11,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.52</span></p>
+    <p>App Version: <span id="app-version">v2.53</span></p>
   </header>
   <nav class="navbar" role="navigation" aria-label="Main Navigation">
     <a href="#" data-page="home" aria-label="Home"><i class="fas fa-home"></i> Home</a>
@@ -40,9 +40,20 @@
       <article id="photo-progress">
         <h3>Track Your Progress Visually</h3>
         <input type="file" id="photo-upload" accept="image/*">
+        <input type="text" id="photo-description" placeholder="Add a description (optional)">
         <button id="upload-photo-btn">Upload Photo</button>
         <div id="photo-gallery">
           <p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>
+        </div>
+      </article>
+
+      <article id="compare-photos">
+        <h3>Before & After</h3>
+        <select id="photo-select-before"></select>
+        <select id="photo-select-after"></select>
+        <button id="generate-comparison-btn">Generate Comparison</button>
+        <div id="comparison-result">
+          <p class="placeholder">Select two photos to generate a comparison.</p>
         </div>
       </article>
 
