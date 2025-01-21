@@ -1,5 +1,5 @@
-// JavaScript (v2.56)
-const appVersion = "v2.56";
+// JavaScript (v2.57)
+const appVersion = "v2.57";
 
 let chartInstance = null;
 
@@ -211,10 +211,41 @@ function setupPhotoUpload() {
       localStorage.setItem("photos", JSON.stringify(photos));
       alert("Photo uploaded successfully!");
       descriptionInput.value = "";
-      updatePhotoGallery(photos);
+      updatePhotoGallery();
     };
     reader.readAsDataURL(file);
   });
+}
+
+// Update Photo Gallery
+function updatePhotoGallery() {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  const gallery = document.getElementById("photo-gallery");
+  gallery.innerHTML = "";
+
+  if (photos.length === 0) {
+    gallery.innerHTML = '<p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>';
+    return;
+  }
+
+  photos.forEach((photo, index) => {
+    const photoEntry = document.createElement("div");
+    photoEntry.classList.add("photo-entry");
+    photoEntry.innerHTML = `
+      <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
+      <p>${photo.date}</p>
+      <p>${photo.description || ""}</p>
+      <button onclick="deletePhoto(${index})">Delete</button>
+    `;
+    gallery.appendChild(photoEntry);
+  });
+}
+
+function deletePhoto(index) {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  photos.splice(index, 1);
+  localStorage.setItem("photos", JSON.stringify(photos));
+  updatePhotoGallery();
 }
 
 // Collapsible Sections
