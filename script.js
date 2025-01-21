@@ -1,4 +1,4 @@
-const appVersion = "v2.42";
+const appVersion = "v2.43";
 
 // Initialize App
 window.addEventListener('DOMContentLoaded', () => {
@@ -34,6 +34,7 @@ function navigateTo(pageId) {
       pageFound = true;
     } else {
       page.classList.add('hidden'); // Hide other pages
+      console.log(`Hiding page: ${page.id}`);
     }
   });
 
@@ -43,8 +44,14 @@ function navigateTo(pageId) {
 
   // Specific logic for the Dashboard page
   if (pageId === 'dashboard') {
+    console.log('Loading dashboard...');
     loadDashboard();
   }
+
+  // Debug element states
+  pages.forEach(page => {
+    console.log(`Page: ${page.id}, Classes: ${page.className}`);
+  });
 }
 
 // Setup Log Weight Functionality
