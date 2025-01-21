@@ -1,60 +1,72 @@
-// JavaScript (v2.55)
-const appVersion = "v2.55";
-
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("app-version").textContent = appVersion;
-  setupNavigation();
-  setupLogWeight();
-  setupPhotoUpload();
-  loadDashboard();
-  setupCollapsibleSections();
-  setupThemeToggle();
-});
-
-function setupNavigation() {
-  const links = document.querySelectorAll(".navbar a");
-  links.forEach((link) => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      navigateTo(link.getAttribute("data-page"));
-    });
-  });
-}
-
-function navigateTo(pageId) {
-  document.querySelectorAll(".page").forEach((page) => {
-    page.classList.toggle("hidden", page.id !== pageId);
-  });
-}
-
 function loadDashboard() {
-  // Chart rendering and summary stats logic
+  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
+
+  if (progressData.length > 0) {
+    document.getElementById("chart-placeholder").style.display = "none";
+    renderChart(progressData);
+  } else {
+    document.getElementById("chart-placeholder").style.display = "block";
+    renderChart(getPlaceholderData());
+  }
 }
 
-function setupLogWeight() {
-  document.getElementById("log-weight-btn").addEventListener("click", () => {
-    // Weight logging logic
+function renderChart(data) {
+  const ctx = document.getElementById("weight-chart").getContext("2d");
+
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  chartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: data.map((entry) => entry.date),
+      datasets: [
+        {
+          label: "Weight (lbs)",
+          data: data.map((entry) => entry.weight),
+          borderColor: "#ff6f61",
+          backgroundColor: "rgba(255, 111, 97, 0.2)",
+          fill: true,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        tooltip: {
+          enabled: true,
+        },
+      },
+      scales: {
+        x: {
+          grid: {
+            color: "#cccccc",
+          },
+        },
+        y: {
+          grid: {
+            color: "#cccccc",
+          },
+          beginAtZero: true,
+        },
+      },
+    },
   });
 }
 
-function setupPhotoUpload() {
-  document.getElementById("upload-photo-btn").addEventListener("click", () => {
-    // Photo upload logic
+function getPlaceholderData() {
+  const today = new Date();
+  const placeholderDates = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (6 - i));
+    return date.toISOString().split("T")[0];
   });
-}
 
-function setupCollapsibleSections() {
-  document.querySelectorAll(".toggle-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const content = btn.nextElementSibling;
-      content.classList.toggle("open");
-    });
-  });
-}
+  const placeholderWeights = [150, 152, 151, 153, 150, 148, 149];
 
-function setupThemeToggle() {
-  const btn = document.getElementById("theme-toggle-btn");
-  btn.addEventListener("click", () => {
-    document.body.classList.toggle("dark-theme");
-  });
+  return placeholderDates.map((date, index) => ({
+    date,
+    weight: placeholderWeights[index],
+  }));
 }
