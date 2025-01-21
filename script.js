@@ -1,4 +1,4 @@
-const appVersion = "v2.43";
+const appVersion = "v2.44";
 
 // Initialize App
 window.addEventListener('DOMContentLoaded', () => {
@@ -25,33 +25,23 @@ function setupNavigation() {
 function navigateTo(pageId) {
   console.log(`Navigating to page: ${pageId}`); // Log the page being navigated to
   const pages = document.querySelectorAll('.page');
-  let pageFound = false;
-
   pages.forEach(page => {
     if (page.id === pageId) {
-      page.classList.remove('hidden'); // Show the matching page
+      page.style.display = 'block'; // Force display for the target page
+      page.classList.remove('hidden');
       console.log(`Showing page: ${page.id}`);
-      pageFound = true;
     } else {
-      page.classList.add('hidden'); // Hide other pages
+      page.style.display = 'none'; // Force hiding other pages
+      page.classList.add('hidden');
       console.log(`Hiding page: ${page.id}`);
     }
   });
-
-  if (!pageFound) {
-    console.error(`Page "${pageId}" not found.`);
-  }
 
   // Specific logic for the Dashboard page
   if (pageId === 'dashboard') {
     console.log('Loading dashboard...');
     loadDashboard();
   }
-
-  // Debug element states
-  pages.forEach(page => {
-    console.log(`Page: ${page.id}, Classes: ${page.className}`);
-  });
 }
 
 // Setup Log Weight Functionality
