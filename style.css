@@ -1,4 +1,4 @@
-/* CSS (v2.59) */
+/* CSS (v2.58) */
 body {
   font-family: 'Poppins', Arial, sans-serif;
   margin: 0;
@@ -27,40 +27,44 @@ body {
   display: none;
 }
 
-.summary-section {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-}
-
-.action-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.action-buttons button {
-  background: #3498db;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.action-buttons button:hover {
-  background: #1a73e8;
-}
-
-.photos-section {
-  margin-top: 20px;
-}
-
 .card {
   border-radius: 10px;
   background: #2c3e50;
   padding: 20px;
+  margin: 20px 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#weight-chart {
+  width: 100%;
+  max-height: 400px;
+}
+
+.collapsible-section {
+  margin-top: 20px;
+}
+
+.toggle-btn {
+  display: block;
+  width: 100%;
+  background: #3498db;
+  color: white;
+  padding: 10px;
+  text-align: left;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.collapsible-content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease-out;
+}
+
+.collapsible-content.open {
+  max-height: 300px; /* Adjust based on content size */
 }
 
 .progress-bar {
