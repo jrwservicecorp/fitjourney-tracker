@@ -1,3 +1,4 @@
+/* General Styles */
 body {
   font-family: 'Poppins', Arial, sans-serif;
   margin: 0;
@@ -6,6 +7,7 @@ body {
   color: #f5f5f5;
 }
 
+/* Navigation Bar */
 .navbar {
   display: flex;
   justify-content: center;
@@ -27,6 +29,7 @@ body {
   background-color: #3498db;
 }
 
+/* Log Weight Section */
 #log-weight-section {
   margin: 20px;
 }
@@ -50,4 +53,28 @@ body {
 
 #log-weight-btn:hover {
   background: #1a73e8;
+}
+
+/* Date Filter Section */
+#date-filter {
+  margin: 10px 0;
+}
+
+#date-filter label {
+  margin-right: 5px;
+}
+
+/* Milestone Section */
+#milestones {
+  margin-top: 20px;
+}
+
+/* Weight Chart Section */
+#weight-chart-container {
+  margin-top: 20px;
+}
+
+/* Hidden Class */
+.hidden {
+  display: none;
 }
