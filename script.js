@@ -1,4 +1,4 @@
-const appVersion = "v2.46";
+const appVersion = "v2.47";
 
 const chartColors = {
   default: { line: '#ff6f61', grid: '#cccccc', labels: '#ffffff' },
@@ -51,18 +51,26 @@ function navigateTo(pageId) {
 function setupLogWeight() {
   const logWeightBtn = document.getElementById('log-weight-btn');
   const weightInput = document.getElementById('weight-input');
+  const bodyFatInput = document.getElementById('body-fat');
+  const waistInput = document.getElementById('waist');
   logWeightBtn.addEventListener('click', () => {
     const weight = parseFloat(weightInput.value);
+    const bodyFat = parseFloat(bodyFatInput.value);
+    const waist = parseFloat(waistInput.value);
+
     if (isNaN(weight) || weight < 20 || weight > 500) {
       alert('Please enter a valid weight between 20 and 500 lbs.');
       return;
     }
+
     const today = new Date().toISOString().split('T')[0];
     const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
-    progressData.push({ date: today, weight });
+    progressData.push({ date: today, weight, bodyFat, waist });
     localStorage.setItem('progressData', JSON.stringify(progressData));
-    alert('Weight logged successfully!');
-    weightInput.value = ''; // Clear input
+    alert('Entry logged successfully!');
+    weightInput.value = '';
+    bodyFatInput.value = '';
+    waistInput.value = '';
     loadDashboard();
   });
 }
@@ -88,7 +96,8 @@ function setupExportButton() {
   const exportBtn = document.getElementById('export-btn');
   exportBtn.addEventListener('click', () => {
     const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
-    const csvContent = 'Date,Weight\n' + progressData.map(entry => `${entry.date},${entry.weight}`).join('\n');
+    const csvContent = 'Date,Weight,Body Fat,Waist\n' + 
+      progressData.map(entry => `${entry.date},${entry.weight},${entry.bodyFat || ''},${entry.waist || ''}`).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -142,6 +151,28 @@ function updateMilestones() {
   }
 }
 
+// Update Streaks
+function updateStreaks() {
+  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
+  let currentStreak = 0;
+  let longestStreak = 0;
+  let previousDate = null;
+
+  progressData.forEach(entry => {
+    const entryDate = new Date(entry.date);
+    if (previousDate && (entryDate - previousDate) === 86400000) {
+      currentStreak++;
+    } else {
+      currentStreak = 1;
+    }
+    longestStreak = Math.max(longestStreak, currentStreak);
+    previousDate = entryDate;
+  });
+
+  document.getElementById('current-streak').textContent = `${currentStreak} days`;
+  document.getElementById('longest-streak').textContent = `Longest Streak: ${longestStreak} days`;
+}
+
 // Update Chart
 function updateChart(data) {
   const currentTheme = localStorage.getItem('chartTheme') || 'default';
@@ -165,6 +196,24 @@ function updateChart(data) {
       data: new Array(data.length).fill(targetWeight),
       borderColor: '#ff0000',
       borderDash: [5, 5],
+      fill: false
+    });
+  }
+
+  if (data.some(entry => entry.bodyFat)) {
+    datasets.push({
+      label: 'Body Fat (%)',
+      data: data.map(entry => entry.bodyFat || null),
+      borderColor: '#00ff00',
+      fill: false
+    });
+  }
+
+  if (data.some(entry => entry.waist)) {
+    datasets.push({
+      label: 'Waist (in)',
+      data: data.map(entry => entry.waist || null),
+      borderColor: '#ffa500',
       fill: false
     });
   }
@@ -193,4 +242,5 @@ function loadDashboard() {
   const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
   updateChart(progressData);
   updateMilestones();
+  updateStreaks();
 }
