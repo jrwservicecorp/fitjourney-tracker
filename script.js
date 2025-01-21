@@ -1,4 +1,4 @@
-const appVersion = "v2.38";
+const appVersion = "v2.31";
 
 // Initialize App
 window.addEventListener('DOMContentLoaded', () => {
