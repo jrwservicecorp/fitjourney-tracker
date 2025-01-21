@@ -125,6 +125,23 @@ function setupTargetWeight() {
   });
 }
 
+// Update Milestones
+function updateMilestones() {
+  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
+  const milestoneList = document.getElementById('milestone-list');
+  milestoneList.innerHTML = '';
+
+  if (progressData.length > 0) {
+    milestoneList.innerHTML += '<li>First weight logged!</li>';
+  }
+  if (progressData.length >= 7) {
+    milestoneList.innerHTML += '<li>7-day logging streak! Great consistency!</li>';
+  }
+  if (progressData.length >= 30) {
+    milestoneList.innerHTML += '<li>30-day streak! You’re amazing!</li>';
+  }
+}
+
 // Update Chart
 function updateChart(data) {
   const currentTheme = localStorage.getItem('chartTheme') || 'default';
