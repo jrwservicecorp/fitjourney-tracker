@@ -11,25 +11,23 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.55</span></p>
+    <p>App Version: <span id="app-version">v2.58</span></p>
   </header>
   <nav class="navbar" role="navigation" aria-label="Main Navigation">
-    <a href="#" data-page="home" aria-label="Home"><i class="fas fa-home"></i> Home</a>
-    <a href="#" data-page="dashboard" aria-label="Dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
-    <a href="#" data-page="settings" aria-label="Settings"><i class="fas fa-cog"></i> Settings</a>
-    <a href="#" data-page="about" aria-label="About"><i class="fas fa-info-circle"></i> About</a>
+    <a href="#" data-page="home"><i class="fas fa-home"></i> Home</a>
+    <a href="#" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="#" data-page="settings"><i class="fas fa-cog"></i> Settings</a>
+    <a href="#" data-page="about"><i class="fas fa-info-circle"></i> About</a>
   </nav>
   <div id="main-app">
     <section id="dashboard" class="page hidden">
       <h2>Dashboard</h2>
-      
       <div class="card">
         <h3>Your Weight Trends</h3>
         <canvas id="weight-chart"></canvas>
         <p class="placeholder" id="chart-placeholder">Start logging your weight to see trends here!</p>
       </div>
-
-      <div id="summary-stats" class="card">
+      <div class="card">
         <h3>Summary</h3>
         <p>Average Weight: <span id="avg-weight">--</span> lbs</p>
         <p>Current Streak: <span id="current-streak">--</span> days</p>
@@ -38,8 +36,7 @@
           <div class="progress" id="goal-progress-bar" style="width: 0%;"></div>
         </div>
       </div>
-
-      <div class="collapsible-section card">
+      <div class="collapsible-section">
         <button class="toggle-btn">Log Your Weight</button>
         <div class="collapsible-content">
           <input type="number" id="weight-input" placeholder="Enter your weight (lbs)">
@@ -50,21 +47,17 @@
           <button id="log-weight-btn">Log Entry</button>
         </div>
       </div>
-
-      <div class="collapsible-section card">
-        <button class="toggle-btn">Track Your Progress Visually</button>
-        <div class="collapsible-content">
-          <input type="file" id="photo-upload" accept="image/*">
-          <input type="text" id="photo-description" placeholder="Add a description (optional)">
-          <button id="upload-photo-btn">Upload Photo</button>
-          <div id="photo-gallery">
-            <p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>
-          </div>
+      <div class="card">
+        <h3>Photos</h3>
+        <input type="file" id="photo-upload" accept="image/*">
+        <input type="text" id="photo-description" placeholder="Add a description (optional)">
+        <button id="upload-photo-btn">Upload Photo</button>
+        <div id="photo-gallery">
+          <p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>
         </div>
       </div>
     </section>
   </div>
-  <button id="theme-toggle-btn" class="theme-toggle">Toggle Theme</button>
   <script src="script.js" defer></script>
 </body>
 </html>
