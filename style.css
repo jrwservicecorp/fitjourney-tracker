@@ -53,6 +53,29 @@ li {
     background-color: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 8px;
+    position: relative;
+}
+
+#chart-container canvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* Chart Filters */
+#chart-filters {
+    margin-top: 10px;
+}
+
+#chart-filters label {
+    font-size: 14px;
+    margin-right: 5px;
+}
+
+#chart-filters select {
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 /* Progress Bar */
@@ -71,6 +94,39 @@ li {
     text-align: center;
     color: white;
     line-height: 20px;
+    font-size: 14px;
+}
+
+/* Achievements Section */
+#achievements ul {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#achievements ul li img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+/* Photo Gallery */
+.photo-entry {
+    display: inline-block;
+    margin: 10px;
+    text-align: center;
+}
+
+.photo-entry img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+}
+
+.photo-entry p {
+    margin-top: 5px;
     font-size: 14px;
 }
 
