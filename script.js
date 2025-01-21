@@ -1,4 +1,4 @@
-const appVersion = "v2.37";
+const appVersion = "v2.38";
 
 // Initialize App
 window.addEventListener('DOMContentLoaded', () => {
@@ -22,12 +22,11 @@ function setupNavigation() {
 // Navigate Between Pages
 function navigateTo(pageId) {
   const pages = document.querySelectorAll('.page');
-  pages.forEach((page) => page.classList.add('hidden'));
+  pages.forEach(page => page.classList.add('hidden'));
   const targetPage = document.getElementById(pageId);
   if (targetPage) {
     targetPage.classList.remove('hidden');
-  } else {
-    console.error(`Page "${pageId}" not found.`);
+    if (pageId === 'dashboard') loadDashboard();
   }
 }
 
@@ -35,12 +34,6 @@ function navigateTo(pageId) {
 function setupLogWeight() {
   const logWeightBtn = document.getElementById('log-weight-btn');
   const weightInput = document.getElementById('weight-input');
-
-  if (!logWeightBtn || !weightInput) {
-    console.error('Log Weight button or input not found.');
-    return;
-  }
-
   logWeightBtn.addEventListener('click', () => {
     const weight = parseFloat(weightInput.value);
     if (isNaN(weight) || weight < 20 || weight > 500) {
@@ -54,4 +47,29 @@ function setupLogWeight() {
     alert('Weight logged successfully!');
     weightInput.value = ''; // Clear input
   });
+}
+
+// Load Dashboard with Chart
+function loadDashboard() {
+  const dashboard = document.getElementById('dashboard');
+  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
+  const chartContainer = document.getElementById('weight-chart-container');
+  if (progressData.length === 0) {
+    chartContainer.innerHTML = '<p>No data available. Log your weight to get started!</p>';
+  } else {
+    chartContainer.innerHTML = '<canvas id="weight-chart"></canvas>';
+    const ctx = document.getElementById('weight-chart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: progressData.map(entry => entry.date),
+        datasets: [{
+          label: 'Weight Progress',
+          data: progressData.map(entry => entry.weight),
+          borderColor: '#3498db',
+          fill: false,
+        }],
+      },
+    });
+  }
 }
