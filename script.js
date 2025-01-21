@@ -143,4 +143,45 @@ function setupPhotoUpload() {
 function updatePhotoGallery() {
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
   const gallery = document.getElementById("photo-gallery");
-  gallery.innerHTML =
+  gallery.innerHTML = "";
+
+  if (photos.length === 0) {
+    gallery.innerHTML = '<p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>';
+    return;
+  }
+
+  photos.forEach((photo, index) => {
+    const photoEntry = document.createElement("div");
+    photoEntry.classList.add("photo-entry");
+    photoEntry.innerHTML = `
+      <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
+      <p>${photo.date}</p>
+      <p>${photo.description || ""}</p>
+      <button onclick="deletePhoto(${index})">Delete</button>
+    `;
+    gallery.appendChild(photoEntry);
+  });
+}
+
+function deletePhoto(index) {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  photos.splice(index, 1);
+  localStorage.setItem("photos", JSON.stringify(photos));
+  updatePhotoGallery();
+}
+
+function setupCollapsibleSections() {
+  document.querySelectorAll(".toggle-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const content = btn.nextElementSibling;
+      content.classList.toggle("open");
+    });
+  });
+}
+
+function setupThemeToggle() {
+  const btn = document.getElementById("theme-toggle-btn");
+  btn.addEventListener("click", () => {
+    document.body.classList.toggle("dark-theme");
+  });
+}
