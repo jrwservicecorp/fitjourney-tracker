@@ -1,60 +1,98 @@
-// JavaScript (v2.55)
-const appVersion = "v2.55";
-
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("app-version").textContent = appVersion;
-  setupNavigation();
-  setupLogWeight();
-  setupPhotoUpload();
-  loadDashboard();
-  setupCollapsibleSections();
-  setupThemeToggle();
-});
-
-function setupNavigation() {
-  const links = document.querySelectorAll(".navbar a");
-  links.forEach((link) => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      navigateTo(link.getAttribute("data-page"));
-    });
-  });
+/* CSS (v2.55) */
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+  color: #f5f5f5;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-function navigateTo(pageId) {
-  document.querySelectorAll(".page").forEach((page) => {
-    page.classList.toggle("hidden", page.id !== pageId);
-  });
+.navbar {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  background: #2c3e50;
 }
 
-function loadDashboard() {
-  // Chart rendering and summary stats logic
+.navbar a {
+  text-decoration: none;
+  color: white;
+  padding: 10px 15px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 5px;
+  transition: background-color 0.3s;
 }
 
-function setupLogWeight() {
-  document.getElementById("log-weight-btn").addEventListener("click", () => {
-    // Weight logging logic
-  });
+.navbar a:hover {
+  background-color: #3498db;
 }
 
-function setupPhotoUpload() {
-  document.getElementById("upload-photo-btn").addEventListener("click", () => {
-    // Photo upload logic
-  });
+.page.hidden {
+  display: none;
 }
 
-function setupCollapsibleSections() {
-  document.querySelectorAll(".toggle-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const content = btn.nextElementSibling;
-      content.classList.toggle("open");
-    });
-  });
+.card {
+  border-radius: 10px;
+  background: #2c3e50;
+  padding: 20px;
+  margin: 20px 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-function setupThemeToggle() {
-  const btn = document.getElementById("theme-toggle-btn");
-  btn.addEventListener("click", () => {
-    document.body.classList.toggle("dark-theme");
-  });
+#weight-chart {
+  width: 100%;
+  max-height: 400px;
+}
+
+.collapsible-section {
+  margin-top: 20px;
+}
+
+.toggle-btn {
+  display: block;
+  width: 100%;
+  background: #3498db;
+  color: white;
+  padding: 10px;
+  text-align: left;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.collapsible-content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease-out;
+}
+
+.collapsible-content.open {
+  max-height: 300px; /* Adjust based on content size */
+}
+
+.progress-bar {
+  width: 100%;
+  background: #ccc;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.progress {
+  height: 10px;
+  background: #ff6f61;
+}
+
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #3498db;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
