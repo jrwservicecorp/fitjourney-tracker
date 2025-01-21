@@ -1,4 +1,9 @@
-const appVersion = "v2.45";
+const appVersion = "v2.46";
+
+const chartColors = {
+  default: { line: '#ff6f61', grid: '#cccccc', labels: '#ffffff' },
+  dark: { line: '#3498db', grid: '#666666', labels: '#f5f5f5' }
+};
 
 // Initialize App
 window.addEventListener('DOMContentLoaded', () => {
@@ -7,6 +12,8 @@ window.addEventListener('DOMContentLoaded', () => {
   setupLogWeight();
   setupDateFilter();
   setupExportButton();
+  setupThemeToggle();
+  setupTargetWeight();
   navigateTo('home');
 });
 
@@ -56,7 +63,7 @@ function setupLogWeight() {
     localStorage.setItem('progressData', JSON.stringify(progressData));
     alert('Weight logged successfully!');
     weightInput.value = ''; // Clear input
-    loadDashboard(); // Update the chart dynamically
+    loadDashboard();
   });
 }
 
@@ -90,39 +97,77 @@ function setupExportButton() {
   });
 }
 
-// Update Milestones
-function updateMilestones() {
-  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
-  const milestoneList = document.getElementById('milestone-list');
-  milestoneList.innerHTML = '';
+// Setup Theme Toggle
+function setupThemeToggle() {
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  themeToggleBtn.addEventListener('click', () => {
+    const currentTheme = localStorage.getItem('chartTheme') || 'default';
+    const newTheme = currentTheme === 'default' ? 'dark' : 'default';
+    localStorage.setItem('chartTheme', newTheme);
+    loadDashboard();
+  });
+}
 
-  if (progressData.length > 0) {
-    milestoneList.innerHTML += '<li>First weight logged!</li>';
-  }
-  if (progressData.length >= 7) {
-    milestoneList.innerHTML += '<li>7-day logging streak! Great consistency!</li>';
-  }
-  if (progressData.length >= 30) {
-    milestoneList.innerHTML += '<li>30-day streak! You’re amazing!</li>';
-  }
+// Setup Target Weight
+function setupTargetWeight() {
+  const saveTargetWeightBtn = document.getElementById('save-target-weight-btn');
+  const targetWeightInput = document.getElementById('target-weight-input');
+  saveTargetWeightBtn.addEventListener('click', () => {
+    const targetWeight = parseFloat(targetWeightInput.value);
+    if (isNaN(targetWeight) || targetWeight <= 0) {
+      alert('Please enter a valid target weight.');
+      return;
+    }
+    localStorage.setItem('targetWeight', targetWeight);
+    alert('Target weight saved successfully!');
+    targetWeightInput.value = '';
+    loadDashboard();
+  });
 }
 
 // Update Chart
 function updateChart(data) {
+  const currentTheme = localStorage.getItem('chartTheme') || 'default';
+  const theme = chartColors[currentTheme];
+  const targetWeight = parseFloat(localStorage.getItem('targetWeight'));
+
   const chartContainer = document.getElementById('weight-chart-container');
   chartContainer.innerHTML = '<canvas id="weight-chart"></canvas>';
   const ctx = document.getElementById('weight-chart').getContext('2d');
+  const datasets = [{
+    label: 'Weight Progress',
+    data: data.map(entry => entry.weight),
+    borderColor: theme.line,
+    borderWidth: 2,
+    pointBackgroundColor: theme.line
+  }];
+
+  if (!isNaN(targetWeight)) {
+    datasets.push({
+      label: 'Target Weight',
+      data: new Array(data.length).fill(targetWeight),
+      borderColor: '#ff0000',
+      borderDash: [5, 5],
+      fill: false
+    });
+  }
+
   new Chart(ctx, {
     type: 'line',
     data: {
       labels: data.map(entry => entry.date),
-      datasets: [{
-        label: 'Weight Progress',
-        data: data.map(entry => entry.weight),
-        borderColor: '#3498db',
-        fill: false,
-      }],
+      datasets: datasets
     },
+    options: {
+      responsive: true,
+      scales: {
+        x: { grid: { color: theme.grid }, ticks: { color: theme.labels } },
+        y: { grid: { color: theme.grid }, ticks: { color: theme.labels } }
+      },
+      plugins: {
+        legend: { labels: { color: theme.labels } }
+      }
+    }
   });
 }
 
