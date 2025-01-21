@@ -1,67 +1,84 @@
-/* General Styles */
+/* General Styling */
 body {
-  font-family: 'Poppins', Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
-  color: #f5f5f5;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
 }
 
-.navbar {
-  display: flex;
-  justify-content: center;
-  padding: 10px;
-  background: #2c3e50;
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
 }
 
-.navbar a {
-  text-decoration: none;
-  color: white;
-  padding: 10px 15px;
-  font-size: 18px;
-  font-weight: bold;
-  border-radius: 5px;
-  transition: background-color 0.3s;
+main {
+    padding: 20px;
 }
 
-.navbar a:hover {
-  background-color: #3498db;
+h2, h3 {
+    color: #4CAF50;
 }
 
-/* Trophy Case */
-#trophies img {
-  width: 50px;
-  height: 50px;
-  margin: 5px;
+ul {
+    list-style: none;
+    padding: 0;
 }
 
-#photo-gallery img {
-  width: 100px;
-  height: 100px;
-  margin: 10px;
-  border-radius: 5px;
+li {
+    margin: 5px 0;
 }
 
-.comparison img {
-  width: 150px;
-  height: 150px;
-  margin: 10px;
+/* Dashboard Styling */
+#dashboard {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: 1fr;
 }
 
-button {
-  padding: 10px 15px;
-  font-size: 16px;
-  background: #3498db;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+#weekly-summary, #progress-chart, #goal-progress, #achievements, #community-engagement {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-button:hover {
-  background: #1a73e8;
+#chart-container {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
 }
 
-.hidden {
-  display: none;
+/* Progress Bar */
+.progress-bar {
+    background-color: #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 20px;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.progress {
+    background-color: #4CAF50;
+    height: 100%;
+    text-align: center;
+    color: white;
+    line-height: 20px;
+    font-size: 14px;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #333;
+    color: white;
 }
