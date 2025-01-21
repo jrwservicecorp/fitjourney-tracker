@@ -1,5 +1,5 @@
-// JavaScript (v2.51)
-const appVersion = "v2.51";
+// JavaScript (v2.52)
+const appVersion = "v2.52";
 
 const chartColors = {
   default: { line: '#ff6f61', grid: '#cccccc', labels: '#ffffff' },
@@ -12,7 +12,6 @@ window.addEventListener('DOMContentLoaded', () => {
   setupNavigation();
   setupLogWeight();
   setupPhotoUpload();
-  setupThemeToggle();
   loadDashboard();
 });
 
@@ -36,10 +35,9 @@ function navigateTo(pageId) {
 
 // Weight Logging
 function setupLogWeight() {
-  document.getElementById('log-weight-btn').addEventListener('click', () => {
+  const logWeightBtn = document.getElementById('log-weight-btn');
+  logWeightBtn.addEventListener('click', () => {
     const weight = parseFloat(document.getElementById('weight-input').value);
-    const bodyFat = parseFloat(document.getElementById('body-fat').value);
-    const waist = parseFloat(document.getElementById('waist').value);
 
     if (isNaN(weight) || weight < 20 || weight > 500) {
       alert('Please enter a valid weight between 20 and 500 lbs.');
@@ -48,10 +46,33 @@ function setupLogWeight() {
 
     const today = new Date().toISOString().split('T')[0];
     const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
-    progressData.push({ date: today, weight, bodyFat, waist });
+    progressData.push({ date: today, weight });
     localStorage.setItem('progressData', JSON.stringify(progressData));
     alert('Entry logged successfully!');
     loadDashboard();
+  });
+}
+
+// Photo Upload
+function setupPhotoUpload() {
+  const uploadBtn = document.getElementById('upload-photo-btn');
+  const photoInput = document.getElementById('photo-upload');
+
+  uploadBtn.addEventListener('click', () => {
+    const file = photoInput.files[0];
+    if (!file) {
+      alert('Please select a photo to upload.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = event => {
+      const photos = JSON.parse(localStorage.getItem('photos')) || [];
+      photos.push({ date: new Date().toISOString().split('T')[0], src: event.target.result });
+      localStorage.setItem('photos', JSON.stringify(photos));
+      alert('Photo uploaded successfully!');
+    };
+    reader.readAsDataURL(file);
   });
 }
 
@@ -68,30 +89,23 @@ function loadDashboard() {
 
 function renderChart(data) {
   const ctx = document.getElementById('weight-chart').getContext('2d');
-  const chart = new Chart(ctx, {
+  new Chart(ctx, {
     type: 'line',
     data: {
       labels: data.map(entry => entry.date),
-      datasets: [{ 
-        label: 'Weight (lbs)', 
-        data: data.map(entry => entry.weight), 
-        borderColor: chartColors.default.line, 
-        fill: false 
-      }]
+      datasets: [{
+        label: 'Weight (lbs)',
+        data: data.map(entry => entry.weight),
+        borderColor: chartColors.default.line,
+        fill: false,
+      }],
     },
     options: {
       responsive: true,
       scales: {
         x: { grid: { color: chartColors.default.grid } },
-        y: { grid: { color: chartColors.default.grid } }
-      }
-    }
-  });
-}
-
-// Theme Toggle
-function setupThemeToggle() {
-  document.getElementById('theme-toggle').addEventListener('change', event => {
-    document.body.classList.toggle('dark-mode', event.target.checked);
+        y: { grid: { color: chartColors.default.grid } },
+      },
+    },
   });
 }
