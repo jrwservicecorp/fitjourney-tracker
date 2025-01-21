@@ -1,268 +1,58 @@
-// JavaScript (v2.58)
-const appVersion = "v2.58";
-
-let chartInstance = null;
-
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("app-version").textContent = appVersion;
-  setupNavigation();
-  setupLogWeight();
-  setupPhotoUpload();
-  loadDashboard();
-  setupCollapsibleSections();
-  setupThemeToggle();
-});
-
-// Navigation
-function setupNavigation() {
-  const links = document.querySelectorAll(".navbar a");
-  links.forEach((link) => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      navigateTo(link.getAttribute("data-page"));
-    });
-  });
-}
-
-function navigateTo(pageId) {
-  document.querySelectorAll(".page").forEach((page) => {
-    page.classList.toggle("hidden", page.id !== pageId);
-  });
-
-  if (pageId === "dashboard") loadDashboard();
-}
-
-// Load Dashboard
-function loadDashboard() {
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-
-  if (progressData.length > 0) {
-    document.getElementById("chart-placeholder").style.display = "none";
-    renderChart(progressData);
-  } else {
-    document.getElementById("chart-placeholder").style.display = "block";
-    renderChart(getPlaceholderData());
-  }
-
-  updateSummaryStats(progressData);
-}
-
-// Render Chart
-function renderChart(data) {
-  const ctx = document.getElementById("weight-chart").getContext("2d");
-
-  if (chartInstance) {
-    chartInstance.destroy();
-  }
-
-  chartInstance = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: data.map((entry) => entry.date),
-      datasets: [
-        {
-          label: "Weight (lbs)",
-          data: data.map((entry) => entry.weight),
-          borderColor: "#ff6f61",
-          backgroundColor: "rgba(255, 111, 97, 0.2)",
-          fill: true,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        tooltip: {
-          enabled: true,
-        },
-      },
-      scales: {
-        x: {
-          grid: {
-            color: "#cccccc",
-          },
-        },
-        y: {
-          grid: {
-            color: "#cccccc",
-          },
-          beginAtZero: true,
-        },
-      },
-    },
-  });
-}
-
-// Generate Placeholder Data
-function getPlaceholderData() {
-  const today = new Date();
-  const placeholderDates = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - (6 - i));
-    return date.toISOString().split("T")[0];
-  });
-
-  const placeholderWeights = [150, 152, 151, 153, 150, 148, 149];
-
-  return placeholderDates.map((date, index) => ({
-    date,
-    weight: placeholderWeights[index],
-  }));
-}
-
-// Update Summary Stats
-function updateSummaryStats(data) {
-  const avgWeight = data.length > 0
-    ? (data.reduce((sum, entry) => sum + entry.weight, 0) / data.length).toFixed(1)
-    : "--";
-
-  const currentStreak = calculateStreak(data);
-  const goalProgress = calculateGoalProgress(data);
-
-  document.getElementById("avg-weight").textContent = avgWeight;
-  document.getElementById("current-streak").textContent = currentStreak;
-  document.getElementById("goal-progress").textContent = `${goalProgress}%`;
-
-  const progressBar = document.getElementById("goal-progress-bar");
-  progressBar.style.width = `${goalProgress}%`;
-}
-
-// Calculate Logging Streak
-function calculateStreak(data) {
-  if (data.length === 0) return 0;
-
-  let streak = 1;
-  let prevDate = new Date(data[data.length - 1].date);
-
-  for (let i = data.length - 2; i >= 0; i--) {
-    const currDate = new Date(data[i].date);
-    if ((prevDate - currDate) / (1000 * 60 * 60 * 24) === 1) {
-      streak++;
-    } else {
-      break;
-    }
-    prevDate = currDate;
-  }
-
-  return streak;
-}
-
-// Calculate Goal Progress
-function calculateGoalProgress(data) {
-  const targetWeight = parseFloat(localStorage.getItem("targetWeight")) || 0;
-  if (data.length === 0 || !targetWeight) return 0;
-
-  const currentWeight = data[data.length - 1].weight;
-  const initialWeight = data[0].weight;
-
-  const progress = Math.max(
-    0,
-    Math.min(100, ((initialWeight - currentWeight) / (initialWeight - targetWeight)) * 100)
-  );
-
-  return progress.toFixed(1);
-}
-
-// Log Weight
-function setupLogWeight() {
-  const logWeightBtn = document.getElementById("log-weight-btn");
-  logWeightBtn.addEventListener("click", () => {
-    const weight = parseFloat(document.getElementById("weight-input").value);
-    const bodyFat = parseFloat(document.getElementById("body-fat").value);
-    const waist = parseFloat(document.getElementById("waist").value);
-
-    if (isNaN(weight) || weight < 20 || weight > 500) {
-      alert("Please enter a valid weight between 20 and 500 lbs.");
-      return;
-    }
-
-    const today = new Date().toISOString().split("T")[0];
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    progressData.push({ date: today, weight, bodyFat, waist });
-    localStorage.setItem("progressData", JSON.stringify(progressData));
-    alert("Entry logged successfully!");
-    loadDashboard();
-  });
-}
-
-// Photo Upload
-function setupPhotoUpload() {
-  const uploadBtn = document.getElementById("upload-photo-btn");
-  const photoInput = document.getElementById("photo-upload");
-  const descriptionInput = document.getElementById("photo-description");
-
-  uploadBtn.addEventListener("click", () => {
-    const file = photoInput.files[0];
-    const description = descriptionInput.value;
-
-    if (!file) {
-      alert("Please select a photo to upload.");
-      return;
-    }
-
-    // Create an object URL for the file
-    const photoUrl = URL.createObjectURL(file);
-
-    const photos = JSON.parse(localStorage.getItem("photos")) || [];
-    photos.push({
-      date: new Date().toISOString().split("T")[0],
-      src: photoUrl,
-      description,
-    });
-    localStorage.setItem("photos", JSON.stringify(photos));
-
-    alert("Photo uploaded successfully!");
-    descriptionInput.value = "";
-    photoInput.value = ""; // Clear file input
-    updatePhotoGallery();
-  });
-}
-
-// Update Photo Gallery
-function updatePhotoGallery() {
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  const gallery = document.getElementById("photo-gallery");
-  gallery.innerHTML = "";
-
-  if (photos.length === 0) {
-    gallery.innerHTML = '<p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>';
-    return;
-  }
-
-  photos.forEach((photo, index) => {
-    const photoEntry = document.createElement("div");
-    photoEntry.classList.add("photo-entry");
-    photoEntry.innerHTML = `
-      <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
-      <p>${photo.date}</p>
-      <p>${photo.description || ""}</p>
-      <button onclick="deletePhoto(${index})">Delete</button>
-    `;
-    gallery.appendChild(photoEntry);
-  });
-}
-
-function deletePhoto(index) {
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  photos.splice(index, 1);
-  localStorage.setItem("photos", JSON.stringify(photos));
-  updatePhotoGallery();
-}
-
-// Collapsible Sections
-function setupCollapsibleSections() {
-  document.querySelectorAll(".toggle-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const content = btn.nextElementSibling;
-      content.classList.toggle("open");
-    });
-  });
-}
-
-// Theme Toggle
-function setupThemeToggle() {
-  const btn = document.getElementById("theme-toggle-btn");
-  btn.addEventListener("click", () => {
-    document.body.classList.toggle("dark-theme");
-  });
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitJourney Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>FitJourney Tracker</h1>
+    <p>App Version: <span id="app-version">v2.59</span></p>
+  </header>
+  <nav class="navbar" role="navigation" aria-label="Main Navigation">
+    <a href="#" data-page="home"><i class="fas fa-home"></i> Home</a>
+    <a href="#" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="#" data-page="settings"><i class="fas fa-cog"></i> Settings</a>
+    <a href="#" data-page="about"><i class="fas fa-info-circle"></i> About</a>
+  </nav>
+  <div id="main-app">
+    <section id="dashboard" class="page hidden">
+      <div class="summary-section">
+        <div class="card">
+          <h3>Your Weight Trends</h3>
+          <canvas id="weight-chart"></canvas>
+          <p class="placeholder" id="chart-placeholder">Start logging your weight to see trends here!</p>
+        </div>
+        <div class="card">
+          <h3>Summary</h3>
+          <p>Average Weight: <span id="avg-weight">--</span> lbs</p>
+          <p>Current Streak: <span id="current-streak">--</span> days</p>
+          <p>Goal Progress: <span id="goal-progress">--%</span></p>
+          <div class="progress-bar">
+            <div class="progress" id="goal-progress-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="toggle-btn" id="log-weight-toggle">Log Your Weight</button>
+          <button class="toggle-btn" id="track-progress-toggle">Track Your Progress</button>
+        </div>
+      </div>
+      <div class="photos-section card">
+        <h3>Photos</h3>
+        <input type="file" id="photo-upload" accept="image/*">
+        <input type="date" id="photo-date">
+        <input type="text" id="photo-description" placeholder="Add a description (optional)">
+        <button id="upload-photo-btn">Upload Photo</button>
+        <div id="photo-gallery">
+          <p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script src="script.js" defer></script>
+</body>
+</html>
