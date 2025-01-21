@@ -1,4 +1,4 @@
-const appVersion = "v2.40";
+const appVersion = "v2.41";
 
 // Initialize App
 window.addEventListener('DOMContentLoaded', () => {
@@ -10,8 +10,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // Setup Navigation
 function setupNavigation() {
-  const links = document.querySelectorAll('.navbar a');
-  links.forEach((link) => {
+  document.querySelectorAll('.navbar a').forEach((link) => {
     link.addEventListener('click', (event) => {
       event.preventDefault();
       const pageId = link.getAttribute('data-page');
@@ -23,13 +22,23 @@ function setupNavigation() {
 // Navigate Between Pages
 function navigateTo(pageId) {
   const pages = document.querySelectorAll('.page');
-  pages.forEach(page => page.classList.add('hidden')); // Hide all pages
-  const targetPage = document.getElementById(pageId);
-  if (targetPage) {
-    targetPage.classList.remove('hidden'); // Show the selected page
-    if (pageId === 'dashboard') loadDashboard();
-  } else {
+  let pageFound = false; // Track if a valid page is found
+  pages.forEach(page => {
+    if (page.id === pageId) {
+      page.classList.remove('hidden'); // Show the matching page
+      pageFound = true;
+    } else {
+      page.classList.add('hidden'); // Hide other pages
+    }
+  });
+
+  if (!pageFound) {
     console.error(`Page "${pageId}" not found.`);
+  }
+
+  // Specific logic for the Dashboard page
+  if (pageId === 'dashboard') {
+    loadDashboard();
   }
 }
 
