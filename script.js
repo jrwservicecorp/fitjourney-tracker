@@ -1,204 +1,98 @@
-// JavaScript (v2.54)
-const appVersion = "v2.54";
-
-const chartColors = {
-  default: { line: '#ff6f61', grid: '#cccccc', labels: '#ffffff' },
-  dark: { line: '#3498db', grid: '#666666', labels: '#f5f5f5' }
-};
-
-// Initialize App
-window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('app-version').textContent = appVersion;
-  setupNavigation();
-  setupLogWeight();
-  setupPhotoUpload();
-  setupPhotoComparison();
-  setupPhotoFilter();
-  setupCustomDateComparison();
-  loadDashboard();
-});
-
-// Navigation
-function setupNavigation() {
-  const links = document.querySelectorAll('.navbar a');
-  links.forEach(link => {
-    link.addEventListener('click', event => {
-      event.preventDefault();
-      navigateTo(link.getAttribute('data-page'));
-    });
-  });
+/* CSS (v2.55) */
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+  color: #f5f5f5;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-function navigateTo(pageId) {
-  document.querySelectorAll('.page').forEach(page => {
-    page.style.display = page.id === pageId ? 'block' : 'none';
-  });
-  if (pageId === 'dashboard') loadDashboard();
+.navbar {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  background: #2c3e50;
 }
 
-// Weight Logging
-function setupLogWeight() {
-  const logWeightBtn = document.getElementById('log-weight-btn');
-  logWeightBtn.addEventListener('click', () => {
-    const weight = parseFloat(document.getElementById('weight-input').value);
-
-    if (isNaN(weight) || weight < 20 || weight > 500) {
-      alert('Please enter a valid weight between 20 and 500 lbs.');
-      return;
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
-    progressData.push({ date: today, weight });
-    localStorage.setItem('progressData', JSON.stringify(progressData));
-    alert('Entry logged successfully!');
-    loadDashboard();
-  });
+.navbar a {
+  text-decoration: none;
+  color: white;
+  padding: 10px 15px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 5px;
+  transition: background-color 0.3s;
 }
 
-// Photo Upload
-function setupPhotoUpload() {
-  const uploadBtn = document.getElementById('upload-photo-btn');
-  const photoInput = document.getElementById('photo-upload');
-  const descriptionInput = document.getElementById('photo-description');
-
-  uploadBtn.addEventListener('click', () => {
-    const file = photoInput.files[0];
-    const description = descriptionInput.value;
-
-    if (!file) {
-      alert('Please select a photo to upload.');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = event => {
-      const photos = JSON.parse(localStorage.getItem('photos')) || [];
-      photos.push({
-        date: new Date().toISOString().split('T')[0],
-        src: event.target.result,
-        description,
-      });
-      localStorage.setItem('photos', JSON.stringify(photos));
-      alert('Photo uploaded successfully!');
-      descriptionInput.value = '';
-      updatePhotoGallery(photos);
-    };
-    reader.readAsDataURL(file);
-  });
+.navbar a:hover {
+  background-color: #3498db;
 }
 
-// Update Photo Gallery
-function updatePhotoGallery(filteredPhotos = null) {
-  const photos = filteredPhotos || JSON.parse(localStorage.getItem('photos')) || [];
-  const gallery = document.getElementById('photo-gallery');
-  gallery.innerHTML = '';
-
-  if (photos.length === 0) {
-    gallery.innerHTML = '<p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>';
-    return;
-  }
-
-  photos.forEach((photo, index) => {
-    const photoEntry = document.createElement('div');
-    photoEntry.classList.add('photo-entry');
-    photoEntry.innerHTML = `
-      <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
-      <p>${photo.date}</p>
-      <p>${photo.description || ''}</p>
-      <button onclick="deletePhoto(${index})">Delete</button>
-    `;
-    gallery.appendChild(photoEntry);
-  });
+.page.hidden {
+  display: none;
 }
 
-function deletePhoto(index) {
-  const photos = JSON.parse(localStorage.getItem('photos')) || [];
-  photos.splice(index, 1);
-  localStorage.setItem('photos', JSON.stringify(photos));
-  updatePhotoGallery();
+.card {
+  border-radius: 10px;
+  background: #2c3e50;
+  padding: 20px;
+  margin: 20px 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-// Photo Filter
-function setupPhotoFilter() {
-  const filterInput = document.getElementById('filter-tags');
-  const filterButton = document.getElementById('apply-filter-btn');
-
-  filterButton.addEventListener('click', () => {
-    const tag = filterInput.value.toLowerCase();
-    const photos = JSON.parse(localStorage.getItem('photos')) || [];
-    const filteredPhotos = photos.filter(photo => (photo.description || '').toLowerCase().includes(tag));
-    updatePhotoGallery(filteredPhotos);
-  });
+#weight-chart {
+  width: 100%;
+  max-height: 400px;
 }
 
-// Custom Date Range for Comparison
-function setupCustomDateComparison() {
-  const startDateInput = document.getElementById('date-range-start');
-  const endDateInput = document.getElementById('date-range-end');
-  const comparisonResult = document.getElementById('comparison-result');
-
-  document.getElementById('generate-comparison-btn').addEventListener('click', () => {
-    const photos = JSON.parse(localStorage.getItem('photos')) || [];
-    const startDate = new Date(startDateInput.value);
-    const endDate = new Date(endDateInput.value);
-
-    if (isNaN(startDate) || isNaN(endDate) || startDate >= endDate) {
-      alert('Please select a valid date range.');
-      return;
-    }
-
-    const beforePhoto = photos.find(photo => new Date(photo.date) >= startDate);
-    const afterPhoto = photos.reverse().find(photo => new Date(photo.date) <= endDate);
-
-    if (!beforePhoto || !afterPhoto) {
-      alert('No photos available for the selected date range.');
-      return;
-    }
-
-    comparisonResult.innerHTML = `
-      <div class="comparison-photo"><img src="${beforePhoto.src}" alt="Before"></div>
-      <div class="comparison-photo"><img src="${afterPhoto.src}" alt="After"></div>
-    `;
-  });
+.collapsible-section {
+  margin-top: 20px;
 }
 
-// Dashboard
-function loadDashboard() {
-  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
-  if (progressData.length > 0) {
-    document.getElementById('chart-placeholder').style.display = 'none';
-    renderChart(progressData);
-  } else {
-    document.getElementById('chart-placeholder').style.display = 'block';
-  }
+.toggle-btn {
+  display: block;
+  width: 100%;
+  background: #3498db;
+  color: white;
+  padding: 10px;
+  text-align: left;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
 }
 
-let chartInstance = null;
-function renderChart(data) {
-  const ctx = document.getElementById('weight-chart').getContext('2d');
+.collapsible-content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease-out;
+}
 
-  if (chartInstance) {
-    chartInstance.destroy();
-  }
+.collapsible-content.open {
+  max-height: 300px; /* Adjust based on content size */
+}
 
-  chartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.map(entry => entry.date),
-      datasets: [{
-        label: 'Weight (lbs)',
-        data: data.map(entry => entry.weight),
-        borderColor: chartColors.default.line,
-        fill: false,
-      }],
-    },
-    options: {
-      responsive: true,
-      scales: {
-        x: { grid: { color: chartColors.default.grid } },
-        y: { grid: { color: chartColors.default.grid } },
-      },
-    },
-  });
+.progress-bar {
+  width: 100%;
+  background: #ccc;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.progress {
+  height: 10px;
+  background: #ff6f61;
+}
+
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #3498db;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
