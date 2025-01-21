@@ -1,66 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FitJourney Tracker v2.50</title>
-    <link rel="stylesheet" href="styles.css">
-    <script defer src="script.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitJourney Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <header>
-        <h1>FitJourney Tracker</h1>
-        <p id="app-version">Version 2.50</p>
-    </header>
-    <main>
-        <section id="dashboard">
-            <h2>Dashboard</h2>
-            <div id="weekly-summary">
-                <h3>Weekly Summary</h3>
-                <ul>
-                    <li>Total Weight Change: <span id="total-weight-change">0 lbs</span></li>
-                    <li>Average Daily Activity: <span id="average-daily-activity">0 mins</span></li>
-                    <li>Longest Streak: <span id="longest-streak">0 days</span></li>
-                </ul>
-            </div>
-
-            <div id="progress-chart">
-                <h3>Progress Chart</h3>
-                <div id="chart-container">Loading chart...</div>
-                <div id="chart-filters">
-                    <label for="date-range">Date Range:</label>
-                    <select id="date-range">
-                        <option value="7">Last 7 Days</option>
-                        <option value="30">Last 30 Days</option>
-                        <option value="custom">Custom</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="goal-progress">
-                <h3>Goal Progress</h3>
-                <div class="progress-bar">
-                    <div class="progress" style="width: 40%;">40%</div>
-                </div>
-            </div>
-
-            <div id="achievements">
-                <h3>Achievements</h3>
-                <ul>
-                    <li><img src="icons/trophy_first.png" alt="Trophy"> First 5 lbs lost - Jan 2025</li>
-                    <li><img src="icons/trophy_7day.png" alt="Trophy"> Logged 30 days consecutively - Feb 2025</li>
-                </ul>
-            </div>
-
-            <div id="community-engagement">
-                <h3>Community Engagement</h3>
-                <p><a href="#">See likes and comments on your progress pictures</a></p>
-                <p><a href="#">Explore trending progress stories</a></p>
-            </div>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2025 FitJourney Tracker</p>
-    </footer>
+  <header>
+    <h1>FitJourney Tracker</h1>
+    <p>App Version: <span id="app-version">v2.48</span></p>
+  </header>
+  <div class="navbar">
+    <a href="#" data-page="home"><i class="fas fa-home"></i> Home</a>
+    <a href="#" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="#" data-page="settings"><i class="fas fa-cog"></i> Settings</a>
+    <a href="#" data-page="about"><i class="fas fa-info-circle"></i> About</a>
+  </div>
+  <div id="main-app">
+    <div id="home" class="page">
+      <h2>Welcome to FitJourney Tracker</h2>
+      <p>Start tracking your fitness journey today!</p>
+    </div>
+    <div id="dashboard" class="page hidden">
+      <h2>Dashboard</h2>
+      <div id="log-weight-section">
+        <h3>Log Your Weight</h3>
+        <input type="number" id="weight-input" placeholder="Enter your weight (lbs)">
+        <label for="body-fat">Body Fat (%):</label>
+        <input type="number" id="body-fat" placeholder="Enter body fat percentage">
+        <label for="waist">Waist (in):</label>
+        <input type="number" id="waist" placeholder="Enter waist measurement">
+        <button id="log-weight-btn">Log Entry</button>
+      </div>
+      <div id="trophy-case">
+        <h3>Your Achievements</h3>
+        <div id="trophies"></div>
+      </div>
+      <div id="photo-progress">
+        <h3>Track Your Progress Visually</h3>
+        <input type="file" id="photo-upload" accept="image/*">
+        <button id="upload-photo-btn">Upload Photo</button>
+        <div id="photo-gallery"></div>
+      </div>
+      <div id="compare-photos">
+        <h3>Before & After</h3>
+        <select id="photo-select-before"></select>
+        <select id="photo-select-after"></select>
+        <button id="generate-comparison-btn">Generate Comparison</button>
+        <div id="comparison-result"></div>
+      </div>
+      <div id="weight-chart-container"></div>
+    </div>
+    <div id="settings" class="page hidden">
+      <h2>Settings</h2>
+      <p>Set your target weight:</p>
+      <input type="number" id="target-weight-input" placeholder="Enter target weight (lbs)">
+      <button id="save-target-weight-btn">Save Target</button>
+    </div>
+    <div id="about" class="page hidden">
+      <h2>About FitJourney Tracker</h2>
+      <p>FitJourney Tracker helps you visualize your fitness progress and stay motivated.</p>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
