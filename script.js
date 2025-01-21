@@ -1,4 +1,4 @@
-const appVersion = "v2.39";
+const appVersion = "v2.40";
 
 // Initialize App
 window.addEventListener('DOMContentLoaded', () => {
@@ -10,7 +10,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // Setup Navigation
 function setupNavigation() {
-  document.querySelectorAll('.navbar a').forEach((link) => {
+  const links = document.querySelectorAll('.navbar a');
+  links.forEach((link) => {
     link.addEventListener('click', (event) => {
       event.preventDefault();
       const pageId = link.getAttribute('data-page');
@@ -22,10 +23,10 @@ function setupNavigation() {
 // Navigate Between Pages
 function navigateTo(pageId) {
   const pages = document.querySelectorAll('.page');
-  pages.forEach(page => page.classList.add('hidden'));
+  pages.forEach(page => page.classList.add('hidden')); // Hide all pages
   const targetPage = document.getElementById(pageId);
   if (targetPage) {
-    targetPage.classList.remove('hidden');
+    targetPage.classList.remove('hidden'); // Show the selected page
     if (pageId === 'dashboard') loadDashboard();
   } else {
     console.error(`Page "${pageId}" not found.`);
