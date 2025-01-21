@@ -11,7 +11,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.53</span></p>
+    <p>App Version: <span id="app-version">v2.54</span></p>
   </header>
   <nav class="navbar" role="navigation" aria-label="Main Navigation">
     <a href="#" data-page="home" aria-label="Home"><i class="fas fa-home"></i> Home</a>
@@ -42,6 +42,11 @@
         <input type="file" id="photo-upload" accept="image/*">
         <input type="text" id="photo-description" placeholder="Add a description (optional)">
         <button id="upload-photo-btn">Upload Photo</button>
+        <div id="photo-filter">
+          <label for="filter-tags">Filter by Tag:</label>
+          <input type="text" id="filter-tags" placeholder="Enter a tag">
+          <button id="apply-filter-btn">Apply Filter</button>
+        </div>
         <div id="photo-gallery">
           <p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>
         </div>
@@ -49,11 +54,13 @@
 
       <article id="compare-photos">
         <h3>Before & After</h3>
-        <select id="photo-select-before"></select>
-        <select id="photo-select-after"></select>
+        <label for="date-range-start">Start Date:</label>
+        <input type="date" id="date-range-start">
+        <label for="date-range-end">End Date:</label>
+        <input type="date" id="date-range-end">
         <button id="generate-comparison-btn">Generate Comparison</button>
         <div id="comparison-result">
-          <p class="placeholder">Select two photos to generate a comparison.</p>
+          <p class="placeholder">Select a date range to generate a comparison.</p>
         </div>
       </article>
 
