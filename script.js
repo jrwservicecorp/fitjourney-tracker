@@ -1,4 +1,4 @@
-const appVersion = "v2.47";
+const appVersion = "v2.49";
 
 const chartColors = {
   default: { line: '#ff6f61', grid: '#cccccc', labels: '#ffffff' },
@@ -10,6 +10,8 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('app-version').textContent = appVersion;
   setupNavigation();
   setupLogWeight();
+  setupPhotoUpload();
+  setupPhotoComparison();
   setupDateFilter();
   setupExportButton();
   setupThemeToggle();
@@ -47,7 +49,7 @@ function navigateTo(pageId) {
   }
 }
 
-// Setup Log Weight Functionality
+// Log Weight and Metrics
 function setupLogWeight() {
   const logWeightBtn = document.getElementById('log-weight-btn');
   const weightInput = document.getElementById('weight-input');
@@ -75,63 +77,21 @@ function setupLogWeight() {
   });
 }
 
-// Setup Date Filter
-function setupDateFilter() {
-  const filterBtn = document.getElementById('filter-btn');
-  filterBtn.addEventListener('click', () => {
-    const startDate = document.getElementById('start-date').value;
-    const endDate = document.getElementById('end-date').value;
-    const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
+// Trophy Case
+function updateTrophies() {
+  const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
+  const trophies = document.getElementById('trophies');
+  trophies.innerHTML = '';
 
-    const filteredData = progressData.filter(entry => {
-      return (!startDate || entry.date >= startDate) && (!endDate || entry.date <= endDate);
-    });
-
-    updateChart(filteredData);
-  });
-}
-
-// Setup Export Button
-function setupExportButton() {
-  const exportBtn = document.getElementById('export-btn');
-  exportBtn.addEventListener('click', () => {
-    const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
-    const csvContent = 'Date,Weight,Body Fat,Waist\n' + 
-      progressData.map(entry => `${entry.date},${entry.weight},${entry.bodyFat || ''},${entry.waist || ''}`).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'weight_progress.csv';
-    link.click();
-  });
-}
-
-// Setup Theme Toggle
-function setupThemeToggle() {
-  const themeToggleBtn = document.getElementById('theme-toggle-btn');
-  themeToggleBtn.addEventListener('click', () => {
-    const currentTheme = localStorage.getItem('chartTheme') || 'default';
-    const newTheme = currentTheme === 'default' ? 'dark' : 'default';
-    localStorage.setItem('chartTheme', newTheme);
-    loadDashboard();
-  });
-}
-
-// Setup Target Weight
-function setupTargetWeight() {
-  const saveTargetWeightBtn = document.getElementById('save-target-weight-btn');
-  const targetWeightInput = document.getElementById('target-weight-input');
-  saveTargetWeightBtn.addEventListener('click', () => {
-    const targetWeight = parseFloat(targetWeightInput.value);
-    if (isNaN(targetWeight) || targetWeight <= 0) {
-      alert('Please enter a valid target weight.');
-      return;
-    }
-    localStorage.setItem('targetWeight', targetWeight);
-    alert('Target weight saved successfully!');
-    targetWeightInput.value = '';
-    loadDashboard();
-  });
+  if (progressData.length > 0) {
+    trophies.innerHTML += '<img src="icons/trophy_first.png" alt="First Entry Trophy" title="First Weight Logged">';
+  }
+  if (progressData.length >= 7) {
+    trophies.innerHTML += '<img src="icons/trophy_7day.png" alt="7-Day Streak Trophy" title="7-Day Logging Streak">';
+  }
+  if (progressData.length >= 30) {
+    trophies.innerHTML += '<img src="icons/trophy_30day.png" alt="30-Day Streak Trophy" title="30-Day Logging Streak">';
+  }
 }
 
 // Update Milestones
@@ -173,67 +133,40 @@ function updateStreaks() {
   document.getElementById('longest-streak').textContent = `Longest Streak: ${longestStreak} days`;
 }
 
-// Update Chart
-function updateChart(data) {
-  const currentTheme = localStorage.getItem('chartTheme') || 'default';
-  const theme = chartColors[currentTheme];
-  const targetWeight = parseFloat(localStorage.getItem('targetWeight'));
+// Photo Upload and Gallery
+function setupPhotoUpload() {
+  const photoUploadBtn = document.getElementById('upload-photo-btn');
+  const photoInput = document.getElementById('photo-upload');
 
-  const chartContainer = document.getElementById('weight-chart-container');
-  chartContainer.innerHTML = '<canvas id="weight-chart"></canvas>';
-  const ctx = document.getElementById('weight-chart').getContext('2d');
-  const datasets = [{
-    label: 'Weight Progress',
-    data: data.map(entry => entry.weight),
-    borderColor: theme.line,
-    borderWidth: 2,
-    pointBackgroundColor: theme.line
-  }];
-
-  if (!isNaN(targetWeight)) {
-    datasets.push({
-      label: 'Target Weight',
-      data: new Array(data.length).fill(targetWeight),
-      borderColor: '#ff0000',
-      borderDash: [5, 5],
-      fill: false
-    });
-  }
-
-  if (data.some(entry => entry.bodyFat)) {
-    datasets.push({
-      label: 'Body Fat (%)',
-      data: data.map(entry => entry.bodyFat || null),
-      borderColor: '#00ff00',
-      fill: false
-    });
-  }
-
-  if (data.some(entry => entry.waist)) {
-    datasets.push({
-      label: 'Waist (in)',
-      data: data.map(entry => entry.waist || null),
-      borderColor: '#ffa500',
-      fill: false
-    });
-  }
-
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.map(entry => entry.date),
-      datasets: datasets
-    },
-    options: {
-      responsive: true,
-      scales: {
-        x: { grid: { color: theme.grid }, ticks: { color: theme.labels } },
-        y: { grid: { color: theme.grid }, ticks: { color: theme.labels } }
-      },
-      plugins: {
-        legend: { labels: { color: theme.labels } }
-      }
+  photoUploadBtn.addEventListener('click', () => {
+    const file = photoInput.files[0];
+    if (!file) {
+      alert('Please select a photo to upload.');
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const photos = JSON.parse(localStorage.getItem('photos')) || [];
+      photos.push({ date: new Date().toISOString().split('T')[0], src: event.target.result });
+      localStorage.setItem('photos', JSON.stringify(photos));
+      alert('Photo uploaded successfully!');
+      updatePhotoGallery();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function updatePhotoGallery() {
+  const photos = JSON.parse(localStorage.getItem('photos')) || [];
+  const gallery = document.getElementById('photo-gallery');
+  gallery.innerHTML = '';
+
+  photos.forEach(photo => {
+    gallery.innerHTML += `<div class="photo-entry">
+      <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
+      <p>${photo.date}</p>
+    </div>`;
   });
 }
 
@@ -243,4 +176,6 @@ function loadDashboard() {
   updateChart(progressData);
   updateMilestones();
   updateStreaks();
+  updateTrophies();
+  updatePhotoGallery();
 }
