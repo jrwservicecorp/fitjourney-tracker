@@ -1,14 +1,12 @@
 const appVersion = "v2.36";
 
-// Set Version in Header
-document.getElementById('app-version').textContent = appVersion;
-
 // Initialize App
-window.onload = () => {
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('app-version').textContent = appVersion;
   setupNavigation();
-  navigateTo('home');
   setupLogWeight();
-};
+  navigateTo('home');
+});
 
 // Setup Navigation
 function setupNavigation() {
@@ -23,14 +21,25 @@ function setupNavigation() {
 
 // Navigate Between Pages
 function navigateTo(pageId) {
-  document.querySelectorAll('.page').forEach((page) => page.classList.add('hidden'));
-  document.getElementById(pageId).classList.remove('hidden');
+  const pages = document.querySelectorAll('.page');
+  pages.forEach((page) => page.classList.add('hidden'));
+  const targetPage = document.getElementById(pageId);
+  if (targetPage) {
+    targetPage.classList.remove('hidden');
+  } else {
+    console.error(`Page "${pageId}" not found.`);
+  }
 }
 
 // Setup Log Weight Functionality
 function setupLogWeight() {
   const logWeightBtn = document.getElementById('log-weight-btn');
   const weightInput = document.getElementById('weight-input');
+
+  if (!logWeightBtn || !weightInput) {
+    console.error('Log Weight button or input not found.');
+    return;
+  }
 
   logWeightBtn.addEventListener('click', () => {
     const weight = parseFloat(weightInput.value);
