@@ -1,4 +1,4 @@
-const appVersion = "v2.41";
+const appVersion = "v2.42";
 
 // Initialize App
 window.addEventListener('DOMContentLoaded', () => {
@@ -10,10 +10,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // Setup Navigation
 function setupNavigation() {
-  document.querySelectorAll('.navbar a').forEach((link) => {
+  const links = document.querySelectorAll('.navbar a');
+  links.forEach((link) => {
+    const pageId = link.getAttribute('data-page');
+    console.log(`Setting up navigation for: ${pageId}`); // Debug log
     link.addEventListener('click', (event) => {
       event.preventDefault();
-      const pageId = link.getAttribute('data-page');
       navigateTo(pageId);
     });
   });
@@ -21,11 +23,14 @@ function setupNavigation() {
 
 // Navigate Between Pages
 function navigateTo(pageId) {
+  console.log(`Navigating to page: ${pageId}`); // Log the page being navigated to
   const pages = document.querySelectorAll('.page');
-  let pageFound = false; // Track if a valid page is found
+  let pageFound = false;
+
   pages.forEach(page => {
     if (page.id === pageId) {
       page.classList.remove('hidden'); // Show the matching page
+      console.log(`Showing page: ${page.id}`);
       pageFound = true;
     } else {
       page.classList.add('hidden'); // Hide other pages
