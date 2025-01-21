@@ -1,5 +1,7 @@
-// JavaScript (v2.59)
-const appVersion = "v2.59";
+// JavaScript (v2.58)
+const appVersion = "v2.58";
+
+let chartInstance = null;
 
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
@@ -7,10 +9,10 @@ window.addEventListener("DOMContentLoaded", () => {
   setupLogWeight();
   setupPhotoUpload();
   loadDashboard();
-  setupToggleButtons();
+  setupCollapsibleSections();
+  setupThemeToggle();
 });
 
-// Navigation
 function setupNavigation() {
   const links = document.querySelectorAll(".navbar a");
   links.forEach((link) => {
@@ -29,9 +31,9 @@ function navigateTo(pageId) {
   if (pageId === "dashboard") loadDashboard();
 }
 
-// Dashboard
 function loadDashboard() {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+
   if (progressData.length > 0) {
     document.getElementById("chart-placeholder").style.display = "none";
     renderChart(progressData);
@@ -41,26 +43,79 @@ function loadDashboard() {
   }
 }
 
-// Render Chart
 function renderChart(data) {
-  // Chart rendering logic
+  const ctx = document.getElementById("weight-chart").getContext("2d");
+
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  chartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: data.map((entry) => entry.date),
+      datasets: [
+        {
+          label: "Weight (lbs)",
+          data: data.map((entry) => entry.weight),
+          borderColor: "#ff6f61",
+          backgroundColor: "rgba(255, 111, 97, 0.2)",
+          fill: true,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        tooltip: {
+          enabled: true,
+        },
+      },
+      scales: {
+        x: {
+          grid: {
+            color: "#cccccc",
+          },
+        },
+        y: {
+          grid: {
+            color: "#cccccc",
+          },
+          beginAtZero: true,
+        },
+      },
+    },
+  });
 }
 
-// Log Weight
 function setupLogWeight() {
-  // Log weight functionality
+  const logWeightBtn = document.getElementById("log-weight-btn");
+  logWeightBtn.addEventListener("click", () => {
+    const weight = parseFloat(document.getElementById("weight-input").value);
+    const bodyFat = parseFloat(document.getElementById("body-fat").value);
+    const waist = parseFloat(document.getElementById("waist").value);
+
+    if (isNaN(weight) || weight < 20 || weight > 500) {
+      alert("Please enter a valid weight between 20 and 500 lbs.");
+      return;
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    progressData.push({ date: today, weight, bodyFat, waist });
+    localStorage.setItem("progressData", JSON.stringify(progressData));
+    alert("Entry logged successfully!");
+    loadDashboard();
+  });
 }
 
-// Photo Upload
 function setupPhotoUpload() {
   const uploadBtn = document.getElementById("upload-photo-btn");
   const photoInput = document.getElementById("photo-upload");
-  const dateInput = document.getElementById("photo-date");
   const descriptionInput = document.getElementById("photo-description");
 
   uploadBtn.addEventListener("click", () => {
     const file = photoInput.files[0];
-    const date = dateInput.value || new Date().toISOString().split("T")[0];
     const description = descriptionInput.value;
 
     if (!file) {
@@ -72,14 +127,13 @@ function setupPhotoUpload() {
 
     const photos = JSON.parse(localStorage.getItem("photos")) || [];
     photos.push({
-      date,
+      date: new Date().toISOString().split("T")[0],
       src: photoUrl,
       description,
     });
     localStorage.setItem("photos", JSON.stringify(photos));
 
     alert("Photo uploaded successfully!");
-    dateInput.value = "";
     descriptionInput.value = "";
     photoInput.value = "";
     updatePhotoGallery();
@@ -87,18 +141,6 @@ function setupPhotoUpload() {
 }
 
 function updatePhotoGallery() {
-  // Update photo gallery logic
-}
-
-function setupToggleButtons() {
-  const logWeightToggle = document.getElementById("log-weight-toggle");
-  const trackProgressToggle = document.getElementById("track-progress-toggle");
-
-  logWeightToggle.addEventListener("click", () => {
-    // Toggle log weight section
-  });
-
-  trackProgressToggle.addEventListener("click", () => {
-    // Toggle track progress section
-  });
-}
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  const gallery = document.getElementById("photo-gallery");
+  gallery.innerHTML =
