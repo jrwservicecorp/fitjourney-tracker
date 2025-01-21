@@ -1,4 +1,4 @@
-/* CSS (v2.52) */
+/* CSS (v2.53) */
 body {
   font-family: 'Poppins', Arial, sans-serif;
   margin: 0;
@@ -47,4 +47,36 @@ body {
   font-style: italic;
   color: #aaa;
   text-align: center;
+}
+
+.photo-entry {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.photo-entry img {
+  max-width: 100px;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
+.photo-entry button {
+  margin-top: 5px;
+  background: #ff6f61;
+}
+
+.photo-entry button:hover {
+  background: #e6504b;
+}
+
+.comparison-photo {
+  display: inline-block;
+  margin: 10px;
+}
+
+.comparison-photo img {
+  max-width: 200px;
+  height: auto;
+  border: 2px solid #3498db;
 }
