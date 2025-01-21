@@ -11,7 +11,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.54</span></p>
+    <p>App Version: <span id="app-version">v2.55</span></p>
   </header>
   <nav class="navbar" role="navigation" aria-label="Main Navigation">
     <a href="#" data-page="home" aria-label="Home"><i class="fas fa-home"></i> Home</a>
@@ -20,57 +20,51 @@
     <a href="#" data-page="about" aria-label="About"><i class="fas fa-info-circle"></i> About</a>
   </nav>
   <div id="main-app">
-    <section id="home" class="page">
-      <h2>Welcome to FitJourney Tracker</h2>
-      <p>Start tracking your fitness journey today!</p>
-    </section>
-
     <section id="dashboard" class="page hidden">
       <h2>Dashboard</h2>
-      <article id="log-weight-section">
-        <h3>Log Your Weight</h3>
-        <input type="number" id="weight-input" placeholder="Enter your weight (lbs)">
-        <label for="body-fat">Body Fat (%):</label>
-        <input type="number" id="body-fat" placeholder="Enter body fat percentage">
-        <label for="waist">Waist (in):</label>
-        <input type="number" id="waist" placeholder="Enter waist measurement">
-        <button id="log-weight-btn">Log Entry</button>
-      </article>
-
-      <article id="photo-progress">
-        <h3>Track Your Progress Visually</h3>
-        <input type="file" id="photo-upload" accept="image/*">
-        <input type="text" id="photo-description" placeholder="Add a description (optional)">
-        <button id="upload-photo-btn">Upload Photo</button>
-        <div id="photo-filter">
-          <label for="filter-tags">Filter by Tag:</label>
-          <input type="text" id="filter-tags" placeholder="Enter a tag">
-          <button id="apply-filter-btn">Apply Filter</button>
-        </div>
-        <div id="photo-gallery">
-          <p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>
-        </div>
-      </article>
-
-      <article id="compare-photos">
-        <h3>Before & After</h3>
-        <label for="date-range-start">Start Date:</label>
-        <input type="date" id="date-range-start">
-        <label for="date-range-end">End Date:</label>
-        <input type="date" id="date-range-end">
-        <button id="generate-comparison-btn">Generate Comparison</button>
-        <div id="comparison-result">
-          <p class="placeholder">Select a date range to generate a comparison.</p>
-        </div>
-      </article>
-
-      <div id="weight-chart-container">
+      
+      <div class="card">
         <h3>Your Weight Trends</h3>
         <canvas id="weight-chart"></canvas>
         <p class="placeholder" id="chart-placeholder">Start logging your weight to see trends here!</p>
       </div>
+
+      <div id="summary-stats" class="card">
+        <h3>Summary</h3>
+        <p>Average Weight: <span id="avg-weight">--</span> lbs</p>
+        <p>Current Streak: <span id="current-streak">--</span> days</p>
+        <p>Goal Progress: <span id="goal-progress">--%</span></p>
+        <div class="progress-bar">
+          <div class="progress" id="goal-progress-bar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="collapsible-section card">
+        <button class="toggle-btn">Log Your Weight</button>
+        <div class="collapsible-content">
+          <input type="number" id="weight-input" placeholder="Enter your weight (lbs)">
+          <label for="body-fat">Body Fat (%):</label>
+          <input type="number" id="body-fat" placeholder="Enter body fat percentage">
+          <label for="waist">Waist (in):</label>
+          <input type="number" id="waist" placeholder="Enter waist measurement">
+          <button id="log-weight-btn">Log Entry</button>
+        </div>
+      </div>
+
+      <div class="collapsible-section card">
+        <button class="toggle-btn">Track Your Progress Visually</button>
+        <div class="collapsible-content">
+          <input type="file" id="photo-upload" accept="image/*">
+          <input type="text" id="photo-description" placeholder="Add a description (optional)">
+          <button id="upload-photo-btn">Upload Photo</button>
+          <div id="photo-gallery">
+            <p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>
+          </div>
+        </div>
+      </div>
     </section>
   </div>
+  <button id="theme-toggle-btn" class="theme-toggle">Toggle Theme</button>
   <script src="script.js" defer></script>
 </body>
 </html>
