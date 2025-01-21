@@ -1,3 +1,4 @@
+/* General Styles */
 body {
   font-family: 'Poppins', Arial, sans-serif;
   margin: 0;
@@ -27,20 +28,24 @@ body {
   background-color: #3498db;
 }
 
-#log-weight-section,
-#date-filter,
-#milestones,
-#weekly-summary,
-#weight-chart-container {
-  margin: 20px;
+/* Trophy Case */
+#trophies img {
+  width: 50px;
+  height: 50px;
+  margin: 5px;
 }
 
-#weight-input,
-#target-weight-input {
-  padding: 10px;
-  font-size: 16px;
-  margin-right: 10px;
-  width: 200px;
+#photo-gallery img {
+  width: 100px;
+  height: 100px;
+  margin: 10px;
+  border-radius: 5px;
+}
+
+.comparison img {
+  width: 150px;
+  height: 150px;
+  margin: 10px;
 }
 
 button {
