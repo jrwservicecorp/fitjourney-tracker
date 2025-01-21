@@ -1,5 +1,5 @@
-// JavaScript (v2.57)
-const appVersion = "v2.57";
+// JavaScript (v2.58)
+const appVersion = "v2.58";
 
 let chartInstance = null;
 
@@ -200,20 +200,21 @@ function setupPhotoUpload() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const photos = JSON.parse(localStorage.getItem("photos")) || [];
-      photos.push({
-        date: new Date().toISOString().split("T")[0],
-        src: event.target.result,
-        description,
-      });
-      localStorage.setItem("photos", JSON.stringify(photos));
-      alert("Photo uploaded successfully!");
-      descriptionInput.value = "";
-      updatePhotoGallery();
-    };
-    reader.readAsDataURL(file);
+    // Create an object URL for the file
+    const photoUrl = URL.createObjectURL(file);
+
+    const photos = JSON.parse(localStorage.getItem("photos")) || [];
+    photos.push({
+      date: new Date().toISOString().split("T")[0],
+      src: photoUrl,
+      description,
+    });
+    localStorage.setItem("photos", JSON.stringify(photos));
+
+    alert("Photo uploaded successfully!");
+    descriptionInput.value = "";
+    photoInput.value = ""; // Clear file input
+    updatePhotoGallery();
   });
 }
 
