@@ -1,4 +1,4 @@
-const appVersion = "v2.31";
+const appVersion = "v2.39";
 
 // Initialize App
 window.addEventListener('DOMContentLoaded', () => {
@@ -27,6 +27,8 @@ function navigateTo(pageId) {
   if (targetPage) {
     targetPage.classList.remove('hidden');
     if (pageId === 'dashboard') loadDashboard();
+  } else {
+    console.error(`Page "${pageId}" not found.`);
   }
 }
 
@@ -51,7 +53,11 @@ function setupLogWeight() {
 
 // Load Dashboard with Chart
 function loadDashboard() {
-  const dashboard = document.getElementById('dashboard');
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js is not loaded. Ensure the library is included in index.html.');
+    return;
+  }
+
   const progressData = JSON.parse(localStorage.getItem('progressData')) || [];
   const chartContainer = document.getElementById('weight-chart-container');
   if (progressData.length === 0) {
