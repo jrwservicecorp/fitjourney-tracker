@@ -1,4 +1,4 @@
-const appVersion = "v2.49";
+const appVersion = "v2.50";
 
 const chartColors = {
   default: { line: '#ff6f61', grid: '#cccccc', labels: '#ffffff' },
@@ -74,6 +74,39 @@ function setupLogWeight() {
     bodyFatInput.value = '';
     waistInput.value = '';
     loadDashboard();
+  });
+}
+
+// Update Chart
+function updateChart(data) {
+  const chartContainer = document.getElementById('chart-container');
+  chartContainer.innerHTML = '<canvas id="progress-chart"></canvas>';
+
+  const ctx = document.getElementById('progress-chart').getContext('2d');
+  const labels = data.map(entry => entry.date);
+  const weights = data.map(entry => entry.weight);
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Weight Progress',
+        data: weights,
+        borderColor: chartColors.default.line,
+        backgroundColor: 'rgba(255, 111, 97, 0.2)',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      scales: {
+        x: { grid: { color: chartColors.default.grid } },
+        y: { grid: { color: chartColors.default.grid } }
+      },
+      plugins: {
+        legend: { labels: { color: chartColors.default.labels } }
+      }
+    }
   });
 }
 
