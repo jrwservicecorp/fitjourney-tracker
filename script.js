@@ -1,76 +1,104 @@
-/* CSS (v2.59) */
-body {
-  font-family: 'Poppins', Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
-  color: #f5f5f5;
+// JavaScript (v2.59)
+const appVersion = "v2.59";
+
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("app-version").textContent = appVersion;
+  setupNavigation();
+  setupLogWeight();
+  setupPhotoUpload();
+  loadDashboard();
+  setupToggleButtons();
+});
+
+// Navigation
+function setupNavigation() {
+  const links = document.querySelectorAll(".navbar a");
+  links.forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      navigateTo(link.getAttribute("data-page"));
+    });
+  });
 }
 
-.navbar {
-  display: flex;
-  justify-content: center;
-  padding: 10px;
-  background: #2c3e50;
+function navigateTo(pageId) {
+  document.querySelectorAll(".page").forEach((page) => {
+    page.classList.toggle("hidden", page.id !== pageId);
+  });
+
+  if (pageId === "dashboard") loadDashboard();
 }
 
-.navbar a {
-  text-decoration: none;
-  color: white;
-  padding: 10px 15px;
-  font-size: 18px;
-  font-weight: bold;
-  border-radius: 5px;
+// Dashboard
+function loadDashboard() {
+  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+  if (progressData.length > 0) {
+    document.getElementById("chart-placeholder").style.display = "none";
+    renderChart(progressData);
+  } else {
+    document.getElementById("chart-placeholder").style.display = "block";
+    renderChart(getPlaceholderData());
+  }
 }
 
-.page.hidden {
-  display: none;
+// Render Chart
+function renderChart(data) {
+  // Chart rendering logic
 }
 
-.summary-section {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
+// Log Weight
+function setupLogWeight() {
+  // Log weight functionality
 }
 
-.action-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+// Photo Upload
+function setupPhotoUpload() {
+  const uploadBtn = document.getElementById("upload-photo-btn");
+  const photoInput = document.getElementById("photo-upload");
+  const dateInput = document.getElementById("photo-date");
+  const descriptionInput = document.getElementById("photo-description");
+
+  uploadBtn.addEventListener("click", () => {
+    const file = photoInput.files[0];
+    const date = dateInput.value || new Date().toISOString().split("T")[0];
+    const description = descriptionInput.value;
+
+    if (!file) {
+      alert("Please select a photo to upload.");
+      return;
+    }
+
+    const photoUrl = URL.createObjectURL(file);
+
+    const photos = JSON.parse(localStorage.getItem("photos")) || [];
+    photos.push({
+      date,
+      src: photoUrl,
+      description,
+    });
+    localStorage.setItem("photos", JSON.stringify(photos));
+
+    alert("Photo uploaded successfully!");
+    dateInput.value = "";
+    descriptionInput.value = "";
+    photoInput.value = "";
+    updatePhotoGallery();
+  });
 }
 
-.action-buttons button {
-  background: #3498db;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+function updatePhotoGallery() {
+  // Update photo gallery logic
 }
 
-.action-buttons button:hover {
-  background: #1a73e8;
-}
+function setupToggleButtons() {
+  const logWeightToggle = document.getElementById("log-weight-toggle");
+  const trackProgressToggle = document.getElementById("track-progress-toggle");
 
-.photos-section {
-  margin-top: 20px;
-}
+  logWeightToggle.addEventListener("click", () => {
+    // Toggle log weight section
+  });
 
-.card {
-  border-radius: 10px;
-  background: #2c3e50;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.progress-bar {
-  width: 100%;
-  background: #ccc;
-  border-radius: 5px;
-  margin-top: 10px;
-}
-
-.progress {
-  height: 10px;
-  background: #ff6f61;
+  trackProgressToggle.addEventListener("click", () => {
+    // Toggle track progress section
+  });
 }
