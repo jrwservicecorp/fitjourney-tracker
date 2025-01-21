@@ -11,22 +11,23 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.48</span></p>
+    <p>App Version: <span id="app-version">v2.51</span></p>
   </header>
-  <div class="navbar">
-    <a href="#" data-page="home"><i class="fas fa-home"></i> Home</a>
-    <a href="#" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
-    <a href="#" data-page="settings"><i class="fas fa-cog"></i> Settings</a>
-    <a href="#" data-page="about"><i class="fas fa-info-circle"></i> About</a>
-  </div>
+  <nav class="navbar" role="navigation" aria-label="Main Navigation">
+    <a href="#" data-page="home" aria-label="Home"><i class="fas fa-home"></i> Home</a>
+    <a href="#" data-page="dashboard" aria-label="Dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="#" data-page="settings" aria-label="Settings"><i class="fas fa-cog"></i> Settings</a>
+    <a href="#" data-page="about" aria-label="About"><i class="fas fa-info-circle"></i> About</a>
+  </nav>
   <div id="main-app">
-    <div id="home" class="page">
+    <section id="home" class="page">
       <h2>Welcome to FitJourney Tracker</h2>
       <p>Start tracking your fitness journey today!</p>
-    </div>
-    <div id="dashboard" class="page hidden">
+    </section>
+
+    <section id="dashboard" class="page hidden">
       <h2>Dashboard</h2>
-      <div id="log-weight-section">
+      <article id="log-weight-section">
         <h3>Log Your Weight</h3>
         <input type="number" id="weight-input" placeholder="Enter your weight (lbs)">
         <label for="body-fat">Body Fat (%):</label>
@@ -34,37 +35,56 @@
         <label for="waist">Waist (in):</label>
         <input type="number" id="waist" placeholder="Enter waist measurement">
         <button id="log-weight-btn">Log Entry</button>
-      </div>
-      <div id="trophy-case">
+      </article>
+
+      <article id="trophy-case">
         <h3>Your Achievements</h3>
         <div id="trophies"></div>
-      </div>
-      <div id="photo-progress">
+      </article>
+
+      <article id="photo-progress">
         <h3>Track Your Progress Visually</h3>
         <input type="file" id="photo-upload" accept="image/*">
         <button id="upload-photo-btn">Upload Photo</button>
-        <div id="photo-gallery"></div>
-      </div>
-      <div id="compare-photos">
+        <div id="photo-gallery">
+          <p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>
+        </div>
+      </article>
+
+      <article id="compare-photos">
         <h3>Before & After</h3>
         <select id="photo-select-before"></select>
         <select id="photo-select-after"></select>
         <button id="generate-comparison-btn">Generate Comparison</button>
-        <div id="comparison-result"></div>
+        <div id="comparison-result">
+          <p class="placeholder">Select two photos to generate a comparison.</p>
+        </div>
+      </article>
+
+      <div id="weight-chart-container">
+        <h3>Your Weight Trends</h3>
+        <canvas id="weight-chart"></canvas>
+        <p class="placeholder" id="chart-placeholder">Start logging your weight to see trends here!</p>
       </div>
-      <div id="weight-chart-container"></div>
-    </div>
-    <div id="settings" class="page hidden">
+    </section>
+
+    <section id="settings" class="page hidden">
       <h2>Settings</h2>
       <p>Set your target weight:</p>
       <input type="number" id="target-weight-input" placeholder="Enter target weight (lbs)">
       <button id="save-target-weight-btn">Save Target</button>
-    </div>
-    <div id="about" class="page hidden">
+
+      <div id="theme-toggle-container">
+        <label for="theme-toggle">Dark Mode:</label>
+        <input type="checkbox" id="theme-toggle">
+      </div>
+    </section>
+
+    <section id="about" class="page hidden">
       <h2>About FitJourney Tracker</h2>
       <p>FitJourney Tracker helps you visualize your fitness progress and stay motivated.</p>
-    </div>
+    </section>
   </div>
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
