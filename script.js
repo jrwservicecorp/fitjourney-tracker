@@ -1,5 +1,5 @@
-// JavaScript (v2.53)
-const appVersion = "v2.53";
+// JavaScript (v2.54)
+const appVersion = "v2.54";
 
 const chartColors = {
   default: { line: '#ff6f61', grid: '#cccccc', labels: '#ffffff' },
@@ -13,6 +13,8 @@ window.addEventListener('DOMContentLoaded', () => {
   setupLogWeight();
   setupPhotoUpload();
   setupPhotoComparison();
+  setupPhotoFilter();
+  setupCustomDateComparison();
   loadDashboard();
 });
 
@@ -80,15 +82,15 @@ function setupPhotoUpload() {
       localStorage.setItem('photos', JSON.stringify(photos));
       alert('Photo uploaded successfully!');
       descriptionInput.value = '';
-      updatePhotoGallery();
+      updatePhotoGallery(photos);
     };
     reader.readAsDataURL(file);
   });
 }
 
 // Update Photo Gallery
-function updatePhotoGallery() {
-  const photos = JSON.parse(localStorage.getItem('photos')) || [];
+function updatePhotoGallery(filteredPhotos = null) {
+  const photos = filteredPhotos || JSON.parse(localStorage.getItem('photos')) || [];
   const gallery = document.getElementById('photo-gallery');
   gallery.innerHTML = '';
 
@@ -117,39 +119,48 @@ function deletePhoto(index) {
   updatePhotoGallery();
 }
 
-// Photo Comparison
-function setupPhotoComparison() {
-  const beforeSelect = document.getElementById('photo-select-before');
-  const afterSelect = document.getElementById('photo-select-after');
-  const comparisonResult = document.getElementById('comparison-result');
+// Photo Filter
+function setupPhotoFilter() {
+  const filterInput = document.getElementById('filter-tags');
+  const filterButton = document.getElementById('apply-filter-btn');
 
-  function populatePhotoSelects() {
+  filterButton.addEventListener('click', () => {
+    const tag = filterInput.value.toLowerCase();
     const photos = JSON.parse(localStorage.getItem('photos')) || [];
-    [beforeSelect, afterSelect].forEach(select => {
-      select.innerHTML = photos.map((photo, index) => `<option value="${index}">${photo.date}</option>`).join('');
-    });
-  }
+    const filteredPhotos = photos.filter(photo => (photo.description || '').toLowerCase().includes(tag));
+    updatePhotoGallery(filteredPhotos);
+  });
+}
+
+// Custom Date Range for Comparison
+function setupCustomDateComparison() {
+  const startDateInput = document.getElementById('date-range-start');
+  const endDateInput = document.getElementById('date-range-end');
+  const comparisonResult = document.getElementById('comparison-result');
 
   document.getElementById('generate-comparison-btn').addEventListener('click', () => {
     const photos = JSON.parse(localStorage.getItem('photos')) || [];
-    const beforeIndex = beforeSelect.value;
-    const afterIndex = afterSelect.value;
+    const startDate = new Date(startDateInput.value);
+    const endDate = new Date(endDateInput.value);
 
-    if (!beforeIndex || !afterIndex || beforeIndex === afterIndex) {
-      alert('Please select two different photos for comparison.');
+    if (isNaN(startDate) || isNaN(endDate) || startDate >= endDate) {
+      alert('Please select a valid date range.');
       return;
     }
 
-    const beforePhoto = photos[beforeIndex];
-    const afterPhoto = photos[afterIndex];
+    const beforePhoto = photos.find(photo => new Date(photo.date) >= startDate);
+    const afterPhoto = photos.reverse().find(photo => new Date(photo.date) <= endDate);
+
+    if (!beforePhoto || !afterPhoto) {
+      alert('No photos available for the selected date range.');
+      return;
+    }
 
     comparisonResult.innerHTML = `
       <div class="comparison-photo"><img src="${beforePhoto.src}" alt="Before"></div>
       <div class="comparison-photo"><img src="${afterPhoto.src}" alt="After"></div>
     `;
   });
-
-  populatePhotoSelects();
 }
 
 // Dashboard
