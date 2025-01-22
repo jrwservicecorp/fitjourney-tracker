@@ -1,6 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.79 */
+/* Updated JavaScript for FitJourney Tracker v2.80 */
 
-const appVersion = "v2.79";
+const appVersion = "v2.80";
 
 let chartInstance = null;
 let photoPage = 0; // Pagination for photos
@@ -20,11 +20,11 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 function equalizeHeights() {
-  const weightSummaryBox = document.querySelector(".weight-summary");
-  const otherBoxes = document.querySelectorAll(".dashboard-row .card:not(.weight-summary)");
+  const weightCheckInBox = document.querySelector(".weight-checkin");
+  const otherBoxes = document.querySelectorAll(".dashboard-row .card:not(.weight-checkin)");
 
-  if (weightSummaryBox) {
-    const height = weightSummaryBox.offsetHeight;
+  if (weightCheckInBox) {
+    const height = weightCheckInBox.offsetHeight;
     otherBoxes.forEach((box) => {
       box.style.height = `${height}px`;
     });
