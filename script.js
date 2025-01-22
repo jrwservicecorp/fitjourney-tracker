@@ -107,7 +107,7 @@ function getPlaceholderData() {
 
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
-  if (!weightForm) return; // Exit if the form is not found
+  if (!weightForm) return;
   weightForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const weight = parseFloat(document.getElementById("weight-input").value);
@@ -127,7 +127,7 @@ function setupWeightLogging() {
 
 function updateSummary(data) {
   const summaryContainer = document.getElementById("weight-summary");
-  if (!summaryContainer) return; // Exit if the summary container is not found
+  if (!summaryContainer) return;
 
   if (data.length === 0) {
     summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
