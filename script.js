@@ -1,6 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.76 - Responsive Photo Comparison */
+/* Updated JavaScript for FitJourney Tracker v2.77 - Sample Data Fix and Chart Readability */
 
-const appVersion = "v2.76";
+const appVersion = "v2.77";
 
 let chartInstance = null;
 let photoPage = 0; // Pagination for photos
@@ -69,7 +69,22 @@ function renderChart(data, isSample = false) {
       responsive: true,
       plugins: {
         legend: {
-          display: false,
+          display: true,
+          labels: {
+            color: "#f5f5f5", // Improve label readability
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: "#f5f5f5", // Improve x-axis tick readability
+          },
+        },
+        y: {
+          ticks: {
+            color: "#f5f5f5", // Improve y-axis tick readability
+          },
         },
       },
     },
