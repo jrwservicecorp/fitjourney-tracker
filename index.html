@@ -10,7 +10,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.79</span></p>
+    <p>App Version: <span id="app-version">v2.81</span></p>
   </header>
   <nav class="navbar">
     <a href="#" data-page="dashboard">Dashboard</a>
@@ -24,25 +24,18 @@
         <div id="chart-legend">
           <p><span class="pink-bar">■</span> Pink: Sample Data</p>
           <p><span class="blue-bar">■</span> Blue: User Data</p>
-          <div class="chart-filters">
-            <button data-filter="7">7 Days</button>
-            <button data-filter="30">30 Days</button>
-            <button data-filter="custom">Custom</button>
-          </div>
         </div>
       </div>
       <div class="card">
-        <h3>Goal Progress</h3>
-        <div id="goal-progress">
-          <p>No goals set yet. <button id="add-goal-btn">Set a Goal</button></p>
-        </div>
+        <h3>Milestones</h3>
+        <div id="milestone-section"></div>
       </div>
       <div class="dashboard-row compact">
-        <div class="card small weight-summary">
+        <div class="card weight-summary">
           <h3>Weight Summary</h3>
           <div id="weight-summary"></div>
         </div>
-        <div class="card small">
+        <div class="card weight-checkin">
           <h3>Weight Check-In</h3>
           <form id="weight-form">
             <input id="weight-input" type="number" step="0.1" placeholder="Weight (lbs)" required />
@@ -50,7 +43,7 @@
             <button type="submit">Log Weight</button>
           </form>
         </div>
-        <div class="card small">
+        <div class="card timeline">
           <h3>Timeline</h3>
           <div id="timeline-section" class="horizontal-scroll">
             <p class="placeholder">No timeline data yet. Start logging your weight to see it here!</p>
