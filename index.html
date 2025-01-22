@@ -80,3 +80,85 @@
   <script src="script.js" defer></script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitJourney Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>FitJourney Tracker</h1>
+    <p>App Version: <span id="app-version">v2.82</span></p>
+  </header>
+  <nav class="navbar">
+    <a href="#" data-page="dashboard">Dashboard</a>
+    <a href="#" data-page="about">About</a>
+  </nav>
+  <div id="main-app">
+    <!-- Dashboard Page -->
+    <section id="dashboard" class="page">
+      <div class="card prominent">
+        <canvas id="weight-chart"></canvas>
+        <p id="chart-placeholder">Start logging weight to see trends!</p>
+        <div id="chart-legend">
+          <p><span class="pink-bar">■</span> Pink: Sample Data</p>
+          <p><span class="blue-bar">■</span> Blue: User Data</p>
+          <div class="chart-filters">
+            <button data-filter="7">7 Days</button>
+            <button data-filter="30">30 Days</button>
+            <button data-filter="custom">Custom Range</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Milestones</h3>
+        <div id="milestone-section"></div>
+      </div>
+      <div class="dashboard-row compact">
+        <div class="card weight-summary">
+          <h3>Weight Summary</h3>
+          <div id="weight-summary"></div>
+        </div>
+        <div class="card weight-checkin">
+          <h3>Weight Check-In</h3>
+          <form id="weight-form">
+            <input id="weight-input" type="number" step="0.1" placeholder="Weight (lbs)" required />
+            <input id="date-input" type="date" required />
+            <button type="submit">Log Weight</button>
+          </form>
+        </div>
+        <div class="card timeline">
+          <h3>Timeline</h3>
+          <div id="timeline-section" class="horizontal-scroll">
+            <p class="placeholder">No timeline data yet. Start logging your weight to see it here!</p>
+          </div>
+          <button id="expand-timeline-btn">Show More</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Photo Gallery</h3>
+        <div id="photo-gallery"></div>
+        <button id="load-more-photos-btn">Load More</button>
+      </div>
+      <div>
+        <h4>Compare Photos</h4>
+        <select id="photo-select-1"></select>
+        <select id="photo-select-2"></select>
+        <button id="compare-photos-btn">Compare</button>
+        <div id="photo-comparison"></div>
+      </div>
+    </section>
+
+    <!-- About Page -->
+    <section id="about" class="page hidden">
+      <h2>About FitJourney Tracker</h2>
+      <p>This app is designed to help users track their fitness journey, set goals, and visualize progress with beautiful charts, timelines, and milestones.</p>
+    </section>
+  </div>
+  <script src="script.js" defer></script>
+</body>
+</html>
