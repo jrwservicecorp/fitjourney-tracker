@@ -122,10 +122,11 @@ function setupPhotoUpload() {
     reader.onload = function (e) {
       const photoDataUrl = e.target.result;
 
+      // Save photo to localStorage
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
       photos.push({
         date: new Date().toISOString().split("T")[0],
-        src: photoDataUrl,
+        src: photoDataUrl, // Base64 URL
         description,
       });
       localStorage.setItem("photos", JSON.stringify(photos));
