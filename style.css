@@ -1,3 +1,4 @@
+/* Updated styles for v2.62 */
 body {
   font-family: 'Poppins', Arial, sans-serif;
   margin: 0;
@@ -71,4 +72,14 @@ button:hover {
   max-width: 100%;
   border-radius: 5px;
   margin: 10px 0;
+}
+
+#photo-gallery div {
+  margin-bottom: 15px;
+}
+
+.summary-section .label {
+  font-weight: bold;
+  color: #ffffff;
+  margin-right: 5px;
 }
