@@ -1,4 +1,4 @@
-/* Updated JavaScript for FitJourney Tracker v2.73 */
+/* Updated JavaScript for FitJourney Tracker v2.73 - Photo Comparison Fix */
 
 const appVersion = "v2.73";
 
@@ -211,14 +211,17 @@ function getAssociatedWeight(date) {
 function updatePhotoGallery() {
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
   const gallery = document.getElementById("photo-gallery");
-  const photosToDisplay = photos.slice(photoPage * 4, photoPage * 4 + 4);
+  const select1 = document.getElementById("photo-select-1");
+  const select2 = document.getElementById("photo-select-2");
+  gallery.innerHTML = ""; // Clear gallery
+  select1.innerHTML = ""; // Clear dropdown
+  select2.innerHTML = "";
 
-  if (photosToDisplay.length === 0) {
-    document.getElementById("load-more-photos-btn").disabled = true;
-    return;
-  }
+  photos.forEach((photo) => {
+    const optionHTML = `<option value="${photo.src}">${photo.date}</option>`;
+    select1.innerHTML += optionHTML;
+    select2.innerHTML += optionHTML;
 
-  photosToDisplay.forEach((photo) => {
     gallery.innerHTML += `
       <div>
         <img src="${photo.src}" alt="Progress Photo">
