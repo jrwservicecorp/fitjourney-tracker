@@ -1,6 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.78 - Equal Heights Fix */
+/* Updated JavaScript for FitJourney Tracker v2.79 */
 
-const appVersion = "v2.78";
+const appVersion = "v2.79";
 
 let chartInstance = null;
 let photoPage = 0; // Pagination for photos
@@ -13,6 +13,8 @@ window.addEventListener("DOMContentLoaded", () => {
   setupPhotoComparison();
   setupPhotoPagination();
   setupTimelineExpansion();
+  setupGoalProgress();
+  setupChartFilters();
   loadDashboard();
   equalizeHeights(); // Ensure equal heights on page load
 });
@@ -305,4 +307,116 @@ function setupPhotoComparison() {
           <h4>Photo 2</h4>
           <img src="${photo2}" alt="Photo 2" style="max-width: 150px; height: auto;">
         </div>
-        <div style="margin-top: 20px
+        <div style="margin-top: 20px;">
+          <textarea id="custom-text" placeholder="Add your text here..."></textarea>
+          <button id="export-comparison-btn">Export</button>
+        </div>
+      </div>
+    `;
+
+    setupExportComparison(photo1, photo2);
+  });
+}
+
+function setupExportComparison(photo1, photo2) {
+  const exportBtn = document.getElementById("export-comparison-btn");
+  if (!exportBtn) return;
+
+  exportBtn.addEventListener("click", () => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const customText = document.getElementById("custom-text").value;
+
+    canvas.width = 800;
+    canvas.height = 400;
+
+    const img1 = new Image();
+    const img2 = new Image();
+
+    img1.onload = () => {
+      ctx.drawImage(img1, 0, 0, 400, 400);
+      img2.onload = () => {
+        ctx.drawImage(img2, 400, 0, 400, 400);
+
+        // Add custom text
+        ctx.font = "20px Arial";
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.fillText(customText, canvas.width / 2, 380);
+
+        // Export the canvas
+        const exportLink = document.createElement("a");
+        exportLink.download = "comparison.png";
+        exportLink.href = canvas.toDataURL();
+        exportLink.click();
+      };
+      img2.src = photo2;
+    };
+    img1.src = photo1;
+  });
+}
+
+function updateMilestones(data) {
+  const milestoneContainer = document.getElementById("milestone-section");
+  if (!milestoneContainer) return;
+
+  let milestones = "";
+  const totalWeightLoss = data[0].weight - data[data.length - 1].weight;
+
+  if (totalWeightLoss >= 10) {
+    milestones += "<p>🏆 Lost 10 lbs! Great job!</p>";
+  }
+
+  if (data.length >= 7) {
+    milestones += "<p>🔥 7-day logging streak!</p>";
+  }
+
+  milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
+}
+
+function setupGoalProgress() {
+  const goalProgressContainer = document.getElementById("goal-progress");
+  const addGoalBtn = document.getElementById("add-goal-btn");
+
+  if (!addGoalBtn) return;
+
+  addGoalBtn.addEventListener("click", () => {
+    const goalWeight = prompt("Set your goal weight (lbs):");
+    if (goalWeight) {
+      goalProgressContainer.innerHTML = `
+        <p>Goal: Reach ${goalWeight} lbs</p>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: 30%;"></div>
+        </div>
+      `;
+    }
+  });
+}
+
+function setupChartFilters() {
+  const filterButtons = document.querySelectorAll(".chart-filters button");
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const filter = button.getAttribute("data-filter");
+
+      if (filter === "7") {
+        loadChartData(7);
+      } else if (filter === "30") {
+        loadChartData(30);
+      } else if (filter === "custom") {
+        const range = prompt("Enter the number of days for the custom range:");
+        if (range) {
+          loadChartData(parseInt(range));
+        }
+      }
+    });
+  });
+}
+
+function loadChartData(days) {
+  const progressData = JSON.parse(localStorage.getItem("progressData")) || getSampleData();
+  const filteredData = progressData.slice(-days);
+
+  renderChart(filteredData, false);
+}
