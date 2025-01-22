@@ -1,5 +1,5 @@
-/* Updated JavaScript for FitJourney Tracker v2.63 */
-const appVersion = "v2.63";
+/* Updated JavaScript for FitJourney Tracker v2.64 */
+const appVersion = "v2.64";
 
 let chartInstance = null;
 
@@ -172,6 +172,8 @@ function calculateMilestones(data) {
 
 function setupPhotoUpload() {
   const uploadBtn = document.getElementById("upload-photo-btn");
+  if (!uploadBtn) return;
+
   uploadBtn.addEventListener("click", () => {
     const fileInput = document.getElementById("photo-upload");
     const file = fileInput.files[0];
