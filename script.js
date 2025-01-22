@@ -5,6 +5,8 @@ let chartInstance = null;
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
   setupNavigation();
+  setupWeightLogging();
+  setupPhotoUpload();
   loadDashboard();
 });
 
@@ -25,8 +27,6 @@ function navigateTo(pageId) {
 
   if (pageId === "dashboard") {
     loadDashboard();
-  } else if (pageId === "log-weight") {
-    setupWeightLogging();
   }
 }
 
@@ -42,6 +42,8 @@ function loadDashboard() {
     updateSummary([]);
     renderChart(getPlaceholderData());
   }
+
+  updatePhotoGallery();
 }
 
 function renderChart(data) {
@@ -144,4 +146,49 @@ function updateSummary(data) {
     <p><strong>Highest Weight:</strong> ${max} lbs</p>
     <p><strong>Lowest Weight:</strong> ${min} lbs</p>
   `;
+}
+
+function setupPhotoUpload() {
+  const uploadBtn = document.getElementById("upload-photo-btn");
+  uploadBtn.addEventListener("click", () => {
+    const file = document.getElementById("photo-upload").files[0];
+    const description = document.getElementById("photo-description").value;
+
+    if (!file) {
+      alert("Please select a photo to upload.");
+      return;
+    }
+
+    const photoUrl = URL.createObjectURL(file);
+    const photos = JSON.parse(localStorage.getItem("photos")) || [];
+    photos.push({
+      date: new Date().toISOString().split("T")[0],
+      src: photoUrl,
+      description,
+    });
+    localStorage.setItem("photos", JSON.stringify(photos));
+    alert("Photo uploaded successfully!");
+    updatePhotoGallery();
+  });
+}
+
+function updatePhotoGallery() {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  const gallery = document.getElementById("photo-gallery");
+  gallery.innerHTML = "";
+
+  if (photos.length === 0) {
+    gallery.innerHTML = '<p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>';
+    return;
+  }
+
+  photos.forEach((photo) => {
+    const photoEntry = document.createElement("div");
+    photoEntry.innerHTML = `
+      <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
+      <p>${photo.date}</p>
+      <p>${photo.description || ""}</p>
+    `;
+    gallery.appendChild(photoEntry);
+  });
 }
