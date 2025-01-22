@@ -1,6 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.73 - Fix Blob URL Issues */
+/* Updated JavaScript for FitJourney Tracker v2.74 */
 
-const appVersion = "v2.73";
+const appVersion = "v2.74";
 
 let chartInstance = null;
 let photoPage = 0; // Pagination for photos
@@ -260,15 +260,56 @@ function setupPhotoComparison() {
     }
 
     comparisonContainer.innerHTML = `
-      <div>
-        <h4>Photo 1</h4>
-        <img src="${photo1}" alt="Photo 1">
-      </div>
-      <div>
-        <h4>Photo 2</h4>
-        <img src="${photo2}" alt="Photo 2">
+      <div class="comparison-container">
+        <div>
+          <h4>Photo 1</h4>
+          <img src="${photo1}" alt="Photo 1">
+        </div>
+        <div>
+          <h4>Photo 2</h4>
+          <img src="${photo2}" alt="Photo 2">
+        </div>
+        <button id="export-comparison-btn">Export Comparison</button>
       </div>
     `;
+
+    setupExportComparison(photo1, photo2);
+  });
+}
+
+function setupExportComparison(photo1, photo2) {
+  const exportBtn = document.getElementById("export-comparison-btn");
+  if (!exportBtn) return;
+
+  exportBtn.addEventListener("click", () => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = 800;
+    canvas.height = 400;
+
+    const img1 = new Image();
+    const img2 = new Image();
+
+    img1.onload = () => {
+      ctx.drawImage(img1, 0, 0, 400, 400);
+      img2.onload = () => {
+        ctx.drawImage(img2, 400, 0, 400, 400);
+
+        // Add labels
+        ctx.font = "20px Arial";
+        ctx.fillStyle = "black";
+        ctx.fillText("Photo 1", 150, 30);
+        ctx.fillText("Photo 2", 550, 30);
+
+        const exportLink = document.createElement("a");
+        exportLink.download = "comparison.png";
+        exportLink.href = canvas.toDataURL();
+        exportLink.click();
+      };
+      img2.src = photo2;
+    };
+    img1.src = photo1;
   });
 }
 
