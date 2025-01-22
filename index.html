@@ -1,462 +1,110 @@
-/* Consolidated JavaScript for FitJourney Tracker v2.85 */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>FitJourney Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>FitJourney Tracker</h1>
+    <p>App Version: <span id="app-version">v2.85</span></p>
+  </header>
 
-const appVersion = "v2.85";
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="#" data-page="dashboard">Dashboard</a>
+    <a href="#" data-page="about">About</a>
+  </nav>
 
-let chartInstance = null;
-let photoPage = 0; // For gallery pagination
+  <div id="main-app">
+    <!-- Dashboard Page -->
+    <section id="dashboard" class="page">
+      <!-- Chart Section -->
+      <div class="card prominent">
+        <canvas id="weight-chart"></canvas>
+        <p id="chart-placeholder">Start logging weight to see trends!</p>
+        <div id="chart-legend">
+          <p><span class="pink-bar">■</span> Pink: Sample Data</p>
+          <p><span class="blue-bar">■</span> Blue: User Data</p>
+          <div class="chart-filters">
+            <button data-filter="7">7 Days</button>
+            <button data-filter="30">30 Days</button>
+            <button data-filter="custom">Custom Range</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Milestones</h3>
+        <div id="milestone-section"></div>
+      </div>
+      <div class="dashboard-row compact">
+        <div class="card weight-summary">
+          <h3>Weight Summary</h3>
+          <div id="weight-summary"></div>
+        </div>
+        <div class="card weight-checkin">
+          <h3>Weight Check-In</h3>
+          <form id="weight-form">
+            <label for="weight-input" class="input-label">Weight:</label>
+            <input id="weight-input" type="number" step="0.1" placeholder="lbs" required />
 
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("app-version").textContent = appVersion;
+            <label for="date-input" class="input-label">Date:</label>
+            <input id="date-input" type="date" required />
 
-  setupNavigation();
-  setupWeightLogging();
-  setupPhotoUpload();
-  setupPhotoComparison();
-  setupPhotoPagination();
-  setupTimelineExpansion();
-  setupGoalProgress();
-  setupChartFilters();
+            <button type="submit" class="submit-btn">Log Weight</button>
+          </form>
+        </div>
+        <div class="card timeline">
+          <h3>Timeline</h3>
+          <div id="timeline-section" class="horizontal-scroll">
+            <p class="placeholder">No timeline data yet. Start logging your weight to see it here!</p>
+          </div>
+          <button id="expand-timeline-btn">Show More</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Photo Gallery</h3>
+        <!-- Photo Upload Fields -->
+        <div class="photo-upload-section">
+          <label for="photo-upload" class="input-label">Select Photo:</label>
+          <input id="photo-upload" type="file" accept="image/*" />
 
-  loadDashboard();
-  equalizeHeights();
-});
+          <label for="photo-date" class="input-label">Photo Date:</label>
+          <input id="photo-date" type="date" />
 
-/* ================================
-    Navigation and Page Toggling
-================================ */
-function setupNavigation() {
-  const links = document.querySelectorAll(".navbar a");
-  links.forEach((link) => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      navigateTo(link.getAttribute("data-page"));
-    });
-  });
-}
+          <label for="photo-keywords" class="input-label">Keywords:</label>
+          <input id="photo-keywords" type="text" placeholder="e.g., front, side, workout" />
 
-function navigateTo(pageId) {
-  document.querySelectorAll(".page").forEach((page) => {
-    page.classList.toggle("hidden", page.id !== pageId);
-  });
+          <label for="photo-description" class="input-label">Description (optional):</label>
+          <input id="photo-description" type="text" placeholder="Add a description" />
 
-  if (pageId === "dashboard") {
-    loadDashboard();
-  }
-}
+          <button id="upload-photo-btn">Upload Photo</button>
+        </div>
 
-/* ================================
-    Dashboard Loading
-================================ */
-function loadDashboard() {
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || getSampleData();
-
-  renderChart(progressData, !localStorage.getItem("progressData"));
-  updateSummary(progressData);
-  updateTimeline(progressData);
-  updatePhotoGallery();
-  updateMilestones(progressData);
-  equalizeHeights();
-}
-
-/* ================================
-    Chart Rendering and Filters
-================================ */
-function renderChart(data, isSample = false) {
-  const ctx = document.getElementById("weight-chart")?.getContext("2d");
-  if (!ctx) {
-    console.error("Chart container not found!");
-    return;
-  }
-
-  if (chartInstance) {
-    chartInstance.destroy();
-  }
-
-  chartInstance = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: data.map((entry) => entry.date),
-      datasets: [
-        {
-          label: isSample ? "Sample Data" : "User Data",
-          data: data.map((entry) => entry.weight),
-          backgroundColor: data.map(() => (isSample ? "pink" : "#3498db")),
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: true,
-          labels: {
-            color: "#f5f5f5",
-          },
-        },
-      },
-      scales: {
-        x: {
-          ticks: {
-            color: "#f5f5f5",
-          },
-        },
-        y: {
-          ticks: {
-            color: "#f5f5f5",
-          },
-        },
-      },
-    },
-  });
-}
-
-function setupChartFilters() {
-  const filterButtons = document.querySelectorAll(".chart-filters button");
-  filterButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const filter = button.getAttribute("data-filter");
-      if (filter === "7") {
-        loadChartData(7);
-      } else if (filter === "30") {
-        loadChartData(30);
-      } else if (filter === "custom") {
-        const range = prompt("Enter the number of days for the custom range:");
-        if (range) {
-          loadChartData(parseInt(range));
-        }
-      }
-    });
-  });
-}
-
-function loadChartData(days) {
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || getSampleData();
-  const filteredData = progressData.slice(-days);
-  renderChart(filteredData, false);
-}
-
-/* ================================
-    Summary, Timeline, Milestones
-================================ */
-function updateSummary(data) {
-  const summaryContainer = document.getElementById("weight-summary");
-  if (!summaryContainer) return;
-
-  if (data.length === 0) {
-    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
-    return;
-  }
-
-  const weights = data.map((entry) => entry.weight);
-  const sum = weights.reduce((acc, w) => acc + w, 0);
-  const averageVal = Math.round(sum / weights.length); // Round, no decimals
-  const maxVal = Math.round(Math.max(...weights));
-  const minVal = Math.round(Math.min(...weights));
-
-  summaryContainer.innerHTML = `
-    <p><strong>Average Weight:</strong> ${averageVal} lbs</p>
-    <p><strong>Highest Weight:</strong> ${maxVal} lbs</p>
-    <p><strong>Lowest Weight:</strong> ${minVal} lbs</p>
-  `;
-  equalizeHeights();
-}
-
-function updateTimeline(data) {
-  const timelineContainer = document.getElementById("timeline-section");
-  if (!timelineContainer) return;
-
-  if (data.length === 0) {
-    timelineContainer.innerHTML =
-      '<p class="placeholder">No timeline data yet. Start logging your weight to see it here!</p>';
-    return;
-  }
-
-  const limitedData = data.slice(-7);
-  timelineContainer.innerHTML = limitedData
-    .map((entry) => `<p>${entry.date} - ${Math.round(entry.weight)} lbs</p>`)
-    .join("");
-}
-
-function updateMilestones(data) {
-  const milestoneContainer = document.getElementById("milestone-section");
-  if (!milestoneContainer) return;
-
-  let milestones = "";
-  const totalWeightLoss = data[0].weight - data[data.length - 1].weight;
-
-  if (totalWeightLoss >= 10) {
-    milestones += "<p>🏆 Lost 10 lbs! Great job!</p>";
-  }
-  if (data.length >= 7) {
-    milestones += "<p>🔥 7-day logging streak!</p>";
-  }
-
-  milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
-}
-
-function setupTimelineExpansion() {
-  const expandBtn = document.getElementById("expand-timeline-btn");
-  if (!expandBtn) return;
-
-  expandBtn.addEventListener("click", () => {
-    const timelineSection = document.getElementById("timeline-section");
-    const isExpanded = timelineSection.classList.toggle("expanded");
-
-    expandBtn.textContent = isExpanded ? "Show Less" : "Show More";
-    if (!isExpanded) {
-      timelineSection.scrollTop = 0;
-    }
-  });
-}
-
-/* ================================
-    Photo Gallery & Comparison
-================================ */
-function updatePhotoGallery() {
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  const gallery = document.getElementById("photo-gallery");
-  const select1 = document.getElementById("photo-select-1");
-  const select2 = document.getElementById("photo-select-2");
-  gallery.innerHTML = "";
-  select1.innerHTML = "";
-  select2.innerHTML = "";
-
-  photos.slice(photoPage * 4, photoPage * 4 + 4).forEach((photo) => {
-    const optionHTML = `<option value="${photo.src}">${photo.date}</option>`;
-    select1.innerHTML += optionHTML;
-    select2.innerHTML += optionHTML;
-
-    gallery.innerHTML += `
+        <!-- Actual Photo Gallery -->
+        <div id="photo-gallery"></div>
+        <button id="load-more-photos-btn">Load More</button>
+      </div>
       <div>
-        <img src="${photo.src}" alt="Progress Photo" style="max-width: 150px;">
-        <p>${photo.date}</p>
-        <p>${photo.keywords || ""}</p>
-        <p>${photo.weight || "Unknown Weight"} lbs</p>
-        <p>${photo.description || ""}</p>
+        <h4>Compare Photos</h4>
+        <select id="photo-select-1"></select>
+        <select id="photo-select-2"></select>
+        <button id="compare-photos-btn">Compare</button>
+        <div id="photo-comparison"></div>
       </div>
-    `;
-  });
-}
+    </section>
 
-function setupPhotoPagination() {
-  const loadMoreBtn = document.getElementById("load-more-photos-btn");
-  if (!loadMoreBtn) return;
+    <!-- About Page -->
+    <section id="about" class="page hidden">
+      <h2>About FitJourney Tracker</h2>
+      <p>This app is designed to help you track your fitness journey effectively!</p>
+    </section>
+  </div>
 
-  loadMoreBtn.addEventListener("click", () => {
-    photoPage++;
-    updatePhotoGallery();
-  });
-}
-
-function setupPhotoUpload() {
-  const uploadBtn = document.getElementById("upload-photo-btn");
-  if (!uploadBtn) return;
-
-  uploadBtn.addEventListener("click", () => {
-    const fileInput = document.getElementById("photo-upload");
-    const file = fileInput.files[0];
-    const photoDate = document.getElementById("photo-date").value;
-    const keywords = document.getElementById("photo-keywords").value;
-    const description = document.getElementById("photo-description").value;
-
-    if (!file) {
-      alert("Please select a photo to upload.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const photoDataUrl = e.target.result;
-      const photos = JSON.parse(localStorage.getItem("photos")) || [];
-
-      // If user didn't pick a date, default to today's date
-      const finalDate = photoDate || new Date().toISOString().split("T")[0];
-
-      photos.push({
-        date: finalDate,
-        src: photoDataUrl,
-        keywords: keywords,
-        weight: getAssociatedWeight(finalDate),
-        description,
-      });
-
-      localStorage.setItem("photos", JSON.stringify(photos));
-
-      alert("Photo uploaded successfully!");
-      fileInput.value = "";
-      document.getElementById("photo-date").value = "";
-      document.getElementById("photo-keywords").value = "";
-      document.getElementById("photo-description").value = "";
-      updatePhotoGallery();
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-function setupPhotoComparison() {
-  const compareBtn = document.getElementById("compare-photos-btn");
-  if (!compareBtn) return;
-
-  compareBtn.addEventListener("click", () => {
-    const select1 = document.getElementById("photo-select-1");
-    const select2 = document.getElementById("photo-select-2");
-    const gallery = document.getElementById("photo-gallery");
-    const comparisonContainer = document.getElementById("photo-comparison");
-
-    const photo1 = select1.value;
-    const photo2 = select2.value;
-
-    if (!photo1 || !photo2) {
-      alert("Please select two photos to compare.");
-      return;
-    }
-
-    gallery.style.display = "none";
-    comparisonContainer.innerHTML = `
-      <div class="comparison-container" style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="flex: 1; text-align: center;">
-          <h4>Photo 1</h4>
-          <img src="${photo1}" alt="Photo 1" style="max-width: 150px;">
-        </div>
-        <div style="flex: 1; text-align: center;">
-          <h4>Photo 2</h4>
-          <img src="${photo2}" alt="Photo 2" style="max-width: 150px;">
-        </div>
-        <div style="margin-top: 20px;">
-          <textarea id="custom-text" placeholder="Add your text here..."></textarea>
-          <button id="export-comparison-btn">Export</button>
-        </div>
-      </div>
-    `;
-    setupExportComparison(photo1, photo2);
-  });
-}
-
-function setupExportComparison(photo1, photo2) {
-  const exportBtn = document.getElementById("export-comparison-btn");
-  if (!exportBtn) return;
-
-  exportBtn.addEventListener("click", () => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const customText = document.getElementById("custom-text").value;
-
-    canvas.width = 800;
-    canvas.height = 400;
-
-    const img1 = new Image();
-    const img2 = new Image();
-
-    img1.onload = () => {
-      ctx.drawImage(img1, 0, 0, 400, 400);
-      img2.onload = () => {
-        ctx.drawImage(img2, 400, 0, 400, 400);
-
-        ctx.font = "20px Arial";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.fillText(customText, canvas.width / 2, 380);
-
-        const exportLink = document.createElement("a");
-        exportLink.download = "comparison.png";
-        exportLink.href = canvas.toDataURL();
-        exportLink.click();
-      };
-      img2.src = photo2;
-    };
-    img1.src = photo1;
-  });
-}
-
-/* ================================
-    Milestones & Goals
-================================ */
-function setupGoalProgress() {
-  const goalProgressContainer = document.getElementById("goal-progress");
-  const addGoalBtn = document.getElementById("add-goal-btn");
-
-  if (!addGoalBtn || !goalProgressContainer) return;
-
-  addGoalBtn.addEventListener("click", () => {
-    const goalWeight = prompt("Set your goal weight (lbs):");
-    if (goalWeight) {
-      goalProgressContainer.innerHTML = `
-        <p>Goal: Reach ${goalWeight} lbs</p>
-        <div class="progress-bar-container">
-          <div class="progress-bar" style="width: 30%;"></div>
-        </div>
-      `;
-    }
-  });
-}
-
-function updateMilestones(data) {
-  const milestoneContainer = document.getElementById("milestone-section");
-  if (!milestoneContainer) return;
-
-  let milestones = "";
-  const totalWeightLoss = data[0].weight - data[data.length - 1].weight;
-
-  if (totalWeightLoss >= 10) {
-    milestones += "<p>🏆 Lost 10 lbs! Great job!</p>";
-  }
-  if (data.length >= 7) {
-    milestones += "<p>🔥 7-day logging streak!</p>";
-  }
-
-  milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
-}
-
-/* ================================
-    Helper Functions
-================================ */
-function getAssociatedWeight(date) {
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  const weightEntry = progressData.find((entry) => entry.date === date);
-  return weightEntry ? weightEntry.weight : "Unknown";
-}
-
-function getSampleData() {
-  const today = new Date();
-  return Array.from({ length: 30 }, (_, i) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
-    return {
-      date: date.toISOString().split("T")[0],
-      weight: Math.random() * 20 + 180,
-    };
-  });
-}
-
-function setupWeightLogging() {
-  const weightForm = document.getElementById("weight-form");
-  if (!weightForm) return;
-
-  weightForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const weight = parseFloat(document.getElementById("weight-input").value);
-    const date = document.getElementById("date-input").value;
-
-    if (!weight || !date) {
-      alert("Please enter both weight and date.");
-      return;
-    }
-
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    progressData.push({ date, weight });
-    localStorage.setItem("progressData", JSON.stringify(progressData));
-    loadDashboard();
-  });
-}
-
-function equalizeHeights() {
-  const weightCheckInBox = document.querySelector(".weight-checkin");
-  const otherBoxes = document.querySelectorAll(".dashboard-row .card:not(.weight-checkin)");
-
-  if (weightCheckInBox) {
-    const height = weightCheckInBox.offsetHeight;
-    otherBoxes.forEach((box) => {
-      box.style.height = `${height}px`;
-    });
-  }
-}
+  <!-- Main Script -->
+  <script src="script.js" defer></script>
+</body>
+</html>
