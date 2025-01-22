@@ -1,4 +1,4 @@
-/* Updated JavaScript for FitJourney Tracker v2.64 */
+/* Updated JavaScript for FitJourney Tracker v2.64 updated */
 const appVersion = "v2.64";
 
 let chartInstance = null;
