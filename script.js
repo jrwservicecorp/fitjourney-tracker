@@ -1,4 +1,4 @@
-/* Updated JavaScript for FitJourney Tracker v2.76 - WYSIWYG Editor Enhancements */
+/* Updated JavaScript for FitJourney Tracker v2.76 - Responsive Photo Comparison */
 
 const appVersion = "v2.76";
 
@@ -265,16 +265,16 @@ function setupPhotoComparison() {
 
     // Show comparison view
     comparisonContainer.innerHTML = `
-      <div class="comparison-container">
-        <div style="width: 50%; display: inline-block; text-align: center;">
+      <div class="comparison-container" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="flex: 1; text-align: center;">
           <h4>Photo 1</h4>
-          <img src="${photo1}" alt="Photo 1" style="max-width: 100%; height: auto;">
+          <img src="${photo1}" alt="Photo 1" style="max-width: 150px; height: auto;">
         </div>
-        <div style="width: 50%; display: inline-block; text-align: center;">
+        <div style="flex: 1; text-align: center;">
           <h4>Photo 2</h4>
-          <img src="${photo2}" alt="Photo 2" style="max-width: 100%; height: auto;">
+          <img src="${photo2}" alt="Photo 2" style="max-width: 150px; height: auto;">
         </div>
-        <div>
+        <div style="margin-top: 20px;">
           <textarea id="custom-text" placeholder="Add your text here..."></textarea>
           <button id="export-comparison-btn">Export</button>
         </div>
