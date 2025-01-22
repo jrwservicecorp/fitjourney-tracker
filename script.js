@@ -1,6 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.74 */
+/* Updated JavaScript for FitJourney Tracker v2.75 - WYSIWYG Editor & Social Sharing */
 
-const appVersion = "v2.74";
+const appVersion = "v2.75";
 
 let chartInstance = null;
 let photoPage = 0; // Pagination for photos
@@ -249,6 +249,7 @@ function setupPhotoComparison() {
   compareBtn.addEventListener("click", () => {
     const select1 = document.getElementById("photo-select-1");
     const select2 = document.getElementById("photo-select-2");
+    const gallery = document.getElementById("photo-gallery");
     const comparisonContainer = document.getElementById("photo-comparison");
 
     const photo1 = select1.value;
@@ -259,6 +260,10 @@ function setupPhotoComparison() {
       return;
     }
 
+    // Hide the photo gallery
+    gallery.style.display = "none";
+
+    // Show comparison view
     comparisonContainer.innerHTML = `
       <div class="comparison-container">
         <div>
@@ -269,7 +274,10 @@ function setupPhotoComparison() {
           <h4>Photo 2</h4>
           <img src="${photo2}" alt="Photo 2">
         </div>
-        <button id="export-comparison-btn">Export Comparison</button>
+        <div>
+          <textarea id="custom-text" placeholder="Add your text here..."></textarea>
+          <button id="export-comparison-btn">Export</button>
+        </div>
       </div>
     `;
 
@@ -284,6 +292,7 @@ function setupExportComparison(photo1, photo2) {
   exportBtn.addEventListener("click", () => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
+    const customText = document.getElementById("custom-text").value;
 
     canvas.width = 800;
     canvas.height = 400;
@@ -296,12 +305,13 @@ function setupExportComparison(photo1, photo2) {
       img2.onload = () => {
         ctx.drawImage(img2, 400, 0, 400, 400);
 
-        // Add labels
+        // Add custom text
         ctx.font = "20px Arial";
-        ctx.fillStyle = "black";
-        ctx.fillText("Photo 1", 150, 30);
-        ctx.fillText("Photo 2", 550, 30);
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.fillText(customText, canvas.width / 2, 380);
 
+        // Export the canvas
         const exportLink = document.createElement("a");
         exportLink.download = "comparison.png";
         exportLink.href = canvas.toDataURL();
