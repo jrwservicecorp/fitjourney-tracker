@@ -10,7 +10,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.84</span></p>
+    <p>App Version: <span id="app-version">v2.85</span></p>
   </header>
 
   <!-- Navigation -->
@@ -67,6 +67,24 @@
       </div>
       <div class="card">
         <h3>Photo Gallery</h3>
+        <!-- Photo Upload Fields -->
+        <div class="photo-upload-section">
+          <label for="photo-upload" class="input-label">Select Photo:</label>
+          <input id="photo-upload" type="file" accept="image/*" />
+
+          <label for="photo-date" class="input-label">Photo Date:</label>
+          <input id="photo-date" type="date" />
+
+          <label for="photo-keywords" class="input-label">Keywords:</label>
+          <input id="photo-keywords" type="text" placeholder="e.g., front, side, workout" />
+
+          <label for="photo-description" class="input-label">Description (optional):</label>
+          <input id="photo-description" type="text" placeholder="Add a description" />
+
+          <button id="upload-photo-btn">Upload Photo</button>
+        </div>
+
+        <!-- Actual Photo Gallery -->
         <div id="photo-gallery"></div>
         <button id="load-more-photos-btn">Load More</button>
       </div>
@@ -82,9 +100,7 @@
     <!-- About Page -->
     <section id="about" class="page hidden">
       <h2>About FitJourney Tracker</h2>
-      <p>
-        This app is designed to help you track your fitness journey effectively!
-      </p>
+      <p>This app is designed to help you track your fitness journey effectively!</p>
     </section>
   </div>
 
