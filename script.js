@@ -1,6 +1,6 @@
-/* JavaScript for FitJourney Tracker v2.69 */
+/* Updated JavaScript for FitJourney Tracker v2.70 */
 
-const appVersion = "v2.69";
+const appVersion = "v2.70";
 
 let chartInstance = null;
 
@@ -104,49 +104,6 @@ function setupWeightLogging() {
   });
 }
 
-function updateSummary(data) {
-  const summaryContainer = document.getElementById("weight-summary");
-  if (!summaryContainer) return;
-
-  if (data.length === 0) {
-    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
-    return;
-  }
-
-  const weights = data.map((entry) => entry.weight);
-  const average = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(2);
-  const max = Math.max(...weights);
-  const min = Math.min(...weights);
-
-  summaryContainer.innerHTML = `
-    <p><strong>Average Weight:</strong> ${average} lbs</p>
-    <p><strong>Highest Weight:</strong> ${max} lbs</p>
-    <p><strong>Lowest Weight:</strong> ${min} lbs</p>
-  `;
-}
-
-function updateTimeline(data) {
-  const timelineContainer = document.getElementById("timeline-section");
-  if (!timelineContainer) return;
-
-  if (data.length === 0) {
-    timelineContainer.innerHTML =
-      '<p class="placeholder">No timeline data yet. Start logging your weight to see it here!</p>';
-    return;
-  }
-
-  timelineContainer.innerHTML = data
-    .map(
-      (entry) => `
-      <div>
-        <p>${entry.date}</p>
-        <p>${entry.weight.toFixed(1)} lbs</p>
-      </div>
-    `
-    )
-    .join("");
-}
-
 function setupPhotoUpload() {
   const uploadBtn = document.getElementById("upload-photo-btn");
   if (!uploadBtn) return;
@@ -200,6 +157,49 @@ function updatePhotoGallery() {
         <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
         <p>${photo.date}</p>
         <p>${photo.description || ""}</p>
+      </div>
+    `
+    )
+    .join("");
+}
+
+function updateSummary(data) {
+  const summaryContainer = document.getElementById("weight-summary");
+  if (!summaryContainer) return;
+
+  if (data.length === 0) {
+    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
+    return;
+  }
+
+  const weights = data.map((entry) => entry.weight);
+  const average = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(2);
+  const max = Math.max(...weights);
+  const min = Math.min(...weights);
+
+  summaryContainer.innerHTML = `
+    <p><strong>Average Weight:</strong> ${average} lbs</p>
+    <p><strong>Highest Weight:</strong> ${max} lbs</p>
+    <p><strong>Lowest Weight:</strong> ${min} lbs</p>
+  `;
+}
+
+function updateTimeline(data) {
+  const timelineContainer = document.getElementById("timeline-section");
+  if (!timelineContainer) return;
+
+  if (data.length === 0) {
+    timelineContainer.innerHTML =
+      '<p class="placeholder">No timeline data yet. Start logging your weight to see it here!</p>';
+    return;
+  }
+
+  timelineContainer.innerHTML = data
+    .map(
+      (entry) => `
+      <div>
+        <p>${entry.date}</p>
+        <p>${entry.weight.toFixed(1)} lbs</p>
       </div>
     `
     )
