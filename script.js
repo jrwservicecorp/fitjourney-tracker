@@ -1,6 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.80 */
+/* Updated JavaScript for FitJourney Tracker v2.81 */
 
-const appVersion = "v2.80";
+const appVersion = "v2.81";
 
 let chartInstance = null;
 let photoPage = 0; // Pagination for photos
@@ -13,8 +13,6 @@ window.addEventListener("DOMContentLoaded", () => {
   setupPhotoComparison();
   setupPhotoPagination();
   setupTimelineExpansion();
-  setupGoalProgress();
-  setupChartFilters();
   loadDashboard();
   equalizeHeights(); // Ensure equal heights on page load
 });
@@ -77,7 +75,7 @@ function renderChart(data, isSample = false) {
         {
           label: isSample ? "Sample Data" : "User Data",
           data: data.map((entry) => entry.weight),
-          backgroundColor: isSample ? "pink" : "#3498db",
+          backgroundColor: data.map(() => (isSample ? "pink" : "#3498db")),
         },
       ],
     },
@@ -87,7 +85,7 @@ function renderChart(data, isSample = false) {
         legend: {
           display: true,
           labels: {
-            color: "#f5f5f5", // Improve label readability
+            color: "#f5f5f5", // Improve legend readability
           },
         },
       },
@@ -250,7 +248,7 @@ function updatePhotoGallery() {
   select1.innerHTML = ""; // Clear dropdown
   select2.innerHTML = "";
 
-  photos.forEach((photo) => {
+  photos.slice(photoPage * 4, photoPage * 4 + 4).forEach((photo) => {
     const optionHTML = `<option value="${photo.src}">${photo.date}</option>`;
     select1.innerHTML += optionHTML;
     select2.innerHTML += optionHTML;
@@ -372,51 +370,4 @@ function updateMilestones(data) {
   }
 
   milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
-}
-
-function setupGoalProgress() {
-  const goalProgressContainer = document.getElementById("goal-progress");
-  const addGoalBtn = document.getElementById("add-goal-btn");
-
-  if (!addGoalBtn) return;
-
-  addGoalBtn.addEventListener("click", () => {
-    const goalWeight = prompt("Set your goal weight (lbs):");
-    if (goalWeight) {
-      goalProgressContainer.innerHTML = `
-        <p>Goal: Reach ${goalWeight} lbs</p>
-        <div class="progress-bar-container">
-          <div class="progress-bar" style="width: 30%;"></div>
-        </div>
-      `;
-    }
-  });
-}
-
-function setupChartFilters() {
-  const filterButtons = document.querySelectorAll(".chart-filters button");
-
-  filterButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const filter = button.getAttribute("data-filter");
-
-      if (filter === "7") {
-        loadChartData(7);
-      } else if (filter === "30") {
-        loadChartData(30);
-      } else if (filter === "custom") {
-        const range = prompt("Enter the number of days for the custom range:");
-        if (range) {
-          loadChartData(parseInt(range));
-        }
-      }
-    });
-  });
-}
-
-function loadChartData(days) {
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || getSampleData();
-  const filteredData = progressData.slice(-days);
-
-  renderChart(filteredData, false);
 }
