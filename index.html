@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -10,15 +10,19 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.82</span></p>
+    <p>App Version: <span id="app-version">v2.84</span></p>
   </header>
+
+  <!-- Navigation -->
   <nav class="navbar">
     <a href="#" data-page="dashboard">Dashboard</a>
     <a href="#" data-page="about">About</a>
   </nav>
+
   <div id="main-app">
     <!-- Dashboard Page -->
     <section id="dashboard" class="page">
+      <!-- Chart Section -->
       <div class="card prominent">
         <canvas id="weight-chart"></canvas>
         <p id="chart-placeholder">Start logging weight to see trends!</p>
@@ -44,9 +48,13 @@
         <div class="card weight-checkin">
           <h3>Weight Check-In</h3>
           <form id="weight-form">
-            <input id="weight-input" type="number" step="0.1" placeholder="Weight (lbs)" required />
+            <label for="weight-input" class="input-label">Weight:</label>
+            <input id="weight-input" type="number" step="0.1" placeholder="lbs" required />
+
+            <label for="date-input" class="input-label">Date:</label>
             <input id="date-input" type="date" required />
-            <button type="submit">Log Weight</button>
+
+            <button type="submit" class="submit-btn">Log Weight</button>
           </form>
         </div>
         <div class="card timeline">
@@ -74,19 +82,13 @@
     <!-- About Page -->
     <section id="about" class="page hidden">
       <h2>About FitJourney Tracker</h2>
-      <p>This app is designed to help users track their fitness journey, set goals, and visualize progress with beautiful charts, timelines, and milestones.</p>
+      <p>
+        This app is designed to help you track your fitness journey effectively!
+      </p>
     </section>
   </div>
+
+  <!-- Main Script -->
   <script src="script.js" defer></script>
 </body>
 </html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FitJourney Tracker</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-
