@@ -1,132 +1,110 @@
-/* Base Styles */
-body {
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #121212;
-  color: #ffffff;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>FitJourney Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>FitJourney Tracker</h1>
+    <p>App Version: <span id="app-version">v2.85</span></p>
+  </header>
 
-.navbar {
-  display: flex;
-  justify-content: center;
-  padding: 10px;
-  background-color: #1f1f1f;
-}
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="#" data-page="dashboard">Dashboard</a>
+    <a href="#" data-page="about">About</a>
+  </nav>
 
-.navbar a {
-  text-decoration: none;
-  color: #ffffff;
-  font-size: 16px;
-  padding: 8px 15px;
-  transition: background 0.3s ease;
-}
+  <div id="main-app">
+    <!-- Dashboard Page -->
+    <section id="dashboard" class="page">
+      <!-- Chart Section -->
+      <div class="card prominent">
+        <canvas id="weight-chart"></canvas>
+        <p id="chart-placeholder">Start logging weight to see trends!</p>
+        <div id="chart-legend">
+          <p><span class="pink-bar">■</span> Pink: Sample Data</p>
+          <p><span class="blue-bar">■</span> Blue: User Data</p>
+          <div class="chart-filters">
+            <button data-filter="7">7 Days</button>
+            <button data-filter="30">30 Days</button>
+            <button data-filter="custom">Custom Range</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Milestones</h3>
+        <div id="milestone-section"></div>
+      </div>
+      <div class="dashboard-row compact">
+        <div class="card weight-summary">
+          <h3>Weight Summary</h3>
+          <div id="weight-summary"></div>
+        </div>
+        <div class="card weight-checkin">
+          <h3>Weight Check-In</h3>
+          <form id="weight-form">
+            <label for="weight-input" class="input-label">Weight:</label>
+            <input id="weight-input" type="number" step="0.1" placeholder="lbs" required />
 
-.navbar a:hover {
-  background-color: #333;
-}
+            <label for="date-input" class="input-label">Date:</label>
+            <input id="date-input" type="date" required />
 
-/* Cards and Layout */
-.card {
-  background-color: #1f1f1f;
-  margin: 20px;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-}
+            <button type="submit" class="submit-btn">Log Weight</button>
+          </form>
+        </div>
+        <div class="card timeline">
+          <h3>Timeline</h3>
+          <div id="timeline-section" class="horizontal-scroll">
+            <p class="placeholder">No timeline data yet. Start logging your weight to see it here!</p>
+          </div>
+          <button id="expand-timeline-btn">Show More</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Photo Gallery</h3>
+        <!-- Photo Upload Fields -->
+        <div class="photo-upload-section">
+          <label for="photo-upload" class="input-label">Select Photo:</label>
+          <input id="photo-upload" type="file" accept="image/*" />
 
-.dashboard-row.compact {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-}
+          <label for="photo-date" class="input-label">Photo Date:</label>
+          <input id="photo-date" type="date" />
 
-.dashboard-row.compact .card {
-  flex: 1;
-  height: auto; /* Height is synced dynamically with JS */
-}
+          <label for="photo-keywords" class="input-label">Keywords:</label>
+          <input id="photo-keywords" type="text" placeholder="e.g., front, side, workout" />
 
-.page.hidden {
-  display: none;
-}
+          <label for="photo-description" class="input-label">Description (optional):</label>
+          <input id="photo-description" type="text" placeholder="Add a description" />
 
-/* Timeline Styles */
-#timeline-section {
-  max-height: 200px;
-  overflow-y: auto;
-  padding-right: 10px;
-}
+          <button id="upload-photo-btn">Upload Photo</button>
+        </div>
 
-#timeline-section.expanded {
-  max-height: none;
-  overflow-y: visible;
-}
+        <!-- Actual Photo Gallery -->
+        <div id="photo-gallery"></div>
+        <button id="load-more-photos-btn">Load More</button>
+      </div>
+      <div>
+        <h4>Compare Photos</h4>
+        <select id="photo-select-1"></select>
+        <select id="photo-select-2"></select>
+        <button id="compare-photos-btn">Compare</button>
+        <div id="photo-comparison"></div>
+      </div>
+    </section>
 
-#expand-timeline-btn {
-  display: block;
-  margin: 10px auto;
-  background-color: #333;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-}
+    <!-- About Page -->
+    <section id="about" class="page hidden">
+      <h2>About FitJourney Tracker</h2>
+      <p>This app is designed to help you track your fitness journey effectively!</p>
+    </section>
+  </div>
 
-#expand-timeline-btn:hover {
-  background-color: #555;
-}
-
-/* Chart Filters */
-.chart-filters {
-  margin-top: 15px;
-}
-
-.chart-filters button {
-  background-color: #333;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  margin-right: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.chart-filters button:hover {
-  background-color: #555;
-}
-
-/* Photo Gallery Layout */
-#photo-gallery {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-#photo-gallery > div {
-  flex: 1 1 calc(25% - 15px); /* 4 photos per row */
-  max-width: calc(25% - 15px);
-  text-align: center;
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .dashboard-row.compact {
-    flex-wrap: wrap;
-  }
-
-  #photo-gallery > div {
-    flex: 1 1 calc(50% - 15px); /* 2 photos per row */
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard-row.compact {
-    flex-wrap: wrap;
-    flex-direction: column;
-  }
-
-  #photo-gallery > div {
-    flex: 1 1 100%; /* 1 photo per row */
-  }
-}
+  <!-- Main Script -->
+  <script src="script.js" defer></script>
+</body>
+</html>
