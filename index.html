@@ -15,7 +15,6 @@
   </header>
   <nav class="navbar" role="navigation" aria-label="Main Navigation">
     <a href="#" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
-    <a href="#" data-page="settings"><i class="fas fa-cog"></i> Settings</a>
     <a href="#" data-page="about"><i class="fas fa-info-circle"></i> About</a>
   </nav>
   <div id="main-app">
@@ -28,7 +27,7 @@
         <div id="weight-summary" class="summary-section"></div>
       </div>
       <div class="card">
-        <h3>Log Weight</h3>
+        <h3>Log Your Weight</h3>
         <form id="weight-form">
           <label for="weight-input">Weight (lbs):</label>
           <input type="number" id="weight-input" step="0.1" required>
@@ -38,7 +37,7 @@
         </form>
       </div>
       <div class="card">
-        <h3>Upload Progress Photos</h3>
+        <h3>Photo Gallery</h3>
         <input type="file" id="photo-upload" accept="image/*">
         <input type="text" id="photo-description" placeholder="Add a description (optional)">
         <button id="upload-photo-btn">Upload Photo</button>
@@ -47,13 +46,9 @@
         </div>
       </div>
     </section>
-    <section id="settings" class="page hidden">
-      <h2>Settings</h2>
-      <p>Manage your preferences here.</p>
-    </section>
     <section id="about" class="page hidden">
       <h2>About FitJourney Tracker</h2>
-      <p>Version 2.61 of the app is designed to help you track your fitness journey.</p>
+      <p>This app is designed to help you track your fitness journey.</p>
     </section>
   </div>
   <script src="script.js" defer></script>
