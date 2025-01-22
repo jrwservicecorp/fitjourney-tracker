@@ -1,15 +1,13 @@
-/* Consolidated JavaScript for FitJourney Tracker v2.83 */
+/* Consolidated JavaScript for FitJourney Tracker v2.84 */
 
-const appVersion = "v2.83";
+const appVersion = "v2.84";
 
 let chartInstance = null;
 let photoPage = 0; // For gallery pagination
 
 window.addEventListener("DOMContentLoaded", () => {
-  // Display version
   document.getElementById("app-version").textContent = appVersion;
 
-  // Initial setup
   setupNavigation();
   setupWeightLogging();
   setupPhotoUpload();
@@ -19,9 +17,8 @@ window.addEventListener("DOMContentLoaded", () => {
   setupGoalProgress();
   setupChartFilters();
 
-  // Load initial dashboard view
   loadDashboard();
-  equalizeHeights(); // Ensure boxes match the weight check-in box height
+  equalizeHeights();
 });
 
 /* ================================
@@ -38,12 +35,10 @@ function setupNavigation() {
 }
 
 function navigateTo(pageId) {
-  // Toggle visibility of pages
   document.querySelectorAll(".page").forEach((page) => {
     page.classList.toggle("hidden", page.id !== pageId);
   });
 
-  // If going back to dashboard, reload data
   if (pageId === "dashboard") {
     loadDashboard();
   }
@@ -60,8 +55,7 @@ function loadDashboard() {
   updateTimeline(progressData);
   updatePhotoGallery();
   updateMilestones(progressData);
-
-  equalizeHeights(); // Re-apply box height matching
+  equalizeHeights();
 }
 
 /* ================================
@@ -74,7 +68,6 @@ function renderChart(data, isSample = false) {
     return;
   }
 
-  // Destroy old instance if exists
   if (chartInstance) {
     chartInstance.destroy();
   }
@@ -122,7 +115,6 @@ function setupChartFilters() {
   filterButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const filter = button.getAttribute("data-filter");
-
       if (filter === "7") {
         loadChartData(7);
       } else if (filter === "30") {
@@ -156,14 +148,15 @@ function updateSummary(data) {
   }
 
   const weights = data.map((entry) => entry.weight);
-  const average = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(2);
-  const max = Math.max(...weights);
-  const min = Math.min(...weights);
+  const sum = weights.reduce((acc, w) => acc + w, 0);
+  const averageVal = Math.round(sum / weights.length); // Round, no decimals
+  const maxVal = Math.round(Math.max(...weights));
+  const minVal = Math.round(Math.min(...weights));
 
   summaryContainer.innerHTML = `
-    <p><strong>Average Weight:</strong> ${average} lbs</p>
-    <p><strong>Highest Weight:</strong> ${max} lbs</p>
-    <p><strong>Lowest Weight:</strong> ${min} lbs</p>
+    <p><strong>Average Weight:</strong> ${averageVal} lbs</p>
+    <p><strong>Highest Weight:</strong> ${maxVal} lbs</p>
+    <p><strong>Lowest Weight:</strong> ${minVal} lbs</p>
   `;
   equalizeHeights();
 }
@@ -178,7 +171,7 @@ function updateTimeline(data) {
     return;
   }
 
-  // Limit timeline to last 7 entries, date & weight on same line
+  // Show last 7 entries, no decimals
   const limitedData = data.slice(-7);
   timelineContainer.innerHTML = limitedData
     .map((entry) => `<p>${entry.date} - ${Math.round(entry.weight)} lbs</p>`)
@@ -211,8 +204,6 @@ function setupTimelineExpansion() {
     const isExpanded = timelineSection.classList.toggle("expanded");
 
     expandBtn.textContent = isExpanded ? "Show Less" : "Show More";
-
-    // Scroll top if collapsing
     if (!isExpanded) {
       timelineSection.scrollTop = 0;
     }
@@ -309,9 +300,7 @@ function setupPhotoComparison() {
       return;
     }
 
-    // Hide the gallery
     gallery.style.display = "none";
-    // Show the comparison
     comparisonContainer.innerHTML = `
       <div class="comparison-container" style="display: flex; justify-content: space-between; align-items: center;">
         <div style="flex: 1; text-align: center;">
@@ -322,7 +311,7 @@ function setupPhotoComparison() {
           <h4>Photo 2</h4>
           <img src="${photo2}" alt="Photo 2" style="max-width: 150px;">
         </div>
-        <div>
+        <div style="margin-top: 20px;">
           <textarea id="custom-text" placeholder="Add your text here..."></textarea>
           <button id="export-comparison-btn">Export</button>
         </div>
@@ -371,23 +360,6 @@ function setupExportComparison(photo1, photo2) {
 /* ================================
     Milestones & Goals
 ================================ */
-function updateMilestones(data) {
-  const milestoneContainer = document.getElementById("milestone-section");
-  if (!milestoneContainer) return;
-
-  let milestones = "";
-  const totalWeightLoss = data[0].weight - data[data.length - 1].weight;
-
-  if (totalWeightLoss >= 10) {
-    milestones += "<p>🏆 Lost 10 lbs! Great job!</p>";
-  }
-  if (data.length >= 7) {
-    milestones += "<p>🔥 7-day logging streak!</p>";
-  }
-
-  milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
-}
-
 function setupGoalProgress() {
   const goalProgressContainer = document.getElementById("goal-progress");
   const addGoalBtn = document.getElementById("add-goal-btn");
