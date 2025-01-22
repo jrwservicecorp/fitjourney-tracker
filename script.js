@@ -1,6 +1,6 @@
-/* JavaScript for v2.67 */
+/* JavaScript for FitJourney Tracker v2.65 */
 
-const appVersion = "v2.67";
+const appVersion = "v2.65";
 
 let chartInstance = null;
 
@@ -45,6 +45,7 @@ function loadDashboard() {
     renderChart(getPlaceholderData());
   }
 
+  updatePhotoGallery();
   updateTimeline(progressData);
 }
 
@@ -75,9 +76,80 @@ function renderChart(data) {
   });
 }
 
+function setupWeightLogging() {
+  const weightForm = document.getElementById("weight-form");
+  if (!weightForm) return;
+
+  weightForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const weight = parseFloat(document.getElementById("weight-input").value);
+    const date = document.getElementById("date-input").value;
+
+    if (!weight || !date) {
+      alert("Please enter both weight and date.");
+      return;
+    }
+
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    progressData.push({ date, weight });
+    localStorage.setItem("progressData", JSON.stringify(progressData));
+    loadDashboard();
+  });
+}
+
 function updateSummary(data) {
   const summaryContainer = document.getElementById("weight-summary");
   if (!summaryContainer) return;
 
   if (data.length === 0) {
-  
+    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
+    return;
+  }
+
+  const weights = data.map((entry) => entry.weight);
+  const average = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(2);
+  const max = Math.max(...weights);
+  const min = Math.min(...weights);
+
+  summaryContainer.innerHTML = `
+    <p><strong>Average Weight:</strong> ${average} lbs</p>
+    <p><strong>Highest Weight:</strong> ${max} lbs</p>
+    <p><strong>Lowest Weight:</strong> ${min} lbs</p>
+  `;
+}
+
+function updatePhotoGallery() {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  const gallery = document.getElementById("photo-gallery");
+  gallery.innerHTML = "";
+
+  if (photos.length === 0) {
+    gallery.innerHTML = '<p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>';
+    return;
+  }
+
+  const latestPhoto = photos[photos.length - 1]; // Show only the latest photo
+  const photoEntry = document.createElement("div");
+  photoEntry.innerHTML = `
+    <img src="${latestPhoto.src}" alt="Progress Photo" title="${latestPhoto.date}">
+    <p>${latestPhoto.date}</p>
+    <p>${latestPhoto.description || ""}</p>
+  `;
+  gallery.appendChild(photoEntry);
+}
+
+function updateTimeline(data) {
+  const timelineContainer = document.getElementById("timeline-section");
+  if (!timelineContainer) return;
+
+  timelineContainer.innerHTML = data
+    .map(
+      (entry) => `
+      <div>
+        <p>${entry.date}</p>
+        <p>${entry.weight} lbs</p>
+      </div>
+    `
+    )
+    .join("");
+}
