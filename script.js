@@ -1,6 +1,6 @@
-/* JavaScript for FitJourney Tracker v2.68 */
+/* JavaScript for FitJourney Tracker v2.69 */
 
-const appVersion = "v2.68";
+const appVersion = "v2.69";
 
 let chartInstance = null;
 
@@ -35,20 +35,13 @@ function navigateTo(pageId) {
 function loadDashboard() {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || getSampleData();
 
-  if (progressData.length > 0) {
-    document.getElementById("chart-placeholder").style.display = "none";
-    renderChart(progressData);
-    updateSummary(progressData);
-  } else {
-    document.getElementById("chart-placeholder").style.display = "block";
-    updateSummary([]);
-    renderChart(getSampleData());
-  }
-
+  renderChart(progressData, !localStorage.getItem("progressData"));
+  updateSummary(progressData);
   updateTimeline(progressData);
+  updatePhotoGallery();
 }
 
-function renderChart(data) {
+function renderChart(data, isSample = false) {
   const ctx = document.getElementById("weight-chart").getContext("2d");
 
   if (chartInstance) {
@@ -56,21 +49,24 @@ function renderChart(data) {
   }
 
   chartInstance = new Chart(ctx, {
-    type: "line",
+    type: "bar",
     data: {
       labels: data.map((entry) => entry.date),
       datasets: [
         {
-          label: "Weight (lbs)",
+          label: isSample ? "Sample Data" : "User Data",
           data: data.map((entry) => entry.weight),
-          borderColor: "#ff6f61",
-          backgroundColor: "rgba(255, 111, 97, 0.2)",
-          fill: true,
+          backgroundColor: isSample ? "pink" : "#3498db",
         },
       ],
     },
     options: {
       responsive: true,
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
     },
   });
 }
@@ -82,7 +78,7 @@ function getSampleData() {
     date.setDate(today.getDate() - (6 - i));
     return {
       date: date.toISOString().split("T")[0],
-      weight: Math.random() * 20 + 180, // Sample weights between 180 and 200
+      weight: Math.random() * 20 + 180,
     };
   });
 }
@@ -145,6 +141,65 @@ function updateTimeline(data) {
       <div>
         <p>${entry.date}</p>
         <p>${entry.weight.toFixed(1)} lbs</p>
+      </div>
+    `
+    )
+    .join("");
+}
+
+function setupPhotoUpload() {
+  const uploadBtn = document.getElementById("upload-photo-btn");
+  if (!uploadBtn) return;
+
+  uploadBtn.addEventListener("click", () => {
+    const fileInput = document.getElementById("photo-upload");
+    const file = fileInput.files[0];
+    const description = document.getElementById("photo-description").value;
+
+    if (!file) {
+      alert("Please select a photo to upload.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const photoDataUrl = e.target.result;
+
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
+      photos.push({
+        date: new Date().toISOString().split("T")[0],
+        src: photoDataUrl,
+        description,
+      });
+      localStorage.setItem("photos", JSON.stringify(photos));
+
+      alert("Photo uploaded successfully!");
+      fileInput.value = ""; // Clear the file input
+      document.getElementById("photo-description").value = ""; // Clear the description
+      updatePhotoGallery();
+    };
+
+    reader.readAsDataURL(file); // Convert the image file to Base64
+  });
+}
+
+function updatePhotoGallery() {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  const gallery = document.getElementById("photo-gallery");
+  gallery.innerHTML = ""; // Clear the gallery before updating
+
+  if (photos.length === 0) {
+    gallery.innerHTML = '<p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>';
+    return;
+  }
+
+  gallery.innerHTML = photos
+    .map(
+      (photo) => `
+      <div>
+        <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
+        <p>${photo.date}</p>
+        <p>${photo.description || ""}</p>
       </div>
     `
     )
