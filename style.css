@@ -36,17 +36,15 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.dashboard-row {
+.dashboard-row.compact {
   display: flex;
   gap: 20px;
   justify-content: space-between;
 }
 
-.card img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
+.card.small {
+  flex: 1 1 30%;
+  max-width: 300px;
 }
 
 textarea {
@@ -72,39 +70,60 @@ button:hover {
   background: #1a73e8;
 }
 
+/* Photo Gallery Adjustments */
+#photo-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+#photo-gallery > div {
+  flex: 1 1 calc(25% - 15px); /* 4 photos per row */
+  max-width: calc(25% - 15px);
+  text-align: center;
+}
+
 /* Responsive Styles */
 
 /* Medium screens (tablets) */
 @media (max-width: 768px) {
-  .dashboard-row {
+  .dashboard-row.compact {
     flex-wrap: wrap;
   }
 
-  .card {
+  .card.small {
     flex: 1 1 calc(50% - 20px);
+    max-width: calc(50% - 20px);
     margin: 10px;
+  }
+
+  #photo-gallery > div {
+    flex: 1 1 calc(50% - 15px); /* 2 photos per row */
+    max-width: calc(50% - 15px);
   }
 
   .navbar a {
     font-size: 16px;
     padding: 8px 12px;
   }
-
-  button {
-    font-size: 14px;
-  }
 }
 
 /* Small screens (phones) */
 @media (max-width: 480px) {
-  .dashboard-row {
+  .dashboard-row.compact {
     flex-wrap: wrap;
     flex-direction: column;
   }
 
-  .card {
+  .card.small {
     flex: 1 1 100%;
+    max-width: 100%;
     margin: 10px 0;
+  }
+
+  #photo-gallery > div {
+    flex: 1 1 100%; /* 1 photo per row */
+    max-width: 100%;
   }
 
   textarea {
@@ -117,12 +136,3 @@ button:hover {
     padding: 8px;
   }
 
-  .navbar a {
-    font-size: 14px;
-    padding: 6px 10px;
-  }
-
-  img {
-    max-width: 80%;
-  }
-}
