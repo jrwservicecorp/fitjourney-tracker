@@ -1,5 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.65 */
-const appVersion = "v2.65";
+/* JavaScript for v2.66 */
+
+const appVersion = "v2.66";
 
 let chartInstance = null;
 
@@ -10,6 +11,13 @@ window.addEventListener("DOMContentLoaded", () => {
   setupPhotoUpload();
   loadDashboard();
 });
+
+function toggleSection(sectionId) {
+  const section = document.getElementById(sectionId);
+  if (section) {
+    section.classList.toggle("hidden");
+  }
+}
 
 function setupNavigation() {
   const links = document.querySelectorAll(".navbar a");
@@ -94,22 +102,6 @@ function renderChart(data) {
   });
 }
 
-function getPlaceholderData() {
-  const today = new Date();
-  const placeholderDates = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - (6 - i));
-    return date.toISOString().split("T")[0];
-  });
-
-  const placeholderWeights = [150, 152, 151, 153, 150, 148, 149];
-
-  return placeholderDates.map((date, index) => ({
-    date,
-    weight: placeholderWeights[index],
-  }));
-}
-
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
   if (!weightForm) return;
@@ -153,60 +145,6 @@ function updateSummary(data) {
   `;
 }
 
-function calculateMilestones(data) {
-  const milestoneContainer = document.getElementById("milestone-section");
-  if (!milestoneContainer) return;
-
-  let milestones = "";
-  const totalWeightLoss = data[0].weight - data[data.length - 1].weight;
-
-  if (totalWeightLoss >= 10) {
-    milestones += "<p>🏆 Lost 10 lbs! Great job!</p>";
-  }
-
-  if (data.length >= 7) {
-    milestones += "<p>🔥 7-day logging streak!</p>";
-  }
-
-  milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
-}
-
-function setupPhotoUpload() {
-  const uploadBtn = document.getElementById("upload-photo-btn");
-  if (!uploadBtn) return;
-
-  uploadBtn.addEventListener("click", () => {
-    const fileInput = document.getElementById("photo-upload");
-    const file = fileInput.files[0];
-    const description = document.getElementById("photo-description").value;
-
-    if (!file) {
-      alert("Please select a photo to upload.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const photoDataUrl = e.target.result;
-
-      const photos = JSON.parse(localStorage.getItem("photos")) || [];
-      photos.push({
-        date: new Date().toISOString().split("T")[0],
-        src: photoDataUrl,
-        description,
-      });
-      localStorage.setItem("photos", JSON.stringify(photos));
-
-      alert("Photo uploaded successfully!");
-      fileInput.value = ""; // Clear the file input
-      document.getElementById("photo-description").value = ""; // Clear the description
-      updatePhotoGallery();
-    };
-
-    reader.readAsDataURL(file); // Convert the image file to Base64
-  });
-}
-
 function updatePhotoGallery() {
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
   const gallery = document.getElementById("photo-gallery");
@@ -235,7 +173,8 @@ function updateTimeline(data) {
     .map(
       (entry) => `
     <div>
-      <p><span class='label'>${entry.date}:</span> ${entry.weight} lbs</p>
+      <p>${entry.date}</p>
+      <p>${entry.weight} lbs</p>
     </div>
   `
     )
