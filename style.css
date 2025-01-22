@@ -1,4 +1,4 @@
-/* Updated styles for FitJourney Tracker v2.70 */
+/* Updated styles for FitJourney Tracker v2.71 */
 
 body {
   font-family: 'Poppins', Arial, sans-serif;
@@ -41,11 +41,27 @@ body {
   padding: 30px;
 }
 
-.dashboard-row {
+.dashboard-row.compact {
   display: flex;
   gap: 20px;
   justify-content: space-between;
-  flex-wrap: wrap;
+}
+
+.card.small {
+  flex: 1;
+  min-width: 250px;
+  max-width: 30%;
+}
+
+@media (max-width: 768px) {
+  .dashboard-row.compact {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .card.small {
+    max-width: 100%;
+  }
 }
 
 canvas {
