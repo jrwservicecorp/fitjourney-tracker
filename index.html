@@ -11,7 +11,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.58</span></p>
+    <p>App Version: <span id="app-version">v2.60</span></p>
   </header>
   <nav class="navbar" role="navigation" aria-label="Main Navigation">
     <a href="#" data-page="home"><i class="fas fa-home"></i> Home</a>
@@ -28,35 +28,16 @@
         <p class="placeholder" id="chart-placeholder">Start logging your weight to see trends here!</p>
       </div>
       <div class="card">
-        <h3>Summary</h3>
-        <p>Average Weight: <span id="avg-weight">--</span> lbs</p>
-        <p>Current Streak: <span id="current-streak">--</span> days</p>
-        <p>Goal Progress: <span id="goal-progress">--%</span></p>
-        <div class="progress-bar">
-          <div class="progress" id="goal-progress-bar" style="width: 0%;"></div>
-        </div>
-      </div>
-      <div class="collapsible-section">
-        <button class="toggle-btn">Log Your Weight</button>
-        <div class="collapsible-content">
-          <input type="number" id="weight-input" placeholder="Enter your weight (lbs)">
-          <label for="body-fat">Body Fat (%):</label>
-          <input type="number" id="body-fat" placeholder="Enter body fat percentage">
-          <label for="waist">Waist (in):</label>
-          <input type="number" id="waist" placeholder="Enter waist measurement">
-          <button id="log-weight-btn">Log Entry</button>
-        </div>
-      </div>
-      <div class="card">
         <h3>Photos</h3>
         <input type="file" id="photo-upload" accept="image/*">
         <input type="text" id="photo-description" placeholder="Add a description (optional)">
-        <button id="upload-photo-btn">Upload Photo</button>
+        <button id="upload-photo-btn" class="button">Upload Photo</button>
         <div id="photo-gallery">
           <p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>
         </div>
       </div>
     </section>
+    <button id="theme-toggle-btn" class="theme-toggle">Toggle Theme</button>
   </div>
   <script src="script.js" defer></script>
 </body>
