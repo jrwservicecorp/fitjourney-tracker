@@ -10,13 +10,14 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.81</span></p>
+    <p>App Version: <span id="app-version">v2.82</span></p>
   </header>
   <nav class="navbar">
     <a href="#" data-page="dashboard">Dashboard</a>
     <a href="#" data-page="about">About</a>
   </nav>
   <div id="main-app">
+    <!-- Dashboard Page -->
     <section id="dashboard" class="page">
       <div class="card prominent">
         <canvas id="weight-chart"></canvas>
@@ -24,6 +25,11 @@
         <div id="chart-legend">
           <p><span class="pink-bar">■</span> Pink: Sample Data</p>
           <p><span class="blue-bar">■</span> Blue: User Data</p>
+          <div class="chart-filters">
+            <button data-filter="7">7 Days</button>
+            <button data-filter="30">30 Days</button>
+            <button data-filter="custom">Custom Range</button>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -64,9 +70,11 @@
         <div id="photo-comparison"></div>
       </div>
     </section>
+
+    <!-- About Page -->
     <section id="about" class="page hidden">
       <h2>About FitJourney Tracker</h2>
-      <p>This app is designed to help you track your fitness journey effectively!</p>
+      <p>This app is designed to help users track their fitness journey, set goals, and visualize progress with beautiful charts, timelines, and milestones.</p>
     </section>
   </div>
   <script src="script.js" defer></script>
