@@ -1,4 +1,4 @@
-/* Updated styles for FitJourney Tracker v2.73 */
+/* Base styles (desktop-first approach) */
 
 body {
   font-family: 'Poppins', Arial, sans-serif;
@@ -36,68 +36,93 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.card.prominent {
-  max-width: 100%;
-  padding: 30px;
-}
-
-.dashboard-row.compact {
+.dashboard-row {
   display: flex;
   gap: 20px;
   justify-content: space-between;
 }
 
-.card.small {
-  flex: 1;
-  min-width: 250px;
-  max-width: 30%;
-}
-
-#timeline-section {
-  max-height: 150px;
-  overflow: hidden;
-}
-
-#timeline-section.expanded {
-  max-height: none;
-  overflow: auto;
-}
-
-canvas {
+.card img {
+  max-width: 100%;
+  height: auto;
   display: block;
   margin: 0 auto;
-  max-width: 90%;
-  height: 400px;
 }
 
-#chart-legend p {
-  font-size: 14px;
-  margin: 0;
-}
-
-.pink-bar {
-  color: pink;
-}
-
-.blue-bar {
-  color: #3498db;
-}
-
-#photo-gallery {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-#photo-gallery > div {
-  width: 20%;
-  text-align: center;
-  font-size: 12px;
-}
-
-#photo-gallery img {
+textarea {
   width: 100%;
-  height: auto;
+  padding: 10px;
+  border: 1px solid #ccc;
   border-radius: 5px;
-  margin-bottom: 5px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+button {
+  background: #3498db;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1a73e8;
+}
+
+/* Responsive Styles */
+
+/* Medium screens (tablets) */
+@media (max-width: 768px) {
+  .dashboard-row {
+    flex-wrap: wrap;
+  }
+
+  .card {
+    flex: 1 1 calc(50% - 20px);
+    margin: 10px;
+  }
+
+  .navbar a {
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+
+  button {
+    font-size: 14px;
+  }
+}
+
+/* Small screens (phones) */
+@media (max-width: 480px) {
+  .dashboard-row {
+    flex-wrap: wrap;
+    flex-direction: column;
+  }
+
+  .card {
+    flex: 1 1 100%;
+    margin: 10px 0;
+  }
+
+  textarea {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  button {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .navbar a {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+
+  img {
+    max-width: 80%;
+  }
 }
