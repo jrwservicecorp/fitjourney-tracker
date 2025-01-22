@@ -1,6 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.77 - Sample Data Fix and Chart Readability */
+/* Updated JavaScript for FitJourney Tracker v2.78 - Equal Heights Fix */
 
-const appVersion = "v2.77";
+const appVersion = "v2.78";
 
 let chartInstance = null;
 let photoPage = 0; // Pagination for photos
@@ -14,7 +14,20 @@ window.addEventListener("DOMContentLoaded", () => {
   setupPhotoPagination();
   setupTimelineExpansion();
   loadDashboard();
+  equalizeHeights(); // Ensure equal heights on page load
 });
+
+function equalizeHeights() {
+  const weightSummaryBox = document.querySelector(".weight-summary");
+  const otherBoxes = document.querySelectorAll(".dashboard-row .card:not(.weight-summary)");
+
+  if (weightSummaryBox) {
+    const height = weightSummaryBox.offsetHeight;
+    otherBoxes.forEach((box) => {
+      box.style.height = `${height}px`;
+    });
+  }
+}
 
 function setupNavigation() {
   const links = document.querySelectorAll(".navbar a");
@@ -44,6 +57,7 @@ function loadDashboard() {
   updateTimeline(progressData);
   updatePhotoGallery();
   updateMilestones(progressData);
+  equalizeHeights(); // Reapply equal heights after loading content
 }
 
 function renderChart(data, isSample = false) {
@@ -143,6 +157,7 @@ function updateSummary(data) {
     <p><strong>Highest Weight:</strong> ${max} lbs</p>
     <p><strong>Lowest Weight:</strong> ${min} lbs</p>
   `;
+  equalizeHeights(); // Reapply equal heights after content updates
 }
 
 function updateTimeline(data) {
@@ -165,6 +180,7 @@ function updateTimeline(data) {
     `
     )
     .join("");
+  equalizeHeights(); // Reapply equal heights after content updates
 }
 
 function setupTimelineExpansion() {
@@ -289,69 +305,4 @@ function setupPhotoComparison() {
           <h4>Photo 2</h4>
           <img src="${photo2}" alt="Photo 2" style="max-width: 150px; height: auto;">
         </div>
-        <div style="margin-top: 20px;">
-          <textarea id="custom-text" placeholder="Add your text here..."></textarea>
-          <button id="export-comparison-btn">Export</button>
-        </div>
-      </div>
-    `;
-
-    setupExportComparison(photo1, photo2);
-  });
-}
-
-function setupExportComparison(photo1, photo2) {
-  const exportBtn = document.getElementById("export-comparison-btn");
-  if (!exportBtn) return;
-
-  exportBtn.addEventListener("click", () => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const customText = document.getElementById("custom-text").value;
-
-    canvas.width = 800;
-    canvas.height = 400;
-
-    const img1 = new Image();
-    const img2 = new Image();
-
-    img1.onload = () => {
-      ctx.drawImage(img1, 0, 0, 400, 400);
-      img2.onload = () => {
-        ctx.drawImage(img2, 400, 0, 400, 400);
-
-        // Add custom text
-        ctx.font = "20px Arial";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.fillText(customText, canvas.width / 2, 380);
-
-        // Export the canvas
-        const exportLink = document.createElement("a");
-        exportLink.download = "comparison.png";
-        exportLink.href = canvas.toDataURL();
-        exportLink.click();
-      };
-      img2.src = photo2;
-    };
-    img1.src = photo1;
-  });
-}
-
-function updateMilestones(data) {
-  const milestoneContainer = document.getElementById("milestone-section");
-  if (!milestoneContainer) return;
-
-  let milestones = "";
-  const totalWeightLoss = data[0].weight - data[data.length - 1].weight;
-
-  if (totalWeightLoss >= 10) {
-    milestones += "<p>🏆 Lost 10 lbs! Great job!</p>";
-  }
-
-  if (data.length >= 7) {
-    milestones += "<p>🔥 7-day logging streak!</p>";
-  }
-
-  milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
-}
+        <div style="margin-top: 20px
