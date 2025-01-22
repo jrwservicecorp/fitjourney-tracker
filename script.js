@@ -1,5 +1,5 @@
-/* Updated JavaScript for v2.62 */
-const appVersion = "v2.62";
+/* Updated JavaScript for FitJourney Tracker v2.63 */
+const appVersion = "v2.63";
 
 let chartInstance = null;
 
@@ -38,6 +38,7 @@ function loadDashboard() {
     document.getElementById("chart-placeholder").style.display = "none";
     renderChart(progressData);
     updateSummary(progressData);
+    calculateMilestones(progressData);
   } else {
     document.getElementById("chart-placeholder").style.display = "block";
     updateSummary([]);
@@ -45,6 +46,7 @@ function loadDashboard() {
   }
 
   updatePhotoGallery();
+  updateTimeline(progressData);
 }
 
 function renderChart(data) {
@@ -138,7 +140,7 @@ function updateSummary(data) {
     return;
   }
 
-  const weights = data.map(entry => entry.weight);
+  const weights = data.map((entry) => entry.weight);
   const average = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(2);
   const max = Math.max(...weights);
   const min = Math.min(...weights);
@@ -148,6 +150,24 @@ function updateSummary(data) {
     <p><span class='label'>Highest Weight:</span> ${max} lbs</p>
     <p><span class='label'>Lowest Weight:</span> ${min} lbs</p>
   `;
+}
+
+function calculateMilestones(data) {
+  const milestoneContainer = document.getElementById("milestone-section");
+  if (!milestoneContainer) return;
+
+  let milestones = "";
+  const totalWeightLoss = data[0].weight - data[data.length - 1].weight;
+
+  if (totalWeightLoss >= 10) {
+    milestones += "<p>🏆 Lost 10 lbs! Great job!</p>";
+  }
+
+  if (data.length >= 7) {
+    milestones += "<p>🔥 7-day logging streak!</p>";
+  }
+
+  milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
 }
 
 function setupPhotoUpload() {
@@ -203,4 +223,19 @@ function updatePhotoGallery() {
     `;
     gallery.appendChild(photoEntry);
   });
+}
+
+function updateTimeline(data) {
+  const timelineContainer = document.getElementById("timeline-section");
+  if (!timelineContainer) return;
+
+  timelineContainer.innerHTML = data
+    .map(
+      (entry) => `
+    <div>
+      <p><span class='label'>${entry.date}:</span> ${entry.weight} lbs</p>
+    </div>
+  `
+    )
+    .join("");
 }
