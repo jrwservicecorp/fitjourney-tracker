@@ -1,4 +1,4 @@
-/* Updated styles for FitJourney Tracker v2.67 */
+/* Updated styles for FitJourney Tracker v2.65 */
 
 body {
   font-family: 'Poppins', Arial, sans-serif;
@@ -83,4 +83,8 @@ button:hover {
   max-width: 100%;
   border-radius: 5px;
   margin: 10px 0;
+}
+
+#photo-gallery div {
+  margin-bottom: 15px;
 }
