@@ -1,6 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.82 */
+/* Updated JavaScript for FitJourney Tracker v2.83 */
 
-const appVersion = "v2.82";
+const appVersion = "v2.83";
 
 let chartInstance = null;
 let photoPage = 0; // Pagination for photos
@@ -65,6 +65,11 @@ function loadDashboard() {
 function renderChart(data, isSample = false) {
   const ctx = document.getElementById("weight-chart").getContext("2d");
 
+  if (!ctx) {
+    console.error("Chart container not found!");
+    return;
+  }
+
   if (chartInstance) {
     chartInstance.destroy();
   }
@@ -87,19 +92,19 @@ function renderChart(data, isSample = false) {
         legend: {
           display: true,
           labels: {
-            color: "#f5f5f5", // Improve legend readability
+            color: "#f5f5f5",
           },
         },
       },
       scales: {
         x: {
           ticks: {
-            color: "#f5f5f5", // Improve x-axis tick readability
+            color: "#f5f5f5",
           },
         },
         y: {
           ticks: {
-            color: "#f5f5f5", // Improve y-axis tick readability
+            color: "#f5f5f5",
           },
         },
       },
@@ -126,7 +131,7 @@ function updateSummary(data) {
     <p><strong>Highest Weight:</strong> ${max} lbs</p>
     <p><strong>Lowest Weight:</strong> ${min} lbs</p>
   `;
-  equalizeHeights(); // Reapply equal heights after content updates
+  equalizeHeights();
 }
 
 function updateTimeline(data) {
@@ -139,7 +144,6 @@ function updateTimeline(data) {
     return;
   }
 
-  // Limit to 7 lines and format date and weight on the same line
   const limitedData = data.slice(-7);
   timelineContainer.innerHTML = limitedData
     .map((entry) => `<p>${entry.date} - ${Math.round(entry.weight)} lbs</p>`)
@@ -154,10 +158,8 @@ function setupTimelineExpansion() {
     const timelineSection = document.getElementById("timeline-section");
     const isExpanded = timelineSection.classList.toggle("expanded");
 
-    // Toggle button text based on state
     expandBtn.textContent = isExpanded ? "Show Less" : "Show More";
 
-    // Ensure smooth scrolling back to the top when collapsing
     if (!isExpanded) {
       timelineSection.scrollTop = 0;
     }
@@ -188,97 +190,6 @@ function updatePhotoGallery() {
   });
 }
 
-function setupPhotoPagination() {
-  const loadMoreBtn = document.getElementById("load-more-photos-btn");
-  if (!loadMoreBtn) return;
-
-  loadMoreBtn.addEventListener("click", () => {
-    photoPage++;
-    updatePhotoGallery();
-  });
-}
-
-function setupPhotoComparison() {
-  const compareBtn = document.getElementById("compare-photos-btn");
-  if (!compareBtn) return;
-
-  compareBtn.addEventListener("click", () => {
-    const select1 = document.getElementById("photo-select-1");
-    const select2 = document.getElementById("photo-select-2");
-    const gallery = document.getElementById("photo-gallery");
-    const comparisonContainer = document.getElementById("photo-comparison");
-
-    const photo1 = select1.value;
-    const photo2 = select2.value;
-
-    if (!photo1 || !photo2) {
-      alert("Please select two photos to compare.");
-      return;
-    }
-
-    // Hide the photo gallery
-    gallery.style.display = "none";
-
-    // Show comparison view
-    comparisonContainer.innerHTML = `
-      <div class="comparison-container" style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="flex: 1; text-align: center;">
-          <h4>Photo 1</h4>
-          <img src="${photo1}" alt="Photo 1" style="max-width: 150px; height: auto;">
-        </div>
-        <div style="flex: 1; text-align: center;">
-          <h4>Photo 2</h4>
-          <img src="${photo2}" alt="Photo 2" style="max-width: 150px; height: auto;">
-        </div>
-        <div style="margin-top: 20px;">
-          <textarea id="custom-text" placeholder="Add your text here..."></textarea>
-          <button id="export-comparison-btn">Export</button>
-        </div>
-      </div>
-    `;
-
-    setupExportComparison(photo1, photo2);
-  });
-}
-
-function setupExportComparison(photo1, photo2) {
-  const exportBtn = document.getElementById("export-comparison-btn");
-  if (!exportBtn) return;
-
-  exportBtn.addEventListener("click", () => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const customText = document.getElementById("custom-text").value;
-
-    canvas.width = 800;
-    canvas.height = 400;
-
-    const img1 = new Image();
-    const img2 = new Image();
-
-    img1.onload = () => {
-      ctx.drawImage(img1, 0, 0, 400, 400);
-      img2.onload = () => {
-        ctx.drawImage(img2, 400, 0, 400, 400);
-
-        // Add custom text
-        ctx.font = "20px Arial";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.fillText(customText, canvas.width / 2, 380);
-
-        // Export the canvas
-        const exportLink = document.createElement("a");
-        exportLink.download = "comparison.png";
-        exportLink.href = canvas.toDataURL();
-        exportLink.click();
-      };
-      img2.src = photo2;
-    };
-    img1.src = photo1;
-  });
-}
-
 function updateMilestones(data) {
   const milestoneContainer = document.getElementById("milestone-section");
   if (!milestoneContainer) return;
@@ -295,53 +206,6 @@ function updateMilestones(data) {
   }
 
   milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
-}
-
-function setupGoalProgress() {
-  const goalProgressContainer = document.getElementById("goal-progress");
-  const addGoalBtn = document.getElementById("add-goal-btn");
-
-  if (!addGoalBtn) return;
-
-  addGoalBtn.addEventListener("click", () => {
-    const goalWeight = prompt("Set your goal weight (lbs):");
-    if (goalWeight) {
-      goalProgressContainer.innerHTML = `
-        <p>Goal: Reach ${goalWeight} lbs</p>
-        <div class="progress-bar-container">
-          <div class="progress-bar" style="width: 30%;"></div>
-        </div>
-      `;
-    }
-  });
-}
-
-function setupChartFilters() {
-  const filterButtons = document.querySelectorAll(".chart-filters button");
-
-  filterButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const filter = button.getAttribute("data-filter");
-
-      if (filter === "7") {
-        loadChartData(7);
-      } else if (filter === "30") {
-        loadChartData(30);
-      } else if (filter === "custom") {
-        const range = prompt("Enter the number of days for the custom range:");
-        if (range) {
-          loadChartData(parseInt(range));
-        }
-      }
-    });
-  });
-}
-
-function loadChartData(days) {
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || getSampleData();
-  const filteredData = progressData.slice(-days);
-
-  renderChart(filteredData, false);
 }
 
 function getSampleData() {
