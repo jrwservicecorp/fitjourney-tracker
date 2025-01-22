@@ -45,6 +45,33 @@ body {
   height: auto; /* Height will be synced dynamically */
 }
 
+/* Timeline styles */
+#timeline-section {
+  max-height: 200px; /* Constrain timeline height */
+  overflow-y: auto; /* Enable scrolling for excess content */
+  padding-right: 10px; /* Add padding for scrollbar */
+}
+
+#timeline-section.expanded {
+  max-height: none; /* Remove height constraint when expanded */
+  overflow-y: visible;
+}
+
+#expand-timeline-btn {
+  display: block;
+  margin: 10px auto;
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#expand-timeline-btn:hover {
+  background-color: #555;
+}
+
 /* Photo Gallery */
 #photo-gallery {
   display: flex;
