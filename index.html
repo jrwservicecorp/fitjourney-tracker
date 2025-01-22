@@ -10,7 +10,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.71</span></p>
+    <p>App Version: <span id="app-version">v2.72</span></p>
   </header>
   <nav class="navbar">
     <a href="#" data-page="dashboard">Dashboard</a>
@@ -47,16 +47,13 @@
         </div>
       </div>
       <div class="card">
+        <h3>Milestones</h3>
+        <div id="milestone-section"></div>
+      </div>
+      <div class="card">
         <h3>Photo Gallery</h3>
-        <div class="photo-placeholder">
-          <div class="photo-icon">📷</div>
-          <div class="photo-icon">📷</div>
-          <div class="photo-icon">📷</div>
-        </div>
-        <input id="photo-upload" type="file" accept="image/*" />
-        <input id="photo-description" type="text" placeholder="Add a description (optional)" />
-        <button id="upload-photo-btn">Upload Photo</button>
         <div id="photo-gallery"></div>
+        <button id="load-more-photos-btn">Load More</button>
         <div>
           <h4>Compare Photos</h4>
           <select id="photo-select-1"></select>
@@ -64,10 +61,6 @@
           <button id="compare-photos-btn">Compare</button>
           <div id="photo-comparison"></div>
         </div>
-      </div>
-      <div class="card">
-        <h3>Milestones</h3>
-        <div id="milestone-section"></div>
       </div>
     </section>
     <section id="about" class="page hidden">
