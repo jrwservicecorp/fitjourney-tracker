@@ -5,7 +5,6 @@ let chartInstance = null;
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
   setupNavigation();
-  setupWeightLogging();
   loadDashboard();
 });
 
@@ -24,7 +23,11 @@ function navigateTo(pageId) {
     page.classList.toggle("hidden", page.id !== pageId);
   });
 
-  if (pageId === "dashboard") loadDashboard();
+  if (pageId === "dashboard") {
+    loadDashboard();
+  } else if (pageId === "log-weight") {
+    setupWeightLogging();
+  }
 }
 
 function loadDashboard() {
@@ -104,6 +107,7 @@ function getPlaceholderData() {
 
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
+  if (!weightForm) return; // Exit if the form is not found
   weightForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const weight = parseFloat(document.getElementById("weight-input").value);
@@ -123,6 +127,8 @@ function setupWeightLogging() {
 
 function updateSummary(data) {
   const summaryContainer = document.getElementById("weight-summary");
+  if (!summaryContainer) return; // Exit if the summary container is not found
+
   if (data.length === 0) {
     summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
     return;
