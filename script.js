@@ -1,5 +1,5 @@
-/* Updated JavaScript for FitJourney Tracker v2.64 updated */
-const appVersion = "v2.64";
+/* Updated JavaScript for FitJourney Tracker v2.65 */
+const appVersion = "v2.65";
 
 let chartInstance = null;
 
@@ -146,6 +146,7 @@ function updateSummary(data) {
   const min = Math.min(...weights);
 
   summaryContainer.innerHTML = `
+    <h3>Weight Summary</h3>
     <p><span class='label'>Average Weight:</span> ${average} lbs</p>
     <p><span class='label'>Highest Weight:</span> ${max} lbs</p>
     <p><span class='label'>Lowest Weight:</span> ${min} lbs</p>
@@ -209,22 +210,21 @@ function setupPhotoUpload() {
 function updatePhotoGallery() {
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
   const gallery = document.getElementById("photo-gallery");
-  gallery.innerHTML = "";
+  gallery.innerHTML = ""; // Clear the gallery before updating
 
   if (photos.length === 0) {
     gallery.innerHTML = '<p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>';
     return;
   }
 
-  photos.forEach((photo) => {
-    const photoEntry = document.createElement("div");
-    photoEntry.innerHTML = `
-      <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
-      <p>${photo.date}</p>
-      <p>${photo.description || ""}</p>
-    `;
-    gallery.appendChild(photoEntry);
-  });
+  const latestPhoto = photos[photos.length - 1]; // Show only the latest photo
+  const photoEntry = document.createElement("div");
+  photoEntry.innerHTML = `
+    <img src="${latestPhoto.src}" alt="Progress Photo" title="${latestPhoto.date}">
+    <p>${latestPhoto.date}</p>
+    <p>${latestPhoto.description || ""}</p>
+  `;
+  gallery.appendChild(photoEntry);
 }
 
 function updateTimeline(data) {
