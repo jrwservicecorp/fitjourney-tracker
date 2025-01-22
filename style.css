@@ -34,6 +34,7 @@ body {
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
+/* Dashboard Layout */
 .dashboard-row.compact {
   display: flex;
   justify-content: space-between;
@@ -45,11 +46,30 @@ body {
   height: auto; /* Height will be synced dynamically */
 }
 
-/* Timeline styles */
+/* Chart Filters */
+.chart-filters {
+  margin-top: 15px;
+}
+
+.chart-filters button {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  margin-right: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.chart-filters button:hover {
+  background-color: #555;
+}
+
+/* Timeline Styles */
 #timeline-section {
   max-height: 200px; /* Constrain timeline height */
-  overflow-y: auto; /* Enable scrolling for excess content */
-  padding-right: 10px; /* Add padding for scrollbar */
+  overflow-y: auto; /* Allow scrolling for excess content */
+  padding-right: 10px;
 }
 
 #timeline-section.expanded {
@@ -85,7 +105,7 @@ body {
   text-align: center;
 }
 
-/* Responsive styles */
+/* Responsive Styles */
 @media (max-width: 768px) {
   .dashboard-row.compact {
     flex-wrap: wrap;
