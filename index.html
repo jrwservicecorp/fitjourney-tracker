@@ -11,13 +11,11 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.60</span></p>
+    <p>App Version: <span id="app-version">v2.61</span></p>
   </header>
   <nav class="navbar" role="navigation" aria-label="Main Navigation">
-    <a href="#" data-page="home"><i class="fas fa-home"></i> Home</a>
     <a href="#" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
-    <a href="#" data-page="settings"><i class="fas fa-cog"></i> Settings</a>
-    <a href="#" data-page="about"><i class="fas fa-info-circle"></i> About</a>
+    <a href="#" data-page="log-weight"><i class="fas fa-edit"></i> Log Weight</a>
   </nav>
   <div id="main-app">
     <section id="dashboard" class="page hidden">
@@ -26,18 +24,19 @@
         <h3>Your Weight Trends</h3>
         <canvas id="weight-chart"></canvas>
         <p class="placeholder" id="chart-placeholder">Start logging your weight to see trends here!</p>
-      </div>
-      <div class="card">
-        <h3>Photos</h3>
-        <input type="file" id="photo-upload" accept="image/*">
-        <input type="text" id="photo-description" placeholder="Add a description (optional)">
-        <button id="upload-photo-btn" class="button">Upload Photo</button>
-        <div id="photo-gallery">
-          <p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>
-        </div>
+        <div id="weight-summary" class="summary-section"></div>
       </div>
     </section>
-    <button id="theme-toggle-btn" class="theme-toggle">Toggle Theme</button>
+    <section id="log-weight" class="page hidden">
+      <h2>Log Your Weight</h2>
+      <form id="weight-form" class="card">
+        <label for="weight-input">Weight (lbs):</label>
+        <input type="number" id="weight-input" step="0.1" required>
+        <label for="date-input">Date:</label>
+        <input type="date" id="date-input" required>
+        <button type="submit">Log Weight</button>
+      </form>
+    </section>
   </div>
   <script src="script.js" defer></script>
 </body>
