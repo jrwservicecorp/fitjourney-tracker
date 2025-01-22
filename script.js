@@ -1,6 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.81 */
+/* Updated JavaScript for FitJourney Tracker v2.82 */
 
-const appVersion = "v2.81";
+const appVersion = "v2.82";
 
 let chartInstance = null;
 let photoPage = 0; // Pagination for photos
@@ -13,6 +13,8 @@ window.addEventListener("DOMContentLoaded", () => {
   setupPhotoComparison();
   setupPhotoPagination();
   setupTimelineExpansion();
+  setupGoalProgress();
+  setupChartFilters();
   loadDashboard();
   equalizeHeights(); // Ensure equal heights on page load
 });
@@ -105,39 +107,6 @@ function renderChart(data, isSample = false) {
   });
 }
 
-function getSampleData() {
-  const today = new Date();
-  return Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - (6 - i));
-    return {
-      date: date.toISOString().split("T")[0],
-      weight: Math.random() * 20 + 180,
-    };
-  });
-}
-
-function setupWeightLogging() {
-  const weightForm = document.getElementById("weight-form");
-  if (!weightForm) return;
-
-  weightForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const weight = parseFloat(document.getElementById("weight-input").value);
-    const date = document.getElementById("date-input").value;
-
-    if (!weight || !date) {
-      alert("Please enter both weight and date.");
-      return;
-    }
-
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    progressData.push({ date, weight });
-    localStorage.setItem("progressData", JSON.stringify(progressData));
-    loadDashboard();
-  });
-}
-
 function updateSummary(data) {
   const summaryContainer = document.getElementById("weight-summary");
   if (!summaryContainer) return;
@@ -170,17 +139,11 @@ function updateTimeline(data) {
     return;
   }
 
-  timelineContainer.innerHTML = data
-    .map(
-      (entry) => `
-      <div>
-        <p>${entry.date}</p>
-        <p>${entry.weight.toFixed(1)} lbs</p>
-      </div>
-    `
-    )
+  // Limit to 7 lines and format date and weight on the same line
+  const limitedData = data.slice(-7);
+  timelineContainer.innerHTML = limitedData
+    .map((entry) => `<p>${entry.date} - ${Math.round(entry.weight)} lbs</p>`)
     .join("");
-  equalizeHeights(); // Reapply equal heights after content updates
 }
 
 function setupTimelineExpansion() {
@@ -189,54 +152,16 @@ function setupTimelineExpansion() {
 
   expandBtn.addEventListener("click", () => {
     const timelineSection = document.getElementById("timeline-section");
-    timelineSection.classList.toggle("expanded");
-    expandBtn.textContent = timelineSection.classList.contains("expanded")
-      ? "Show Less"
-      : "Show More";
-  });
-}
+    const isExpanded = timelineSection.classList.toggle("expanded");
 
-function setupPhotoUpload() {
-  const uploadBtn = document.getElementById("upload-photo-btn");
-  if (!uploadBtn) return;
+    // Toggle button text based on state
+    expandBtn.textContent = isExpanded ? "Show Less" : "Show More";
 
-  uploadBtn.addEventListener("click", () => {
-    const fileInput = document.getElementById("photo-upload");
-    const file = fileInput.files[0];
-    const description = document.getElementById("photo-description").value;
-
-    if (!file) {
-      alert("Please select a photo to upload.");
-      return;
+    // Ensure smooth scrolling back to the top when collapsing
+    if (!isExpanded) {
+      timelineSection.scrollTop = 0;
     }
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const photoDataUrl = e.target.result;
-
-      const photos = JSON.parse(localStorage.getItem("photos")) || [];
-      photos.push({
-        date: new Date().toISOString().split("T")[0],
-        src: photoDataUrl,
-        weight: getAssociatedWeight(new Date().toISOString().split("T")[0]),
-        description,
-      });
-      localStorage.setItem("photos", JSON.stringify(photos));
-
-      alert("Photo uploaded successfully!");
-      fileInput.value = ""; // Clear the file input
-      document.getElementById("photo-description").value = ""; // Clear the description
-      updatePhotoGallery();
-    };
-
-    reader.readAsDataURL(file); // Convert the image file to Base64
   });
-}
-
-function getAssociatedWeight(date) {
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  const weightEntry = progressData.find((entry) => entry.date === date);
-  return weightEntry ? weightEntry.weight : "Unknown";
 }
 
 function updatePhotoGallery() {
@@ -370,4 +295,63 @@ function updateMilestones(data) {
   }
 
   milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
+}
+
+function setupGoalProgress() {
+  const goalProgressContainer = document.getElementById("goal-progress");
+  const addGoalBtn = document.getElementById("add-goal-btn");
+
+  if (!addGoalBtn) return;
+
+  addGoalBtn.addEventListener("click", () => {
+    const goalWeight = prompt("Set your goal weight (lbs):");
+    if (goalWeight) {
+      goalProgressContainer.innerHTML = `
+        <p>Goal: Reach ${goalWeight} lbs</p>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: 30%;"></div>
+        </div>
+      `;
+    }
+  });
+}
+
+function setupChartFilters() {
+  const filterButtons = document.querySelectorAll(".chart-filters button");
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const filter = button.getAttribute("data-filter");
+
+      if (filter === "7") {
+        loadChartData(7);
+      } else if (filter === "30") {
+        loadChartData(30);
+      } else if (filter === "custom") {
+        const range = prompt("Enter the number of days for the custom range:");
+        if (range) {
+          loadChartData(parseInt(range));
+        }
+      }
+    });
+  });
+}
+
+function loadChartData(days) {
+  const progressData = JSON.parse(localStorage.getItem("progressData")) || getSampleData();
+  const filteredData = progressData.slice(-days);
+
+  renderChart(filteredData, false);
+}
+
+function getSampleData() {
+  const today = new Date();
+  return Array.from({ length: 30 }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    return {
+      date: date.toISOString().split("T")[0],
+      weight: Math.random() * 20 + 180,
+    };
+  });
 }
