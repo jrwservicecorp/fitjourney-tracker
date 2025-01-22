@@ -10,7 +10,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.69</span></p>
+    <p>App Version: <span id="app-version">v2.70</span></p>
   </header>
   <nav class="navbar">
     <a href="#" data-page="dashboard">Dashboard</a>
@@ -20,12 +20,13 @@
     <section id="dashboard" class="page">
       <div class="card prominent">
         <canvas id="weight-chart"></canvas>
+        <p id="chart-placeholder">Start logging weight to see trends!</p>
         <div id="chart-legend">
-          <p><span class="sample-legend"></span> Sample Data (Pink Bars)</p>
-          <p><span class="user-legend"></span> User Data</p>
+          <p><span class="pink-bar">■</span> Pink: Sample Data</p>
+          <p><span class="blue-bar">■</span> Blue: User Data</p>
         </div>
       </div>
-      <div class="dashboard-grid">
+      <div class="dashboard-row">
         <div class="card">
           <h3>Weight Summary</h3>
           <div id="weight-summary"></div>
@@ -46,14 +47,15 @@
         </div>
         <div class="card">
           <h3>Photo Gallery</h3>
+          <div class="photo-placeholder">
+            <div class="photo-icon">📷</div>
+            <div class="photo-icon">📷</div>
+            <div class="photo-icon">📷</div>
+          </div>
           <input id="photo-upload" type="file" accept="image/*" />
           <input id="photo-description" type="text" placeholder="Add a description (optional)" />
           <button id="upload-photo-btn">Upload Photo</button>
-          <div id="photo-gallery">
-            <div class="placeholder-photo">📸</div>
-            <div class="placeholder-photo">📸</div>
-            <div class="placeholder-photo">📸</div>
-          </div>
+          <div id="photo-gallery"></div>
         </div>
       </div>
     </section>
