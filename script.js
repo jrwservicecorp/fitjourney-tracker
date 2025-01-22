@@ -1,6 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.70 */
+/* Updated JavaScript for FitJourney Tracker v2.71 */
 
-const appVersion = "v2.70";
+const appVersion = "v2.71";
 
 let chartInstance = null;
 
@@ -9,6 +9,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupNavigation();
   setupWeightLogging();
   setupPhotoUpload();
+  setupPhotoComparison();
   loadDashboard();
 });
 
@@ -39,6 +40,7 @@ function loadDashboard() {
   updateSummary(progressData);
   updateTimeline(progressData);
   updatePhotoGallery();
+  updateMilestones(progressData);
 }
 
 function renderChart(data, isSample = false) {
@@ -104,66 +106,6 @@ function setupWeightLogging() {
   });
 }
 
-function setupPhotoUpload() {
-  const uploadBtn = document.getElementById("upload-photo-btn");
-  if (!uploadBtn) return;
-
-  uploadBtn.addEventListener("click", () => {
-    const fileInput = document.getElementById("photo-upload");
-    const file = fileInput.files[0];
-    const description = document.getElementById("photo-description").value;
-
-    if (!file) {
-      alert("Please select a photo to upload.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const photoDataUrl = e.target.result;
-
-      // Save photo to localStorage
-      const photos = JSON.parse(localStorage.getItem("photos")) || [];
-      photos.push({
-        date: new Date().toISOString().split("T")[0],
-        src: photoDataUrl, // Base64 URL
-        description,
-      });
-      localStorage.setItem("photos", JSON.stringify(photos));
-
-      alert("Photo uploaded successfully!");
-      fileInput.value = ""; // Clear the file input
-      document.getElementById("photo-description").value = ""; // Clear the description
-      updatePhotoGallery();
-    };
-
-    reader.readAsDataURL(file); // Convert the image file to Base64
-  });
-}
-
-function updatePhotoGallery() {
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  const gallery = document.getElementById("photo-gallery");
-  gallery.innerHTML = ""; // Clear the gallery before updating
-
-  if (photos.length === 0) {
-    gallery.innerHTML = '<p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>';
-    return;
-  }
-
-  gallery.innerHTML = photos
-    .map(
-      (photo) => `
-      <div>
-        <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
-        <p>${photo.date}</p>
-        <p>${photo.description || ""}</p>
-      </div>
-    `
-    )
-    .join("");
-}
-
 function updateSummary(data) {
   const summaryContainer = document.getElementById("weight-summary");
   if (!summaryContainer) return;
@@ -205,4 +147,118 @@ function updateTimeline(data) {
     `
     )
     .join("");
+}
+
+function setupPhotoUpload() {
+  const uploadBtn = document.getElementById("upload-photo-btn");
+  if (!uploadBtn) return;
+
+  uploadBtn.addEventListener("click", () => {
+    const fileInput = document.getElementById("photo-upload");
+    const file = fileInput.files[0];
+    const description = document.getElementById("photo-description").value;
+
+    if (!file) {
+      alert("Please select a photo to upload.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const photoDataUrl = e.target.result;
+
+      // Save photo to localStorage
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
+      photos.push({
+        date: new Date().toISOString().split("T")[0],
+        src: photoDataUrl, // Base64 URL
+        description,
+      });
+      localStorage.setItem("photos", JSON.stringify(photos));
+
+      alert("Photo uploaded successfully!");
+      fileInput.value = ""; // Clear the file input
+      document.getElementById("photo-description").value = ""; // Clear the description
+      updatePhotoGallery();
+    };
+
+    reader.readAsDataURL(file); // Convert the image file to Base64
+  });
+}
+
+function updatePhotoGallery() {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  const gallery = document.getElementById("photo-gallery");
+  const select1 = document.getElementById("photo-select-1");
+  const select2 = document.getElementById("photo-select-2");
+  gallery.innerHTML = ""; // Clear the gallery before updating
+  select1.innerHTML = ""; // Clear photo select options
+  select2.innerHTML = "";
+
+  if (photos.length === 0) {
+    gallery.innerHTML = '<p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>';
+    return;
+  }
+
+  photos.forEach((photo, index) => {
+    const optionHTML = `<option value="${photo.src}">${photo.date}</option>`;
+    select1.innerHTML += optionHTML;
+    select2.innerHTML += optionHTML;
+
+    gallery.innerHTML += `
+      <div>
+        <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
+        <p>${photo.date}</p>
+        <p>${photo.description || ""}</p>
+      </div>
+    `;
+  });
+}
+
+function setupPhotoComparison() {
+  const compareBtn = document.getElementById("compare-photos-btn");
+  if (!compareBtn) return;
+
+  compareBtn.addEventListener("click", () => {
+    const select1 = document.getElementById("photo-select-1");
+    const select2 = document.getElementById("photo-select-2");
+    const comparisonContainer = document.getElementById("photo-comparison");
+
+    const photo1 = select1.value;
+    const photo2 = select2.value;
+
+    if (!photo1 || !photo2) {
+      alert("Please select two photos to compare.");
+      return;
+    }
+
+    comparisonContainer.innerHTML = `
+      <div>
+        <h4>Photo 1</h4>
+        <img src="${photo1}" alt="Photo 1">
+      </div>
+      <div>
+        <h4>Photo 2</h4>
+        <img src="${photo2}" alt="Photo 2">
+      </div>
+    `;
+  });
+}
+
+function updateMilestones(data) {
+  const milestoneContainer = document.getElementById("milestone-section");
+  if (!milestoneContainer) return;
+
+  let milestones = "";
+  const totalWeightLoss = data[0].weight - data[data.length - 1].weight;
+
+  if (totalWeightLoss >= 10) {
+    milestones += "<p>🏆 Lost 10 lbs! Great job!</p>";
+  }
+
+  if (data.length >= 7) {
+    milestones += "<p>🔥 7-day logging streak!</p>";
+  }
+
+  milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
 }
