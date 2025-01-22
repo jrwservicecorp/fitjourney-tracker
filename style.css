@@ -1,4 +1,4 @@
-/* CSS (v2.58) */
+/* CSS (v2.60) */
 body {
   font-family: 'Poppins', Arial, sans-serif;
   margin: 0;
@@ -40,41 +40,24 @@ body {
   max-height: 400px;
 }
 
-.collapsible-section {
-  margin-top: 20px;
-}
-
-.toggle-btn {
-  display: block;
-  width: 100%;
+button {
   background: #3498db;
   color: white;
   padding: 10px;
-  text-align: left;
+  font-size: 16px;
+  font-weight: bold;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  margin-bottom: 10px;
+  transition: background 0.3s ease;
 }
 
-.collapsible-content {
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.3s ease-out;
+button:hover {
+  background: #1a73e8;
 }
 
-.collapsible-content.open {
-  max-height: 300px; /* Adjust based on content size */
-}
-
-.progress-bar {
-  width: 100%;
-  background: #ccc;
-  border-radius: 5px;
-  margin-top: 10px;
-}
-
-.progress {
-  height: 10px;
-  background: #ff6f61;
+.placeholder {
+  color: #aaaaaa;
+  font-style: italic;
+  text-align: center;
 }
