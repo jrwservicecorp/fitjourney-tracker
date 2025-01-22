@@ -1,4 +1,4 @@
-/* Dark mode base styles */
+/* Base styles */
 body {
   font-family: 'Inter', sans-serif;
   margin: 0;
@@ -9,10 +9,9 @@ body {
 
 .navbar {
   display: flex;
-  justify-content: space-between;
-  padding: 10px 20px;
+  justify-content: center;
+  padding: 10px;
   background-color: #1f1f1f;
-  border-bottom: 1px solid #333;
 }
 
 .navbar a {
@@ -33,24 +32,50 @@ body {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
 }
 
-.card:hover {
-  transform: translateY(-5px);
+.dashboard-row.compact {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
 }
 
-.chart-filters button {
-  background: #333;
-  color: white;
-  border: none;
-  padding: 10px;
-  margin: 5px;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 14px;
+.dashboard-row.compact .card {
+  flex: 1;
+  height: auto; /* Height will be synced dynamically */
 }
 
-.chart-filters button:hover {
-  background: #555;
+/* Photo Gallery */
+#photo-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+#photo-gallery > div {
+  flex: 1 1 calc(25% - 15px); /* 4 photos per row */
+  max-width: calc(25% - 15px);
+  text-align: center;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .dashboard-row.compact {
+    flex-wrap: wrap;
+  }
+
+  #photo-gallery > div {
+    flex: 1 1 calc(50% - 15px); /* 2 photos per row */
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-row.compact {
+    flex-wrap: wrap;
+    flex-direction: column;
+  }
+
+  #photo-gallery > div {
+    flex: 1 1 100%; /* 1 photo per row */
+  }
 }
