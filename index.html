@@ -16,6 +16,8 @@
   <nav class="navbar" role="navigation" aria-label="Main Navigation">
     <a href="#" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
     <a href="#" data-page="log-weight"><i class="fas fa-edit"></i> Log Weight</a>
+    <a href="#" data-page="settings"><i class="fas fa-cog"></i> Settings</a>
+    <a href="#" data-page="about"><i class="fas fa-info-circle"></i> About</a>
   </nav>
   <div id="main-app">
     <section id="dashboard" class="page hidden">
@@ -36,6 +38,14 @@
         <input type="date" id="date-input" required>
         <button type="submit">Log Weight</button>
       </form>
+    </section>
+    <section id="settings" class="page hidden">
+      <h2>Settings</h2>
+      <p>Manage your preferences here.</p>
+    </section>
+    <section id="about" class="page hidden">
+      <h2>About FitJourney Tracker</h2>
+      <p>Version 2.61 of the app is designed to help you track your fitness journey.</p>
     </section>
   </div>
   <script src="script.js" defer></script>
