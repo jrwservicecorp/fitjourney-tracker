@@ -1,5 +1,5 @@
-// JavaScript (v2.60)
-const appVersion = "v2.60";
+// JavaScript (v2.61)
+const appVersion = "v2.61";
 
 let chartInstance = null;
 
@@ -145,3 +145,46 @@ function updatePhotoGallery() {
     gallery.appendChild(photoEntry);
   });
 }
+
+function setupWeightLogging() {
+  const weightForm = document.getElementById("weight-form");
+  weightForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const weight = parseFloat(document.getElementById("weight-input").value);
+    const date = document.getElementById("date-input").value;
+
+    if (!weight || !date) {
+      alert("Please enter both weight and date.");
+      return;
+    }
+
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    progressData.push({ date, weight });
+    localStorage.setItem("progressData", JSON.stringify(progressData));
+    loadDashboard();
+  });
+}
+
+function updateSummary(data) {
+  const summaryContainer = document.getElementById("weight-summary");
+  if (data.length === 0) {
+    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
+    return;
+  }
+
+  const weights = data.map(entry => entry.weight);
+  const average = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(2);
+  const max = Math.max(...weights);
+  const min = Math.min(...weights);
+
+  summaryContainer.innerHTML = `
+    <p><strong>Average Weight:</strong> ${average} lbs</p>
+    <p><strong>Highest Weight:</strong> ${max} lbs</p>
+    <p><strong>Lowest Weight:</strong> ${min} lbs</p>
+  `;
+}
+
+// Call setupWeightLogging on DOMContentLoaded
+window.addEventListener("DOMContentLoaded", () => {
+  setupWeightLogging();
+});
