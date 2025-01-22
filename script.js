@@ -1,6 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.75 - WYSIWYG Editor & Social Sharing */
+/* Updated JavaScript for FitJourney Tracker v2.76 - WYSIWYG Editor Enhancements */
 
-const appVersion = "v2.75";
+const appVersion = "v2.76";
 
 let chartInstance = null;
 let photoPage = 0; // Pagination for photos
@@ -224,7 +224,7 @@ function updatePhotoGallery() {
 
     gallery.innerHTML += `
       <div>
-        <img src="${photo.src}" alt="Progress Photo">
+        <img src="${photo.src}" alt="Progress Photo" style="max-width: 150px;">
         <p>${photo.date}</p>
         <p>${photo.weight || "Unknown Weight"} lbs</p>
       </div>
@@ -266,13 +266,13 @@ function setupPhotoComparison() {
     // Show comparison view
     comparisonContainer.innerHTML = `
       <div class="comparison-container">
-        <div>
+        <div style="width: 50%; display: inline-block; text-align: center;">
           <h4>Photo 1</h4>
-          <img src="${photo1}" alt="Photo 1">
+          <img src="${photo1}" alt="Photo 1" style="max-width: 100%; height: auto;">
         </div>
-        <div>
+        <div style="width: 50%; display: inline-block; text-align: center;">
           <h4>Photo 2</h4>
-          <img src="${photo2}" alt="Photo 2">
+          <img src="${photo2}" alt="Photo 2" style="max-width: 100%; height: auto;">
         </div>
         <div>
           <textarea id="custom-text" placeholder="Add your text here..."></textarea>
