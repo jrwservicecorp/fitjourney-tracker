@@ -1,12 +1,15 @@
-/* Updated JavaScript for FitJourney Tracker v2.83 */
+/* Consolidated JavaScript for FitJourney Tracker v2.83 */
 
 const appVersion = "v2.83";
 
 let chartInstance = null;
-let photoPage = 0; // Pagination for photos
+let photoPage = 0; // For gallery pagination
 
 window.addEventListener("DOMContentLoaded", () => {
+  // Display version
   document.getElementById("app-version").textContent = appVersion;
+
+  // Initial setup
   setupNavigation();
   setupWeightLogging();
   setupPhotoUpload();
@@ -15,22 +18,15 @@ window.addEventListener("DOMContentLoaded", () => {
   setupTimelineExpansion();
   setupGoalProgress();
   setupChartFilters();
+
+  // Load initial dashboard view
   loadDashboard();
-  equalizeHeights(); // Ensure equal heights on page load
+  equalizeHeights(); // Ensure boxes match the weight check-in box height
 });
 
-function equalizeHeights() {
-  const weightCheckInBox = document.querySelector(".weight-checkin");
-  const otherBoxes = document.querySelectorAll(".dashboard-row .card:not(.weight-checkin)");
-
-  if (weightCheckInBox) {
-    const height = weightCheckInBox.offsetHeight;
-    otherBoxes.forEach((box) => {
-      box.style.height = `${height}px`;
-    });
-  }
-}
-
+/* ================================
+    Navigation and Page Toggling
+================================ */
 function setupNavigation() {
   const links = document.querySelectorAll(".navbar a");
   links.forEach((link) => {
@@ -42,15 +38,20 @@ function setupNavigation() {
 }
 
 function navigateTo(pageId) {
+  // Toggle visibility of pages
   document.querySelectorAll(".page").forEach((page) => {
     page.classList.toggle("hidden", page.id !== pageId);
   });
 
+  // If going back to dashboard, reload data
   if (pageId === "dashboard") {
     loadDashboard();
   }
 }
 
+/* ================================
+    Dashboard Loading
+================================ */
 function loadDashboard() {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || getSampleData();
 
@@ -59,17 +60,21 @@ function loadDashboard() {
   updateTimeline(progressData);
   updatePhotoGallery();
   updateMilestones(progressData);
-  equalizeHeights(); // Reapply equal heights after loading content
+
+  equalizeHeights(); // Re-apply box height matching
 }
 
+/* ================================
+    Chart Rendering and Filters
+================================ */
 function renderChart(data, isSample = false) {
-  const ctx = document.getElementById("weight-chart").getContext("2d");
-
+  const ctx = document.getElementById("weight-chart")?.getContext("2d");
   if (!ctx) {
     console.error("Chart container not found!");
     return;
   }
 
+  // Destroy old instance if exists
   if (chartInstance) {
     chartInstance.destroy();
   }
@@ -112,6 +117,35 @@ function renderChart(data, isSample = false) {
   });
 }
 
+function setupChartFilters() {
+  const filterButtons = document.querySelectorAll(".chart-filters button");
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const filter = button.getAttribute("data-filter");
+
+      if (filter === "7") {
+        loadChartData(7);
+      } else if (filter === "30") {
+        loadChartData(30);
+      } else if (filter === "custom") {
+        const range = prompt("Enter the number of days for the custom range:");
+        if (range) {
+          loadChartData(parseInt(range));
+        }
+      }
+    });
+  });
+}
+
+function loadChartData(days) {
+  const progressData = JSON.parse(localStorage.getItem("progressData")) || getSampleData();
+  const filteredData = progressData.slice(-days);
+  renderChart(filteredData, false);
+}
+
+/* ================================
+    Summary, Timeline, Milestones
+================================ */
 function updateSummary(data) {
   const summaryContainer = document.getElementById("weight-summary");
   if (!summaryContainer) return;
@@ -144,10 +178,28 @@ function updateTimeline(data) {
     return;
   }
 
+  // Limit timeline to last 7 entries, date & weight on same line
   const limitedData = data.slice(-7);
   timelineContainer.innerHTML = limitedData
     .map((entry) => `<p>${entry.date} - ${Math.round(entry.weight)} lbs</p>`)
     .join("");
+}
+
+function updateMilestones(data) {
+  const milestoneContainer = document.getElementById("milestone-section");
+  if (!milestoneContainer) return;
+
+  let milestones = "";
+  const totalWeightLoss = data[0].weight - data[data.length - 1].weight;
+
+  if (totalWeightLoss >= 10) {
+    milestones += "<p>🏆 Lost 10 lbs! Great job!</p>";
+  }
+  if (data.length >= 7) {
+    milestones += "<p>🔥 7-day logging streak!</p>";
+  }
+
+  milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
 }
 
 function setupTimelineExpansion() {
@@ -160,19 +212,23 @@ function setupTimelineExpansion() {
 
     expandBtn.textContent = isExpanded ? "Show Less" : "Show More";
 
+    // Scroll top if collapsing
     if (!isExpanded) {
       timelineSection.scrollTop = 0;
     }
   });
 }
 
+/* ================================
+    Photo Gallery & Comparison
+================================ */
 function updatePhotoGallery() {
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
   const gallery = document.getElementById("photo-gallery");
   const select1 = document.getElementById("photo-select-1");
   const select2 = document.getElementById("photo-select-2");
-  gallery.innerHTML = ""; // Clear gallery
-  select1.innerHTML = ""; // Clear dropdown
+  gallery.innerHTML = "";
+  select1.innerHTML = "";
   select2.innerHTML = "";
 
   photos.slice(photoPage * 4, photoPage * 4 + 4).forEach((photo) => {
@@ -190,6 +246,133 @@ function updatePhotoGallery() {
   });
 }
 
+function setupPhotoPagination() {
+  const loadMoreBtn = document.getElementById("load-more-photos-btn");
+  if (!loadMoreBtn) return;
+
+  loadMoreBtn.addEventListener("click", () => {
+    photoPage++;
+    updatePhotoGallery();
+  });
+}
+
+function setupPhotoUpload() {
+  const uploadBtn = document.getElementById("upload-photo-btn");
+  if (!uploadBtn) return;
+
+  uploadBtn.addEventListener("click", () => {
+    const fileInput = document.getElementById("photo-upload");
+    const file = fileInput.files[0];
+    const description = document.getElementById("photo-description").value;
+
+    if (!file) {
+      alert("Please select a photo to upload.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const photoDataUrl = e.target.result;
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
+      photos.push({
+        date: new Date().toISOString().split("T")[0],
+        src: photoDataUrl,
+        weight: getAssociatedWeight(new Date().toISOString().split("T")[0]),
+        description,
+      });
+      localStorage.setItem("photos", JSON.stringify(photos));
+
+      alert("Photo uploaded successfully!");
+      fileInput.value = "";
+      document.getElementById("photo-description").value = "";
+      updatePhotoGallery();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function setupPhotoComparison() {
+  const compareBtn = document.getElementById("compare-photos-btn");
+  if (!compareBtn) return;
+
+  compareBtn.addEventListener("click", () => {
+    const select1 = document.getElementById("photo-select-1");
+    const select2 = document.getElementById("photo-select-2");
+    const gallery = document.getElementById("photo-gallery");
+    const comparisonContainer = document.getElementById("photo-comparison");
+
+    const photo1 = select1.value;
+    const photo2 = select2.value;
+
+    if (!photo1 || !photo2) {
+      alert("Please select two photos to compare.");
+      return;
+    }
+
+    // Hide the gallery
+    gallery.style.display = "none";
+    // Show the comparison
+    comparisonContainer.innerHTML = `
+      <div class="comparison-container" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="flex: 1; text-align: center;">
+          <h4>Photo 1</h4>
+          <img src="${photo1}" alt="Photo 1" style="max-width: 150px; height: auto;">
+        </div>
+        <div style="flex: 1; text-align: center;">
+          <h4>Photo 2</h4>
+          <img src="${photo2}" alt="Photo 2" style="max-width: 150px; height: auto;">
+        </div>
+        <div style="margin-top: 20px;">
+          <textarea id="custom-text" placeholder="Add your text here..."></textarea>
+          <button id="export-comparison-btn">Export</button>
+        </div>
+      </div>
+    `;
+    setupExportComparison(photo1, photo2);
+  });
+}
+
+function setupExportComparison(photo1, photo2) {
+  const exportBtn = document.getElementById("export-comparison-btn");
+  if (!exportBtn) return;
+
+  exportBtn.addEventListener("click", () => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const customText = document.getElementById("custom-text").value;
+
+    canvas.width = 800;
+    canvas.height = 400;
+
+    const img1 = new Image();
+    const img2 = new Image();
+
+    img1.onload = () => {
+      ctx.drawImage(img1, 0, 0, 400, 400);
+      img2.onload = () => {
+        ctx.drawImage(img2, 400, 0, 400, 400);
+
+        // Custom text
+        ctx.font = "20px Arial";
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.fillText(customText, canvas.width / 2, 380);
+
+        // Export
+        const exportLink = document.createElement("a");
+        exportLink.download = "comparison.png";
+        exportLink.href = canvas.toDataURL();
+        exportLink.click();
+      };
+      img2.src = photo2;
+    };
+    img1.src = photo1;
+  });
+}
+
+/* ================================
+    Milestones & Goals
+================================ */
 function updateMilestones(data) {
   const milestoneContainer = document.getElementById("milestone-section");
   if (!milestoneContainer) return;
@@ -200,7 +383,6 @@ function updateMilestones(data) {
   if (totalWeightLoss >= 10) {
     milestones += "<p>🏆 Lost 10 lbs! Great job!</p>";
   }
-
   if (data.length >= 7) {
     milestones += "<p>🔥 7-day logging streak!</p>";
   }
@@ -208,6 +390,28 @@ function updateMilestones(data) {
   milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
 }
 
+function setupGoalProgress() {
+  const goalProgressContainer = document.getElementById("goal-progress");
+  const addGoalBtn = document.getElementById("add-goal-btn");
+
+  if (!addGoalBtn || !goalProgressContainer) return;
+
+  addGoalBtn.addEventListener("click", () => {
+    const goalWeight = prompt("Set your goal weight (lbs):");
+    if (goalWeight) {
+      goalProgressContainer.innerHTML = `
+        <p>Goal: Reach ${goalWeight} lbs</p>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: 30%;"></div>
+        </div>
+      `;
+    }
+  });
+}
+
+/* ================================
+    Sample Data
+================================ */
 function getSampleData() {
   const today = new Date();
   return Array.from({ length: 30 }, (_, i) => {
