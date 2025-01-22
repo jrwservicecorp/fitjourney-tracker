@@ -1,4 +1,3 @@
-// JavaScript (v2.61)
 const appVersion = "v2.61";
 
 let chartInstance = null;
@@ -6,7 +5,7 @@ let chartInstance = null;
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
   setupNavigation();
-  setupPhotoUpload();
+  setupWeightLogging();
   loadDashboard();
 });
 
@@ -34,8 +33,10 @@ function loadDashboard() {
   if (progressData.length > 0) {
     document.getElementById("chart-placeholder").style.display = "none";
     renderChart(progressData);
+    updateSummary(progressData);
   } else {
     document.getElementById("chart-placeholder").style.display = "block";
+    updateSummary([]);
     renderChart(getPlaceholderData());
   }
 }
@@ -101,51 +102,6 @@ function getPlaceholderData() {
   }));
 }
 
-function setupPhotoUpload() {
-  const uploadBtn = document.getElementById("upload-photo-btn");
-  uploadBtn.addEventListener("click", () => {
-    const file = document.getElementById("photo-upload").files[0];
-    const description = document.getElementById("photo-description").value;
-
-    if (!file) {
-      alert("Please select a photo to upload.");
-      return;
-    }
-
-    const photoUrl = URL.createObjectURL(file);
-    const photos = JSON.parse(localStorage.getItem("photos")) || [];
-    photos.push({
-      date: new Date().toISOString().split("T")[0],
-      src: photoUrl,
-      description,
-    });
-    localStorage.setItem("photos", JSON.stringify(photos));
-    alert("Photo uploaded successfully!");
-    updatePhotoGallery();
-  });
-}
-
-function updatePhotoGallery() {
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  const gallery = document.getElementById("photo-gallery");
-  gallery.innerHTML = "";
-
-  if (photos.length === 0) {
-    gallery.innerHTML = '<p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>';
-    return;
-  }
-
-  photos.forEach((photo) => {
-    const photoEntry = document.createElement("div");
-    photoEntry.innerHTML = `
-      <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
-      <p>${photo.date}</p>
-      <p>${photo.description || ""}</p>
-    `;
-    gallery.appendChild(photoEntry);
-  });
-}
-
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
   weightForm.addEventListener("submit", (e) => {
@@ -183,8 +139,3 @@ function updateSummary(data) {
     <p><strong>Lowest Weight:</strong> ${min} lbs</p>
   `;
 }
-
-// Call setupWeightLogging on DOMContentLoaded
-window.addEventListener("DOMContentLoaded", () => {
-  setupWeightLogging();
-});
