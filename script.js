@@ -1,6 +1,6 @@
-/* Updated JavaScript for FitJourney Tracker v2.72 */
+/* Updated JavaScript for FitJourney Tracker v2.73 */
 
-const appVersion = "v2.72";
+const appVersion = "v2.73";
 
 let chartInstance = null;
 let photoPage = 0; // Pagination for photos
@@ -12,6 +12,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupPhotoUpload();
   setupPhotoComparison();
   setupPhotoPagination();
+  setupTimelineExpansion();
   loadDashboard();
 });
 
@@ -151,6 +152,19 @@ function updateTimeline(data) {
     .join("");
 }
 
+function setupTimelineExpansion() {
+  const expandBtn = document.getElementById("expand-timeline-btn");
+  if (!expandBtn) return;
+
+  expandBtn.addEventListener("click", () => {
+    const timelineSection = document.getElementById("timeline-section");
+    timelineSection.classList.toggle("expanded");
+    expandBtn.textContent = timelineSection.classList.contains("expanded")
+      ? "Show Less"
+      : "Show More";
+  });
+}
+
 function setupPhotoUpload() {
   const uploadBtn = document.getElementById("upload-photo-btn");
   if (!uploadBtn) return;
@@ -173,6 +187,7 @@ function setupPhotoUpload() {
       photos.push({
         date: new Date().toISOString().split("T")[0],
         src: photoDataUrl,
+        weight: getAssociatedWeight(new Date().toISOString().split("T")[0]),
         description,
       });
       localStorage.setItem("photos", JSON.stringify(photos));
@@ -187,32 +202,28 @@ function setupPhotoUpload() {
   });
 }
 
+function getAssociatedWeight(date) {
+  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+  const weightEntry = progressData.find((entry) => entry.date === date);
+  return weightEntry ? weightEntry.weight : "Unknown";
+}
+
 function updatePhotoGallery() {
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
   const gallery = document.getElementById("photo-gallery");
-  const select1 = document.getElementById("photo-select-1");
-  const select2 = document.getElementById("photo-select-2");
-  gallery.innerHTML = ""; // Clear gallery
-  select1.innerHTML = ""; // Clear dropdown
-  select2.innerHTML = "";
-
-  const photosToDisplay = photos.slice(photoPage * 3, photoPage * 3 + 3);
+  const photosToDisplay = photos.slice(photoPage * 4, photoPage * 4 + 4);
 
   if (photosToDisplay.length === 0) {
-    gallery.innerHTML = '<p class="placeholder">No more photos to display.</p>';
+    document.getElementById("load-more-photos-btn").disabled = true;
     return;
   }
 
   photosToDisplay.forEach((photo) => {
-    const optionHTML = `<option value="${photo.src}">${photo.date}</option>`;
-    select1.innerHTML += optionHTML;
-    select2.innerHTML += optionHTML;
-
     gallery.innerHTML += `
       <div>
-        <img src="${photo.src}" alt="Progress Photo" title="${photo.date}">
+        <img src="${photo.src}" alt="Progress Photo">
         <p>${photo.date}</p>
-        <p>${photo.description || ""}</p>
+        <p>${photo.weight || "Unknown Weight"} lbs</p>
       </div>
     `;
   });
