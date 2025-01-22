@@ -18,14 +18,21 @@
   </nav>
   <div id="main-app">
     <section id="dashboard" class="page">
-      <div class="card">
+      <div class="card prominent-card">
         <canvas id="weight-chart"></canvas>
-        <p id="chart-placeholder">Start logging weight to see trends!</p>
+        <p id="chart-placeholder" class="placeholder">
+          Start logging your weight to see trends or explore the sample data!
+        </p>
+      </div>
+      <div class="card">
+        <h3>Weight Summary</h3>
         <div id="weight-summary"></div>
       </div>
       <div class="card">
         <h3>Timeline</h3>
-        <div id="timeline-section"></div>
+        <div id="timeline-section" class="horizontal-scroll">
+          <p class="placeholder">No timeline data yet. Start logging your weight to see it here!</p>
+        </div>
       </div>
       <div class="card">
         <h3>Photo Gallery</h3>
@@ -35,6 +42,7 @@
         <div id="photo-gallery"></div>
       </div>
       <div class="card">
+        <h3>Weight Check-In</h3>
         <form id="weight-form">
           <input id="weight-input" type="number" step="0.1" placeholder="Weight (lbs)" required />
           <input id="date-input" type="date" required />
