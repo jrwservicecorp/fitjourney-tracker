@@ -316,13 +316,13 @@ function setupPhotoComparison() {
       <div class="comparison-container" style="display: flex; justify-content: space-between; align-items: center;">
         <div style="flex: 1; text-align: center;">
           <h4>Photo 1</h4>
-          <img src="${photo1}" alt="Photo 1" style="max-width: 150px; height: auto;">
+          <img src="${photo1}" alt="Photo 1" style="max-width: 150px;">
         </div>
         <div style="flex: 1; text-align: center;">
           <h4>Photo 2</h4>
-          <img src="${photo2}" alt="Photo 2" style="max-width: 150px; height: auto;">
+          <img src="${photo2}" alt="Photo 2" style="max-width: 150px;">
         </div>
-        <div style="margin-top: 20px;">
+        <div>
           <textarea id="custom-text" placeholder="Add your text here..."></textarea>
           <button id="export-comparison-btn">Export</button>
         </div>
@@ -352,13 +352,11 @@ function setupExportComparison(photo1, photo2) {
       img2.onload = () => {
         ctx.drawImage(img2, 400, 0, 400, 400);
 
-        // Custom text
         ctx.font = "20px Arial";
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
         ctx.fillText(customText, canvas.width / 2, 380);
 
-        // Export
         const exportLink = document.createElement("a");
         exportLink.download = "comparison.png";
         exportLink.href = canvas.toDataURL();
@@ -410,8 +408,14 @@ function setupGoalProgress() {
 }
 
 /* ================================
-    Sample Data
+    Utility Functions
 ================================ */
+function getAssociatedWeight(date) {
+  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+  const weightEntry = progressData.find((entry) => entry.date === date);
+  return weightEntry ? weightEntry.weight : "Unknown";
+}
+
 function getSampleData() {
   const today = new Date();
   return Array.from({ length: 30 }, (_, i) => {
@@ -422,4 +426,37 @@ function getSampleData() {
       weight: Math.random() * 20 + 180,
     };
   });
+}
+
+function setupWeightLogging() {
+  const weightForm = document.getElementById("weight-form");
+  if (!weightForm) return;
+
+  weightForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const weight = parseFloat(document.getElementById("weight-input").value);
+    const date = document.getElementById("date-input").value;
+
+    if (!weight || !date) {
+      alert("Please enter both weight and date.");
+      return;
+    }
+
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    progressData.push({ date, weight });
+    localStorage.setItem("progressData", JSON.stringify(progressData));
+    loadDashboard();
+  });
+}
+
+function equalizeHeights() {
+  const weightCheckInBox = document.querySelector(".weight-checkin");
+  const otherBoxes = document.querySelectorAll(".dashboard-row .card:not(.weight-checkin)");
+
+  if (weightCheckInBox) {
+    const height = weightCheckInBox.offsetHeight;
+    otherBoxes.forEach((box) => {
+      box.style.height = `${height}px`;
+    });
+  }
 }
