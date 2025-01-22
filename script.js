@@ -1,8 +1,9 @@
-/* Updated JavaScript for FitJourney Tracker v2.71 */
+/* Updated JavaScript for FitJourney Tracker v2.72 */
 
-const appVersion = "v2.71";
+const appVersion = "v2.72";
 
 let chartInstance = null;
+let photoPage = 0; // Pagination for photos
 
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
@@ -10,6 +11,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupWeightLogging();
   setupPhotoUpload();
   setupPhotoComparison();
+  setupPhotoPagination();
   loadDashboard();
 });
 
@@ -167,11 +169,10 @@ function setupPhotoUpload() {
     reader.onload = function (e) {
       const photoDataUrl = e.target.result;
 
-      // Save photo to localStorage
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
       photos.push({
         date: new Date().toISOString().split("T")[0],
-        src: photoDataUrl, // Base64 URL
+        src: photoDataUrl,
         description,
       });
       localStorage.setItem("photos", JSON.stringify(photos));
@@ -191,16 +192,18 @@ function updatePhotoGallery() {
   const gallery = document.getElementById("photo-gallery");
   const select1 = document.getElementById("photo-select-1");
   const select2 = document.getElementById("photo-select-2");
-  gallery.innerHTML = ""; // Clear the gallery before updating
-  select1.innerHTML = ""; // Clear photo select options
+  gallery.innerHTML = ""; // Clear gallery
+  select1.innerHTML = ""; // Clear dropdown
   select2.innerHTML = "";
 
-  if (photos.length === 0) {
-    gallery.innerHTML = '<p class="placeholder">No photos uploaded yet. Start uploading to see your progress!</p>';
+  const photosToDisplay = photos.slice(photoPage * 3, photoPage * 3 + 3);
+
+  if (photosToDisplay.length === 0) {
+    gallery.innerHTML = '<p class="placeholder">No more photos to display.</p>';
     return;
   }
 
-  photos.forEach((photo, index) => {
+  photosToDisplay.forEach((photo) => {
     const optionHTML = `<option value="${photo.src}">${photo.date}</option>`;
     select1.innerHTML += optionHTML;
     select2.innerHTML += optionHTML;
@@ -212,6 +215,16 @@ function updatePhotoGallery() {
         <p>${photo.description || ""}</p>
       </div>
     `;
+  });
+}
+
+function setupPhotoPagination() {
+  const loadMoreBtn = document.getElementById("load-more-photos-btn");
+  if (!loadMoreBtn) return;
+
+  loadMoreBtn.addEventListener("click", () => {
+    photoPage++;
+    updatePhotoGallery();
   });
 }
 
