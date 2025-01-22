@@ -1,6 +1,6 @@
-/* Consolidated JavaScript for FitJourney Tracker v2.84 */
+/* Consolidated JavaScript for FitJourney Tracker v2.85 */
 
-const appVersion = "v2.84";
+const appVersion = "v2.85";
 
 let chartInstance = null;
 let photoPage = 0; // For gallery pagination
@@ -171,7 +171,6 @@ function updateTimeline(data) {
     return;
   }
 
-  // Show last 7 entries, no decimals
   const limitedData = data.slice(-7);
   timelineContainer.innerHTML = limitedData
     .map((entry) => `<p>${entry.date} - ${Math.round(entry.weight)} lbs</p>`)
@@ -231,7 +230,9 @@ function updatePhotoGallery() {
       <div>
         <img src="${photo.src}" alt="Progress Photo" style="max-width: 150px;">
         <p>${photo.date}</p>
+        <p>${photo.keywords || ""}</p>
         <p>${photo.weight || "Unknown Weight"} lbs</p>
+        <p>${photo.description || ""}</p>
       </div>
     `;
   });
@@ -254,6 +255,8 @@ function setupPhotoUpload() {
   uploadBtn.addEventListener("click", () => {
     const fileInput = document.getElementById("photo-upload");
     const file = fileInput.files[0];
+    const photoDate = document.getElementById("photo-date").value;
+    const keywords = document.getElementById("photo-keywords").value;
     const description = document.getElementById("photo-description").value;
 
     if (!file) {
@@ -265,16 +268,24 @@ function setupPhotoUpload() {
     reader.onload = function (e) {
       const photoDataUrl = e.target.result;
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
+
+      // If user didn't pick a date, default to today's date
+      const finalDate = photoDate || new Date().toISOString().split("T")[0];
+
       photos.push({
-        date: new Date().toISOString().split("T")[0],
+        date: finalDate,
         src: photoDataUrl,
-        weight: getAssociatedWeight(new Date().toISOString().split("T")[0]),
+        keywords: keywords,
+        weight: getAssociatedWeight(finalDate),
         description,
       });
+
       localStorage.setItem("photos", JSON.stringify(photos));
 
       alert("Photo uploaded successfully!");
       fileInput.value = "";
+      document.getElementById("photo-date").value = "";
+      document.getElementById("photo-keywords").value = "";
       document.getElementById("photo-description").value = "";
       updatePhotoGallery();
     };
@@ -379,8 +390,25 @@ function setupGoalProgress() {
   });
 }
 
+function updateMilestones(data) {
+  const milestoneContainer = document.getElementById("milestone-section");
+  if (!milestoneContainer) return;
+
+  let milestones = "";
+  const totalWeightLoss = data[0].weight - data[data.length - 1].weight;
+
+  if (totalWeightLoss >= 10) {
+    milestones += "<p>🏆 Lost 10 lbs! Great job!</p>";
+  }
+  if (data.length >= 7) {
+    milestones += "<p>🔥 7-day logging streak!</p>";
+  }
+
+  milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
+}
+
 /* ================================
-    Utility Functions
+    Helper Functions
 ================================ */
 function getAssociatedWeight(date) {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
