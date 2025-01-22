@@ -1,4 +1,5 @@
-const appVersion = "v2.61";
+/* Updated JavaScript for v2.62 */
+const appVersion = "v2.62";
 
 let chartInstance = null;
 
@@ -110,6 +111,7 @@ function getPlaceholderData() {
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
   if (!weightForm) return;
+
   weightForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const weight = parseFloat(document.getElementById("weight-input").value);
@@ -142,16 +144,17 @@ function updateSummary(data) {
   const min = Math.min(...weights);
 
   summaryContainer.innerHTML = `
-    <p><strong>Average Weight:</strong> ${average} lbs</p>
-    <p><strong>Highest Weight:</strong> ${max} lbs</p>
-    <p><strong>Lowest Weight:</strong> ${min} lbs</p>
+    <p><span class='label'>Average Weight:</span> ${average} lbs</p>
+    <p><span class='label'>Highest Weight:</span> ${max} lbs</p>
+    <p><span class='label'>Lowest Weight:</span> ${min} lbs</p>
   `;
 }
 
 function setupPhotoUpload() {
   const uploadBtn = document.getElementById("upload-photo-btn");
   uploadBtn.addEventListener("click", () => {
-    const file = document.getElementById("photo-upload").files[0];
+    const fileInput = document.getElementById("photo-upload");
+    const file = fileInput.files[0];
     const description = document.getElementById("photo-description").value;
 
     if (!file) {
@@ -159,16 +162,25 @@ function setupPhotoUpload() {
       return;
     }
 
-    const photoUrl = URL.createObjectURL(file);
-    const photos = JSON.parse(localStorage.getItem("photos")) || [];
-    photos.push({
-      date: new Date().toISOString().split("T")[0],
-      src: photoUrl,
-      description,
-    });
-    localStorage.setItem("photos", JSON.stringify(photos));
-    alert("Photo uploaded successfully!");
-    updatePhotoGallery();
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const photoDataUrl = e.target.result;
+
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
+      photos.push({
+        date: new Date().toISOString().split("T")[0],
+        src: photoDataUrl,
+        description,
+      });
+      localStorage.setItem("photos", JSON.stringify(photos));
+
+      alert("Photo uploaded successfully!");
+      fileInput.value = ""; // Clear the file input
+      document.getElementById("photo-description").value = ""; // Clear the description
+      updatePhotoGallery();
+    };
+
+    reader.readAsDataURL(file); // Convert the image file to Base64
   });
 }
 
