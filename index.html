@@ -10,7 +10,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.72</span></p>
+    <p>App Version: <span id="app-version">v2.73</span></p>
   </header>
   <nav class="navbar">
     <a href="#" data-page="dashboard">Dashboard</a>
@@ -25,6 +25,10 @@
           <p><span class="pink-bar">■</span> Pink: Sample Data</p>
           <p><span class="blue-bar">■</span> Blue: User Data</p>
         </div>
+      </div>
+      <div class="card">
+        <h3>Milestones</h3>
+        <div id="milestone-section"></div>
       </div>
       <div class="dashboard-row compact">
         <div class="card small" id="summary-card">
@@ -44,23 +48,20 @@
           <div id="timeline-section" class="horizontal-scroll">
             <p class="placeholder">No timeline data yet. Start logging your weight to see it here!</p>
           </div>
+          <button id="expand-timeline-btn">Show More</button>
         </div>
-      </div>
-      <div class="card">
-        <h3>Milestones</h3>
-        <div id="milestone-section"></div>
       </div>
       <div class="card">
         <h3>Photo Gallery</h3>
         <div id="photo-gallery"></div>
         <button id="load-more-photos-btn">Load More</button>
-        <div>
-          <h4>Compare Photos</h4>
-          <select id="photo-select-1"></select>
-          <select id="photo-select-2"></select>
-          <button id="compare-photos-btn">Compare</button>
-          <div id="photo-comparison"></div>
-        </div>
+      </div>
+      <div>
+        <h4>Compare Photos</h4>
+        <select id="photo-select-1"></select>
+        <select id="photo-select-2"></select>
+        <button id="compare-photos-btn">Compare</button>
+        <div id="photo-comparison"></div>
       </div>
     </section>
     <section id="about" class="page hidden">
