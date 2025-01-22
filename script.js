@@ -1,4 +1,4 @@
-/* Updated JavaScript for FitJourney Tracker v2.73 - Photo Comparison Fix */
+/* Updated JavaScript for FitJourney Tracker v2.73 - Fix Blob URL Issues */
 
 const appVersion = "v2.73";
 
