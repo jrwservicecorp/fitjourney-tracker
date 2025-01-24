@@ -1,6 +1,6 @@
-/* Consolidated JavaScript for FitJourney Tracker v2.91 */
+/* Consolidated JavaScript for FitJourney Tracker v2.92 */
 
-const appVersion = "v2.91";
+const appVersion = "v2.92";
 
 let chartInstance = null;
 let photoPage = 0; // For gallery pagination
@@ -41,93 +41,6 @@ function navigateTo(pageId) {
   if (pageId === "dashboard") {
     loadDashboard();
   }
-}
-
-/* ================================
-    Weight Logging
-================================ */
-function setupWeightLogging() {
-  const weightForm = document.getElementById("weight-form");
-  if (!weightForm) {
-    console.warn("Weight form not found!");
-    return;
-  }
-
-  weightForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const weightInput = document.getElementById("weight-input");
-    const dateInput = document.getElementById("date-input");
-
-    const weight = parseFloat(weightInput.value);
-    const date = dateInput.value;
-
-    if (!weight || !date) {
-      alert("Please enter a valid weight and date.");
-      return;
-    }
-
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    progressData.push({ date, weight });
-
-    localStorage.setItem("progressData", JSON.stringify(progressData));
-
-    // Reset the form inputs
-    weightInput.value = "";
-    dateInput.value = "";
-
-    alert("Weight logged successfully!");
-    loadDashboard(); // Reload the dashboard to reflect the new data
-  });
-}
-
-/* ================================
-    Photo Upload
-================================ */
-function setupPhotoUpload() {
-  const uploadBtn = document.getElementById("upload-photo-btn");
-  if (!uploadBtn) {
-    console.warn("Upload button not found!");
-    return;
-  }
-
-  uploadBtn.addEventListener("click", () => {
-    const fileInput = document.getElementById("photo-upload");
-    const file = fileInput.files[0];
-    const photoDate = document.getElementById("photo-date").value;
-    const keywords = document.getElementById("photo-keywords").value;
-    const description = document.getElementById("photo-description").value;
-
-    if (!file) {
-      alert("Please select a photo to upload.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const photoDataUrl = e.target.result;
-      const photos = JSON.parse(localStorage.getItem("photos")) || [];
-
-      const finalDate = photoDate || new Date().toISOString().split("T")[0];
-
-      photos.push({
-        date: finalDate,
-        src: photoDataUrl,
-        keywords: keywords,
-        description,
-      });
-
-      localStorage.setItem("photos", JSON.stringify(photos));
-
-      alert("Photo uploaded successfully!");
-      fileInput.value = "";
-      document.getElementById("photo-date").value = "";
-      document.getElementById("photo-keywords").value = "";
-      document.getElementById("photo-description").value = "";
-      updatePhotoGallery();
-    };
-    reader.readAsDataURL(file);
-  });
 }
 
 /* ================================
@@ -195,6 +108,12 @@ function renderChart(data, isSample = false) {
 function loadDashboard() {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || getSampleData();
   console.log("Loaded progress data:", progressData);
+
+  if (!progressData || progressData.length === 0) {
+    console.warn("No progress data available.");
+    document.getElementById("weight-summary").textContent = "No data available.";
+    return;
+  }
 
   renderChart(progressData, !localStorage.getItem("progressData"));
   updateSummary(progressData);
