@@ -1,6 +1,6 @@
-/* Consolidated JavaScript for FitJourney Tracker v2.87 */
+/* Consolidated JavaScript for FitJourney Tracker v2.89 */
 
-const appVersion = "v2.87";
+const appVersion = "v2.89";
 
 let chartInstance = null;
 let photoPage = 0; // For gallery pagination
@@ -9,7 +9,7 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
 
   setupNavigation();
-  setupWeightLogging(); // Ensures the weight logging functionality is initialized
+  setupWeightLogging();
   setupPhotoUpload();
   setupPhotoComparison();
   setupPhotoPagination();
@@ -19,44 +19,6 @@ window.addEventListener("DOMContentLoaded", () => {
   loadDashboard();
   equalizeHeights();
 });
-
-/* ================================
-    Weight Logging
-================================ */
-function setupWeightLogging() {
-  const weightForm = document.getElementById("weight-form");
-  if (!weightForm) {
-    console.warn("Weight form not found!");
-    return;
-  }
-
-  weightForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const weightInput = document.getElementById("weight-input");
-    const dateInput = document.getElementById("date-input");
-
-    const weight = parseFloat(weightInput.value);
-    const date = dateInput.value;
-
-    if (!weight || !date) {
-      alert("Please enter a valid weight and date.");
-      return;
-    }
-
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    progressData.push({ date, weight });
-
-    localStorage.setItem("progressData", JSON.stringify(progressData));
-
-    // Reset the form inputs
-    weightInput.value = "";
-    dateInput.value = "";
-
-    alert("Weight logged successfully!");
-    loadDashboard(); // Reload the dashboard to reflect the new data
-  });
-}
 
 /* ================================
     Navigation and Page Toggling
@@ -97,7 +59,7 @@ function loadDashboard() {
 }
 
 /* ================================
-    Chart Rendering and Filters
+    Chart Rendering
 ================================ */
 function renderChart(data, isSample = false) {
   const ctx = document.getElementById("weight-chart")?.getContext("2d");
@@ -155,34 +117,8 @@ function renderChart(data, isSample = false) {
   });
 }
 
-function setupChartFilters() {
-  const filterButtons = document.querySelectorAll(".chart-filters button");
-  filterButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const filter = button.getAttribute("data-filter");
-      if (filter === "7") {
-        loadChartData(7);
-      } else if (filter === "30") {
-        loadChartData(30);
-      } else if (filter === "custom") {
-        const range = prompt("Enter the number of days for the custom range:");
-        if (range) {
-          loadChartData(parseInt(range));
-        }
-      }
-    });
-  });
-}
-
-function loadChartData(days) {
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || getSampleData();
-  const filteredData = progressData.slice(-days);
-  console.log(`Filtered chart data for last ${days} days:`, filteredData);
-  renderChart(filteredData, false);
-}
-
 /* ================================
-    Summary, Timeline, Milestones
+    Summary Updates
 ================================ */
 function updateSummary(data) {
   const summaryContainer = document.getElementById("weight-summary");
@@ -194,20 +130,20 @@ function updateSummary(data) {
   }
 
   const weights = data.map((entry) => entry.weight);
-  const sum = weights.reduce((acc, w) => acc + w, 0);
-  const averageVal = Math.round(sum / weights.length);
-  const maxVal = Math.round(Math.max(...weights));
-  const minVal = Math.round(Math.min(...weights));
+  const averageVal = Math.round(weights.reduce((acc, w) => acc + w, 0) / weights.length);
+  const maxVal = Math.max(...weights);
+  const minVal = Math.min(...weights);
 
-  console.log("Summary data:", { averageVal, maxVal, minVal });
   summaryContainer.innerHTML = `
     <p><strong>Average Weight:</strong> ${averageVal} lbs</p>
     <p><strong>Highest Weight:</strong> ${maxVal} lbs</p>
     <p><strong>Lowest Weight:</strong> ${minVal} lbs</p>
   `;
-  equalizeHeights();
 }
 
+/* ================================
+    Timeline Updates
+================================ */
 function updateTimeline(data) {
   const timelineContainer = document.getElementById("timeline-section");
   if (!timelineContainer) return;
@@ -218,11 +154,59 @@ function updateTimeline(data) {
     return;
   }
 
-  const limitedData = data.slice(-7);
-  console.log("Timeline data:", limitedData);
-  timelineContainer.innerHTML = limitedData
-    .map((entry) => `<p>${entry.date} - ${Math.round(entry.weight)} lbs</p>`)
+  timelineContainer.innerHTML = data
+    .slice(-7)
+    .map((entry) => `<p>${entry.date} - ${entry.weight} lbs</p>`)
     .join("");
+}
+
+/* ================================
+    Photo Upload
+================================ */
+function setupPhotoUpload() {
+  const uploadBtn = document.getElementById("upload-photo-btn");
+  if (!uploadBtn) {
+    console.warn("Upload button not found!");
+    return;
+  }
+
+  uploadBtn.addEventListener("click", () => {
+    const fileInput = document.getElementById("photo-upload");
+    const file = fileInput.files[0];
+    const photoDate = document.getElementById("photo-date").value;
+    const keywords = document.getElementById("photo-keywords").value;
+    const description = document.getElementById("photo-description").value;
+
+    if (!file) {
+      alert("Please select a photo to upload.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const photoDataUrl = e.target.result;
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
+
+      const finalDate = photoDate || new Date().toISOString().split("T")[0];
+
+      photos.push({
+        date: finalDate,
+        src: photoDataUrl,
+        keywords: keywords,
+        description,
+      });
+
+      localStorage.setItem("photos", JSON.stringify(photos));
+
+      alert("Photo uploaded successfully!");
+      fileInput.value = "";
+      document.getElementById("photo-date").value = "";
+      document.getElementById("photo-keywords").value = "";
+      document.getElementById("photo-description").value = "";
+      updatePhotoGallery();
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 /* ================================
