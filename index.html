@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
   <header>
@@ -13,16 +13,13 @@
     <p>App Version: <span id="app-version">v2.85</span></p>
   </header>
 
-  <!-- Navigation -->
   <nav class="navbar">
     <a href="#" data-page="dashboard">Dashboard</a>
     <a href="#" data-page="about">About</a>
   </nav>
 
   <div id="main-app">
-    <!-- Dashboard Page -->
     <section id="dashboard" class="page">
-      <!-- Chart Section -->
       <div class="card prominent">
         <canvas id="weight-chart"></canvas>
         <p id="chart-placeholder">Start logging weight to see trends!</p>
@@ -36,10 +33,12 @@
           </div>
         </div>
       </div>
+
       <div class="card">
         <h3>Milestones</h3>
         <div id="milestone-section"></div>
       </div>
+
       <div class="dashboard-row compact">
         <div class="card weight-summary">
           <h3>Weight Summary</h3>
@@ -65,9 +64,9 @@
           <button id="expand-timeline-btn">Show More</button>
         </div>
       </div>
+
       <div class="card">
         <h3>Photo Gallery</h3>
-        <!-- Photo Upload Fields -->
         <div class="photo-upload-section">
           <label for="photo-upload" class="input-label">Select Photo:</label>
           <input id="photo-upload" type="file" accept="image/*" />
@@ -83,28 +82,35 @@
 
           <button id="upload-photo-btn">Upload Photo</button>
         </div>
-
-        <!-- Actual Photo Gallery -->
         <div id="photo-gallery"></div>
         <button id="load-more-photos-btn">Load More</button>
       </div>
+
+      <!-- Compare Photos Section -->
       <div>
         <h4>Compare Photos</h4>
-        <select id="photo-select-1"></select>
-        <select id="photo-select-2"></select>
-        <button id="compare-photos-btn">Compare</button>
-        <div id="photo-comparison"></div>
-      </div>
-    </section>
+        <div style="display: flex; gap: 20px; justify-content: center;">
+          <div>
+            <label for="photo-select-1" class="input-label">Select Photo 1:</label>
+            <select id="photo-select-1" class="photo-select"></select>
+            <div id="photo-1-preview" class="photo-preview"></div>
+          </div>
 
-    <!-- About Page -->
-    <section id="about" class="page hidden">
-      <h2>About FitJourney Tracker</h2>
-      <p>This app is designed to help you track your fitness journey effectively!</p>
+          <div>
+            <label for="photo-select-2" class="input-label">Select Photo 2:</label>
+            <select id="photo-select-2" class="photo-select"></select>
+            <div id="photo-2-preview" class="photo-preview"></div>
+          </div>
+        </div>
+        <button id="compare-photos-btn" class="submit-btn">Compare Photos</button>
+        <div id="side-by-side-comparison" class="comparison-display"></div>
+      </div>
     </section>
   </div>
 
-  <!-- Main Script -->
-  <script src="script.js" defer></script>
+  <section id="about" class="page hidden">
+    <h2>About FitJourney Tracker</h2>
+    <p>This app is designed to help you track your fitness journey effectively!</p>
+  </section>
 </body>
 </html>
