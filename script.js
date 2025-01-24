@@ -1,4 +1,4 @@
-const appVersion = "v3.6";
+const appVersion = "v3.7";
 
 let chartInstance = null;
 let photoPage = 0; // For gallery pagination
@@ -95,7 +95,7 @@ function renderChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
+      maintainAspectRatio: true, // Prevents chart from stretching
       plugins: {
         legend: {
           display: true,
