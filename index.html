@@ -11,7 +11,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v3.1</span></p>
+    <p>App Version: <span id="app-version">v3.4</span></p>
   </header>
 
   <main id="main-app">
@@ -52,22 +52,6 @@
       </div>
     </div>
 
-    <!-- Photo Gallery -->
-    <div class="card">
-      <h3>Photo Gallery</h3>
-      <div id="photo-gallery" class="gallery">
-        <p class="placeholder">No photos uploaded yet.</p>
-      </div>
-      <button id="show-more-photos-btn">Show More</button>
-      <form id="photo-form">
-        <label for="photo-upload">Select Photo:</label>
-        <input id="photo-upload" type="file" accept="image/*">
-        <label for="photo-date">Photo Date:</label>
-        <input id="photo-date" type="date">
-        <button type="submit">Upload Photo</button>
-      </form>
-    </div>
-
     <!-- Photo Comparison -->
     <div class="card">
       <h3>Photo Comparison</h3>
@@ -83,6 +67,22 @@
       </div>
       <button id="compare-photos-btn">Compare Photos</button>
       <div id="side-by-side-comparison"></div>
+    </div>
+
+    <!-- Photo Gallery -->
+    <div class="card">
+      <h3>Photo Gallery</h3>
+      <div id="photo-gallery" class="gallery">
+        <p class="placeholder">No photos uploaded yet.</p>
+      </div>
+      <button id="show-more-photos-btn">Show More</button>
+      <form id="photo-form">
+        <label for="photo-upload">Select Photo:</label>
+        <input id="photo-upload" type="file" accept="image/*">
+        <label for="photo-date">Photo Date:</label>
+        <input id="photo-date" type="date">
+        <button type="submit">Upload Photo</button>
+      </form>
     </div>
   </main>
 </body>
