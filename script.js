@@ -1,6 +1,7 @@
-const appVersion = "v2.95";
+const appVersion = "v3.1";
 
 let chartInstance = null;
+let photoPage = 0; // For gallery pagination
 
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
@@ -10,6 +11,7 @@ window.addEventListener("DOMContentLoaded", () => {
   renderChart();
   updateSummary();
   loadPhotos();
+  loadRecentWeighins();
 });
 
 /* ================================
@@ -37,6 +39,7 @@ function setupWeightLogging() {
 
     renderChart();
     updateSummary();
+    loadRecentWeighins();
   });
 }
 
@@ -96,7 +99,25 @@ function updateSummary() {
 }
 
 /* ================================
-    Photo Upload
+    Recent Weigh-Ins
+================================ */
+function loadRecentWeighins() {
+  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+  const recentContainer = document.getElementById("recent-weighins");
+
+  if (progressData.length === 0) {
+    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
+    return;
+  }
+
+  const recentWeighins = progressData.slice(-4);
+  recentContainer.innerHTML = recentWeighins
+    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
+    .join("");
+}
+
+/* ================================
+    Photo Upload and Gallery
 ================================ */
 function setupPhotoUpload() {
   const photoForm = document.getElementById("photo-form");
@@ -133,7 +154,4 @@ function loadPhotos() {
     return;
   }
 
-  gallery.innerHTML = photos
-    .map((photo) => `<div><img src="${photo.src}" alt="Uploaded Photo"><p>${photo.date}</p></div>`)
-    .join("");
-}
+  const photosToShow = photos.slice(photoPage *
