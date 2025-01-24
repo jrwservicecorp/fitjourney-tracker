@@ -11,7 +11,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v3.0</span></p>
+    <p>App Version: <span id="app-version">v3.1</span></p>
   </header>
 
   <main id="main-app">
@@ -30,6 +30,14 @@
           </div>
         </div>
 
+        <!-- Recent Weigh-Ins -->
+        <div class="card recent-weighins">
+          <h3>Recent Weigh-Ins</h3>
+          <div id="recent-weighins">
+            <p class="placeholder">No weigh-ins recorded yet.</p>
+          </div>
+        </div>
+
         <!-- Log Weight -->
         <div class="card weight-checkin">
           <h3>Log Your Weight</h3>
@@ -44,20 +52,13 @@
       </div>
     </div>
 
-    <!-- Streaks and Awards -->
-    <div class="card">
-      <h3>Streaks and Awards</h3>
-      <div id="streaks-awards">
-        <p class="placeholder">Earn streaks and awards as you log data!</p>
-      </div>
-    </div>
-
     <!-- Photo Gallery -->
     <div class="card">
       <h3>Photo Gallery</h3>
       <div id="photo-gallery" class="gallery">
         <p class="placeholder">No photos uploaded yet.</p>
       </div>
+      <button id="show-more-photos-btn">Show More</button>
       <form id="photo-form">
         <label for="photo-upload">Select Photo:</label>
         <input id="photo-upload" type="file" accept="image/*">
