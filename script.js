@@ -1,4 +1,4 @@
-const appVersion = "v2.94";
+const appVersion = "v2.95";
 
 let chartInstance = null;
 
@@ -18,11 +18,6 @@ window.addEventListener("DOMContentLoaded", () => {
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
 
-  if (!weightForm) {
-    console.error("Weight form not found!");
-    return;
-  }
-
   weightForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
@@ -40,8 +35,8 @@ function setupWeightLogging() {
     localStorage.setItem("progressData", JSON.stringify(progressData));
     alert("Weight logged successfully!");
 
-    renderChart(); // Update the chart after logging new data
-    updateSummary(); // Update the summary after logging new data
+    renderChart();
+    updateSummary();
   });
 }
 
@@ -57,12 +52,9 @@ function renderChart() {
   }
 
   if (progressData.length === 0) {
-    console.warn("No data available to render chart.");
     document.getElementById("chart-placeholder").textContent = "No data available.";
     return;
   }
-
-  document.getElementById("chart-placeholder").textContent = "";
 
   chartInstance = new Chart(ctx, {
     type: "bar",
@@ -76,23 +68,11 @@ function renderChart() {
         },
       ],
     },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: true,
-        },
-      },
-      scales: {
-        x: { ticks: { color: "#333" } },
-        y: { ticks: { color: "#333" } },
-      },
-    },
   });
 }
 
 /* ================================
-    Weight Summary Update
+    Weight Summary
 ================================ */
 function updateSummary() {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
@@ -121,11 +101,6 @@ function updateSummary() {
 function setupPhotoUpload() {
   const photoForm = document.getElementById("photo-form");
 
-  if (!photoForm) {
-    console.error("Photo form not found!");
-    return;
-  }
-
   photoForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
@@ -142,16 +117,13 @@ function setupPhotoUpload() {
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
       photos.push({ date: photoDate, src: e.target.result });
       localStorage.setItem("photos", JSON.stringify(photos));
-      alert("Photo uploaded successfully!");
       loadPhotos();
+      alert("Photo uploaded successfully!");
     };
     reader.readAsDataURL(photoInput);
   });
 }
 
-/* ================================
-    Photo Loading
-================================ */
 function loadPhotos() {
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
   const gallery = document.getElementById("photo-gallery");
@@ -162,6 +134,6 @@ function loadPhotos() {
   }
 
   gallery.innerHTML = photos
-    .map((photo) => `<div><img src="${photo.src}" alt="Photo"><p>${photo.date}</p></div>`)
+    .map((photo) => `<div><img src="${photo.src}" alt="Uploaded Photo"><p>${photo.date}</p></div>`)
     .join("");
 }
