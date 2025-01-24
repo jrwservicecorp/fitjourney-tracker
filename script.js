@@ -1,4 +1,4 @@
-const appVersion = "v3.5";
+const appVersion = "v3.6";
 
 let chartInstance = null;
 let photoPage = 0; // For gallery pagination
@@ -6,8 +6,8 @@ let photoPage = 0; // For gallery pagination
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
 
-  setupWeightLogging(); // Ensure this function is defined
-  setupPhotoUpload();   // Ensure this function is defined
+  setupWeightLogging();
+  setupPhotoUpload();
   renderChart();
   updateSummary();
   loadPhotos();
@@ -66,6 +66,14 @@ function renderChart() {
     return;
   }
 
+  const gradientFill = ctx.createLinearGradient(0, 0, 0, 400);
+  gradientFill.addColorStop(0, "rgba(52, 152, 219, 0.4)"); // Light blue
+  gradientFill.addColorStop(1, "rgba(52, 152, 219, 0)");   // Transparent
+
+  const gradientBorder = ctx.createLinearGradient(0, 0, 400, 0);
+  gradientBorder.addColorStop(0, "#1a73e8"); // Bright blue
+  gradientBorder.addColorStop(1, "#3498db"); // Lighter blue
+
   chartInstance = new Chart(ctx, {
     type: "line",
     data: {
@@ -74,42 +82,66 @@ function renderChart() {
         {
           label: "Weight",
           data: progressData.map((entry) => entry.weight),
-          backgroundColor: "rgba(52, 152, 219, 0.2)",
-          borderColor: "#3498db",
-          borderWidth: 2,
-          pointRadius: 4,
-          pointBackgroundColor: "#ffffff",
+          backgroundColor: gradientFill,
+          borderColor: gradientBorder,
+          borderWidth: 3,
+          pointRadius: 6,
+          pointBackgroundColor: "#ffffff", // White glowing points
           pointBorderColor: "#3498db",
+          pointHoverRadius: 8,
+          tension: 0.4, // Smooth curve
         },
       ],
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: {
           display: true,
           labels: {
-            color: "#ffffff",
+            color: "#ffffff", // White text for legend
+            font: {
+              size: 14,
+            },
           },
+        },
+        tooltip: {
+          backgroundColor: "#1c1c1c",
+          titleColor: "#ffffff",
+          bodyColor: "#ffffff",
+          borderColor: "#3498db",
+          borderWidth: 1,
         },
       },
       scales: {
         x: {
           ticks: {
             color: "#ffffff",
+            font: {
+              size: 12,
+            },
           },
           grid: {
-            color: "rgba(255, 255, 255, 0.1)",
+            color: "rgba(255, 255, 255, 0.1)", // Subtle gridlines
           },
         },
         y: {
           ticks: {
             color: "#ffffff",
+            font: {
+              size: 12,
+            },
+            padding: 10,
           },
           grid: {
-            color: "rgba(255, 255, 255, 0.1)",
+            color: "rgba(255, 255, 255, 0.1)", // Subtle gridlines
           },
         },
+      },
+      animation: {
+        duration: 1500,
+        easing: "easeOutQuart", // Smooth animation
       },
     },
   });
