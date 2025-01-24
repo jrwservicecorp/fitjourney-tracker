@@ -1,6 +1,6 @@
-/* Consolidated JavaScript for FitJourney Tracker v2.90 */
+/* Consolidated JavaScript for FitJourney Tracker v2.91 */
 
-const appVersion = "v2.90";
+const appVersion = "v2.91";
 
 let chartInstance = null;
 let photoPage = 0; // For gallery pagination
@@ -8,9 +8,8 @@ let photoPage = 0; // For gallery pagination
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
 
-  // Initialize all setup functions
   setupNavigation();
-  setupWeightLogging(); // Fully defined and properly called
+  setupWeightLogging();
   setupPhotoUpload();
   setupPhotoComparison();
   setupPhotoPagination();
@@ -20,6 +19,29 @@ window.addEventListener("DOMContentLoaded", () => {
   loadDashboard();
   equalizeHeights();
 });
+
+/* ================================
+    Navigation and Page Toggling
+================================ */
+function setupNavigation() {
+  const links = document.querySelectorAll(".navbar a");
+  links.forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      navigateTo(link.getAttribute("data-page"));
+    });
+  });
+}
+
+function navigateTo(pageId) {
+  document.querySelectorAll(".page").forEach((page) => {
+    page.classList.toggle("hidden", page.id !== pageId);
+  });
+
+  if (pageId === "dashboard") {
+    loadDashboard();
+  }
+}
 
 /* ================================
     Weight Logging
@@ -56,6 +78,55 @@ function setupWeightLogging() {
 
     alert("Weight logged successfully!");
     loadDashboard(); // Reload the dashboard to reflect the new data
+  });
+}
+
+/* ================================
+    Photo Upload
+================================ */
+function setupPhotoUpload() {
+  const uploadBtn = document.getElementById("upload-photo-btn");
+  if (!uploadBtn) {
+    console.warn("Upload button not found!");
+    return;
+  }
+
+  uploadBtn.addEventListener("click", () => {
+    const fileInput = document.getElementById("photo-upload");
+    const file = fileInput.files[0];
+    const photoDate = document.getElementById("photo-date").value;
+    const keywords = document.getElementById("photo-keywords").value;
+    const description = document.getElementById("photo-description").value;
+
+    if (!file) {
+      alert("Please select a photo to upload.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const photoDataUrl = e.target.result;
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
+
+      const finalDate = photoDate || new Date().toISOString().split("T")[0];
+
+      photos.push({
+        date: finalDate,
+        src: photoDataUrl,
+        keywords: keywords,
+        description,
+      });
+
+      localStorage.setItem("photos", JSON.stringify(photos));
+
+      alert("Photo uploaded successfully!");
+      fileInput.value = "";
+      document.getElementById("photo-date").value = "";
+      document.getElementById("photo-keywords").value = "";
+      document.getElementById("photo-description").value = "";
+      updatePhotoGallery();
+    };
+    reader.readAsDataURL(file);
   });
 }
 
