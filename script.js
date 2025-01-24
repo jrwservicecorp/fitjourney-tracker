@@ -1,4 +1,4 @@
-const appVersion = "v3.1";
+const appVersion = "v3.2";
 
 let chartInstance = null;
 let photoPage = 0; // For gallery pagination
@@ -154,4 +154,16 @@ function loadPhotos() {
     return;
   }
 
-  const photosToShow = photos.slice(photoPage *
+  const photosToShow = photos.slice(photoPage * 8, photoPage * 8 + 8);
+  gallery.innerHTML = photosToShow
+    .map((photo) => `<div><img src="${photo.src}" alt="Uploaded Photo"><p>${photo.date}</p></div>`)
+    .join("");
+
+  const showMoreBtn = document.getElementById("show-more-photos-btn");
+  showMoreBtn.style.display = photos.length > photoPage * 8 + 8 ? "block" : "none";
+
+  showMoreBtn.addEventListener("click", () => {
+    photoPage++;
+    loadPhotos();
+  });
+}
