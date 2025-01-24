@@ -9,7 +9,7 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
 
   setupNavigation();
-  setupWeightLogging();
+  setupWeightLogging(); // Ensure this is correctly initialized
   setupPhotoUpload();
   setupPhotoComparison();
   setupPhotoPagination();
@@ -20,6 +20,41 @@ window.addEventListener("DOMContentLoaded", () => {
   loadDashboard();
   equalizeHeights();
 });
+
+/* ================================
+    Weight Logging
+================================ */
+function setupWeightLogging() {
+  const weightForm = document.getElementById("weight-form");
+  if (!weightForm) return;
+
+  weightForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const weightInput = document.getElementById("weight-input");
+    const dateInput = document.getElementById("date-input");
+
+    const weight = parseFloat(weightInput.value);
+    const date = dateInput.value;
+
+    if (!weight || !date) {
+      alert("Please enter a valid weight and date.");
+      return;
+    }
+
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    progressData.push({ date, weight });
+
+    localStorage.setItem("progressData", JSON.stringify(progressData));
+
+    // Reset the form inputs
+    weightInput.value = "";
+    dateInput.value = "";
+
+    alert("Weight logged successfully!");
+    loadDashboard(); // Reload the dashboard to reflect new data
+  });
+}
 
 /* ================================
     Navigation and Page Toggling
