@@ -57,36 +57,26 @@ canvas {
   font-size: 14px;
 }
 
-/* Summary and Weight Check-In */
+/* Summary Container */
 .summary-container {
   display: flex;
   gap: 20px;
   justify-content: space-between;
 }
 
-.weight-summary, .weight-checkin {
+.weight-summary, .recent-weighins, .weight-checkin {
   flex: 1;
-}
-
-/* Streaks and Awards */
-#streaks-awards {
-  text-align: center;
-  padding: 10px;
-  background: #2c2c2c;
-  border-radius: 5px;
-  font-size: 14px;
-  color: #888;
 }
 
 /* Photo Gallery */
 .gallery {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 15px;
-  flex-wrap: wrap;
 }
 
 .gallery img {
-  max-width: calc(25% - 15px);
+  max-width: 100%;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
