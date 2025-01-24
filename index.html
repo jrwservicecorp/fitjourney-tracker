@@ -11,26 +11,19 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.94</span></p>
+    <p>App Version: <span id="app-version">v2.95</span></p>
   </header>
 
-  <main>
+  <nav class="navbar">
+    <a href="#" data-page="dashboard">Dashboard</a>
+    <a href="#" data-page="about">About</a>
+  </nav>
+
+  <main id="main-app">
     <!-- Chart Section -->
     <div class="card prominent">
       <canvas id="weight-chart"></canvas>
       <p id="chart-placeholder">Start logging weight to see trends!</p>
-    </div>
-
-    <!-- Weight Form -->
-    <div>
-      <h3>Log Your Weight</h3>
-      <form id="weight-form">
-        <label for="weight-input">Weight:</label>
-        <input id="weight-input" type="number" step="0.1" placeholder="lbs" required>
-        <label for="date-input">Date:</label>
-        <input id="date-input" type="date" required>
-        <button type="submit">Log Weight</button>
-      </form>
     </div>
 
     <!-- Weight Summary -->
@@ -39,6 +32,18 @@
       <div id="weight-summary">
         <p class="placeholder">No data available for summary.</p>
       </div>
+    </div>
+
+    <!-- Log Weight -->
+    <div class="card">
+      <h3>Log Your Weight</h3>
+      <form id="weight-form">
+        <label for="weight-input">Weight:</label>
+        <input id="weight-input" type="number" step="0.1" placeholder="lbs" required>
+        <label for="date-input">Date:</label>
+        <input id="date-input" type="date" required>
+        <button type="submit">Log Weight</button>
+      </form>
     </div>
 
     <!-- Photo Upload -->
