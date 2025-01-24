@@ -1,6 +1,6 @@
-/* Consolidated JavaScript for FitJourney Tracker v2.92 */
+/* Consolidated JavaScript for FitJourney Tracker v2.93 */
 
-const appVersion = "v2.92";
+const appVersion = "v2.93";
 
 let chartInstance = null;
 let photoPage = 0; // For gallery pagination
@@ -8,16 +8,20 @@ let photoPage = 0; // For gallery pagination
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
 
+  // Initialize all setup functions
+  console.log("Initializing application...");
   setupNavigation();
-  setupWeightLogging();
+  setupWeightLogging(); // Ensuring this function is defined before being called
   setupPhotoUpload();
   setupPhotoComparison();
   setupPhotoPagination();
   setupTimelineExpansion();
   setupChartFilters();
 
+  console.log("Loading dashboard...");
   loadDashboard();
   equalizeHeights();
+  console.log("Application initialized.");
 });
 
 /* ================================
@@ -41,6 +45,46 @@ function navigateTo(pageId) {
   if (pageId === "dashboard") {
     loadDashboard();
   }
+}
+
+/* ================================
+    Weight Logging
+================================ */
+function setupWeightLogging() {
+  const weightForm = document.getElementById("weight-form");
+  if (!weightForm) {
+    console.warn("Weight form not found!");
+    return;
+  }
+
+  weightForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const weightInput = document.getElementById("weight-input");
+    const dateInput = document.getElementById("date-input");
+
+    const weight = parseFloat(weightInput.value);
+    const date = dateInput.value;
+
+    if (!weight || !date) {
+      alert("Please enter a valid weight and date.");
+      return;
+    }
+
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    progressData.push({ date, weight });
+
+    localStorage.setItem("progressData", JSON.stringify(progressData));
+
+    // Reset the form inputs
+    weightInput.value = "";
+    dateInput.value = "";
+
+    alert("Weight logged successfully!");
+    loadDashboard(); // Reload the dashboard to reflect the new data
+  });
+
+  console.log("Weight logging setup complete.");
 }
 
 /* ================================
@@ -121,49 +165,6 @@ function loadDashboard() {
   updatePhotoGallery();
   updateMilestones(progressData);
   equalizeHeights();
-}
-
-/* ================================
-    Summary Updates
-================================ */
-function updateSummary(data) {
-  const summaryContainer = document.getElementById("weight-summary");
-  if (!summaryContainer) return;
-
-  if (data.length === 0) {
-    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
-    return;
-  }
-
-  const weights = data.map((entry) => entry.weight);
-  const averageVal = Math.round(weights.reduce((acc, w) => acc + w, 0) / weights.length);
-  const maxVal = Math.max(...weights);
-  const minVal = Math.min(...weights);
-
-  summaryContainer.innerHTML = `
-    <p><strong>Average Weight:</strong> ${averageVal} lbs</p>
-    <p><strong>Highest Weight:</strong> ${maxVal} lbs</p>
-    <p><strong>Lowest Weight:</strong> ${minVal} lbs</p>
-  `;
-}
-
-/* ================================
-    Timeline Updates
-================================ */
-function updateTimeline(data) {
-  const timelineContainer = document.getElementById("timeline-section");
-  if (!timelineContainer) return;
-
-  if (data.length === 0) {
-    timelineContainer.innerHTML =
-      '<p class="placeholder">No timeline data yet. Start logging your weight to see it here!</p>';
-    return;
-  }
-
-  timelineContainer.innerHTML = data
-    .slice(-7)
-    .map((entry) => `<p>${entry.date} - ${entry.weight} lbs</p>`)
-    .join("");
 }
 
 /* ================================
