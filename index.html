@@ -11,7 +11,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.93-debug</span></p>
+    <p>App Version: <span id="app-version">v2.94</span></p>
   </header>
 
   <main>
@@ -31,6 +31,29 @@
         <input id="date-input" type="date" required>
         <button type="submit">Log Weight</button>
       </form>
+    </div>
+
+    <!-- Weight Summary -->
+    <div class="card">
+      <h3>Weight Summary</h3>
+      <div id="weight-summary">
+        <p class="placeholder">No data available for summary.</p>
+      </div>
+    </div>
+
+    <!-- Photo Upload -->
+    <div class="card">
+      <h3>Photo Upload</h3>
+      <form id="photo-form">
+        <label for="photo-upload">Select Photo:</label>
+        <input id="photo-upload" type="file" accept="image/*">
+        <label for="photo-date">Photo Date:</label>
+        <input id="photo-date" type="date">
+        <button type="submit">Upload Photo</button>
+      </form>
+      <div id="photo-gallery">
+        <p class="placeholder">No photos uploaded yet.</p>
+      </div>
     </div>
   </main>
 </body>
