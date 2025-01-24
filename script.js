@@ -1,6 +1,6 @@
-/* Consolidated JavaScript for FitJourney Tracker v2.85c */
+/* Consolidated JavaScript for FitJourney Tracker v2.87 */
 
-const appVersion = "v2.85";
+const appVersion = "v2.87";
 
 let chartInstance = null;
 let photoPage = 0; // For gallery pagination
@@ -9,7 +9,7 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
 
   setupNavigation();
-  setupWeightLogging();
+  setupWeightLogging(); // Ensures the weight logging functionality is initialized
   setupPhotoUpload();
   setupPhotoComparison();
   setupPhotoPagination();
@@ -19,6 +19,44 @@ window.addEventListener("DOMContentLoaded", () => {
   loadDashboard();
   equalizeHeights();
 });
+
+/* ================================
+    Weight Logging
+================================ */
+function setupWeightLogging() {
+  const weightForm = document.getElementById("weight-form");
+  if (!weightForm) {
+    console.warn("Weight form not found!");
+    return;
+  }
+
+  weightForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const weightInput = document.getElementById("weight-input");
+    const dateInput = document.getElementById("date-input");
+
+    const weight = parseFloat(weightInput.value);
+    const date = dateInput.value;
+
+    if (!weight || !date) {
+      alert("Please enter a valid weight and date.");
+      return;
+    }
+
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    progressData.push({ date, weight });
+
+    localStorage.setItem("progressData", JSON.stringify(progressData));
+
+    // Reset the form inputs
+    weightInput.value = "";
+    dateInput.value = "";
+
+    alert("Weight logged successfully!");
+    loadDashboard(); // Reload the dashboard to reflect the new data
+  });
+}
 
 /* ================================
     Navigation and Page Toggling
