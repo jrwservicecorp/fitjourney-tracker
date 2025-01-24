@@ -149,7 +149,7 @@ function updateSummary(data) {
 
   const weights = data.map((entry) => entry.weight);
   const sum = weights.reduce((acc, w) => acc + w, 0);
-  const averageVal = Math.round(sum / weights.length); // Round, no decimals
+  const averageVal = Math.round(sum / weights.length);
   const maxVal = Math.round(Math.max(...weights));
   const minVal = Math.round(Math.min(...weights));
 
@@ -269,7 +269,6 @@ function setupPhotoUpload() {
       const photoDataUrl = e.target.result;
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
 
-      // If user didn't pick a date, default to today's date
       const finalDate = photoDate || new Date().toISOString().split("T")[0];
 
       photos.push({
@@ -300,111 +299,37 @@ function setupPhotoComparison() {
   compareBtn.addEventListener("click", () => {
     const select1 = document.getElementById("photo-select-1");
     const select2 = document.getElementById("photo-select-2");
-    const gallery = document.getElementById("photo-gallery");
-    const comparisonContainer = document.getElementById("photo-comparison");
+    const comparisonContainer = document.getElementById("side-by-side-comparison");
 
-    const photo1 = select1.value;
-    const photo2 = select2.value;
+    const photo1Src = select1.value;
+    const photo2Src = select2.value;
 
-    if (!photo1 || !photo2) {
+    if (!photo1Src || !photo2Src) {
       alert("Please select two photos to compare.");
       return;
     }
 
-    gallery.style.display = "none";
     comparisonContainer.innerHTML = `
-      <div class="comparison-container" style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="flex: 1; text-align: center;">
-          <h4>Photo 1</h4>
-          <img src="${photo1}" alt="Photo 1" style="max-width: 150px;">
-        </div>
-        <div style="flex: 1; text-align: center;">
-          <h4>Photo 2</h4>
-          <img src="${photo2}" alt="Photo 2" style="max-width: 150px;">
-        </div>
-        <div style="margin-top: 20px;">
-          <textarea id="custom-text" placeholder="Add your text here..."></textarea>
-          <button id="export-comparison-btn">Export</button>
-        </div>
+      <div>
+        <h4>Photo 1</h4>
+        <img src="${photo1Src}" alt="Photo 1">
+      </div>
+      <div>
+        <h4>Photo 2</h4>
+        <img src="${photo2Src}" alt="Photo 2">
       </div>
     `;
-    setupExportComparison(photo1, photo2);
   });
-}
 
-function setupExportComparison(photo1, photo2) {
-  const exportBtn = document.getElementById("export-comparison-btn");
-  if (!exportBtn) return;
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  const select1 = document.getElementById("photo-select-1");
+  const select2 = document.getElementById("photo-select-2");
 
-  exportBtn.addEventListener("click", () => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const customText = document.getElementById("custom-text").value;
-
-    canvas.width = 800;
-    canvas.height = 400;
-
-    const img1 = new Image();
-    const img2 = new Image();
-
-    img1.onload = () => {
-      ctx.drawImage(img1, 0, 0, 400, 400);
-      img2.onload = () => {
-        ctx.drawImage(img2, 400, 0, 400, 400);
-
-        ctx.font = "20px Arial";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.fillText(customText, canvas.width / 2, 380);
-
-        const exportLink = document.createElement("a");
-        exportLink.download = "comparison.png";
-        exportLink.href = canvas.toDataURL();
-        exportLink.click();
-      };
-      img2.src = photo2;
-    };
-    img1.src = photo1;
+  photos.forEach((photo) => {
+    const optionHTML = `<option value="${photo.src}">${photo.date}</option>`;
+    select1.innerHTML += optionHTML;
+    select2.innerHTML += optionHTML;
   });
-}
-
-/* ================================
-    Milestones & Goals
-================================ */
-function setupGoalProgress() {
-  const goalProgressContainer = document.getElementById("goal-progress");
-  const addGoalBtn = document.getElementById("add-goal-btn");
-
-  if (!addGoalBtn || !goalProgressContainer) return;
-
-  addGoalBtn.addEventListener("click", () => {
-    const goalWeight = prompt("Set your goal weight (lbs):");
-    if (goalWeight) {
-      goalProgressContainer.innerHTML = `
-        <p>Goal: Reach ${goalWeight} lbs</p>
-        <div class="progress-bar-container">
-          <div class="progress-bar" style="width: 30%;"></div>
-        </div>
-      `;
-    }
-  });
-}
-
-function updateMilestones(data) {
-  const milestoneContainer = document.getElementById("milestone-section");
-  if (!milestoneContainer) return;
-
-  let milestones = "";
-  const totalWeightLoss = data[0].weight - data[data.length - 1].weight;
-
-  if (totalWeightLoss >= 10) {
-    milestones += "<p>🏆 Lost 10 lbs! Great job!</p>";
-  }
-  if (data.length >= 7) {
-    milestones += "<p>🔥 7-day logging streak!</p>";
-  }
-
-  milestoneContainer.innerHTML = milestones || "<p>No milestones achieved yet. Keep going!</p>";
 }
 
 /* ================================
@@ -425,27 +350,6 @@ function getSampleData() {
       date: date.toISOString().split("T")[0],
       weight: Math.random() * 20 + 180,
     };
-  });
-}
-
-function setupWeightLogging() {
-  const weightForm = document.getElementById("weight-form");
-  if (!weightForm) return;
-
-  weightForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const weight = parseFloat(document.getElementById("weight-input").value);
-    const date = document.getElementById("date-input").value;
-
-    if (!weight || !date) {
-      alert("Please enter both weight and date.");
-      return;
-    }
-
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    progressData.push({ date, weight });
-    localStorage.setItem("progressData", JSON.stringify(progressData));
-    loadDashboard();
   });
 }
 
