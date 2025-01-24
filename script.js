@@ -1,4 +1,4 @@
-const appVersion = "v3.2";
+const appVersion = "v3.3";
 
 let chartInstance = null;
 let photoPage = 0; // For gallery pagination
@@ -60,16 +60,50 @@ function renderChart() {
   }
 
   chartInstance = new Chart(ctx, {
-    type: "bar",
+    type: "line", // Changed to a sleek line chart
     data: {
       labels: progressData.map((entry) => entry.date),
       datasets: [
         {
           label: "Weight",
           data: progressData.map((entry) => entry.weight),
-          backgroundColor: "#3498db",
+          backgroundColor: "rgba(52, 152, 219, 0.2)", // Transparent fill
+          borderColor: "#3498db", // Clean blue line
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: "#ffffff", // White points
+          pointBorderColor: "#3498db",
         },
       ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            color: "#ffffff", // White legend text for dark theme
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: "#ffffff", // White tick labels
+          },
+          grid: {
+            color: "rgba(255, 255, 255, 0.1)", // Subtle gridlines
+          },
+        },
+        y: {
+          ticks: {
+            color: "#ffffff", // White tick labels
+          },
+          grid: {
+            color: "rgba(255, 255, 255, 0.1)", // Subtle gridlines
+          },
+        },
+      },
     },
   });
 }
