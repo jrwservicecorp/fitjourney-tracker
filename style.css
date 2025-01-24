@@ -39,6 +39,7 @@ button {
   padding: 10px 15px;
   font-size: 14px;
   cursor: pointer;
+  margin-top: 10px;
 }
 
 button:hover {
@@ -47,8 +48,8 @@ button:hover {
 
 /* Chart Section */
 canvas {
-  width: 100% !important;
-  height: auto !important;
+  width: 100%;
+  max-height: 400px; /* Constrain chart height */
 }
 
 #chart-placeholder {
@@ -66,6 +67,22 @@ canvas {
 
 .weight-summary, .recent-weighins, .weight-checkin {
   flex: 1;
+}
+
+.weight-checkin form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Streaks and Awards */
+#streaks-awards {
+  text-align: center;
+  padding: 10px;
+  background: #2c2c2c;
+  border-radius: 5px;
+  font-size: 14px;
+  color: #888;
 }
 
 /* Photo Gallery */
@@ -106,4 +123,27 @@ canvas {
   max-width: 100%;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Buttons */
+#show-more-photos-btn {
+  display: block;
+  margin: 10px auto;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .summary-container {
+    flex-direction: column;
+  }
+
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery {
+    grid-template-columns: repeat(1, 1fr);
+  }
 }
