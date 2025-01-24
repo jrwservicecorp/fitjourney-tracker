@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Main Script -->
   <script src="script.js" defer></script>
 </head>
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v2.85</span></p>
+    <p>App Version: <span id="app-version">v2.91</span></p>
   </header>
 
   <nav class="navbar">
@@ -20,6 +23,7 @@
 
   <div id="main-app">
     <section id="dashboard" class="page">
+      <!-- Chart Section -->
       <div class="card prominent">
         <canvas id="weight-chart"></canvas>
         <p id="chart-placeholder">Start logging weight to see trends!</p>
@@ -34,16 +38,19 @@
         </div>
       </div>
 
+      <!-- Milestones Section -->
       <div class="card">
         <h3>Milestones</h3>
         <div id="milestone-section"></div>
       </div>
 
+      <!-- Dashboard Row -->
       <div class="dashboard-row compact">
         <div class="card weight-summary">
           <h3>Weight Summary</h3>
           <div id="weight-summary"></div>
         </div>
+
         <div class="card weight-checkin">
           <h3>Weight Check-In</h3>
           <form id="weight-form">
@@ -56,6 +63,7 @@
             <button type="submit" class="submit-btn">Log Weight</button>
           </form>
         </div>
+
         <div class="card timeline">
           <h3>Timeline</h3>
           <div id="timeline-section" class="horizontal-scroll">
@@ -65,6 +73,7 @@
         </div>
       </div>
 
+      <!-- Photo Gallery -->
       <div class="card">
         <h3>Photo Gallery</h3>
         <div class="photo-upload-section">
@@ -87,7 +96,7 @@
       </div>
 
       <!-- Compare Photos Section -->
-      <div>
+      <div class="card">
         <h4>Compare Photos</h4>
         <div style="display: flex; gap: 20px; justify-content: center;">
           <div>
