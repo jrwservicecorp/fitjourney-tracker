@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Chart.js CDN -->
+  <!-- Chart.js Library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Main JavaScript -->
   <script src="script.js" defer></script>
@@ -22,6 +22,7 @@
   </nav>
 
   <div id="main-app">
+    <!-- Dashboard Page -->
     <section id="dashboard" class="page">
       <!-- Chart Section -->
       <div class="card prominent">
@@ -106,4 +107,20 @@
           </div>
 
           <div>
-            <label for="photo-select-2" class="input-label">Select Photo 2:</
+            <label for="photo-select-2" class="input-label">Select Photo 2:</label>
+            <select id="photo-select-2" class="photo-select"></select>
+            <div id="photo-2-preview" class="photo-preview"></div>
+          </div>
+        </div>
+        <button id="compare-photos-btn" class="submit-btn">Compare Photos</button>
+        <div id="side-by-side-comparison" class="comparison-display"></div>
+      </div>
+    </section>
+  </div>
+
+  <section id="about" class="page hidden">
+    <h2>About FitJourney Tracker</h2>
+    <p>This app is designed to help you track your fitness journey effectively!</p>
+  </section>
+</body>
+</html>
