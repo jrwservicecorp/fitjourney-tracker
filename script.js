@@ -1,4 +1,4 @@
-/* Consolidated JavaScript for FitJourney Tracker v2.85 */
+/* Consolidated JavaScript for FitJourney Tracker v2.85a */
 
 const appVersion = "v2.85";
 
