@@ -1,4 +1,4 @@
-const appVersion = "v5.4";
+const appVersion = "v5.5";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -14,19 +14,52 @@ window.addEventListener("DOMContentLoaded", async () => {
   console.log("Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
+  // Initialize all components
   setupWeightLogging();
-  setupPhotoUpload();
-
-  // Wait for Filerobot to load before setting up the photo editor
-  await waitForFilerobot();
+  setupPhotoUpload(); // Ensure this function is now properly defined
+  await waitForFilerobot(); // Wait for Filerobot to load
   setupPhotoEditor();
 
-  // Load chart data and initialize the chart
+  // Load chart and other components
   loadChartWithDemoData();
   updateSummary();
   loadPhotos();
   loadRecentWeighins();
 });
+
+/* ================================
+    Photo Upload
+================================ */
+function setupPhotoUpload() {
+  console.log("Setting up photo upload functionality...");
+  const photoForm = document.getElementById("photo-form");
+
+  if (!photoForm) {
+    console.error("Photo form not found. Skipping setupPhotoUpload.");
+    return;
+  }
+
+  photoForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const photoInput = document.getElementById("photo-upload").files[0];
+    const photoDate = document.getElementById("photo-date").value;
+
+    if (!photoInput || !photoDate) {
+      alert("Please select a photo and enter a date.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
+      photos.push({ date: photoDate, src: e.target.result });
+      localStorage.setItem("photos", JSON.stringify(photos));
+      loadPhotos();
+    };
+    reader.readAsDataURL(photoInput);
+  });
+}
 
 /* ================================
     Chart Initialization
@@ -117,6 +150,11 @@ function renderChart(demoData = [], userData = []) {
 ================================ */
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
+
+  if (!weightForm) {
+    console.error("Weight form not found. Skipping setupWeightLogging.");
+    return;
+  }
 
   weightForm.addEventListener("submit", (e) => {
     e.preventDefault();
