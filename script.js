@@ -1,4 +1,4 @@
-const appVersion = "v4.4";
+const appVersion = "v4.5";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -16,7 +16,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupWeightLogging();
   setupPhotoUpload();
   setupPhotoEditor();
-  renderChart();
+  loadChartWithDemoData(); // Ensure demo data is loaded initially
   updateSummary();
   loadPhotos();
   loadRecentWeighins();
@@ -52,27 +52,36 @@ function setupWeightLogging() {
 }
 
 /* ================================
-    Chart Rendering
+    Chart Rendering with Demo Data
 ================================ */
-function renderChart() {
+function loadChartWithDemoData() {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+  renderChart(demoData, progressData); // Pass demo and user data
+}
+
+function renderChart(demoData = [], userData = []) {
   const ctx = document.getElementById("weight-chart").getContext("2d");
 
   if (chartInstance) {
     chartInstance.destroy();
   }
 
+  const labels = [
+    ...demoData.map((d) => d.date),
+    ...userData.map((u) => u.date),
+  ];
+
+  const demoWeights = demoData.map((d) => d.weight);
+  const userWeights = userData.map((u) => u.weight);
+
   chartInstance = new Chart(ctx, {
     type: "line",
     data: {
-      labels: [
-        ...demoData.map((d) => d.date),
-        ...progressData.map((p) => p.date),
-      ],
+      labels,
       datasets: [
         {
           label: "Demo Data",
-          data: demoData.map((d) => d.weight),
+          data: demoWeights,
           borderColor: "#3498db",
           backgroundColor: "rgba(52, 152, 219, 0.2)",
           borderWidth: 2,
@@ -80,7 +89,7 @@ function renderChart() {
         },
         {
           label: "User Data",
-          data: progressData.map((p) => p.weight),
+          data: userWeights,
           borderColor: "#e91e63",
           backgroundColor: "rgba(233, 30, 99, 0.2)",
           borderWidth: 2,
