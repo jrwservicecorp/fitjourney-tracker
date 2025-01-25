@@ -1,4 +1,4 @@
-const appVersion = "v7.6a";
+const appVersion = "v7.7";
 
 let chartInstance = null;
 
@@ -163,7 +163,7 @@ function setupPhotoUpload() {
     return;
   }
 
-  console.log("Upload button found, attaching event listener...");
+  console.log("Upload button found. Attaching event listener...");
 
   uploadButton.addEventListener("click", () => {
     console.log("Upload button clicked!");
