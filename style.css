@@ -40,6 +40,11 @@ button:hover {
   background-color: #0056b3;
 }
 
+/* Chart Options */
+.chart-options {
+  margin-top: 1em;
+}
+
 /* Gallery Styling */
 .gallery {
   display: flex;
