@@ -6,13 +6,12 @@
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.scaleflex.it/plugins/filerobot-image-editor/3.15.0/filerobot-image-editor.min.js"></script>
   <script src="script.js" defer></script>
 </head>
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v4.3</span></p>
+    <p>App Version: <span id="app-version">v5.7</span></p>
   </header>
 
   <main id="main-app">
@@ -20,6 +19,12 @@
     <div class="card prominent">
       <canvas id="weight-chart"></canvas>
       <p id="chart-placeholder">Start logging weight to see trends!</p>
+      <div class="chart-options">
+        <label>
+          <input type="checkbox" id="toggle-demo-data" checked>
+          Show Demo Data
+        </label>
+      </div>
     </div>
 
     <!-- Middle Section: 3 Boxes -->
