@@ -1,4 +1,4 @@
-const appVersion = "v5.6";
+const appVersion = "v5.7";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -20,12 +20,29 @@ window.addEventListener("DOMContentLoaded", async () => {
   await waitForFilerobot(); // Wait for Filerobot to load
   setupPhotoEditor();
 
+  // Set up chart options
+  setupChartOptions();
+
   // Load chart and other components
   loadChartWithDemoData(); // Ensure demo data renders initially
   updateSummary();
   loadPhotos();
   loadRecentWeighins();
 });
+
+/* ================================
+    Chart Options (Demo Toggle)
+================================ */
+function setupChartOptions() {
+  const toggleDemoCheckbox = document.getElementById("toggle-demo-data");
+  toggleDemoCheckbox.addEventListener("change", () => {
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    const showDemoData = toggleDemoCheckbox.checked;
+
+    console.log("Toggling demo data:", showDemoData);
+    renderChart(showDemoData ? demoData : [], progressData);
+  });
+}
 
 /* ================================
     Chart Initialization
@@ -86,6 +103,7 @@ function renderChart(demoData = [], userData = []) {
             backgroundColor: "rgba(233, 30, 99, 0.2)",
             borderWidth: 2,
             pointRadius: 4,
+            hidden: demoWeights.length === 0, // Hide if no demo data
           },
           {
             label: "User Data (Blue)",
@@ -158,54 +176,9 @@ function setupWeightLogging() {
 
     console.log("User logged weight:", { date: dateInput, weight: parseFloat(weightInput) });
 
-    renderChart(demoData, progressData); // Update chart with demo and user data
+    const showDemoData = document.getElementById("toggle-demo-data").checked;
+    renderChart(showDemoData ? demoData : [], progressData); // Update chart based on toggle
     updateSummary();
     loadRecentWeighins();
   });
-}
-
-/* ================================
-    Summary Update
-================================ */
-function updateSummary() {
-  console.log("Updating weight summary...");
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  const summaryContainer = document.getElementById("weight-summary");
-
-  if (progressData.length === 0) {
-    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
-    return;
-  }
-
-  const weights = progressData.map((entry) => entry.weight);
-  const average = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
-  const max = Math.max(...weights);
-  const min = Math.min(...weights);
-
-  summaryContainer.innerHTML = `
-    <p><strong>Average Weight:</strong> ${average} lbs</p>
-    <p><strong>Max Weight:</strong> ${max} lbs</p>
-    <p><strong>Min Weight:</strong> ${min} lbs</p>
-  `;
-  console.log("Summary updated:", { average, max, min });
-}
-
-/* ================================
-    Recent Weigh-Ins
-================================ */
-function loadRecentWeighins() {
-  console.log("Loading recent weigh-ins...");
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  const recentContainer = document.getElementById("recent-weighins");
-
-  if (progressData.length === 0) {
-    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
-    return;
-  }
-
-  const recentWeighins = progressData.slice(-4).reverse();
-  recentContainer.innerHTML = recentWeighins
-    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
-    .join("");
-  console.log("Recent weigh-ins updated:", recentWeighins);
 }
