@@ -11,7 +11,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v6.6</span></p>
+    <p>App Version: <span id="app-version">v6.7</span></p>
   </header>
 
   <main id="main-app">
@@ -29,8 +29,16 @@
 
     <!-- Streaks Section -->
     <div class="card">
-      <h3>Streaks</h3>
-      <p id="streaks-section">No streaks yet! Log your weight to start streaks.</p>
+      <h3>Streak Awards</h3>
+      <div class="streak-options">
+        <label>
+          <input type="checkbox" id="toggle-streaks" checked>
+          Show Streaks
+        </label>
+      </div>
+      <div id="streaks-section">
+        <p>No streaks yet! Log your weight consistently to unlock awards.</p>
+      </div>
     </div>
 
     <!-- Middle Section: 3 Boxes -->
