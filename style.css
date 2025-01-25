@@ -1,3 +1,4 @@
+/* Base Styles */
 body {
   font-family: 'Arial', sans-serif;
   margin: 0;
@@ -11,6 +12,11 @@ header {
   padding: 20px;
   background: #1f1f1f;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+  font-size: 24px;
+  margin: 0;
 }
 
 .card {
@@ -73,6 +79,23 @@ canvas {
   margin: 10px auto;
 }
 
+.chart-options {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.chart-options label {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.placeholder {
+  color: #bbbbbb;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Responsive Styles */
 @media (max-width: 768px) {
   .dashboard-row {
     flex-direction: column;
