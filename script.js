@@ -1,6 +1,6 @@
 import { FilerobotImageEditor } from 'https://cdn.scaleflex.it/plugins/filerobot-image-editor/3.15.0/filerobot-image-editor.min.js';
 
-const appVersion = "v4.0";
+const appVersion = "v4.1";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -17,9 +17,6 @@ window.addEventListener("DOMContentLoaded", () => {
   setupPhotoEditor();
 });
 
-/* ================================
-    Weight Logging
-================================ */
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
 
@@ -46,9 +43,6 @@ function setupWeightLogging() {
   });
 }
 
-/* ================================
-    Photo Editor
-================================ */
 function setupPhotoEditor() {
   const photoEditor = new FilerobotImageEditor('#image-editor-container', {
     tools: ['adjust', 'filters', 'crop', 'text', 'export'],
@@ -60,14 +54,11 @@ function setupPhotoEditor() {
   });
 
   document.getElementById('edit-photo-btn').addEventListener('click', () => {
-    const selectedPhoto = 'path/to/selected/photo.jpg'; // Replace with selected photo logic
+    const selectedPhoto = 'path/to/photo.jpg'; // Placeholder
     photoEditor.open(selectedPhoto);
   });
 }
 
-/* ================================
-    Chart Rendering
-================================ */
 function renderChart() {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
   const ctx = document.getElementById("weight-chart").getContext("2d");
@@ -92,9 +83,6 @@ function renderChart() {
           backgroundColor: "rgba(52, 152, 219, 0.4)",
           borderColor: "#3498db",
           borderWidth: 3,
-          pointRadius: 6,
-          pointBackgroundColor: "#ffffff",
-          pointBorderColor: "#3498db",
         },
       ],
     },
@@ -102,16 +90,52 @@ function renderChart() {
       responsive: true,
       maintainAspectRatio: true,
       plugins: {
-        legend: {
-          labels: {
-            color: "#ffffff",
-          },
-        },
+        legend: { labels: { color: "#ffffff" } },
       },
       scales: {
         x: { ticks: { color: "#ffffff" } },
         y: { ticks: { color: "#ffffff" } },
       },
     },
+  });
+}
+
+function loadPhotos() {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  const gallery = document.getElementById("photo-gallery");
+
+  if (photos.length === 0) {
+    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
+    return;
+  }
+
+  const photosToShow = photos.slice(photoPage * 8, photoPage * 8 + 8);
+  gallery.innerHTML = photosToShow
+    .map((photo) => `<div><img src="${photo.src}" alt="Photo"><p>${photo.date}</p></div>`)
+    .join("");
+}
+
+function setupPhotoUpload() {
+  const photoForm = document.getElementById("photo-form");
+
+  photoForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const photoInput = document.getElementById("photo-upload").files[0];
+    const photoDate = document.getElementById("photo-date").value;
+
+    if (!photoInput || !photoDate) {
+      alert("Select a photo and date.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
+      photos.push({ date: photoDate, src: e.target.result });
+      localStorage.setItem("photos", JSON.stringify(photos));
+      loadPhotos();
+    };
+    reader.readAsDataURL(photoInput);
   });
 }
