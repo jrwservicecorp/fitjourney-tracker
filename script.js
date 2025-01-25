@@ -14,43 +14,24 @@ window.addEventListener("DOMContentLoaded", async () => {
   console.log("Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
-  // Initialize all components
   setupWeightLogging();
   setupPhotoUpload();
-  await waitForFilerobot(); // Wait for Filerobot to load
+  await waitForFilerobot();
   setupPhotoEditor();
-
-  // Set up chart options
   setupChartOptions();
 
-  // Load chart and other components
-  loadChartWithDemoData(); // Ensure demo data renders initially
+  console.log("Loading chart with demo data...");
+  loadChartWithDemoData();
+
   updateSummary();
   loadPhotos();
   loadRecentWeighins();
 });
 
-/* ================================
-    Chart Options (Demo Toggle)
-================================ */
-function setupChartOptions() {
-  const toggleDemoCheckbox = document.getElementById("toggle-demo-data");
-  toggleDemoCheckbox.addEventListener("change", () => {
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    const showDemoData = toggleDemoCheckbox.checked;
-
-    console.log("Toggling demo data:", showDemoData);
-    renderChart(showDemoData ? demoData : [], progressData);
-  });
-}
-
-/* ================================
-    Chart Initialization
-================================ */
 function loadChartWithDemoData() {
-  console.log("Loading chart with demo data...");
+  console.log("Executing loadChartWithDemoData...");
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  console.log("User data:", progressData);
+  console.log("Initial user data:", progressData);
 
   if (progressData.length === 0 && demoData.length === 0) {
     console.log("No data available for chart. Displaying placeholder.");
@@ -58,13 +39,16 @@ function loadChartWithDemoData() {
     return;
   }
 
-  // Render chart with demo and user data
+  console.log("Passing data to renderChart...");
   renderChart(demoData, progressData);
 }
 
 function renderChart(demoData = [], userData = []) {
-  const canvas = document.getElementById("weight-chart");
+  console.log("Executing renderChart...");
+  console.log("Demo Data:", demoData);
+  console.log("User Data:", userData);
 
+  const canvas = document.getElementById("weight-chart");
   if (!canvas) {
     console.error("Chart canvas element not found!");
     return;
@@ -88,7 +72,9 @@ function renderChart(demoData = [], userData = []) {
   const demoWeights = demoData.map((d) => d.weight);
   const userWeights = userData.map((u) => u.weight);
 
-  console.log("Rendering chart with data:", { labels, demoWeights, userWeights });
+  console.log("Rendering chart with labels:", labels);
+  console.log("Demo weights:", demoWeights);
+  console.log("User weights:", userWeights);
 
   try {
     chartInstance = new Chart(ctx, {
@@ -103,7 +89,6 @@ function renderChart(demoData = [], userData = []) {
             backgroundColor: "rgba(233, 30, 99, 0.2)",
             borderWidth: 2,
             pointRadius: 4,
-            hidden: demoWeights.length === 0, // Hide if no demo data
           },
           {
             label: "User Data (Blue)",
@@ -133,52 +118,4 @@ function renderChart(demoData = [], userData = []) {
   } catch (error) {
     console.error("Error rendering chart:", error);
   }
-}
-
-function displayChartPlaceholder() {
-  const canvas = document.getElementById("weight-chart");
-  const ctx = canvas.getContext("2d");
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.font = "16px Arial";
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
-  ctx.fillText("No data available. Log your weight to get started!", canvas.width / 2, canvas.height / 2);
-}
-
-/* ================================
-    Weight Logging
-================================ */
-function setupWeightLogging() {
-  const weightForm = document.getElementById("weight-form");
-
-  if (!weightForm) {
-    console.error("Weight form not found. Skipping setupWeightLogging.");
-    return;
-  }
-
-  weightForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const weightInput = document.getElementById("weight-input").value;
-    const dateInput = document.getElementById("date-input").value;
-
-    if (!weightInput || !dateInput) {
-      alert("Please enter a valid weight and date.");
-      return;
-    }
-
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    progressData.push({ date: dateInput, weight: parseFloat(weightInput) });
-
-    localStorage.setItem("progressData", JSON.stringify(progressData));
-    alert("Weight logged successfully!");
-
-    console.log("User logged weight:", { date: dateInput, weight: parseFloat(weightInput) });
-
-    const showDemoData = document.getElementById("toggle-demo-data").checked;
-    renderChart(showDemoData ? demoData : [], progressData); // Update chart based on toggle
-    updateSummary();
-    loadRecentWeighins();
-  });
 }
