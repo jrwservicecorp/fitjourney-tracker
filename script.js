@@ -1,7 +1,6 @@
-const appVersion = "v6.3";
+const appVersion = "v6.4";
 
 let chartInstance = null;
-let photoPage = 0;
 
 // Demo Data
 const demoData = [
@@ -16,17 +15,13 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize components
   setupWeightLogging();
-  setupPhotoUpload();
-  await waitForFilerobot();
-  setupPhotoEditor();
   setupChartOptions();
 
   console.log("Ensuring canvas is ready before loading chart...");
   ensureCanvasReady(() => {
-    console.log("Canvas is ready. Loading chart with demo data...");
-    loadChartWithDemoData(); // Ensure demo data renders
+    console.log("Canvas is ready. Forcing demo data rendering...");
+    renderChart(demoData, []); // Explicitly render demo data only
     updateSummary();
-    loadRecentWeighins();
   });
 });
 
@@ -50,22 +45,8 @@ function ensureCanvasReady(callback) {
 }
 
 /* ================================
-    Chart Initialization
+    Chart Rendering
 ================================ */
-function loadChartWithDemoData() {
-  console.log("Executing loadChartWithDemoData...");
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  console.log("Initial user data from localStorage:", progressData);
-
-  if (progressData.length === 0) {
-    console.log("No user data found. Rendering demo data only.");
-    renderChart(demoData, []); // Force demo data if no user data exists
-  } else {
-    console.log("Rendering chart with demo and user data...");
-    renderChart(demoData, progressData);
-  }
-}
-
 function renderChart(demoData = [], userData = []) {
   console.log("Executing renderChart...");
   console.log("Demo Data:", demoData);
@@ -176,6 +157,19 @@ function setupWeightLogging() {
     const showDemoData = document.getElementById("toggle-demo-data").checked;
     renderChart(showDemoData ? demoData : [], progressData); // Update chart based on toggle
     updateSummary();
-    loadRecentWeighins();
+  });
+}
+
+/* ================================
+    Chart Options
+================================ */
+function setupChartOptions() {
+  const toggleDemoCheckbox = document.getElementById("toggle-demo-data");
+  toggleDemoCheckbox.addEventListener("change", () => {
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    const showDemoData = toggleDemoCheckbox.checked;
+
+    console.log("Toggling demo data:", showDemoData);
+    renderChart(showDemoData ? demoData : [], progressData);
   });
 }
