@@ -1,4 +1,4 @@
-const appVersion = "v5.2";
+const appVersion = "v5.4";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -21,11 +21,96 @@ window.addEventListener("DOMContentLoaded", async () => {
   await waitForFilerobot();
   setupPhotoEditor();
 
+  // Load chart data and initialize the chart
   loadChartWithDemoData();
   updateSummary();
   loadPhotos();
   loadRecentWeighins();
 });
+
+/* ================================
+    Chart Initialization
+================================ */
+function loadChartWithDemoData() {
+  console.log("Loading chart with demo data...");
+  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+  console.log("User data:", progressData);
+
+  // Pass demo and user data to renderChart
+  renderChart(demoData, progressData);
+}
+
+function renderChart(demoData = [], userData = []) {
+  const canvas = document.getElementById("weight-chart");
+
+  if (!canvas) {
+    console.error("Chart canvas element not found!");
+    return;
+  }
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    console.error("Failed to get 2D context for chart canvas!");
+    return;
+  }
+
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  const labels = [
+    ...demoData.map((d) => d.date),
+    ...userData.map((u) => u.date),
+  ];
+
+  const demoWeights = demoData.map((d) => d.weight);
+  const userWeights = userData.map((u) => u.weight);
+
+  console.log("Rendering chart with data:", { labels, demoWeights, userWeights });
+
+  try {
+    chartInstance = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Demo Data (Pink)",
+            data: demoWeights,
+            borderColor: "#e91e63",
+            backgroundColor: "rgba(233, 30, 99, 0.2)",
+            borderWidth: 2,
+            pointRadius: 4,
+          },
+          {
+            label: "User Data (Blue)",
+            data: userWeights,
+            borderColor: "#3498db",
+            backgroundColor: "rgba(52, 152, 219, 0.2)",
+            borderWidth: 2,
+            pointRadius: 4,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            labels: { color: "#ffffff" },
+          },
+        },
+        scales: {
+          x: { ticks: { color: "#ffffff" } },
+          y: { ticks: { color: "#ffffff" } },
+        },
+      },
+    });
+    console.log("Chart rendered successfully.");
+  } catch (error) {
+    console.error("Error rendering chart:", error);
+  }
+}
 
 /* ================================
     Weight Logging
@@ -52,82 +137,56 @@ function setupWeightLogging() {
 
     console.log("User logged weight:", { date: dateInput, weight: parseFloat(weightInput) });
 
-    renderChart();
+    renderChart(demoData, progressData); // Update chart with demo and user data
     updateSummary();
     loadRecentWeighins();
   });
 }
 
 /* ================================
-    Chart Rendering with Demo Data
+    Summary Update
 ================================ */
-function loadChartWithDemoData() {
-  console.log("Loading chart with demo data...");
+function updateSummary() {
+  console.log("Updating weight summary...");
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  console.log("User data:", progressData);
-  renderChart(demoData, progressData); // Combine demo and user data
-}
+  const summaryContainer = document.getElementById("weight-summary");
 
-function renderChart(demoData = [], userData = []) {
-  const ctx = document.getElementById("weight-chart");
-
-  if (!ctx || !ctx.getContext) {
-    console.error("Chart canvas not found or unsupported!");
+  if (progressData.length === 0) {
+    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
     return;
   }
 
-  if (chartInstance) {
-    chartInstance.destroy();
+  const weights = progressData.map((entry) => entry.weight);
+  const average = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
+  const max = Math.max(...weights);
+  const min = Math.min(...weights);
+
+  summaryContainer.innerHTML = `
+    <p><strong>Average Weight:</strong> ${average} lbs</p>
+    <p><strong>Max Weight:</strong> ${max} lbs</p>
+    <p><strong>Min Weight:</strong> ${min} lbs</p>
+  `;
+  console.log("Summary updated:", { average, max, min });
+}
+
+/* ================================
+    Recent Weigh-Ins
+================================ */
+function loadRecentWeighins() {
+  console.log("Loading recent weigh-ins...");
+  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+  const recentContainer = document.getElementById("recent-weighins");
+
+  if (progressData.length === 0) {
+    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
+    return;
   }
 
-  const labels = [
-    ...demoData.map((d) => d.date),
-    ...userData.map((u) => u.date),
-  ];
-
-  const demoWeights = demoData.map((d) => d.weight);
-  const userWeights = userData.map((u) => u.weight);
-
-  console.log("Rendering chart with data:", { labels, demoWeights, userWeights });
-
-  chartInstance = new Chart(ctx.getContext("2d"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Demo Data (Pink)",
-          data: demoWeights,
-          borderColor: "#e91e63",
-          backgroundColor: "rgba(233, 30, 99, 0.2)",
-          borderWidth: 2,
-          pointRadius: 4,
-        },
-        {
-          label: "User Data (Blue)",
-          data: userWeights,
-          borderColor: "#3498db",
-          backgroundColor: "rgba(52, 152, 219, 0.2)",
-          borderWidth: 2,
-          pointRadius: 4,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: {
-          labels: { color: "#ffffff" },
-        },
-      },
-      scales: {
-        x: { ticks: { color: "#ffffff" } },
-        y: { ticks: { color: "#ffffff" } },
-      },
-    },
-  });
-  console.log("Chart rendered successfully.");
+  const recentWeighins = progressData.slice(-4).reverse();
+  recentContainer.innerHTML = recentWeighins
+    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
+    .join("");
+  console.log("Recent weigh-ins updated:", recentWeighins);
 }
 
 /* ================================
@@ -169,57 +228,10 @@ function setupPhotoEditor() {
       return;
     }
 
-    const lastPhoto = photos[photos.length - 1]; // Edit the most recently uploaded photo
-    photoEditor.open(lastPhoto.src); // Open the photo in the editor
+    const lastPhoto = photos[photos.length - 1];
+    photoEditor.open(lastPhoto.src);
     console.log("Opened photo for editing:", lastPhoto);
   });
 
   console.log("Photo editor initialized.");
-}
-
-/* ================================
-    Photo Upload
-================================ */
-function setupPhotoUpload() {
-  const photoForm = document.getElementById("photo-form");
-
-  photoForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const photoInput = document.getElementById("photo-upload").files[0];
-    const photoDate = document.getElementById("photo-date").value;
-
-    if (!photoInput || !photoDate) {
-      alert("Select a photo and date.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const photos = JSON.parse(localStorage.getItem("photos")) || [];
-      photos.push({ date: photoDate, src: e.target.result }); // Save base64 data
-      localStorage.setItem("photos", JSON.stringify(photos));
-      loadPhotos();
-    };
-    reader.readAsDataURL(photoInput);
-  });
-}
-
-/* ================================
-    Load Photos
-================================ */
-function loadPhotos() {
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  const gallery = document.getElementById("photo-gallery");
-
-  if (photos.length === 0) {
-    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
-    return;
-  }
-
-  const photosToShow = photos.slice(photoPage * 8, photoPage * 8 + 8);
-  gallery.innerHTML = photosToShow
-    .map((photo) => `<div><img src="${photo.src}" alt="Photo"><p>${photo.date}</p></div>`)
-    .join("");
-  console.log("Photos loaded:", photosToShow);
 }
