@@ -6,16 +6,17 @@
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.scaleflex.it/plugins/filerobot-image-editor/3.15.1/filerobot-image-editor.min.js"></script>
   <script src="script.js" defer></script>
 </head>
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v6.7</span></p>
+    <p>App Version: <span id="app-version">v6.9</span></p>
   </header>
 
   <main id="main-app">
-    <!-- Top Section: Chart -->
+    <!-- Chart Section -->
     <div class="card prominent">
       <canvas id="weight-chart"></canvas>
       <p id="chart-placeholder">Start logging weight to see trends!</p>
@@ -27,7 +28,7 @@
       </div>
     </div>
 
-    <!-- Streaks Section -->
+    <!-- Streak Awards -->
     <div class="card">
       <h3>Streak Awards</h3>
       <div class="streak-options">
@@ -37,11 +38,11 @@
         </label>
       </div>
       <div id="streaks-section">
-        <p>No streaks yet! Log your weight consistently to unlock awards.</p>
+        <p>No streaks yet! Log your weight to unlock awards.</p>
       </div>
     </div>
 
-    <!-- Middle Section: 3 Boxes -->
+    <!-- Weight Summary and Logging -->
     <div class="dashboard-row">
       <div class="card weight-summary">
         <h3>Weight Summary</h3>
@@ -69,7 +70,7 @@
 
     <!-- Photo Comparison Section -->
     <div class="card">
-      <h3>Compare Photos</h3>
+      <h3>Photo Comparison</h3>
       <div>
         <label for="photo-select-1">Select Photo 1:</label>
         <select id="photo-select-1" class="photo-select"></select>
@@ -80,6 +81,14 @@
       </div>
       <button id="compare-photos-btn">Compare Photos</button>
       <div id="side-by-side-comparison" class="comparison-display"></div>
+    </div>
+
+    <!-- Photo Editor Section -->
+    <div class="card">
+      <h3>Edit and Export</h3>
+      <button id="export-photo-with-data">Export Photo with Data</button>
+      <button id="export-data-only">Export Data Only</button>
+      <div id="image-editor-container"></div>
     </div>
 
     <!-- Photo Gallery -->
