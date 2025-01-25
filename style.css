@@ -3,7 +3,7 @@ body {
   font-family: 'Arial', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #121212; /* Tesla-inspired dark theme */
+  background-color: #121212;
   color: #ffffff;
 }
 
@@ -17,10 +17,6 @@ header {
 h1 {
   font-size: 24px;
   margin: 0;
-}
-
-p {
-  margin: 5px 0;
 }
 
 .card {
@@ -39,7 +35,6 @@ button {
   padding: 10px 15px;
   font-size: 14px;
   cursor: pointer;
-  margin-top: 10px;
 }
 
 button:hover {
@@ -49,7 +44,7 @@ button:hover {
 /* Chart Section */
 canvas {
   width: 100%;
-  max-height: 400px; /* Constrain chart height */
+  max-height: 400px;
 }
 
 #chart-placeholder {
@@ -58,31 +53,14 @@ canvas {
   font-size: 14px;
 }
 
-/* Summary Container */
-.summary-container {
-  display: flex;
-  gap: 20px;
-  justify-content: space-between;
+/* Photo Editor */
+#image-editor-container {
+  display: none;
 }
 
-.weight-summary, .recent-weighins, .weight-checkin {
-  flex: 1;
-}
-
-.weight-checkin form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-/* Streaks and Awards */
-#streaks-awards {
-  text-align: center;
-  padding: 10px;
-  background: #2c2c2c;
-  border-radius: 5px;
-  font-size: 14px;
-  color: #888;
+#image-editor-container.active {
+  display: block;
+  height: 600px; /* Set height for the editor */
 }
 
 /* Photo Gallery */
@@ -98,52 +76,7 @@ canvas {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* Photo Comparison */
-.comparison-section {
-  display: flex;
-  gap: 20px;
-  justify-content: space-around;
-}
-
-.photo-select {
-  background: #2c2c2c;
-  color: #ffffff;
-  border: 1px solid #444;
-  padding: 5px;
-  border-radius: 5px;
-}
-
-#side-by-side-comparison {
-  margin-top: 20px;
-  display: flex;
-  gap: 20px;
-}
-
-#side-by-side-comparison img {
-  max-width: 100%;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-/* Buttons */
 #show-more-photos-btn {
   display: block;
   margin: 10px auto;
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .summary-container {
-    flex-direction: column;
-  }
-
-  .gallery {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .gallery {
-    grid-template-columns: repeat(1, 1fr);
-  }
 }
