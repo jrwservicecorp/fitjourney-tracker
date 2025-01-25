@@ -8,13 +8,16 @@ window.addEventListener("DOMContentLoaded", () => {
 
   setupWeightLogging();
   setupPhotoUpload();
+  setupPhotoEditor();
   renderChart();
   updateSummary();
   loadPhotos();
   loadRecentWeighins();
-  setupPhotoEditor();
 });
 
+/* ================================
+    Weight Logging
+================================ */
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
 
@@ -41,6 +44,9 @@ function setupWeightLogging() {
   });
 }
 
+/* ================================
+    Chart Rendering
+================================ */
 function renderChart() {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
   const demoData = [
@@ -98,6 +104,9 @@ function renderChart() {
   });
 }
 
+/* ================================
+    Summary Update
+================================ */
 function updateSummary() {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
   const summaryContainer = document.getElementById("weight-summary");
@@ -119,6 +128,9 @@ function updateSummary() {
   `;
 }
 
+/* ================================
+    Recent Weigh-Ins
+================================ */
 function loadRecentWeighins() {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
   const recentContainer = document.getElementById("recent-weighins");
@@ -131,5 +143,70 @@ function loadRecentWeighins() {
   const recentWeighins = progressData.slice(-4).reverse();
   recentContainer.innerHTML = recentWeighins
     .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
+    .join("");
+}
+
+/* ================================
+    Photo Editor
+================================ */
+function setupPhotoEditor() {
+  const photoEditor = window.FilerobotImageEditor.create('#image-editor-container', {
+    tools: ['adjust', 'filters', 'crop', 'text', 'export'],
+    cropPresets: [
+      { label: 'Instagram Square', value: 1 },
+      { label: 'Instagram Portrait', value: 4 / 5 },
+      { label: 'Instagram Landscape', value: 16 / 9 },
+    ],
+  });
+
+  document.getElementById('edit-photo-btn').addEventListener('click', () => {
+    const selectedPhoto = 'path/to/photo.jpg'; // Placeholder
+    photoEditor.open(selectedPhoto);
+  });
+}
+
+/* ================================
+    Photo Upload
+================================ */
+function setupPhotoUpload() {
+  const photoForm = document.getElementById("photo-form");
+
+  photoForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const photoInput = document.getElementById("photo-upload").files[0];
+    const photoDate = document.getElementById("photo-date").value;
+
+    if (!photoInput || !photoDate) {
+      alert("Select a photo and date.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
+      photos.push({ date: photoDate, src: e.target.result });
+      localStorage.setItem("photos", JSON.stringify(photos));
+      loadPhotos();
+    };
+    reader.readAsDataURL(photoInput);
+  });
+}
+
+/* ================================
+    Load Photos
+================================ */
+function loadPhotos() {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  const gallery = document.getElementById("photo-gallery");
+
+  if (photos.length === 0) {
+    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
+    return;
+  }
+
+  const photosToShow = photos.slice(photoPage * 8, photoPage * 8 + 8);
+  gallery.innerHTML = photosToShow
+    .map((photo) => `<div><img src="${photo.src}" alt="Photo"><p>${photo.date}</p></div>`)
     .join("");
 }
