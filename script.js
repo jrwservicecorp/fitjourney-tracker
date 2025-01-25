@@ -159,11 +159,11 @@ function setupPhotoUpload() {
   const uploadButton = document.getElementById("upload-photo-btn");
 
   if (!uploadButton) {
-    console.error("Upload button not found in DOM!");
+    console.error("Upload button not found!");
     return;
   }
 
-  console.log("Upload button is present. Attaching click event...");
+  console.log("Upload button found. Attaching event listener...");
 
   uploadButton.addEventListener("click", () => {
     console.log("Upload button clicked!");
@@ -200,8 +200,6 @@ function setupPhotoUpload() {
       localStorage.setItem("photos", JSON.stringify(photos));
 
       alert("Photo uploaded successfully!");
-      fileInput.value = "";
-      dateInput.value = "";
       loadPhotos();
     };
 
