@@ -1,4 +1,4 @@
-const appVersion = "v6.5";
+const appVersion = "v6.6";
 
 let chartInstance = null;
 
@@ -14,171 +14,75 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("app-version").textContent = appVersion;
 
   setupWeightLogging();
+  setupPhotoComparison();
   setupChartOptions();
 
-  console.log("Ensuring canvas is ready before loading chart...");
-  ensureCanvasReady(() => {
-    console.log("Canvas is ready. Rendering chart...");
-    loadChartWithDemoData(); // Load chart with both demo and user data
-  });
+  loadChartWithDemoData();
 });
 
-/* ================================
-    Ensure Canvas is Ready
-================================ */
-function ensureCanvasReady(callback) {
-  const canvas = document.getElementById("weight-chart");
-
-  if (!canvas) {
-    console.error("Chart canvas element not found!");
-    return;
-  }
-
-  const interval = setInterval(() => {
-    if (canvas.getContext("2d")) {
-      clearInterval(interval);
-      callback(); // Call the provided callback once the canvas is ready
-    }
-  }, 50);
-}
-
-/* ================================
-    Chart Initialization
-================================ */
+/* Chart Initialization */
 function loadChartWithDemoData() {
-  console.log("Executing loadChartWithDemoData...");
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  console.log("Initial user data from localStorage:", progressData);
-
-  renderChart(demoData, progressData); // Render chart with both demo and user data
+  renderChart(demoData, progressData);
 }
 
-function renderChart(demoData = [], userData = [], showDemo = true) {
-  console.log("Executing renderChart...");
-  console.log("Demo Data:", demoData);
-  console.log("User Data:", userData);
-  console.log("Show Demo Data:", showDemo);
-
-  const canvas = document.getElementById("weight-chart");
-  if (!canvas) {
-    console.error("Chart canvas element not found!");
-    return;
-  }
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    console.error("Failed to get 2D context for chart canvas!");
-    return;
-  }
-
+function renderChart(demoData, userData) {
   if (chartInstance) {
     chartInstance.destroy();
   }
 
-  const labels = [
-    ...demoData.map((d) => d.date),
-    ...userData.map((u) => u.date),
-  ];
-
+  const ctx = document.getElementById("weight-chart").getContext("2d");
   const datasets = [];
 
-  // Add demo data only if showDemo is true
-  if (showDemo) {
+  if (document.getElementById("toggle-demo-data").checked) {
     datasets.push({
       label: "Demo Data (Pink)",
       data: demoData.map((d) => d.weight),
       borderColor: "#e91e63",
-      backgroundColor: "rgba(233, 30, 99, 0.2)",
-      borderWidth: 2,
-      pointRadius: 4,
     });
   }
 
-  // Add user data
   datasets.push({
     label: "User Data (Blue)",
     data: userData.map((u) => u.weight),
     borderColor: "#3498db",
-    backgroundColor: "rgba(52, 152, 219, 0.2)",
-    borderWidth: 2,
-    pointRadius: 4,
   });
 
-  console.log("Rendering chart with labels:", labels);
-  console.log("Datasets:", datasets);
-
-  try {
-    chartInstance = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels,
-        datasets,
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: {
-            labels: { color: "#ffffff" },
-          },
-        },
-        scales: {
-          x: { ticks: { color: "#ffffff" } },
-          y: { ticks: { color: "#ffffff" } },
-        },
-      },
-    });
-    console.log("Chart rendered successfully.");
-  } catch (error) {
-    console.error("Error rendering chart:", error);
-  }
+  chartInstance = new Chart(ctx, {
+    type: "line",
+    data: { datasets },
+  });
 }
 
-/* ================================
-    Weight Logging
-================================ */
-function setupWeightLogging() {
-  const weightForm = document.getElementById("weight-form");
+/* Photo Comparison */
+function setupPhotoComparison() {
+  document.getElementById("compare-photos-btn").addEventListener("click", () => {
+    const photo1 = document.getElementById("photo-select-1").value;
+    const photo2 = document.getElementById("photo-select-2").value;
 
-  if (!weightForm) {
-    console.error("Weight form not found. Skipping setupWeightLogging.");
-    return;
-  }
-
-  weightForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const weightInput = document.getElementById("weight-input").value;
-    const dateInput = document.getElementById("date-input").value;
-
-    if (!weightInput || !dateInput) {
-      alert("Please enter a valid weight and date.");
+    if (!photo1 || !photo2) {
+      alert("Select two photos to compare!");
       return;
     }
 
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    progressData.push({ date: dateInput, weight: parseFloat(weightInput) });
-
-    localStorage.setItem("progressData", JSON.stringify(progressData));
-    alert("Weight logged successfully!");
-
-    console.log("User logged weight:", { date: dateInput, weight: parseFloat(weightInput) });
-
-    const showDemoData = document.getElementById("toggle-demo-data").checked;
-    renderChart(demoData, progressData, showDemoData); // Update chart based on toggle
+    document.getElementById("side-by-side-comparison").innerHTML = `
+      <img src="${photo1}" alt="Photo 1">
+      <img src="${photo2}" alt="Photo 2">
+    `;
   });
 }
 
-/* ================================
-    Chart Options
-================================ */
-function setupChartOptions() {
-  const toggleDemoCheckbox = document.getElementById("toggle-demo-data");
-  toggleDemoCheckbox.addEventListener("change", () => {
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    const showDemoData = toggleDemoCheckbox.checked;
+/* Weight Logging */
+function setupWeightLogging() {
+  document.getElementById("weight-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const weight = parseFloat(document.getElementById("weight-input").value);
+    const date = document.getElementById("date-input").value;
 
-    console.log("Toggling demo data:", showDemoData);
-    renderChart(demoData, progressData, showDemoData); // Re-render chart based on toggle
+    const data = JSON.parse(localStorage.getItem("progressData")) || [];
+    data.push({ weight, date });
+    localStorage.setItem("progressData", JSON.stringify(data));
+
+    renderChart(demoData, data);
   });
 }
