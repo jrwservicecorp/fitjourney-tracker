@@ -1,4 +1,4 @@
-const appVersion = "v7.7";
+const appVersion = "v7.9";
 
 let chartInstance = null;
 
@@ -205,6 +205,10 @@ function setupPhotoUpload() {
       loadPhotos();
     };
 
+    reader.onerror = (e) => {
+      console.error("Error reading file:", e);
+    };
+
     reader.readAsDataURL(file);
   });
 }
@@ -262,16 +266,16 @@ function setupExportOptions() {
 
   exportDataBtn.addEventListener("click", () => {
     const overlayData = {
-      weight: '200 lbs',
-      milestone: '10 lbs lost',
-      progress: '50%',
+      weight: "200 lbs",
+      milestone: "10 lbs lost",
+      progress: "50%",
     };
-    const blob = new Blob([JSON.stringify(overlayData)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(overlayData)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = 'progress-data.json';
+    link.download = "progress-data.json";
     link.click();
   });
 }
