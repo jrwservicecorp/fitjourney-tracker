@@ -1,4 +1,4 @@
-const appVersion = "v4.5";
+const appVersion = "v4.6";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -11,12 +11,13 @@ const demoData = [
 ];
 
 window.addEventListener("DOMContentLoaded", () => {
+  console.log("Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
   setupWeightLogging();
   setupPhotoUpload();
   setupPhotoEditor();
-  loadChartWithDemoData(); // Ensure demo data is loaded initially
+  loadChartWithDemoData(); // Load demo data on page load
   updateSummary();
   loadPhotos();
   loadRecentWeighins();
@@ -45,6 +46,8 @@ function setupWeightLogging() {
     localStorage.setItem("progressData", JSON.stringify(progressData));
     alert("Weight logged successfully!");
 
+    console.log("User logged weight:", { date: dateInput, weight: parseFloat(weightInput) });
+
     renderChart();
     updateSummary();
     loadRecentWeighins();
@@ -55,12 +58,19 @@ function setupWeightLogging() {
     Chart Rendering with Demo Data
 ================================ */
 function loadChartWithDemoData() {
+  console.log("Loading chart with demo data...");
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  renderChart(demoData, progressData); // Pass demo and user data
+  console.log("User data:", progressData);
+  renderChart(demoData, progressData); // Combine demo and user data
 }
 
 function renderChart(demoData = [], userData = []) {
   const ctx = document.getElementById("weight-chart").getContext("2d");
+
+  if (!ctx) {
+    console.error("Chart canvas not found!");
+    return;
+  }
 
   if (chartInstance) {
     chartInstance.destroy();
@@ -73,6 +83,8 @@ function renderChart(demoData = [], userData = []) {
 
   const demoWeights = demoData.map((d) => d.weight);
   const userWeights = userData.map((u) => u.weight);
+
+  console.log("Rendering chart with data:", { labels, demoWeights, userWeights });
 
   chartInstance = new Chart(ctx, {
     type: "line",
@@ -111,6 +123,7 @@ function renderChart(demoData = [], userData = []) {
       },
     },
   });
+  console.log("Chart rendered successfully.");
 }
 
 /* ================================
@@ -135,6 +148,7 @@ function updateSummary() {
     <p><strong>Max Weight:</strong> ${max} lbs</p>
     <p><strong>Min Weight:</strong> ${min} lbs</p>
   `;
+  console.log("Summary updated:", { average, max, min });
 }
 
 /* ================================
@@ -153,6 +167,7 @@ function loadRecentWeighins() {
   recentContainer.innerHTML = recentWeighins
     .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
     .join("");
+  console.log("Recent weigh-ins updated:", recentWeighins);
 }
 
 /* ================================
@@ -218,4 +233,5 @@ function loadPhotos() {
   gallery.innerHTML = photosToShow
     .map((photo) => `<div><img src="${photo.src}" alt="Photo"><p>${photo.date}</p></div>`)
     .join("");
+  console.log("Photos loaded:", photosToShow);
 }
