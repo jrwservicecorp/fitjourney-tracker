@@ -55,3 +55,34 @@ canvas {
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
+
+.chart-options,
+.streak-options {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.chart-options label,
+.streak-options label {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.placeholder {
+  color: #bbbbbb;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .dashboard-row {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
