@@ -12,7 +12,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v7.3</span></p>
+    <p>App Version: <span id="app-version">v7.4</span></p>
   </header>
 
   <main id="main-app">
@@ -42,7 +42,7 @@
       </div>
     </div>
 
-    <!-- Weight Summary and Logging -->
+    <!-- Dashboard Row with Summary, Recent Weigh-Ins, Log Weight, and Upload Progress Photo -->
     <div class="dashboard-row">
       <div class="card weight-summary">
         <h3>Weight Summary</h3>
@@ -50,12 +50,14 @@
           <p class="placeholder">No data available for summary.</p>
         </div>
       </div>
+
       <div class="card recent-weighins">
         <h3>Recent Weigh-Ins</h3>
         <div id="recent-weighins">
           <p class="placeholder">No weigh-ins recorded yet.</p>
         </div>
       </div>
+
       <div class="card weight-checkin">
         <h3>Log Your Weight</h3>
         <form id="weight-form">
@@ -64,6 +66,17 @@
           <label for="date-input">Date:</label>
           <input id="date-input" type="date" required>
           <button type="submit">Log Weight</button>
+        </form>
+      </div>
+
+      <div class="card upload-photo">
+        <h3>Upload Progress Photo</h3>
+        <form id="photo-upload-form">
+          <label for="photo-upload">Select Photo:</label>
+          <input id="photo-upload" type="file" accept="image/*">
+          <label for="photo-date">Photo Date:</label>
+          <input id="photo-date" type="date">
+          <button id="upload-photo-btn" type="button">Upload Photo</button>
         </form>
       </div>
     </div>
