@@ -1,4 +1,4 @@
-const appVersion = "v6.9";
+const appVersion = "v7.0";
 
 let chartInstance = null;
 
@@ -13,20 +13,42 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
+  ensureCanvasReady(() => {
+    console.log("Rendering chart with demo data on page load...");
+    renderChart(demoData, [], true);
+  });
+
   setupWeightLogging();
   setupPhotoComparison();
   setupChartOptions();
-
-  // Ensure the chart renders demo data on load
-  console.log("Rendering chart with demo data on page load...");
-  renderChart(demoData, [], true);
-
-  setupExportOptions(); // Ensure Filerobot integration is handled after initialization
+  setupExportOptions();
 });
 
-/* Chart Rendering */
+/* ================================
+    Ensure Canvas is Ready
+================================ */
+function ensureCanvasReady(callback) {
+  const canvas = document.getElementById("weight-chart");
+
+  if (!canvas) {
+    console.error("Chart canvas element not found!");
+    return;
+  }
+
+  const interval = setInterval(() => {
+    if (canvas.getContext("2d")) {
+      clearInterval(interval);
+      callback();
+    }
+  }, 50);
+}
+
+/* ================================
+    Chart Rendering
+================================ */
 function renderChart(demoData, userData, showDemo) {
-  const ctx = document.getElementById("weight-chart").getContext("2d");
+  const canvas = document.getElementById("weight-chart");
+  const ctx = canvas.getContext("2d");
 
   if (chartInstance) {
     chartInstance.destroy();
@@ -49,24 +71,37 @@ function renderChart(demoData, userData, showDemo) {
     backgroundColor: "rgba(52, 152, 219, 0.2)",
   });
 
+  console.log("Rendering chart...");
   chartInstance = new Chart(ctx, {
     type: "line",
-    data: { 
-      labels: [...demoData.map((d) => d.date), ...userData.map((u) => u.date)], 
-      datasets 
+    data: {
+      labels: [...demoData.map((d) => d.date), ...userData.map((u) => u.date)],
+      datasets,
     },
   });
 }
 
-/* Weight Logging */
+/* ================================
+    Weight Logging
+================================ */
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
+
+  if (!weightForm) {
+    console.error("Weight form not found. Skipping weight logging setup.");
+    return;
+  }
 
   weightForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const weight = parseFloat(document.getElementById("weight-input").value);
     const date = document.getElementById("date-input").value;
+
+    if (!weight || !date) {
+      alert("Please enter valid weight and date.");
+      return;
+    }
 
     const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
     progressData.push({ weight, date });
@@ -77,7 +112,9 @@ function setupWeightLogging() {
   });
 }
 
-/* Chart Options */
+/* ================================
+    Chart Options
+================================ */
 function setupChartOptions() {
   document.getElementById("toggle-demo-data").addEventListener("change", () => {
     const showDemo = document.getElementById("toggle-demo-data").checked;
@@ -86,7 +123,9 @@ function setupChartOptions() {
   });
 }
 
-/* Export Options */
+/* ================================
+    Export Options
+================================ */
 function setupExportOptions() {
   if (typeof FilerobotImageEditor === "undefined") {
     console.error("Filerobot Image Editor is not loaded.");
@@ -100,5 +139,31 @@ function setupExportOptions() {
 
   document.getElementById("export-photo-with-data").addEventListener("click", () => {
     imageEditor.open({ imageSrc: 'path-to-photo.jpg' });
+  });
+}
+
+/* ================================
+    Photo Comparison
+================================ */
+function setupPhotoComparison() {
+  document.getElementById("compare-photos-btn").addEventListener("click", () => {
+    const photo1 = document.getElementById("photo-select-1").value;
+    const photo2 = document.getElementById("photo-select-2").value;
+
+    if (!photo1 || !photo2) {
+      alert("Please select two photos for comparison.");
+      return;
+    }
+
+    document.getElementById("side-by-side-comparison").innerHTML = `
+      <div>
+        <h4>Photo 1</h4>
+        <img src="${photo1}" alt="Photo 1">
+      </div>
+      <div>
+        <h4>Photo 2</h4>
+        <img src="${photo2}" alt="Photo 2">
+      </div>
+    `;
   });
 }
