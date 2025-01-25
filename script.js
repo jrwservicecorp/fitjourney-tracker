@@ -1,4 +1,4 @@
-const appVersion = "v6.6";
+const appVersion = "v6.7";
 
 let chartInstance = null;
 
@@ -9,36 +9,34 @@ const demoData = [
   { date: "2023-12-03", weight: 195 },
 ];
 
-window.addEventListener("DOMContentLoaded", async () => {
+window.addEventListener("DOMContentLoaded", () => {
   console.log("Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
   setupWeightLogging();
-  setupPhotoComparison();
   setupChartOptions();
+  setupStreakOptions();
 
-  loadChartWithDemoData();
+  console.log("Rendering initial chart...");
+  renderChart(demoData, [], true);
 });
 
-/* Chart Initialization */
-function loadChartWithDemoData() {
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  renderChart(demoData, progressData);
-}
+/* Chart Rendering */
+function renderChart(demoData, userData, showDemo) {
+  const ctx = document.getElementById("weight-chart").getContext("2d");
 
-function renderChart(demoData, userData) {
   if (chartInstance) {
     chartInstance.destroy();
   }
 
-  const ctx = document.getElementById("weight-chart").getContext("2d");
   const datasets = [];
 
-  if (document.getElementById("toggle-demo-data").checked) {
+  if (showDemo) {
     datasets.push({
       label: "Demo Data (Pink)",
       data: demoData.map((d) => d.weight),
       borderColor: "#e91e63",
+      backgroundColor: "rgba(233, 30, 99, 0.2)",
     });
   }
 
@@ -46,29 +44,12 @@ function renderChart(demoData, userData) {
     label: "User Data (Blue)",
     data: userData.map((u) => u.weight),
     borderColor: "#3498db",
+    backgroundColor: "rgba(52, 152, 219, 0.2)",
   });
 
   chartInstance = new Chart(ctx, {
     type: "line",
-    data: { datasets },
-  });
-}
-
-/* Photo Comparison */
-function setupPhotoComparison() {
-  document.getElementById("compare-photos-btn").addEventListener("click", () => {
-    const photo1 = document.getElementById("photo-select-1").value;
-    const photo2 = document.getElementById("photo-select-2").value;
-
-    if (!photo1 || !photo2) {
-      alert("Select two photos to compare!");
-      return;
-    }
-
-    document.getElementById("side-by-side-comparison").innerHTML = `
-      <img src="${photo1}" alt="Photo 1">
-      <img src="${photo2}" alt="Photo 2">
-    `;
+    data: { labels: [...demoData.map((d) => d.date), ...userData.map((u) => u.date)], datasets },
   });
 }
 
@@ -79,10 +60,37 @@ function setupWeightLogging() {
     const weight = parseFloat(document.getElementById("weight-input").value);
     const date = document.getElementById("date-input").value;
 
-    const data = JSON.parse(localStorage.getItem("progressData")) || [];
-    data.push({ weight, date });
-    localStorage.setItem("progressData", JSON.stringify(data));
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    progressData.push({ weight, date });
+    localStorage.setItem("progressData", JSON.stringify(progressData));
 
-    renderChart(demoData, data);
+    const showDemoData = document.getElementById("toggle-demo-data").checked;
+    renderChart(demoData, progressData, showDemoData);
+  });
+}
+
+/* Chart Options */
+function setupChartOptions() {
+  document.getElementById("toggle-demo-data").addEventListener("change", () => {
+    const showDemoData = document.getElementById("toggle-demo-data").checked;
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    renderChart(demoData, progressData, showDemoData);
+  });
+}
+
+/* Streak Options */
+function setupStreakOptions() {
+  document.getElementById("toggle-streaks").addEventListener("change", () => {
+    const showStreaks = document.getElementById("toggle-streaks").checked;
+    const streaksSection = document.getElementById("streaks-section");
+
+    if (showStreaks) {
+      streaksSection.innerHTML = `
+        <p>🏆 7-day logging streak!</p>
+        <p>🔥 30-day logging streak!</p>
+      `;
+    } else {
+      streaksSection.innerHTML = "<p>Streaks are hidden. Enable them to see awards.</p>";
+    }
   });
 }
