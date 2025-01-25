@@ -1,6 +1,4 @@
-import { FilerobotImageEditor } from 'https://cdn.scaleflex.it/plugins/filerobot-image-editor/3.15.0/filerobot-image-editor.min.js';
-
-const appVersion = "v4.1";
+const appVersion = "v4.2";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -44,7 +42,7 @@ function setupWeightLogging() {
 }
 
 function setupPhotoEditor() {
-  const photoEditor = new FilerobotImageEditor('#image-editor-container', {
+  const photoEditor = window.FilerobotImageEditor.create('#image-editor-container', {
     tools: ['adjust', 'filters', 'crop', 'text', 'export'],
     cropPresets: [
       { label: 'Instagram Square', value: 1 },
