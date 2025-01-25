@@ -1,4 +1,4 @@
-/* Base Styles */
+/* General Styles */
 body {
   font-family: 'Arial', sans-serif;
   margin: 0;
@@ -11,7 +11,6 @@ header {
   text-align: center;
   padding: 20px;
   background: #1f1f1f;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .card {
@@ -36,58 +35,23 @@ button:hover {
   background: #1a73e8;
 }
 
-.canvas {
-  width: 100%;
+canvas {
   max-height: 400px;
 }
 
-.chart-options,
-.streak-options {
-  text-align: center;
-  margin-top: 10px;
-}
-
-.chart-options label,
-.streak-options label {
-  color: #ffffff;
-  font-size: 14px;
-}
-
-.streak-options {
-  text-align: center;
-}
-
-.placeholder {
-  color: #bbbbbb;
-  text-align: center;
-  font-style: italic;
+.dashboard-row {
+  display: flex;
+  gap: 20px;
 }
 
 .comparison-display {
   display: flex;
-  justify-content: space-between;
+  gap: 20px;
   margin-top: 20px;
 }
 
 .comparison-display img {
   max-width: 45%;
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .dashboard-row {
-    flex-direction: column;
-  }
-
-  .gallery {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .gallery {
-    grid-template-columns: repeat(1, 1fr);
-  }
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
