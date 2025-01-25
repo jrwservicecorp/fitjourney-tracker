@@ -1,4 +1,4 @@
-const appVersion = "v4.6";
+const appVersion = "v4.7";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -16,7 +16,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   setupWeightLogging();
   setupPhotoUpload();
-  setupPhotoEditor();
+  setupPhotoEditor(); // Ensure Filerobot is properly loaded
   loadChartWithDemoData(); // Load demo data on page load
   updateSummary();
   loadPhotos();
@@ -174,6 +174,11 @@ function loadRecentWeighins() {
     Photo Editor
 ================================ */
 function setupPhotoEditor() {
+  if (!window.FilerobotImageEditor) {
+    console.error("Filerobot Image Editor is not loaded. Skipping setup.");
+    return;
+  }
+
   const photoEditor = window.FilerobotImageEditor.create('#image-editor-container', {
     tools: ['adjust', 'filters', 'crop', 'text', 'export'],
     cropPresets: [
@@ -187,6 +192,8 @@ function setupPhotoEditor() {
     const selectedPhoto = 'path/to/photo.jpg'; // Placeholder
     photoEditor.open(selectedPhoto);
   });
+
+  console.log("Photo editor initialized.");
 }
 
 /* ================================
