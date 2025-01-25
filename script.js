@@ -1,4 +1,4 @@
-const appVersion = "v5.1";
+const appVersion = "v5.2";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -69,10 +69,10 @@ function loadChartWithDemoData() {
 }
 
 function renderChart(demoData = [], userData = []) {
-  const ctx = document.getElementById("weight-chart").getContext("2d");
+  const ctx = document.getElementById("weight-chart");
 
-  if (!ctx) {
-    console.error("Chart canvas not found!");
+  if (!ctx || !ctx.getContext) {
+    console.error("Chart canvas not found or unsupported!");
     return;
   }
 
@@ -90,7 +90,7 @@ function renderChart(demoData = [], userData = []) {
 
   console.log("Rendering chart with data:", { labels, demoWeights, userWeights });
 
-  chartInstance = new Chart(ctx, {
+  chartInstance = new Chart(ctx.getContext("2d"), {
     type: "line",
     data: {
       labels,
