@@ -11,7 +11,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v5.7</span></p>
+    <p>App Version: <span id="app-version">v6.5</span></p>
   </header>
 
   <main id="main-app">
@@ -27,37 +27,31 @@
       </div>
     </div>
 
-    <!-- Middle Section: 3 Boxes -->
-    <div class="dashboard-row">
-      <div class="card weight-summary">
-        <h3>Weight Summary</h3>
-        <div id="weight-summary">
-          <p class="placeholder">No data available for summary.</p>
-        </div>
-      </div>
-      <div class="card recent-weighins">
-        <h3>Recent Weigh-Ins</h3>
-        <div id="recent-weighins">
-          <p class="placeholder">No weigh-ins recorded yet.</p>
-        </div>
-      </div>
-      <div class="card weight-checkin">
-        <h3>Log Your Weight</h3>
-        <form id="weight-form">
-          <label for="weight-input">Weight:</label>
-          <input id="weight-input" type="number" step="0.1" placeholder="lbs" required>
-          <label for="date-input">Date:</label>
-          <input id="date-input" type="date" required>
-          <button type="submit">Log Weight</button>
-        </form>
+    <!-- Streaks Section -->
+    <div class="card">
+      <h3>Your Streaks & Achievements</h3>
+      <div id="streaks-section">
+        <p class="placeholder">No streaks yet. Start logging your weight to build streaks!</p>
       </div>
     </div>
 
-    <!-- Photo Editor Section -->
+    <!-- Middle Section: Photo Comparison -->
     <div class="card">
-      <h3>Edit and Share Photos</h3>
-      <button id="edit-photo-btn">Edit Photo</button>
-      <div id="image-editor-container"></div>
+      <h3>Compare Your Photos</h3>
+      <div class="photo-comparison">
+        <div>
+          <label for="photo-select-1">Select Photo 1:</label>
+          <select id="photo-select-1"></select>
+        </div>
+        <div>
+          <label for="photo-select-2">Select Photo 2:</label>
+          <select id="photo-select-2"></select>
+        </div>
+        <button id="compare-photos-btn">Compare Photos</button>
+      </div>
+      <div id="side-by-side-comparison">
+        <p class="placeholder">Select two photos to compare.</p>
+      </div>
     </div>
 
     <!-- Photo Gallery -->
