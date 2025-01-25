@@ -1,4 +1,4 @@
-const appVersion = "v7.9";
+const appVersion = "v7.10";
 
 let chartInstance = null;
 
@@ -159,11 +159,11 @@ function setupPhotoUpload() {
   const uploadButton = document.getElementById("upload-photo-btn");
 
   if (!uploadButton) {
-    console.error("Upload button not found!");
+    console.error("Upload button not found in DOM!");
     return;
   }
 
-  console.log("Upload button found. Attaching event listener...");
+  console.log("Upload button is present. Attaching click event...");
 
   uploadButton.addEventListener("click", () => {
     console.log("Upload button clicked!");
