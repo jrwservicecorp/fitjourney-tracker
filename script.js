@@ -1,7 +1,14 @@
-const appVersion = "v4.3";
+const appVersion = "v4.4";
 
 let chartInstance = null;
 let photoPage = 0;
+
+// Demo Data
+const demoData = [
+  { date: "2023-12-01", weight: 200 },
+  { date: "2023-12-02", weight: 198 },
+  { date: "2023-12-03", weight: 195 },
+];
 
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
@@ -49,26 +56,19 @@ function setupWeightLogging() {
 ================================ */
 function renderChart() {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  const demoData = [
-    { date: "2023-12-01", weight: 200 },
-    { date: "2023-12-02", weight: 198 },
-    { date: "2023-12-03", weight: 195 },
-  ];
   const ctx = document.getElementById("weight-chart").getContext("2d");
 
   if (chartInstance) {
     chartInstance.destroy();
   }
 
-  if (progressData.length === 0 && demoData.length === 0) {
-    document.getElementById("chart-placeholder").textContent = "No data available.";
-    return;
-  }
-
   chartInstance = new Chart(ctx, {
     type: "line",
     data: {
-      labels: [...demoData.map((d) => d.date), ...progressData.map((p) => p.date)],
+      labels: [
+        ...demoData.map((d) => d.date),
+        ...progressData.map((p) => p.date),
+      ],
       datasets: [
         {
           label: "Demo Data",
