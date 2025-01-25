@@ -14,11 +14,6 @@ header {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-h1 {
-  font-size: 24px;
-  margin: 0;
-}
-
 .card {
   background: #1c1c1c;
   border-radius: 10px;
@@ -41,52 +36,25 @@ button:hover {
   background: #1a73e8;
 }
 
-canvas {
+.canvas {
   width: 100%;
   max-height: 400px;
 }
 
-.dashboard-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.dashboard-row .card {
-  flex: 1;
-}
-
-.weight-checkin form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-}
-
-.gallery img {
-  max-width: 100%;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-#show-more-photos-btn {
-  display: block;
-  margin: 10px auto;
-}
-
-.chart-options {
+.chart-options,
+.streak-options {
   text-align: center;
   margin-top: 10px;
 }
 
-.chart-options label {
+.chart-options label,
+.streak-options label {
   color: #ffffff;
   font-size: 14px;
+}
+
+.streak-options {
+  text-align: center;
 }
 
 .placeholder {
