@@ -1,4 +1,4 @@
-const appVersion = "v4.9";
+const appVersion = "v5.0";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -17,7 +17,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupWeightLogging();
   setupPhotoUpload();
   waitForFilerobot().then(setupPhotoEditor);
-  loadChartWithDemoData();
+  loadChartWithDemoData(); // Load demo data on page load
   updateSummary();
   loadPhotos();
   loadRecentWeighins();
@@ -61,7 +61,7 @@ function loadChartWithDemoData() {
   console.log("Loading chart with demo data...");
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
   console.log("User data:", progressData);
-  renderChart(demoData, progressData);
+  renderChart(demoData, progressData); // Combine demo and user data
 }
 
 function renderChart(demoData = [], userData = []) {
@@ -76,6 +76,7 @@ function renderChart(demoData = [], userData = []) {
     chartInstance.destroy();
   }
 
+  // Combine demo and user data
   const labels = [
     ...demoData.map((d) => d.date),
     ...userData.map((u) => u.date),
@@ -92,18 +93,18 @@ function renderChart(demoData = [], userData = []) {
       labels,
       datasets: [
         {
-          label: "Demo Data (Blue)",
+          label: "Demo Data (Pink)",
           data: demoWeights,
-          borderColor: "#3498db",
-          backgroundColor: "rgba(52, 152, 219, 0.2)",
+          borderColor: "#e91e63",
+          backgroundColor: "rgba(233, 30, 99, 0.2)",
           borderWidth: 2,
           pointRadius: 4,
         },
         {
-          label: "User Data (Pink)",
+          label: "User Data (Blue)",
           data: userWeights,
-          borderColor: "#e91e63",
-          backgroundColor: "rgba(233, 30, 99, 0.2)",
+          borderColor: "#3498db",
+          backgroundColor: "rgba(52, 152, 219, 0.2)",
           borderWidth: 2,
           pointRadius: 4,
         },
