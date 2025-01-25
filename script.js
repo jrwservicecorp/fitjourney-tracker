@@ -1,4 +1,4 @@
-const appVersion = "v4.8";
+const appVersion = "v4.9";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -17,7 +17,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupWeightLogging();
   setupPhotoUpload();
   waitForFilerobot().then(setupPhotoEditor);
-  loadChartWithDemoData(); // Load demo data on page load
+  loadChartWithDemoData();
   updateSummary();
   loadPhotos();
   loadRecentWeighins();
@@ -61,7 +61,7 @@ function loadChartWithDemoData() {
   console.log("Loading chart with demo data...");
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
   console.log("User data:", progressData);
-  renderChart(demoData, progressData); // Combine demo and user data
+  renderChart(demoData, progressData);
 }
 
 function renderChart(demoData = [], userData = []) {
@@ -223,7 +223,7 @@ function setupPhotoUpload() {
     const reader = new FileReader();
     reader.onload = function (e) {
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
-      photos.push({ date: photoDate, src: e.target.result });
+      photos.push({ date: photoDate, src: e.target.result }); // Save base64 data
       localStorage.setItem("photos", JSON.stringify(photos));
       loadPhotos();
     };
