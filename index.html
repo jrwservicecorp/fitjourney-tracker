@@ -12,7 +12,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v7.4</span></p>
+    <p>App Version: <span id="app-version">v7.6</span></p>
   </header>
 
   <main id="main-app">
@@ -42,7 +42,7 @@
       </div>
     </div>
 
-    <!-- Dashboard Row with Summary, Recent Weigh-Ins, Log Weight, and Upload Progress Photo -->
+    <!-- Dashboard Row -->
     <div class="dashboard-row">
       <div class="card weight-summary">
         <h3>Weight Summary</h3>
@@ -50,14 +50,12 @@
           <p class="placeholder">No data available for summary.</p>
         </div>
       </div>
-
       <div class="card recent-weighins">
         <h3>Recent Weigh-Ins</h3>
         <div id="recent-weighins">
           <p class="placeholder">No weigh-ins recorded yet.</p>
         </div>
       </div>
-
       <div class="card weight-checkin">
         <h3>Log Your Weight</h3>
         <form id="weight-form">
@@ -68,7 +66,6 @@
           <button type="submit">Log Weight</button>
         </form>
       </div>
-
       <div class="card upload-photo">
         <h3>Upload Progress Photo</h3>
         <form id="photo-upload-form">
@@ -81,7 +78,7 @@
       </div>
     </div>
 
-    <!-- Photo Comparison Section -->
+    <!-- Photo Comparison -->
     <div class="card">
       <h3>Photo Comparison</h3>
       <div>
@@ -94,21 +91,6 @@
       </div>
       <button id="compare-photos-btn">Compare Photos</button>
       <div id="side-by-side-comparison" class="comparison-display"></div>
-    </div>
-
-    <!-- Photo Editor Section -->
-    <div class="card">
-      <h3>Edit and Export</h3>
-      <form id="photo-form">
-        <label for="photo-upload">Select Photo:</label>
-        <input id="photo-upload" type="file" accept="image/*">
-        <button id="edit-photo-btn" type="button">Edit Photo</button>
-      </form>
-      <div id="image-editor-container"></div>
-      <div>
-        <button id="export-photo-with-data">Export Photo with Data</button>
-        <button id="export-data-only">Export Data Only</button>
-      </div>
     </div>
 
     <!-- Photo Gallery -->
