@@ -1,4 +1,4 @@
-const appVersion = "v6.1";
+const appVersion = "v6.2";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -21,7 +21,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   setupPhotoEditor();
   setupChartOptions();
 
-  console.log("Loading chart with demo data...");
+  console.log("Forcing chart rendering with demo data...");
   loadChartWithDemoData(); // Ensure demo data renders
   updateSummary();
   loadRecentWeighins();
@@ -33,11 +33,11 @@ window.addEventListener("DOMContentLoaded", async () => {
 function loadChartWithDemoData() {
   console.log("Executing loadChartWithDemoData...");
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  console.log("Initial user data:", progressData);
+  console.log("Initial user data from localStorage:", progressData);
 
   if (progressData.length === 0) {
     console.log("No user data found. Rendering demo data only.");
-    renderChart(demoData, []); // Force demo data only
+    renderChart(demoData, []); // Force demo data if no user data exists
   } else {
     console.log("Rendering chart with demo and user data...");
     renderChart(demoData, progressData);
