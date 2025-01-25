@@ -1,4 +1,4 @@
-const appVersion = "v5.0";
+const appVersion = "v5.1";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -10,14 +10,18 @@ const demoData = [
   { date: "2023-12-03", weight: 195 },
 ];
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
   console.log("Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
   setupWeightLogging();
   setupPhotoUpload();
-  waitForFilerobot().then(setupPhotoEditor);
-  loadChartWithDemoData(); // Load demo data on page load
+
+  // Wait for Filerobot to load before setting up the photo editor
+  await waitForFilerobot();
+  setupPhotoEditor();
+
+  loadChartWithDemoData();
   updateSummary();
   loadPhotos();
   loadRecentWeighins();
@@ -76,7 +80,6 @@ function renderChart(demoData = [], userData = []) {
     chartInstance.destroy();
   }
 
-  // Combine demo and user data
   const labels = [
     ...demoData.map((d) => d.date),
     ...userData.map((u) => u.date),
@@ -128,50 +131,6 @@ function renderChart(demoData = [], userData = []) {
 }
 
 /* ================================
-    Summary Update
-================================ */
-function updateSummary() {
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  const summaryContainer = document.getElementById("weight-summary");
-
-  if (progressData.length === 0) {
-    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
-    return;
-  }
-
-  const weights = progressData.map((entry) => entry.weight);
-  const average = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
-  const max = Math.max(...weights);
-  const min = Math.min(...weights);
-
-  summaryContainer.innerHTML = `
-    <p><strong>Average Weight:</strong> ${average} lbs</p>
-    <p><strong>Max Weight:</strong> ${max} lbs</p>
-    <p><strong>Min Weight:</strong> ${min} lbs</p>
-  `;
-  console.log("Summary updated:", { average, max, min });
-}
-
-/* ================================
-    Recent Weigh-Ins
-================================ */
-function loadRecentWeighins() {
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  const recentContainer = document.getElementById("recent-weighins");
-
-  if (progressData.length === 0) {
-    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
-    return;
-  }
-
-  const recentWeighins = progressData.slice(-4).reverse();
-  recentContainer.innerHTML = recentWeighins
-    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
-    .join("");
-  console.log("Recent weigh-ins updated:", recentWeighins);
-}
-
-/* ================================
     Filerobot Initialization
 ================================ */
 async function waitForFilerobot() {
@@ -187,6 +146,13 @@ async function waitForFilerobot() {
 }
 
 function setupPhotoEditor() {
+  console.log("Setting up the photo editor...");
+
+  if (!window.FilerobotImageEditor) {
+    console.error("Filerobot Image Editor is not loaded. Skipping setup.");
+    return;
+  }
+
   const photoEditor = window.FilerobotImageEditor.create('#image-editor-container', {
     tools: ['adjust', 'filters', 'crop', 'text', 'export'],
     cropPresets: [
@@ -197,8 +163,15 @@ function setupPhotoEditor() {
   });
 
   document.getElementById('edit-photo-btn').addEventListener('click', () => {
-    const selectedPhoto = 'path/to/photo.jpg'; // Placeholder
-    photoEditor.open(selectedPhoto);
+    const photos = JSON.parse(localStorage.getItem("photos")) || [];
+    if (photos.length === 0) {
+      alert("No photos available to edit. Please upload a photo first.");
+      return;
+    }
+
+    const lastPhoto = photos[photos.length - 1]; // Edit the most recently uploaded photo
+    photoEditor.open(lastPhoto.src); // Open the photo in the editor
+    console.log("Opened photo for editing:", lastPhoto);
   });
 
   console.log("Photo editor initialized.");
