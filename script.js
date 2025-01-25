@@ -1,4 +1,4 @@
-const appVersion = "v7.3";
+const appVersion = "v7.4";
 
 let chartInstance = null;
 
@@ -19,6 +19,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupPhotoComparison();
   setupPhotoEditing();
   setupExportOptions();
+  setupPhotoUpload(); // New function for Upload Progress Photo
   loadPhotos();
 });
 
@@ -99,6 +100,11 @@ function setupWeightLogging() {
     const weight = parseFloat(document.getElementById("weight-input").value);
     const date = document.getElementById("date-input").value;
 
+    if (!weight || !date) {
+      alert("Please enter valid weight and date.");
+      return;
+    }
+
     const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
     progressData.push({ weight, date });
     localStorage.setItem("progressData", JSON.stringify(progressData));
@@ -148,6 +154,70 @@ function updateRecentWeighIns(progressData) {
 }
 
 /* ================================
+    Photo Upload Setup
+================================ */
+function setupPhotoUpload() {
+  const uploadButton = document.getElementById("upload-photo-btn");
+
+  uploadButton.addEventListener("click", () => {
+    const fileInput = document.getElementById("photo-upload");
+    const dateInput = document.getElementById("photo-date");
+
+    const file = fileInput.files[0];
+    const date = dateInput.value;
+
+    if (!file || !date) {
+      alert("Please select a photo and enter a valid date.");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const photoDataUrl = e.target.result;
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
+
+      photos.push({
+        date,
+        src: photoDataUrl,
+      });
+
+      localStorage.setItem("photos", JSON.stringify(photos));
+
+      alert("Photo uploaded successfully!");
+      fileInput.value = "";
+      dateInput.value = "";
+      loadPhotos(); // Refresh photo gallery
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ================================
+    Load Photos into Gallery
+================================ */
+function loadPhotos() {
+  const photoGallery = document.getElementById("photo-gallery");
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+
+  if (!photos.length) {
+    photoGallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
+    return;
+  }
+
+  photoGallery.innerHTML = photos
+    .map(
+      (photo) =>
+        `<div class="photo-item">
+          <img src="${photo.src}" alt="Progress Photo">
+          <p>${photo.date}</p>
+        </div>`
+    )
+    .join("");
+}
+
+/* ================================
     Photo Comparison
 ================================ */
 function setupPhotoComparison() {
@@ -188,75 +258,4 @@ function setupPhotoEditing() {
         text: '#ffffff',
       },
     },
-    tools: ['crop', 'adjust', 'text', 'shapes', 'export'],
-  });
-
-  editButton.addEventListener("click", () => {
-    const file = photoInput.files[0];
-    if (!file) {
-      alert("Please select a photo first.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imageEditor.open({ imageSrc: e.target.result });
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-/* ================================
-    Export Options
-================================ */
-function setupExportOptions() {
-  const exportPhotoBtn = document.getElementById("export-photo-with-data");
-  const exportDataBtn = document.getElementById("export-data-only");
-
-  exportPhotoBtn.addEventListener("click", () => {
-    alert("Photo with data exported (simulation).");
-  });
-
-  exportDataBtn.addEventListener("click", () => {
-    const overlayData = {
-      weight: '200 lbs',
-      milestone: '10 lbs lost',
-      progress: '50%',
-    };
-    const blob = new Blob([JSON.stringify(overlayData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'progress-data.json';
-    link.click();
-  });
-}
-
-/* ================================
-    Photo Gallery
-================================ */
-function loadPhotos() {
-  const photoGallery = document.getElementById("photo-gallery");
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-
-  if (!photos.length) {
-    photoGallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
-    return;
-  }
-
-  photoGallery.innerHTML = photos
-    .map((photo) => `<img src="${photo.src}" alt="Photo">`)
-    .join("");
-
-  const photoSelect1 = document.getElementById("photo-select-1");
-  const photoSelect2 = document.getElementById("photo-select-2");
-
-  photoSelect1.innerHTML = photos
-    .map((photo, index) => `<option value="${photo.src}">Photo ${index + 1}</option>`)
-    .join("");
-
-  photoSelect2.innerHTML = photos
-    .map((photo, index) => `<option value="${photo.src}">Photo ${index + 1}</option>`)
-    .join("");
-}
+    tools: ['crop', 'adjust', 'text', 'shapes', 'export
