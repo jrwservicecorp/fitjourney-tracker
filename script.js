@@ -1,4 +1,4 @@
-const appVersion = "v7.4";
+const appVersion = "v7.6";
 
 let chartInstance = null;
 
@@ -14,12 +14,10 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
 
   setupChart();
-  setupStreaks();
   setupWeightLogging();
+  setupStreaks();
   setupPhotoComparison();
-  setupPhotoEditing();
-  setupExportOptions();
-  setupPhotoUpload(); // New function for Upload Progress Photo
+  setupPhotoUpload();
   loadPhotos();
 });
 
@@ -154,7 +152,7 @@ function updateRecentWeighIns(progressData) {
 }
 
 /* ================================
-    Photo Upload Setup
+    Photo Upload
 ================================ */
 function setupPhotoUpload() {
   const uploadButton = document.getElementById("upload-photo-btn");
@@ -177,17 +175,13 @@ function setupPhotoUpload() {
       const photoDataUrl = e.target.result;
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
 
-      photos.push({
-        date,
-        src: photoDataUrl,
-      });
-
+      photos.push({ date, src: photoDataUrl });
       localStorage.setItem("photos", JSON.stringify(photos));
 
       alert("Photo uploaded successfully!");
       fileInput.value = "";
       dateInput.value = "";
-      loadPhotos(); // Refresh photo gallery
+      loadPhotos();
     };
 
     reader.readAsDataURL(file);
@@ -195,25 +189,19 @@ function setupPhotoUpload() {
 }
 
 /* ================================
-    Load Photos into Gallery
+    Load Photos
 ================================ */
 function loadPhotos() {
-  const photoGallery = document.getElementById("photo-gallery");
+  const gallery = document.getElementById("photo-gallery");
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
 
   if (!photos.length) {
-    photoGallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
+    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
     return;
   }
 
-  photoGallery.innerHTML = photos
-    .map(
-      (photo) =>
-        `<div class="photo-item">
-          <img src="${photo.src}" alt="Progress Photo">
-          <p>${photo.date}</p>
-        </div>`
-    )
+  gallery.innerHTML = photos
+    .map((photo) => `<div class="photo-item"><img src="${photo.src}" alt="Progress Photo"><p>${photo.date}</p></div>`)
     .join("");
 }
 
@@ -242,20 +230,3 @@ function setupPhotoComparison() {
     `;
   });
 }
-
-/* ================================
-    Photo Editing with Filerobot
-================================ */
-function setupPhotoEditing() {
-  const photoInput = document.getElementById("photo-upload");
-  const editButton = document.getElementById("edit-photo-btn");
-
-  const imageEditor = FilerobotImageEditor.create('#image-editor-container', {
-    theme: {
-      colors: {
-        primary: '#3498db',
-        secondary: '#1c1c1c',
-        text: '#ffffff',
-      },
-    },
-    tools: ['crop', 'adjust', 'text', 'shapes', 'export
