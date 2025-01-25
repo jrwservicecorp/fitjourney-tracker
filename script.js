@@ -18,6 +18,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupStreaks();
   setupPhotoComparison();
   setupPhotoUpload();
+  setupExportOptions();
   loadPhotos();
 });
 
@@ -188,9 +189,6 @@ function setupPhotoUpload() {
   });
 }
 
-/* ================================
-    Load Photos
-================================ */
 function loadPhotos() {
   const gallery = document.getElementById("photo-gallery");
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
@@ -228,5 +226,32 @@ function setupPhotoComparison() {
         <img src="${photo2}" alt="Photo 2">
       </div>
     `;
+  });
+}
+
+/* ================================
+    Export Options
+================================ */
+function setupExportOptions() {
+  const exportPhotoBtn = document.getElementById("export-photo-with-data");
+  const exportDataBtn = document.getElementById("export-data-only");
+
+  exportPhotoBtn.addEventListener("click", () => {
+    alert("Photo export functionality coming soon!");
+  });
+
+  exportDataBtn.addEventListener("click", () => {
+    const overlayData = {
+      weight: '200 lbs',
+      milestone: '10 lbs lost',
+      progress: '50%',
+    };
+    const blob = new Blob([JSON.stringify(overlayData)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'progress-data.json';
+    link.click();
   });
 }
