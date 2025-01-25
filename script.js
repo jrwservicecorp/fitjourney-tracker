@@ -1,4 +1,4 @@
-const appVersion = "v7.1";
+const appVersion = "v7.3";
 
 let chartInstance = null;
 
@@ -13,23 +13,31 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
+  setupChart();
+  setupStreaks();
+  setupWeightLogging();
+  setupPhotoComparison();
+  setupPhotoEditing();
+  setupExportOptions();
+  loadPhotos();
+});
+
+/* ================================
+    Chart Setup
+================================ */
+function setupChart() {
   ensureCanvasReady(() => {
     console.log("Rendering chart with demo data on page load...");
     renderChart(demoData, [], true);
   });
 
-  setupWeightLogging();
-  setupPhotoComparison();
-  setupChartOptions();
-  setupExportOptions();
+  document.getElementById("toggle-demo-data").addEventListener("change", () => {
+    const showDemo = document.getElementById("toggle-demo-data").checked;
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    renderChart(demoData, progressData, showDemo);
+  });
+}
 
-  updateSummary([]);
-  updateRecentWeighIns([]);
-});
-
-/* ================================
-    Ensure Canvas is Ready
-================================ */
 function ensureCanvasReady(callback) {
   const canvas = document.getElementById("weight-chart");
 
@@ -46,12 +54,8 @@ function ensureCanvasReady(callback) {
   }, 50);
 }
 
-/* ================================
-    Chart Rendering
-================================ */
 function renderChart(demoData, userData, showDemo) {
-  const canvas = document.getElementById("weight-chart");
-  const ctx = canvas.getContext("2d");
+  const ctx = document.getElementById("weight-chart").getContext("2d");
 
   if (chartInstance) {
     chartInstance.destroy();
@@ -89,47 +93,26 @@ function renderChart(demoData, userData, showDemo) {
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
 
-  if (!weightForm) {
-    console.error("Weight form not found. Skipping weight logging setup.");
-    return;
-  }
-
   weightForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const weightInput = document.getElementById("weight-input");
-    const dateInput = document.getElementById("date-input");
+    const weight = parseFloat(document.getElementById("weight-input").value);
+    const date = document.getElementById("date-input").value;
 
-    const weight = parseFloat(weightInput.value);
-    const date = dateInput.value;
-
-    if (!weight || !date) {
-      alert("Please enter a valid weight and date.");
-      return;
-    }
-
-    // Save to localStorage
     const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
     progressData.push({ weight, date });
     localStorage.setItem("progressData", JSON.stringify(progressData));
 
-    console.log("Weight logged:", { weight, date });
-
-    // Update UI
     const showDemo = document.getElementById("toggle-demo-data").checked;
     renderChart(demoData, progressData, showDemo);
     updateSummary(progressData);
     updateRecentWeighIns(progressData);
 
-    // Reset form
-    weightInput.value = "";
-    dateInput.value = "";
+    document.getElementById("weight-input").value = "";
+    document.getElementById("date-input").value = "";
   });
 }
 
-/* ================================
-    Update Summary
-================================ */
 function updateSummary(progressData) {
   const summaryContainer = document.getElementById("weight-summary");
 
@@ -150,9 +133,6 @@ function updateSummary(progressData) {
   `;
 }
 
-/* ================================
-    Update Recent Weigh-Ins
-================================ */
 function updateRecentWeighIns(progressData) {
   const recentContainer = document.getElementById("recent-weighins");
 
@@ -165,36 +145,6 @@ function updateRecentWeighIns(progressData) {
   recentContainer.innerHTML = recentWeighIns
     .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
     .join("");
-}
-
-/* ================================
-    Chart Options
-================================ */
-function setupChartOptions() {
-  document.getElementById("toggle-demo-data").addEventListener("change", () => {
-    const showDemo = document.getElementById("toggle-demo-data").checked;
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    renderChart(demoData, progressData, showDemo);
-  });
-}
-
-/* ================================
-    Export Options
-================================ */
-function setupExportOptions() {
-  if (typeof FilerobotImageEditor === "undefined") {
-    console.error("Filerobot Image Editor is not loaded.");
-    return;
-  }
-
-  const imageEditor = FilerobotImageEditor.create('#image-editor-container', {
-    theme: { colors: { primary: '#3498db', secondary: '#1c1c1c', text: '#ffffff' } },
-    tools: ['export'],
-  });
-
-  document.getElementById("export-photo-with-data").addEventListener("click", () => {
-    imageEditor.open({ imageSrc: 'path-to-photo.jpg' });
-  });
 }
 
 /* ================================
@@ -221,4 +171,92 @@ function setupPhotoComparison() {
       </div>
     `;
   });
+}
+
+/* ================================
+    Photo Editing with Filerobot
+================================ */
+function setupPhotoEditing() {
+  const photoInput = document.getElementById("photo-upload");
+  const editButton = document.getElementById("edit-photo-btn");
+
+  const imageEditor = FilerobotImageEditor.create('#image-editor-container', {
+    theme: {
+      colors: {
+        primary: '#3498db',
+        secondary: '#1c1c1c',
+        text: '#ffffff',
+      },
+    },
+    tools: ['crop', 'adjust', 'text', 'shapes', 'export'],
+  });
+
+  editButton.addEventListener("click", () => {
+    const file = photoInput.files[0];
+    if (!file) {
+      alert("Please select a photo first.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      imageEditor.open({ imageSrc: e.target.result });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ================================
+    Export Options
+================================ */
+function setupExportOptions() {
+  const exportPhotoBtn = document.getElementById("export-photo-with-data");
+  const exportDataBtn = document.getElementById("export-data-only");
+
+  exportPhotoBtn.addEventListener("click", () => {
+    alert("Photo with data exported (simulation).");
+  });
+
+  exportDataBtn.addEventListener("click", () => {
+    const overlayData = {
+      weight: '200 lbs',
+      milestone: '10 lbs lost',
+      progress: '50%',
+    };
+    const blob = new Blob([JSON.stringify(overlayData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'progress-data.json';
+    link.click();
+  });
+}
+
+/* ================================
+    Photo Gallery
+================================ */
+function loadPhotos() {
+  const photoGallery = document.getElementById("photo-gallery");
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+
+  if (!photos.length) {
+    photoGallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
+    return;
+  }
+
+  photoGallery.innerHTML = photos
+    .map((photo) => `<img src="${photo.src}" alt="Photo">`)
+    .join("");
+
+  const photoSelect1 = document.getElementById("photo-select-1");
+  const photoSelect2 = document.getElementById("photo-select-2");
+
+  photoSelect1.innerHTML = photos
+    .map((photo, index) => `<option value="${photo.src}">Photo ${index + 1}</option>`)
+    .join("");
+
+  photoSelect2.innerHTML = photos
+    .map((photo, index) => `<option value="${photo.src}">Photo ${index + 1}</option>`)
+    .join("");
 }
