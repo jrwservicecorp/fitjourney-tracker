@@ -1,4 +1,4 @@
-const appVersion = "v6.2";
+const appVersion = "v6.3";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -21,11 +21,33 @@ window.addEventListener("DOMContentLoaded", async () => {
   setupPhotoEditor();
   setupChartOptions();
 
-  console.log("Forcing chart rendering with demo data...");
-  loadChartWithDemoData(); // Ensure demo data renders
-  updateSummary();
-  loadRecentWeighins();
+  console.log("Ensuring canvas is ready before loading chart...");
+  ensureCanvasReady(() => {
+    console.log("Canvas is ready. Loading chart with demo data...");
+    loadChartWithDemoData(); // Ensure demo data renders
+    updateSummary();
+    loadRecentWeighins();
+  });
 });
+
+/* ================================
+    Ensure Canvas is Ready
+================================ */
+function ensureCanvasReady(callback) {
+  const canvas = document.getElementById("weight-chart");
+
+  if (!canvas) {
+    console.error("Chart canvas element not found!");
+    return;
+  }
+
+  const interval = setInterval(() => {
+    if (canvas.getContext("2d")) {
+      clearInterval(interval);
+      callback(); // Call the provided callback once the canvas is ready
+    }
+  }, 50);
+}
 
 /* ================================
     Chart Initialization
@@ -119,17 +141,6 @@ function renderChart(demoData = [], userData = []) {
   } catch (error) {
     console.error("Error rendering chart:", error);
   }
-}
-
-function displayChartPlaceholder() {
-  const canvas = document.getElementById("weight-chart");
-  const ctx = canvas.getContext("2d");
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.font = "16px Arial";
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
-  ctx.fillText("No data available. Log your weight to get started!", canvas.width / 2, canvas.height / 2);
 }
 
 /* ================================
