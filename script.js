@@ -158,24 +158,44 @@ function updateRecentWeighIns(progressData) {
 function setupPhotoUpload() {
   const uploadButton = document.getElementById("upload-photo-btn");
 
+  if (!uploadButton) {
+    console.error("Upload button not found!");
+    return;
+  }
+
+  console.log("Upload button found, attaching event listener...");
+
   uploadButton.addEventListener("click", () => {
+    console.log("Upload button clicked!");
+
     const fileInput = document.getElementById("photo-upload");
     const dateInput = document.getElementById("photo-date");
+
+    if (!fileInput || !dateInput) {
+      console.error("File input or date input not found!");
+      return;
+    }
 
     const file = fileInput.files[0];
     const date = dateInput.value;
 
-    if (!file || !date) {
-      alert("Please select a photo and enter a valid date.");
+    if (!file) {
+      alert("Please select a photo file to upload.");
+      return;
+    }
+
+    if (!date) {
+      alert("Please enter a valid date.");
       return;
     }
 
     const reader = new FileReader();
 
     reader.onload = (e) => {
+      console.log("File read successfully!");
       const photoDataUrl = e.target.result;
-      const photos = JSON.parse(localStorage.getItem("photos")) || [];
 
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
       photos.push({ date, src: photoDataUrl });
       localStorage.setItem("photos", JSON.stringify(photos));
 
