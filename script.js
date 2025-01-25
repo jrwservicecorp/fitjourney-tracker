@@ -1,4 +1,4 @@
-const appVersion = "v5.5";
+const appVersion = "v5.6";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -16,50 +16,16 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize all components
   setupWeightLogging();
-  setupPhotoUpload(); // Ensure this function is now properly defined
+  setupPhotoUpload();
   await waitForFilerobot(); // Wait for Filerobot to load
   setupPhotoEditor();
 
   // Load chart and other components
-  loadChartWithDemoData();
+  loadChartWithDemoData(); // Ensure demo data renders initially
   updateSummary();
   loadPhotos();
   loadRecentWeighins();
 });
-
-/* ================================
-    Photo Upload
-================================ */
-function setupPhotoUpload() {
-  console.log("Setting up photo upload functionality...");
-  const photoForm = document.getElementById("photo-form");
-
-  if (!photoForm) {
-    console.error("Photo form not found. Skipping setupPhotoUpload.");
-    return;
-  }
-
-  photoForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const photoInput = document.getElementById("photo-upload").files[0];
-    const photoDate = document.getElementById("photo-date").value;
-
-    if (!photoInput || !photoDate) {
-      alert("Please select a photo and enter a date.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const photos = JSON.parse(localStorage.getItem("photos")) || [];
-      photos.push({ date: photoDate, src: e.target.result });
-      localStorage.setItem("photos", JSON.stringify(photos));
-      loadPhotos();
-    };
-    reader.readAsDataURL(photoInput);
-  });
-}
 
 /* ================================
     Chart Initialization
@@ -69,7 +35,13 @@ function loadChartWithDemoData() {
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
   console.log("User data:", progressData);
 
-  // Pass demo and user data to renderChart
+  if (progressData.length === 0 && demoData.length === 0) {
+    console.log("No data available for chart. Displaying placeholder.");
+    displayChartPlaceholder();
+    return;
+  }
+
+  // Render chart with demo and user data
   renderChart(demoData, progressData);
 }
 
@@ -143,6 +115,17 @@ function renderChart(demoData = [], userData = []) {
   } catch (error) {
     console.error("Error rendering chart:", error);
   }
+}
+
+function displayChartPlaceholder() {
+  const canvas = document.getElementById("weight-chart");
+  const ctx = canvas.getContext("2d");
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "center";
+  ctx.fillText("No data available. Log your weight to get started!", canvas.width / 2, canvas.height / 2);
 }
 
 /* ================================
@@ -225,51 +208,4 @@ function loadRecentWeighins() {
     .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
     .join("");
   console.log("Recent weigh-ins updated:", recentWeighins);
-}
-
-/* ================================
-    Filerobot Initialization
-================================ */
-async function waitForFilerobot() {
-  return new Promise((resolve) => {
-    const interval = setInterval(() => {
-      if (window.FilerobotImageEditor) {
-        clearInterval(interval);
-        console.log("Filerobot Image Editor loaded successfully.");
-        resolve();
-      }
-    }, 100);
-  });
-}
-
-function setupPhotoEditor() {
-  console.log("Setting up the photo editor...");
-
-  if (!window.FilerobotImageEditor) {
-    console.error("Filerobot Image Editor is not loaded. Skipping setup.");
-    return;
-  }
-
-  const photoEditor = window.FilerobotImageEditor.create('#image-editor-container', {
-    tools: ['adjust', 'filters', 'crop', 'text', 'export'],
-    cropPresets: [
-      { label: 'Instagram Square', value: 1 },
-      { label: 'Instagram Portrait', value: 4 / 5 },
-      { label: 'Instagram Landscape', value: 16 / 9 },
-    ],
-  });
-
-  document.getElementById('edit-photo-btn').addEventListener('click', () => {
-    const photos = JSON.parse(localStorage.getItem("photos")) || [];
-    if (photos.length === 0) {
-      alert("No photos available to edit. Please upload a photo first.");
-      return;
-    }
-
-    const lastPhoto = photos[photos.length - 1];
-    photoEditor.open(lastPhoto.src);
-    console.log("Opened photo for editing:", lastPhoto);
-  });
-
-  console.log("Photo editor initialized.");
 }
