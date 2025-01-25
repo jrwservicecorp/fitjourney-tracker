@@ -1,6 +1,6 @@
 import { FilerobotImageEditor } from 'https://cdn.scaleflex.it/plugins/filerobot-image-editor/3.15.0/filerobot-image-editor.min.js';
 
-const appVersion = "v3.8";
+const appVersion = "v4.0";
 
 let chartInstance = null;
 let photoPage = 0;
