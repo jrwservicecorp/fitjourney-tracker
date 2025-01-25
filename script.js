@@ -1,4 +1,4 @@
-const appVersion = "v7.0";
+const appVersion = "v7.1";
 
 let chartInstance = null;
 
@@ -22,6 +22,9 @@ window.addEventListener("DOMContentLoaded", () => {
   setupPhotoComparison();
   setupChartOptions();
   setupExportOptions();
+
+  updateSummary([]);
+  updateRecentWeighIns([]);
 });
 
 /* ================================
@@ -71,7 +74,6 @@ function renderChart(demoData, userData, showDemo) {
     backgroundColor: "rgba(52, 152, 219, 0.2)",
   });
 
-  console.log("Rendering chart...");
   chartInstance = new Chart(ctx, {
     type: "line",
     data: {
@@ -95,21 +97,74 @@ function setupWeightLogging() {
   weightForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const weight = parseFloat(document.getElementById("weight-input").value);
-    const date = document.getElementById("date-input").value;
+    const weightInput = document.getElementById("weight-input");
+    const dateInput = document.getElementById("date-input");
+
+    const weight = parseFloat(weightInput.value);
+    const date = dateInput.value;
 
     if (!weight || !date) {
-      alert("Please enter valid weight and date.");
+      alert("Please enter a valid weight and date.");
       return;
     }
 
+    // Save to localStorage
     const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
     progressData.push({ weight, date });
     localStorage.setItem("progressData", JSON.stringify(progressData));
 
+    console.log("Weight logged:", { weight, date });
+
+    // Update UI
     const showDemo = document.getElementById("toggle-demo-data").checked;
     renderChart(demoData, progressData, showDemo);
+    updateSummary(progressData);
+    updateRecentWeighIns(progressData);
+
+    // Reset form
+    weightInput.value = "";
+    dateInput.value = "";
   });
+}
+
+/* ================================
+    Update Summary
+================================ */
+function updateSummary(progressData) {
+  const summaryContainer = document.getElementById("weight-summary");
+
+  if (!progressData.length) {
+    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
+    return;
+  }
+
+  const weights = progressData.map((entry) => entry.weight);
+  const averageWeight = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
+  const maxWeight = Math.max(...weights);
+  const minWeight = Math.min(...weights);
+
+  summaryContainer.innerHTML = `
+    <p><strong>Average Weight:</strong> ${averageWeight} lbs</p>
+    <p><strong>Highest Weight:</strong> ${maxWeight} lbs</p>
+    <p><strong>Lowest Weight:</strong> ${minWeight} lbs</p>
+  `;
+}
+
+/* ================================
+    Update Recent Weigh-Ins
+================================ */
+function updateRecentWeighIns(progressData) {
+  const recentContainer = document.getElementById("recent-weighins");
+
+  if (!progressData.length) {
+    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
+    return;
+  }
+
+  const recentWeighIns = progressData.slice(-4).reverse();
+  recentContainer.innerHTML = recentWeighIns
+    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
+    .join("");
 }
 
 /* ================================
