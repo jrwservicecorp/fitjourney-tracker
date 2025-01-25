@@ -1,4 +1,4 @@
-const appVersion = "v5.8";
+const appVersion = "v5.9";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -10,41 +10,26 @@ const demoData = [
   { date: "2023-12-03", weight: 195 },
 ];
 
-// Ensure all functions are declared before calling them
-function setupWeightLogging() {
-  const weightForm = document.getElementById("weight-form");
+window.addEventListener("DOMContentLoaded", async () => {
+  console.log("Initializing FitJourney Tracker...");
+  document.getElementById("app-version").textContent = appVersion;
 
-  if (!weightForm) {
-    console.error("Weight form not found. Skipping setupWeightLogging.");
-    return;
-  }
+  // Initialize components
+  setupWeightLogging();
+  setupPhotoUpload();
+  await waitForFilerobot();
+  setupPhotoEditor();
+  setupChartOptions();
 
-  weightForm.addEventListener("submit", (e) => {
-    e.preventDefault();
+  console.log("Loading chart with demo data...");
+  loadChartWithDemoData(); // Ensure demo data renders
+  updateSummary();
+  loadRecentWeighins();
+});
 
-    const weightInput = document.getElementById("weight-input").value;
-    const dateInput = document.getElementById("date-input").value;
-
-    if (!weightInput || !dateInput) {
-      alert("Please enter a valid weight and date.");
-      return;
-    }
-
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    progressData.push({ date: dateInput, weight: parseFloat(weightInput) });
-
-    localStorage.setItem("progressData", JSON.stringify(progressData));
-    alert("Weight logged successfully!");
-
-    console.log("User logged weight:", { date: dateInput, weight: parseFloat(weightInput) });
-
-    const showDemoData = document.getElementById("toggle-demo-data").checked;
-    renderChart(showDemoData ? demoData : [], progressData); // Update chart based on toggle
-    updateSummary();
-    loadRecentWeighins();
-  });
-}
-
+/* ================================
+    Chart Initialization
+================================ */
 function loadChartWithDemoData() {
   console.log("Executing loadChartWithDemoData...");
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
@@ -137,17 +122,6 @@ function renderChart(demoData = [], userData = []) {
   }
 }
 
-function setupChartOptions() {
-  const toggleDemoCheckbox = document.getElementById("toggle-demo-data");
-  toggleDemoCheckbox.addEventListener("change", () => {
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    const showDemoData = toggleDemoCheckbox.checked;
-
-    console.log("Toggling demo data:", showDemoData);
-    renderChart(showDemoData ? demoData : [], progressData);
-  });
-}
-
 function displayChartPlaceholder() {
   const canvas = document.getElementById("weight-chart");
   const ctx = canvas.getContext("2d");
@@ -157,6 +131,43 @@ function displayChartPlaceholder() {
   ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
   ctx.fillText("No data available. Log your weight to get started!", canvas.width / 2, canvas.height / 2);
+}
+
+/* ================================
+    Weight Logging
+================================ */
+function setupWeightLogging() {
+  const weightForm = document.getElementById("weight-form");
+
+  if (!weightForm) {
+    console.error("Weight form not found. Skipping setupWeightLogging.");
+    return;
+  }
+
+  weightForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const weightInput = document.getElementById("weight-input").value;
+    const dateInput = document.getElementById("date-input").value;
+
+    if (!weightInput || !dateInput) {
+      alert("Please enter a valid weight and date.");
+      return;
+    }
+
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    progressData.push({ date: dateInput, weight: parseFloat(weightInput) });
+
+    localStorage.setItem("progressData", JSON.stringify(progressData));
+    alert("Weight logged successfully!");
+
+    console.log("User logged weight:", { date: dateInput, weight: parseFloat(weightInput) });
+
+    const showDemoData = document.getElementById("toggle-demo-data").checked;
+    renderChart(showDemoData ? demoData : [], progressData); // Update chart based on toggle
+    updateSummary();
+    loadRecentWeighins();
+  });
 }
 
 function updateSummary() {
@@ -212,7 +223,9 @@ async function waitForFilerobot() {
 }
 
 function setupPhotoUpload() {
+  console.log("Setting up photo upload functionality...");
   const photoForm = document.getElementById("photo-form");
+
   photoForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
@@ -236,6 +249,7 @@ function setupPhotoUpload() {
 }
 
 function setupPhotoEditor() {
+  console.log("Setting up photo editor...");
   const photoEditor = window.FilerobotImageEditor.create('#image-editor-container', {
     tools: ['adjust', 'filters', 'crop', 'text', 'export'],
   });
@@ -250,19 +264,3 @@ function setupPhotoEditor() {
     photoEditor.open(lastPhoto.src);
   });
 }
-
-// Ensure functions are called after being declared
-window.addEventListener("DOMContentLoaded", async () => {
-  console.log("Initializing FitJourney Tracker...");
-  document.getElementById("app-version").textContent = appVersion;
-
-  setupWeightLogging();
-  setupPhotoUpload();
-  await waitForFilerobot();
-  setupPhotoEditor();
-  setupChartOptions();
-
-  loadChartWithDemoData();
-  updateSummary();
-  loadRecentWeighins();
-});
