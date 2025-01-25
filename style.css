@@ -60,7 +60,7 @@ canvas {
 
 #image-editor-container.active {
   display: block;
-  height: 600px; /* Set height for the editor */
+  height: 600px;
 }
 
 /* Photo Gallery */
