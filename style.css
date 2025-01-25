@@ -40,12 +40,10 @@ button:hover {
   background-color: #0056b3;
 }
 
-/* Chart Options */
 .chart-options {
   margin-top: 1em;
 }
 
-/* Gallery Styling */
 .gallery {
   display: flex;
   gap: 1em;
@@ -55,4 +53,8 @@ button:hover {
 .photo-item img {
   max-width: 150px;
   border-radius: 8px;
+}
+
+.placeholder {
+  color: #777;
 }
