@@ -1,4 +1,4 @@
-const appVersion = "v6.4";
+const appVersion = "v6.5";
 
 let chartInstance = null;
 
@@ -13,15 +13,13 @@ window.addEventListener("DOMContentLoaded", async () => {
   console.log("Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
-  // Initialize components
   setupWeightLogging();
   setupChartOptions();
 
   console.log("Ensuring canvas is ready before loading chart...");
   ensureCanvasReady(() => {
-    console.log("Canvas is ready. Forcing demo data rendering...");
-    renderChart(demoData, []); // Explicitly render demo data only
-    updateSummary();
+    console.log("Canvas is ready. Rendering chart...");
+    loadChartWithDemoData(); // Load chart with both demo and user data
   });
 });
 
@@ -45,12 +43,21 @@ function ensureCanvasReady(callback) {
 }
 
 /* ================================
-    Chart Rendering
+    Chart Initialization
 ================================ */
-function renderChart(demoData = [], userData = []) {
+function loadChartWithDemoData() {
+  console.log("Executing loadChartWithDemoData...");
+  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+  console.log("Initial user data from localStorage:", progressData);
+
+  renderChart(demoData, progressData); // Render chart with both demo and user data
+}
+
+function renderChart(demoData = [], userData = [], showDemo = true) {
   console.log("Executing renderChart...");
   console.log("Demo Data:", demoData);
   console.log("User Data:", userData);
+  console.log("Show Demo Data:", showDemo);
 
   const canvas = document.getElementById("weight-chart");
   if (!canvas) {
@@ -73,36 +80,39 @@ function renderChart(demoData = [], userData = []) {
     ...userData.map((u) => u.date),
   ];
 
-  const demoWeights = demoData.map((d) => d.weight);
-  const userWeights = userData.map((u) => u.weight);
+  const datasets = [];
+
+  // Add demo data only if showDemo is true
+  if (showDemo) {
+    datasets.push({
+      label: "Demo Data (Pink)",
+      data: demoData.map((d) => d.weight),
+      borderColor: "#e91e63",
+      backgroundColor: "rgba(233, 30, 99, 0.2)",
+      borderWidth: 2,
+      pointRadius: 4,
+    });
+  }
+
+  // Add user data
+  datasets.push({
+    label: "User Data (Blue)",
+    data: userData.map((u) => u.weight),
+    borderColor: "#3498db",
+    backgroundColor: "rgba(52, 152, 219, 0.2)",
+    borderWidth: 2,
+    pointRadius: 4,
+  });
 
   console.log("Rendering chart with labels:", labels);
-  console.log("Demo weights:", demoWeights);
-  console.log("User weights:", userWeights);
+  console.log("Datasets:", datasets);
 
   try {
     chartInstance = new Chart(ctx, {
       type: "line",
       data: {
         labels,
-        datasets: [
-          {
-            label: "Demo Data (Pink)",
-            data: demoWeights,
-            borderColor: "#e91e63",
-            backgroundColor: "rgba(233, 30, 99, 0.2)",
-            borderWidth: 2,
-            pointRadius: 4,
-          },
-          {
-            label: "User Data (Blue)",
-            data: userWeights,
-            borderColor: "#3498db",
-            backgroundColor: "rgba(52, 152, 219, 0.2)",
-            borderWidth: 2,
-            pointRadius: 4,
-          },
-        ],
+        datasets,
       },
       options: {
         responsive: true,
@@ -155,8 +165,7 @@ function setupWeightLogging() {
     console.log("User logged weight:", { date: dateInput, weight: parseFloat(weightInput) });
 
     const showDemoData = document.getElementById("toggle-demo-data").checked;
-    renderChart(showDemoData ? demoData : [], progressData); // Update chart based on toggle
-    updateSummary();
+    renderChart(demoData, progressData, showDemoData); // Update chart based on toggle
   });
 }
 
@@ -170,6 +179,6 @@ function setupChartOptions() {
     const showDemoData = toggleDemoCheckbox.checked;
 
     console.log("Toggling demo data:", showDemoData);
-    renderChart(showDemoData ? demoData : [], progressData);
+    renderChart(demoData, progressData, showDemoData); // Re-render chart based on toggle
   });
 }
