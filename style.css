@@ -53,6 +53,23 @@ canvas {
   font-size: 14px;
 }
 
+/* Dashboard Row: 3 Boxes */
+.dashboard-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.dashboard-row .card {
+  flex: 1;
+}
+
+.weight-checkin form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 /* Photo Editor */
 #image-editor-container {
   display: none;
@@ -79,4 +96,21 @@ canvas {
 #show-more-photos-btn {
   display: block;
   margin: 10px auto;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .dashboard-row {
+    flex-direction: column;
+  }
+
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery {
+    grid-template-columns: repeat(1, 1fr);
+  }
 }
