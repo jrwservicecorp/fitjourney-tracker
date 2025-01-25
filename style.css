@@ -95,6 +95,18 @@ canvas {
   font-style: italic;
 }
 
+.comparison-display {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.comparison-display img {
+  max-width: 45%;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
 /* Responsive Styles */
 @media (max-width: 768px) {
   .dashboard-row {
