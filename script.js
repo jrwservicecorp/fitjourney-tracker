@@ -1,4 +1,4 @@
-const appVersion = "v5.9";
+const appVersion = "v6.0";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -14,7 +14,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   console.log("Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
-  // Initialize components
   setupWeightLogging();
   setupPhotoUpload();
   await waitForFilerobot();
@@ -22,7 +21,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   setupChartOptions();
 
   console.log("Loading chart with demo data...");
-  loadChartWithDemoData(); // Ensure demo data renders
+  loadChartWithDemoData();
   updateSummary();
   loadRecentWeighins();
 });
@@ -41,7 +40,7 @@ function loadChartWithDemoData() {
     return;
   }
 
-  console.log("Passing data to renderChart...");
+  console.log("Passing demo data to renderChart...");
   renderChart(demoData, progressData);
 }
 
@@ -164,12 +163,15 @@ function setupWeightLogging() {
     console.log("User logged weight:", { date: dateInput, weight: parseFloat(weightInput) });
 
     const showDemoData = document.getElementById("toggle-demo-data").checked;
-    renderChart(showDemoData ? demoData : [], progressData); // Update chart based on toggle
+    renderChart(showDemoData ? demoData : [], progressData);
     updateSummary();
     loadRecentWeighins();
   });
 }
 
+/* ================================
+    Summary Update
+================================ */
 function updateSummary() {
   console.log("Updating weight summary...");
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
@@ -193,6 +195,9 @@ function updateSummary() {
   console.log("Summary updated:", { average, max, min });
 }
 
+/* ================================
+    Recent Weigh-Ins
+================================ */
 function loadRecentWeighins() {
   console.log("Loading recent weigh-ins...");
   const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
@@ -223,9 +228,7 @@ async function waitForFilerobot() {
 }
 
 function setupPhotoUpload() {
-  console.log("Setting up photo upload functionality...");
   const photoForm = document.getElementById("photo-form");
-
   photoForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
@@ -249,7 +252,6 @@ function setupPhotoUpload() {
 }
 
 function setupPhotoEditor() {
-  console.log("Setting up photo editor...");
   const photoEditor = window.FilerobotImageEditor.create('#image-editor-container', {
     tools: ['adjust', 'filters', 'crop', 'text', 'export'],
   });
