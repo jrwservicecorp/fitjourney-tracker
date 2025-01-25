@@ -1,4 +1,4 @@
-const appVersion = "v4.7";
+const appVersion = "v4.8";
 
 let chartInstance = null;
 let photoPage = 0;
@@ -16,7 +16,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   setupWeightLogging();
   setupPhotoUpload();
-  setupPhotoEditor(); // Ensure Filerobot is properly loaded
+  waitForFilerobot().then(setupPhotoEditor);
   loadChartWithDemoData(); // Load demo data on page load
   updateSummary();
   loadPhotos();
@@ -92,7 +92,7 @@ function renderChart(demoData = [], userData = []) {
       labels,
       datasets: [
         {
-          label: "Demo Data",
+          label: "Demo Data (Blue)",
           data: demoWeights,
           borderColor: "#3498db",
           backgroundColor: "rgba(52, 152, 219, 0.2)",
@@ -100,7 +100,7 @@ function renderChart(demoData = [], userData = []) {
           pointRadius: 4,
         },
         {
-          label: "User Data",
+          label: "User Data (Pink)",
           data: userWeights,
           borderColor: "#e91e63",
           backgroundColor: "rgba(233, 30, 99, 0.2)",
@@ -171,14 +171,21 @@ function loadRecentWeighins() {
 }
 
 /* ================================
-    Photo Editor
+    Filerobot Initialization
 ================================ */
-function setupPhotoEditor() {
-  if (!window.FilerobotImageEditor) {
-    console.error("Filerobot Image Editor is not loaded. Skipping setup.");
-    return;
-  }
+async function waitForFilerobot() {
+  return new Promise((resolve) => {
+    const interval = setInterval(() => {
+      if (window.FilerobotImageEditor) {
+        clearInterval(interval);
+        console.log("Filerobot Image Editor loaded successfully.");
+        resolve();
+      }
+    }, 100);
+  });
+}
 
+function setupPhotoEditor() {
   const photoEditor = window.FilerobotImageEditor.create('#image-editor-container', {
     tools: ['adjust', 'filters', 'crop', 'text', 'export'],
     cropPresets: [
