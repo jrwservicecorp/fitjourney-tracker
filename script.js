@@ -1,4 +1,4 @@
-const appVersion = "v7.28-beta";
+const appVersion = "v7.29-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -15,7 +15,7 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("Document fully loaded. Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
-  // Ensure all modules are initialized
+  // Initialize modules
   setupChart();
   setupWeightLogging();
   setupPhotoUpload();
@@ -135,6 +135,43 @@ function setupWeightLogging() {
 }
 
 /* ================================
+    Weight Summary Update
+================================ */
+function updateSummary(progressData) {
+  const summaryContainer = document.getElementById("weight-summary");
+
+  if (!progressData.length) {
+    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
+    return;
+  }
+
+  const weights = progressData.map((entry) => entry.weight);
+  const averageWeight = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
+  const maxWeight = Math.max(...weights);
+  const minWeight = Math.min(...weights);
+
+  summaryContainer.innerHTML = `
+    <p><strong>Average Weight:</strong> ${averageWeight} lbs</p>
+    <p><strong>Highest Weight:</strong> ${maxWeight} lbs</p>
+    <p><strong>Lowest Weight:</strong> ${minWeight} lbs</p>
+  `;
+}
+
+function updateRecentWeighIns(progressData) {
+  const recentContainer = document.getElementById("recent-weighins");
+
+  if (!progressData.length) {
+    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
+    return;
+  }
+
+  const recentWeighIns = progressData.slice(-4).reverse();
+  recentContainer.innerHTML = recentWeighIns
+    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
+    .join("");
+}
+
+/* ================================
     Photo Upload
 ================================ */
 function setupPhotoUpload() {
@@ -200,54 +237,4 @@ function compressImage(file, callback) {
   };
 
   reader.readAsDataURL(file);
-}
-
-/* ================================
-    Photo Gallery
-================================ */
-function loadPhotos() {
-  const gallery = document.getElementById("photo-gallery");
-  if (!gallery) {
-    console.error("Photo gallery element not found!");
-    return;
-  }
-
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  gallery.innerHTML = "";
-
-  if (!photos.length) {
-    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
-    return;
-  }
-
-  gallery.innerHTML = photos
-    .map(
-      (photo, index) => `
-      <div class="photo-item">
-        <img src="${photo.src}" alt="Progress Photo">
-        <p>${photo.date}</p>
-        <button class="delete-photo-btn" data-index="${index}">Delete</button>
-      </div>
-    `
-    )
-    .join("");
-
-  document.querySelectorAll(".delete-photo-btn").forEach((btn) =>
-    btn.addEventListener("click", (e) => {
-      const index = e.target.getAttribute("data-index");
-      deletePhoto(index);
-    })
-  );
-}
-
-function deletePhoto(index) {
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  photos.splice(index, 1);
-  localStorage.setItem("photos", JSON.stringify(photos));
-  loadPhotos();
-}
-
-function clearPhotos() {
-  localStorage.removeItem("photos");
-  loadPhotos();
 }
