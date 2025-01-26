@@ -1,4 +1,4 @@
-const appVersion = "v7.33-beta";
+const appVersion = "v7.34-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -23,7 +23,6 @@ window.addEventListener("DOMContentLoaded", () => {
   setupExportOptions();
   loadPhotos();
 
-  // Event listeners for buttons
   document.getElementById("clear-photos-btn")?.addEventListener("click", clearPhotos);
 });
 
@@ -156,6 +155,20 @@ function updateSummary(progressData) {
   `;
 }
 
+function updateRecentWeighIns(progressData) {
+  const recentContainer = document.getElementById("recent-weighins");
+
+  if (!progressData.length) {
+    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
+    return;
+  }
+
+  const recentWeighIns = progressData.slice(-4).reverse();
+  recentContainer.innerHTML = recentWeighIns
+    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
+    .join("");
+}
+
 /* ================================
     Photo Upload
 ================================ */
@@ -194,44 +207,32 @@ function setupPhotoUpload() {
   });
 }
 
-/* ================================
-    Export Options
-================================ */
-function setupExportOptions() {
-  const prepareExportButton = document.getElementById("prepare-export-btn");
+function compressImage(file, callback) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.src = e.target.result;
 
-  if (!prepareExportButton) {
-    console.error("Export button not found!");
-    return;
-  }
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
 
-  prepareExportButton.addEventListener("click", () => {
-    const selectedType = document.querySelector('input[name="export-type"]:checked');
-    if (!selectedType) {
-      alert("Please select an export type.");
-      return;
-    }
+      const maxWidth = 800;
+      const scale = maxWidth / img.width;
+      canvas.width = maxWidth;
+      canvas.height = img.height * scale;
 
-    const exportType = selectedType.value;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-    switch (exportType) {
-      case "single-photo":
-        console.log("Preparing single-photo export...");
-        // Add single-photo export logic here
-        break;
+      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7); // Compress image
+      callback(compressedDataUrl);
+    };
+  };
 
-      case "photo-comparison":
-        console.log("Preparing photo comparison export...");
-        // Add photo comparison export logic here
-        break;
+  reader.onerror = () => {
+    console.error("Error reading the photo file.");
+    alert("There was an error processing your photo. Please try again.");
+  };
 
-      case "data-only":
-        console.log("Preparing data-only export...");
-        // Add data-only export logic here
-        break;
-
-      default:
-        alert("Invalid export type.");
-    }
-  });
+  reader.readAsDataURL(file);
 }
