@@ -169,23 +169,19 @@ function setupPhotoUpload() {
     return;
   }
 
+  // Use 'submit' event listener, like the weight logging form
   photoForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const fileInput = document.getElementById("photo-upload");
     const dateInput = document.getElementById("photo-date");
 
-    if (!fileInput || !dateInput) {
-      console.error("File input or date input is missing!");
-      alert("Photo upload failed. Please ensure all fields are filled.");
-      return;
-    }
-
+    // Validate inputs
     const file = fileInput.files[0];
     const date = dateInput.value;
 
     if (!file || !date) {
-      alert("Please select a photo file and enter a valid date.");
+      alert("Please complete all fields.");
       return;
     }
 
@@ -208,77 +204,3 @@ function setupPhotoUpload() {
   });
 }
 
-function compressImage(file, callback) {
-  const reader = new FileReader();
-
-  reader.onload = (e) => {
-    const img = new Image();
-    img.src = e.target.result;
-
-    img.onload = () => {
-      console.log("Image loaded for compression.");
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-
-      const maxWidth = 800;
-      const scale = maxWidth / img.width;
-      canvas.width = maxWidth;
-      canvas.height = img.height * scale;
-
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
-      console.log("Image compressed successfully.");
-      callback(compressedDataUrl);
-    };
-  };
-
-  reader.onerror = () => {
-    console.error("Error reading the image file.");
-    alert("Failed to upload the photo. Please try again.");
-  };
-
-  reader.readAsDataURL(file);
-}
-
-function loadPhotos() {
-  const gallery = document.getElementById("photo-gallery");
-  if (!gallery) {
-    console.error("Photo gallery element not found!");
-    return;
-  }
-
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-
-  if (!photos.length) {
-    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
-    return;
-  }
-
-  gallery.innerHTML = photos
-    .map(
-      (photo, index) => `
-      <div class="photo-item">
-        <img src="${photo.src}" alt="Progress Photo">
-        <p>${photo.date}</p>
-        <button class="delete-photo-btn" data-index="${index}">Delete</button>
-      </div>
-    `
-    )
-    .join("");
-
-  const deleteButtons = document.querySelectorAll(".delete-photo-btn");
-  deleteButtons.forEach((button) =>
-    button.addEventListener("click", (e) => {
-      const index = e.target.getAttribute("data-index");
-      deletePhoto(index);
-    })
-  );
-}
-
-function deletePhoto(index) {
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  photos.splice(index, 1);
-  localStorage.setItem("photos", JSON.stringify(photos));
-  loadPhotos();
-}
