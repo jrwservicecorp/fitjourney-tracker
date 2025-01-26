@@ -1,4 +1,4 @@
-const appVersion = "v7.29-beta";
+const appVersion = "v7.30-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -134,9 +134,6 @@ function setupWeightLogging() {
   });
 }
 
-/* ================================
-    Weight Summary Update
-================================ */
 function updateSummary(progressData) {
   const summaryContainer = document.getElementById("weight-summary");
 
@@ -237,4 +234,57 @@ function compressImage(file, callback) {
   };
 
   reader.readAsDataURL(file);
+}
+
+/* ================================
+    Photo Gallery
+================================ */
+function loadPhotos() {
+  const gallery = document.getElementById("photo-gallery");
+  if (!gallery) {
+    console.error("Photo gallery element not found!");
+    return;
+  }
+
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+
+  gallery.innerHTML = "";
+
+  if (!photos.length) {
+    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
+    return;
+  }
+
+  gallery.innerHTML = photos
+    .map(
+      (photo, index) => `
+      <div class="photo-item">
+        <img src="${photo.src}" alt="Progress Photo">
+        <p>${photo.date}</p>
+        <button class="delete-photo-btn" data-index="${index}">Delete</button>
+      </div>
+    `
+    )
+    .join("");
+
+  document.querySelectorAll(".delete-photo-btn").forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      const index = e.target.getAttribute("data-index");
+      deletePhoto(index);
+    })
+  );
+
+  console.log("Photo gallery updated successfully.");
+}
+
+function deletePhoto(index) {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  photos.splice(index, 1);
+  localStorage.setItem("photos", JSON.stringify(photos));
+  loadPhotos();
+}
+
+function clearPhotos() {
+  localStorage.removeItem("photos");
+  loadPhotos();
 }
