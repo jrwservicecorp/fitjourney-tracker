@@ -1,13 +1,7 @@
-const appVersion = "v7.12";
+const appVersion = "v7.13";
 
+// Global variables
 let chartInstance = null;
-
-// Demo Data
-const demoData = [
-  { date: "2023-12-01", weight: 200 },
-  { date: "2023-12-02", weight: 198 },
-  { date: "2023-12-03", weight: 195 },
-];
 
 window.addEventListener("DOMContentLoaded", () => {
   console.log("Document fully loaded. Initializing FitJourney Tracker...");
@@ -39,6 +33,7 @@ function setupChart() {
 
 function ensureCanvasReady(callback) {
   const canvas = document.getElementById("weight-chart");
+
   if (!canvas) {
     console.error("Chart canvas element not found!");
     return;
@@ -204,51 +199,41 @@ function setupPhotoUpload() {
 
 function loadPhotos() {
   const gallery = document.getElementById("photo-gallery");
+  const photoSelect1 = document.getElementById("photo-select-1");
+  const photoSelect2 = document.getElementById("photo-select-2");
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
 
   gallery.innerHTML = photos
-    .map((photo) => {
-      if (!photo.src) return "";
-      return `
-        <div class="photo-item">
-          <img src="${photo.src}" alt="Progress Photo">
-          <p>${photo.date}</p>
-        </div>
-      `;
-    })
+    .map((photo) => `
+      <div class="photo-item">
+        <img src="${photo.src}" alt="Progress Photo">
+        <p>${photo.date}</p>
+      </div>
+    `)
     .join("");
+
+  photoSelect1.innerHTML = photos.map((photo) => `<option value="${photo.src}">${photo.date}</option>`).join("");
+  photoSelect2.innerHTML = photoSelect1.innerHTML;
 }
 
 /* ================================
     Photo Comparison
 ================================ */
 function setupPhotoComparison() {
-  const photo1 = document.getElementById("photo-select-1");
-  const photo2 = document.getElementById("photo-select-2");
+  const compareButton = document.getElementById("compare-photos-btn");
 
-  if (!photo1 || !photo2) {
-    console.warn("Photo comparison select elements not found. Skipping setup.");
-    return;
-  }
+  compareButton.addEventListener("click", () => {
+    const photo1 = document.getElementById("photo-select-1").value;
+    const photo2 = document.getElementById("photo-select-2").value;
 
-  document.getElementById("compare-photos-btn").addEventListener("click", () => {
-    const photo1Value = photo1.value;
-    const photo2Value = photo2.value;
-
-    if (!photo1Value || !photo2Value) {
+    if (!photo1 || !photo2) {
       alert("Please select two photos for comparison.");
       return;
     }
 
     document.getElementById("side-by-side-comparison").innerHTML = `
-      <div>
-        <h4>Photo 1</h4>
-        <img src="${photo1Value}" alt="Photo 1">
-      </div>
-      <div>
-        <h4>Photo 2</h4>
-        <img src="${photo2Value}" alt="Photo 2">
-      </div>
+      <img src="${photo1}" alt="Before">
+      <img src="${photo2}" alt="After">
     `;
   });
 }
@@ -257,29 +242,31 @@ function setupPhotoComparison() {
     Export Options
 ================================ */
 function setupExportOptions() {
-  const exportPhotoBtn = document.getElementById("export-photo-with-data");
-  const exportDataBtn = document.getElementById("export-data-only");
+  const exportPhotoButton = document.getElementById("export-photo-btn");
+  const exportComparisonButton = document.getElementById("export-comparison-btn");
 
-  if (exportPhotoBtn) {
-    exportPhotoBtn.addEventListener("click", () => {
-      alert("Photo export functionality coming soon!");
-    });
-  }
+  exportPhotoButton.addEventListener("click", () => {
+    const photo = document.getElementById("photo-select-1").value;
 
-  if (exportDataBtn) {
-    exportDataBtn.addEventListener("click", () => {
-      const overlayData = {
-        weight: "200 lbs",
-        milestone: "10 lbs lost",
-        progress: "50%",
-      };
-      const blob = new Blob([JSON.stringify(overlayData)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
+    if (!photo) {
+      alert("Please select a photo to export.");
+      return;
+    }
 
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "progress-data.json";
-      link.click();
-    });
-  }
+    const link = document.createElement("a");
+    link.href = photo;
+    link.download = "photo-export.jpg";
+    link.click();
+  });
+
+  exportComparisonButton.addEventListener("click", () => {
+    const comparison = document.getElementById("side-by-side-comparison");
+
+    if (!comparison.innerHTML) {
+      alert("Please compare two photos before exporting.");
+      return;
+    }
+
+    alert("Exporting comparison feature coming soon!");
+  });
 }
