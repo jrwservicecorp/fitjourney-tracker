@@ -1,4 +1,4 @@
-const appVersion = "v7.13";
+const appVersion = "v7.14";
 
 // Global Variables
 let chartInstance = null;
@@ -15,13 +15,14 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("Document fully loaded. Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
-  // Initialize all app features
   setupChart();
   setupWeightLogging();
   setupPhotoUpload();
   setupPhotoComparison();
   setupExportOptions();
   loadPhotos();
+
+  document.getElementById("clear-photos-btn").addEventListener("click", clearPhotos);
 });
 
 /* ================================
@@ -29,27 +30,20 @@ window.addEventListener("DOMContentLoaded", () => {
 ================================ */
 function setupChart() {
   ensureCanvasReady(() => {
-    console.log("Rendering chart with demo data on page load...");
     const storedData = JSON.parse(localStorage.getItem("progressData")) || [];
-    renderChart(demoData, storedData, true); // Load demo + user data
+    renderChart(demoData, storedData, true);
   });
 
-  // Event Listener: Toggle demo data
   document.getElementById("toggle-demo-data").addEventListener("change", () => {
     const showDemo = document.getElementById("toggle-demo-data").checked;
     const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    renderChart(demoData, progressData, showDemo); // Toggle demo data
+    renderChart(demoData, progressData, showDemo);
   });
 }
 
-// Ensures Chart Canvas is Ready Before Rendering
 function ensureCanvasReady(callback) {
   const canvas = document.getElementById("weight-chart");
-
-  if (!canvas) {
-    console.error("Chart canvas element not found!");
-    return;
-  }
+  if (!canvas) return;
 
   const interval = setInterval(() => {
     if (canvas.getContext("2d")) {
@@ -59,34 +53,26 @@ function ensureCanvasReady(callback) {
   }, 50);
 }
 
-// Renders the Chart with Demo and/or User Data
 function renderChart(demoData, userData, showDemo) {
   const ctx = document.getElementById("weight-chart").getContext("2d");
+  if (chartInstance) chartInstance.destroy();
 
-  // Destroy existing chart instance (if any) before re-rendering
-  if (chartInstance) {
-    chartInstance.destroy();
-  }
-
-  // Prepare datasets
   const datasets = [];
   if (showDemo) {
     datasets.push({
-      label: "Demo Data (Pink)",
+      label: "Demo Data",
       data: demoData.map((d) => d.weight),
       borderColor: "#e91e63",
       backgroundColor: "rgba(233, 30, 99, 0.2)",
     });
   }
-
   datasets.push({
-    label: "User Data (Blue)",
+    label: "User Data",
     data: userData.map((u) => u.weight),
     borderColor: "#3498db",
     backgroundColor: "rgba(52, 152, 219, 0.2)",
   });
 
-  // Create chart instance
   chartInstance = new Chart(ctx, {
     type: "line",
     data: {
@@ -109,13 +95,8 @@ function renderChart(demoData, userData, showDemo) {
 ================================ */
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
+  if (!weightForm) return;
 
-  if (!weightForm) {
-    console.error("Weight logging form not found!");
-    return;
-  }
-
-  // Event Listener: Weight Form Submit
   weightForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
@@ -127,24 +108,20 @@ function setupWeightLogging() {
       return;
     }
 
-    // Save user progress data
     const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
     progressData.push({ weight, date });
     localStorage.setItem("progressData", JSON.stringify(progressData));
 
-    // Update chart, summary, and recent weigh-ins
     const showDemo = document.getElementById("toggle-demo-data").checked;
     renderChart(demoData, progressData, showDemo);
     updateSummary(progressData);
     updateRecentWeighIns(progressData);
 
-    // Clear form fields
     document.getElementById("weight-input").value = "";
     document.getElementById("date-input").value = "";
   });
 }
 
-// Updates Summary Statistics for Logged Weights
 function updateSummary(progressData) {
   const summaryContainer = document.getElementById("weight-summary");
 
@@ -165,7 +142,6 @@ function updateSummary(progressData) {
   `;
 }
 
-// Displays Recent Weight Entries
 function updateRecentWeighIns(progressData) {
   const recentContainer = document.getElementById("recent-weighins");
 
@@ -185,13 +161,8 @@ function updateRecentWeighIns(progressData) {
 ================================ */
 function setupPhotoUpload() {
   const photoForm = document.getElementById("photo-upload-form");
+  if (!photoForm) return;
 
-  if (!photoForm) {
-    console.error("Photo upload form not found!");
-    return;
-  }
-
-  // Event Listener: Photo Upload Form Submit
   photoForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
@@ -206,44 +177,82 @@ function setupPhotoUpload() {
       return;
     }
 
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
+    compressImage(file, (compressedDataUrl) => {
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
-      photos.push({ date, src: e.target.result });
+      photos.push({ date, src: compressedDataUrl });
+
       try {
         localStorage.setItem("photos", JSON.stringify(photos));
         loadPhotos();
       } catch (err) {
         console.error("QuotaExceededError: Cannot save photo to localStorage.", err);
-        alert("Storage limit exceeded. Try removing older photos.");
+        alert(
+          "Storage limit exceeded. Please clear some photos using the 'Clear Photos' button and try again."
+        );
       }
-    };
-
-    reader.onerror = () => {
-      alert("Error uploading photo.");
-    };
-
-    reader.readAsDataURL(file);
+    });
   });
 }
 
-// Loads Photos into the Gallery
+function compressImage(file, callback) {
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    const img = new Image();
+    img.src = e.target.result;
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const maxWidth = 800; // Maximum width for the compressed image
+      const scale = maxWidth / img.width;
+      canvas.width = maxWidth;
+      canvas.height = img.height * scale;
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7); // 70% quality
+      callback(compressedDataUrl);
+    };
+  };
+
+  reader.readAsDataURL(file);
+}
+
 function loadPhotos() {
   const gallery = document.getElementById("photo-gallery");
   const photoSelect1 = document.getElementById("photo-select-1");
   const photoSelect2 = document.getElementById("photo-select-2");
+
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
 
+  if (!photos.length) {
+    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
+    photoSelect1.innerHTML = "";
+    photoSelect2.innerHTML = "";
+    return;
+  }
+
   gallery.innerHTML = photos
-    .map((photo) => `
+    .map(
+      (photo, index) => `
       <div class="photo-item">
         <img src="${photo.src}" alt="Progress Photo">
         <p>${photo.date}</p>
+        <button class="delete-photo-btn" data-index="${index}">Delete</button>
       </div>
-    `)
+    `
+    )
     .join("");
 
   photoSelect1.innerHTML = photos.map((photo) => `<option value="${photo.src}">${photo.date}</option>`).join("");
   photoSelect2.innerHTML = photoSelect1.innerHTML;
+}
+
+function clearPhotos() {
+  if (confirm("Are you sure you want to clear all photos?")) {
+    localStorage.removeItem("photos");
+    loadPhotos();
+  }
 }
