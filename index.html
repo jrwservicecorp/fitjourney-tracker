@@ -69,27 +69,12 @@
         <h3>Upload Progress Photo</h3>
         <form id="photo-upload-form">
           <label for="photo-upload">Select Photo:</label>
-          <input id="photo-upload" type="file" accept="image/*">
+          <input id="photo-upload" type="file" accept="image/*" required>
           <label for="photo-date">Photo Date:</label>
-          <input id="photo-date" type="date">
+          <input id="photo-date" type="date" required>
           <button id="upload-photo-btn" type="submit">Upload Photo</button>
         </form>
       </div>
-    </div>
-
-    <!-- Photo Comparison -->
-    <div class="card">
-      <h3>Photo Comparison</h3>
-      <div>
-        <label for="photo-select-1">Select Photo 1:</label>
-        <select id="photo-select-1" class="photo-select"></select>
-      </div>
-      <div>
-        <label for="photo-select-2">Select Photo 2:</label>
-        <select id="photo-select-2" class="photo-select"></select>
-      </div>
-      <button id="compare-photos-btn">Compare Photos</button>
-      <div id="side-by-side-comparison" class="comparison-display"></div>
     </div>
 
     <!-- Photo Gallery -->
@@ -98,7 +83,6 @@
       <div id="photo-gallery" class="gallery">
         <p class="placeholder">No photos uploaded yet.</p>
       </div>
-      <button id="show-more-photos-btn">Show More</button>
     </div>
   </main>
 </body>
