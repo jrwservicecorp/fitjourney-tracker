@@ -1,4 +1,4 @@
-const appVersion = "v7.31-beta";
+const appVersion = "v7.32-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -250,6 +250,18 @@ function loadPhotos() {
   console.log("Photo gallery and comparison dropdowns updated successfully.");
 }
 
+function deletePhoto(index) {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  photos.splice(index, 1);
+  localStorage.setItem("photos", JSON.stringify(photos));
+  loadPhotos();
+}
+
+function clearPhotos() {
+  localStorage.removeItem("photos");
+  loadPhotos();
+}
+
 /* ================================
     Photo Comparison
 ================================ */
@@ -270,6 +282,11 @@ function setupPhotoComparison() {
     }
 
     const comparisonContainer = document.getElementById("comparison-container");
+    if (!comparisonContainer) {
+      console.error("Comparison container not found!");
+      return;
+    }
+
     comparisonContainer.innerHTML = `
       <div>
         <h4>Photo 1</h4>
