@@ -1,4 +1,4 @@
-const appVersion = "v7.25-fix";
+const appVersion = "v7.25-fix2";
 
 // Global Variables
 let chartInstance = null;
@@ -92,6 +92,72 @@ function renderChart(demoData, userData, showDemo) {
 }
 
 /* ================================
+    Weight Logging
+================================ */
+function setupWeightLogging() {
+  const weightForm = document.getElementById("weight-form");
+  if (!weightForm) return;
+
+  weightForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const weight = parseFloat(document.getElementById("weight-input").value);
+    const date = document.getElementById("date-input").value;
+
+    if (!weight || !date) {
+      alert("Please enter valid weight and date.");
+      return;
+    }
+
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    progressData.push({ weight, date });
+    localStorage.setItem("progressData", JSON.stringify(progressData));
+
+    const showDemo = document.getElementById("toggle-demo-data").checked;
+    renderChart(demoData, progressData, showDemo);
+    updateSummary(progressData);
+    updateRecentWeighIns(progressData);
+
+    document.getElementById("weight-input").value = "";
+    document.getElementById("date-input").value = "";
+  });
+}
+
+function updateSummary(progressData) {
+  const summaryContainer = document.getElementById("weight-summary");
+
+  if (!progressData.length) {
+    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
+    return;
+  }
+
+  const weights = progressData.map((entry) => entry.weight);
+  const averageWeight = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
+  const maxWeight = Math.max(...weights);
+  const minWeight = Math.min(...weights);
+
+  summaryContainer.innerHTML = `
+    <p><strong>Average Weight:</strong> ${averageWeight} lbs</p>
+    <p><strong>Highest Weight:</strong> ${maxWeight} lbs</p>
+    <p><strong>Lowest Weight:</strong> ${minWeight} lbs</p>
+  `;
+}
+
+function updateRecentWeighIns(progressData) {
+  const recentContainer = document.getElementById("recent-weighins");
+
+  if (!progressData.length) {
+    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
+    return;
+  }
+
+  const recentWeighIns = progressData.slice(-4).reverse();
+  recentContainer.innerHTML = recentWeighIns
+    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
+    .join("");
+}
+
+/* ================================
     Photo Upload
 ================================ */
 function setupPhotoUpload() {
@@ -115,7 +181,6 @@ function setupPhotoUpload() {
       photos.push({ src: reader.result, date: dateInput.value });
       localStorage.setItem("photos", JSON.stringify(photos));
       loadPhotos();
-      updatePhotoComparisonDropdowns(); // Refresh dropdown options
     };
 
     reader.readAsDataURL(fileInput.files[0]);
@@ -159,49 +224,9 @@ function deletePhoto(index) {
   photos.splice(index, 1);
   localStorage.setItem("photos", JSON.stringify(photos));
   loadPhotos();
-  updatePhotoComparisonDropdowns(); // Refresh dropdown options
 }
 
 function clearPhotos() {
   localStorage.removeItem("photos");
   loadPhotos();
-  updatePhotoComparisonDropdowns(); // Refresh dropdown options
-}
-
-/* ================================
-    Photo Comparison
-================================ */
-function setupPhotoComparison() {
-  updatePhotoComparisonDropdowns();
-
-  const compareButton = document.getElementById("compare-photos-btn");
-  if (!compareButton) return;
-
-  compareButton.addEventListener("click", () => {
-    const photo1Select = document.getElementById("photo-select-1").value;
-    const photo2Select = document.getElementById("photo-select-2").value;
-
-    if (!photo1Select || !photo2Select) {
-      alert("Please select two photos for comparison.");
-      return;
-    }
-
-    console.log(`Comparing photos: ${photo1Select} vs ${photo2Select}`);
-    // Additional logic for displaying the comparison can go here.
-  });
-}
-
-function updatePhotoComparisonDropdowns() {
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  const dropdowns = [
-    document.getElementById("photo-select-1"),
-    document.getElementById("photo-select-2"),
-  ];
-
-  dropdowns.forEach((dropdown) => {
-    if (!dropdown) return;
-    dropdown.innerHTML = photos
-      .map((photo, index) => `<option value="${photo.src}">${photo.date}</option>`)
-      .join("");
-  });
 }
