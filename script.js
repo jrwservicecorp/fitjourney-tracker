@@ -1,4 +1,4 @@
-const appVersion = "v7.37-beta";
+const appVersion = "v7.38-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -20,7 +20,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupWeightLogging();
   setupPhotoUpload();
   setupPhotoComparison();
-  setupExportOptions();
+  setupSinglePhotoExport();
   loadPhotos();
 
   document.getElementById("clear-photos-btn")?.addEventListener("click", clearPhotos);
@@ -301,48 +301,4 @@ function setupPhotoComparison() {
       return;
     }
 
-    // Clear the previous comparison
-    comparisonContainer.innerHTML = "";
-
-    // Render the selected photos side by side
-    comparisonContainer.innerHTML = `
-      <div style="display: flex; justify-content: space-between;">
-        <div>
-          <h4>Photo 1</h4>
-          <img src="${photo1}" alt="Photo 1" style="max-width: 45%;">
-        </div>
-        <div>
-          <h4>Photo 2</h4>
-          <img src="${photo2}" alt="Photo 2" style="max-width: 45%;">
-        </div>
-      </div>
-    `;
-
-    console.log("Photo comparison rendered successfully.");
-  });
-}
-
-/* ================================
-    Clear Photos
-================================ */
-function clearPhotos() {
-  localStorage.removeItem("photos");
-  loadPhotos();
-  console.log("All photos cleared from localStorage.");
-}
-
-/* ================================
-    Export Options
-================================ */
-function setupExportOptions() {
-  const prepareExportButton = document.getElementById("prepare-export-btn");
-
-  if (!prepareExportButton) {
-    console.error("Export button not found!");
-    return;
-  }
-
-  prepareExportButton.addEventListener("click", () => {
-    alert("Export feature coming soon!");
-  });
-}
+    comparisonContainer.innerHTML
