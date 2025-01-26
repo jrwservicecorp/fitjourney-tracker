@@ -1,4 +1,4 @@
-const appVersion = "v7.15";
+const appVersion = "v7.15b";
 
 // Global Variables
 let chartInstance = null;
@@ -341,4 +341,16 @@ function preparePhotoComparisonExport() {
   // Existing photo comparison export logic
 }
 
-function prepare
+function prepareDataOnlyExport() {
+  // Generate data-only export logic
+}
+
+function downloadExport() {
+  const exportCanvas = document.getElementById("share-template");
+  html2canvas(exportCanvas).then((canvas) => {
+    const link = document.createElement("a");
+    link.download = "fitjourney-export.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
