@@ -1,4 +1,4 @@
-const appVersion = "v7.26-beta";
+const appVersion = "v7.27-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -19,8 +19,6 @@ window.addEventListener("DOMContentLoaded", () => {
   setupChart();
   setupWeightLogging();
   setupPhotoUpload();
-  // Comment out setupPhotoComparison until it's implemented
-  // setupPhotoComparison();
   loadPhotos();
 
   // Add event listeners
@@ -28,94 +26,37 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ================================
-    Chart Setup
-================================ */
-function setupChart() {
-  ensureCanvasReady(() => {
-    const storedData = JSON.parse(localStorage.getItem("progressData")) || [];
-    renderChart(demoData, storedData, true);
-  });
-
-  document.getElementById("toggle-demo-data")?.addEventListener("change", () => {
-    const showDemo = document.getElementById("toggle-demo-data").checked;
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    renderChart(demoData, progressData, showDemo);
-  });
-}
-
-function ensureCanvasReady(callback) {
-  const canvas = document.getElementById("weight-chart");
-  if (!canvas) return;
-
-  const interval = setInterval(() => {
-    if (canvas.getContext("2d")) {
-      clearInterval(interval);
-      callback();
-    }
-  }, 50);
-}
-
-function renderChart(demoData, userData, showDemo) {
-  const ctx = document.getElementById("weight-chart").getContext("2d");
-  if (chartInstance) chartInstance.destroy();
-
-  const datasets = [];
-  if (showDemo) {
-    datasets.push({
-      label: "Demo Data",
-      data: demoData.map((d) => d.weight),
-      borderColor: "#e91e63",
-      backgroundColor: "rgba(233, 30, 99, 0.2)",
-    });
-  }
-  datasets.push({
-    label: "User Data",
-    data: userData.map((u) => u.weight),
-    borderColor: "#3498db",
-    backgroundColor: "rgba(52, 152, 219, 0.2)",
-  });
-
-  chartInstance = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: [...demoData.map((d) => d.date), ...userData.map((u) => u.date)],
-      datasets,
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: true,
-        },
-      },
-    },
-  });
-}
-
-/* ================================
     Photo Upload
 ================================ */
 function setupPhotoUpload() {
   const photoForm = document.getElementById("photo-upload-form");
+
   if (!photoForm) {
     console.error("Photo upload form not found!");
     return;
   }
 
   photoForm.addEventListener("submit", (e) => {
-    e.preventDefault(); // Prevent the default form submission behavior
+    e.preventDefault(); // Prevent default form submission
     console.log("Photo upload form submitted!");
 
     const fileInput = document.getElementById("photo-upload");
     const dateInput = document.getElementById("photo-date");
 
     if (!fileInput || !dateInput) {
-      console.error("File input or date input not found!");
+      console.error("File input or date input element not found!");
       return;
     }
 
-    if (!fileInput.files[0] || !dateInput.value) {
-      alert("Please provide a photo and a date.");
+    // Validate inputs
+    if (!fileInput.files[0]) {
+      alert("Please select a photo to upload.");
+      console.log("No photo file selected.");
+      return;
+    }
+    if (!dateInput.value) {
+      alert("Please enter a date for the photo.");
+      console.log("No date entered.");
       return;
     }
 
@@ -139,6 +80,7 @@ function setupPhotoUpload() {
 
 function compressImage(file, callback) {
   const reader = new FileReader();
+
   reader.onload = (e) => {
     const img = new Image();
     img.src = e.target.result;
