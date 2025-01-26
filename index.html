@@ -6,13 +6,12 @@
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="script.js" defer></script>
 </head>
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version"></span></p>
+    <p>App Version: <span id="app-version">v7.25-beta</span></p>
   </header>
 
   <main id="main-app">
@@ -25,20 +24,6 @@
           <input type="checkbox" id="toggle-demo-data" checked>
           Show Demo Data
         </label>
-      </div>
-    </div>
-
-    <!-- Streak Awards -->
-    <div class="card">
-      <h3>Streak Awards</h3>
-      <div class="streak-options">
-        <label>
-          <input type="checkbox" id="toggle-streaks" checked>
-          Show Streaks
-        </label>
-      </div>
-      <div id="streaks-section">
-        <p>No streaks yet! Log your weight to unlock awards.</p>
       </div>
     </div>
 
@@ -66,68 +51,61 @@
           <button type="submit">Log Weight</button>
         </form>
       </div>
-      <div class="card upload-photo">
-        <h3>Upload Progress Photo</h3>
-        <form id="photo-upload-form">
-          <label for="photo-upload">Select Photo:</label>
-          <input id="photo-upload" type="file" accept="image/*">
-          <label for="photo-date">Photo Date:</label>
-          <input id="photo-date" type="date">
-          <button id="upload-photo-btn" type="button">Upload Photo</button>
-        </form>
-      </div>
     </div>
 
-    <!-- Photo Comparison -->
+    <!-- Photo Upload Section -->
+    <div class="card upload-photo">
+      <h3>Upload Progress Photo</h3>
+      <form id="photo-upload-form">
+        <label for="photo-upload">Select Photo:</label>
+        <input id="photo-upload" type="file" accept="image/*">
+        <label for="photo-date">Photo Date:</label>
+        <input id="photo-date" type="date">
+        <button id="upload-photo-btn" type="submit">Upload Photo</button>
+      </form>
+    </div>
+
+    <!-- Photo Gallery Section -->
+    <div class="card">
+      <h3>Photo Gallery</h3>
+      <div id="photo-gallery" class="gallery">
+        <p class="placeholder">No photos uploaded yet.</p>
+      </div>
+      <button id="clear-photos-btn" class="clear-btn">Clear All Photos</button>
+    </div>
+
+    <!-- Photo Comparison Section -->
     <div class="card">
       <h3>Photo Comparison</h3>
       <div>
-        <label for="photo-select-1">Select Before Photo:</label>
+        <label for="photo-select-1">Select Photo 1:</label>
         <select id="photo-select-1" class="photo-select"></select>
       </div>
       <div>
-        <label for="photo-select-2">Select After Photo:</label>
+        <label for="photo-select-2">Select Photo 2:</label>
         <select id="photo-select-2" class="photo-select"></select>
       </div>
-      <button id="prepare-share-btn">Compare Photos</button>
-      <div id="side-by-side-comparison" class="comparison-display"></div>
+      <button id="compare-photos-btn">Compare Photos</button>
     </div>
 
     <!-- Export Options -->
-    <div id="export-options" class="card">
+    <div class="card">
       <h3>Export Options</h3>
-      <label>
-        <input type="radio" name="export-type" value="single-photo" checked>
-        Single Photo with Overlays
-      </label>
-      <label>
-        <input type="radio" name="export-type" value="photo-comparison">
-        Before/After Comparison
-      </label>
-      <label>
-        <input type="radio" name="export-type" value="data-only">
-        Data-Only Export
-      </label>
-      <div id="photo-comparison-options" class="hidden">
-        <h4>Select Photos for Comparison</h4>
-        <label for="photo-select-1">Before Photo:</label>
-        <select id="photo-select-1"></select>
-        <label for="photo-select-2">After Photo:</label>
-        <select id="photo-select-2"></select>
-      </div>
-      <div id="overlay-customization-options">
-        <h4>Overlay Customization</h4>
-        <label for="overlay-text">Add Overlay Text:</label>
-        <input id="overlay-text" type="text" placeholder="Add custom text">
+      <div>
+        <label><input type="radio" name="export-type" value="single-photo"> Single Photo</label>
+        <label><input type="radio" name="export-type" value="photo-comparison"> Photo Comparison</label>
+        <label><input type="radio" name="export-type" value="data-only"> Data Only</label>
       </div>
       <button id="prepare-export-btn">Prepare Export</button>
-      <button id="download-export-btn">Download Export</button>
+      <button id="download-export-btn" class="hidden">Download Export</button>
     </div>
 
-    <!-- Export Canvas -->
-    <div id="export-canvas-container" class="card hidden">
-      <h3>Preview Export</h3>
-      <div id="export-canvas"></div>
+    <!-- Streak Awards -->
+    <div class="card">
+      <h3>Streak Awards</h3>
+      <div id="streak-section">
+        <p class="placeholder">No streaks yet. Log your weight to unlock awards!</p>
+      </div>
     </div>
   </main>
 </body>
