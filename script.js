@@ -1,4 +1,4 @@
-const appVersion = "v7.15";
+const appVersion = "v7.15a";
 
 // Global Variables
 let chartInstance = null;
@@ -217,20 +217,25 @@ function compressImage(file, callback) {
     };
   };
 
+  reader.onerror = () => {
+    console.error("Error reading image file.");
+    alert("Failed to upload the photo. Please try again.");
+  };
+
   reader.readAsDataURL(file);
 }
 
 function loadPhotos() {
   const gallery = document.getElementById("photo-gallery");
-  const photoSelect1 = document.getElementById("photo-select-1");
-  const photoSelect2 = document.getElementById("photo-select-2");
+  if (!gallery) {
+    console.error("Photo gallery element not found!");
+    return;
+  }
 
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
 
   if (!photos.length) {
     gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
-    photoSelect1.innerHTML = "";
-    photoSelect2.innerHTML = "";
     return;
   }
 
@@ -246,9 +251,6 @@ function loadPhotos() {
     )
     .join("");
 
-  photoSelect1.innerHTML = photos.map((photo) => `<option value="${photo.src}">${photo.date}</option>`).join("");
-  photoSelect2.innerHTML = photoSelect1.innerHTML;
-
   const deleteButtons = document.querySelectorAll(".delete-photo-btn");
   deleteButtons.forEach((button) =>
     button.addEventListener("click", (e) => {
@@ -262,6 +264,11 @@ function deletePhoto(index) {
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
   photos.splice(index, 1);
   localStorage.setItem("photos", JSON.stringify(photos));
+  loadPhotos();
+}
+
+function clearPhotos() {
+  localStorage.removeItem("photos");
   loadPhotos();
 }
 
