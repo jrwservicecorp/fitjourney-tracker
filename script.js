@@ -1,4 +1,4 @@
-const appVersion = "v7.21-beta";
+const appVersion = "v7.22-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -164,24 +164,35 @@ function updateRecentWeighIns(progressData) {
 ================================ */
 function setupPhotoUpload() {
   const photoForm = document.getElementById("photo-upload-form");
+  const uploadButton = document.getElementById("upload-photo-btn");
+
   if (!photoForm) {
     console.error("Photo upload form not found!");
     return;
   }
 
-  // Use 'submit' event listener, like the weight logging form
+  console.log("Photo upload form found. Attaching event listeners...");
+
+  // Main listener: Form 'submit' event
   photoForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    console.log("Photo upload form submitted!");
 
     const fileInput = document.getElementById("photo-upload");
     const dateInput = document.getElementById("photo-date");
 
-    // Validate inputs
+    if (!fileInput || !dateInput) {
+      console.error("File input or date input is missing!");
+      alert("Photo upload failed. Please ensure all fields are filled.");
+      return;
+    }
+
     const file = fileInput.files[0];
     const date = dateInput.value;
 
     if (!file || !date) {
-      alert("Please complete all fields.");
+      console.log("Photo or date not provided.");
+      alert("Please select a photo file and enter a valid date.");
       return;
     }
 
@@ -202,6 +213,16 @@ function setupPhotoUpload() {
       }
     });
   });
+
+  // Fallback: Add 'click' event listener to the button
+  if (uploadButton) {
+    uploadButton.addEventListener("click", () => {
+      console.log("Fallback: Upload button clicked, ensure form submission works.");
+      photoForm.requestSubmit(); // Trigger the form submission
+    });
+  } else {
+    console.error("Upload photo button not found!");
+  }
 }
 
 function compressImage(file, callback) {
