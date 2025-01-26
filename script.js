@@ -1,4 +1,4 @@
-const appVersion = "v7.16-beta";
+const appVersion = "v7.20-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -15,18 +15,21 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("Document fully loaded. Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
-  setupChart();
-  setupWeightLogging();
-  setupPhotoUpload();
-  setupPhotoComparison();
-  setupExportOptions();
-  loadPhotos();
+  // Initialize modules
+  setupChart(); // M1
+  setupWeightLogging(); // M2
+  setupPhotoUpload(); // M3
+  setupPhotoComparison(); // M4
+  setupExportOptions(); // M5
+  loadPhotos(); // M6
+  setupStreakAwards(); // M7
 
+  // Add event listeners
   document.getElementById("clear-photos-btn")?.addEventListener("click", clearPhotos);
 });
 
 /* ================================
-    Chart Setup
+    M1: Chart Setup
 ================================ */
 function setupChart() {
   ensureCanvasReady(() => {
@@ -91,7 +94,7 @@ function renderChart(demoData, userData, showDemo) {
 }
 
 /* ================================
-    Weight Logging
+    M2: Weight Logging
 ================================ */
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
@@ -157,11 +160,14 @@ function updateRecentWeighIns(progressData) {
 }
 
 /* ================================
-    Photo Upload
+    M3: Photo Upload
 ================================ */
 function setupPhotoUpload() {
   const photoForm = document.getElementById("photo-upload-form");
-  if (!photoForm) return;
+  if (!photoForm) {
+    console.error("Photo upload form not found!");
+    return;
+  }
 
   photoForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -169,20 +175,28 @@ function setupPhotoUpload() {
     const fileInput = document.getElementById("photo-upload");
     const dateInput = document.getElementById("photo-date");
 
+    if (!fileInput || !dateInput) {
+      console.error("File input or date input is missing!");
+      alert("Photo upload failed. Please ensure all fields are filled.");
+      return;
+    }
+
     const file = fileInput.files[0];
     const date = dateInput.value;
 
     if (!file || !date) {
-      alert("Please complete all fields.");
+      alert("Please select a photo file and enter a valid date.");
       return;
     }
 
+    console.log("Processing photo upload...");
     compressImage(file, (compressedDataUrl) => {
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
       photos.push({ date, src: compressedDataUrl });
 
       try {
         localStorage.setItem("photos", JSON.stringify(photos));
+        console.log("Photo saved to localStorage successfully.");
         loadPhotos();
       } catch (err) {
         console.error("QuotaExceededError: Cannot save photo to localStorage.", err);
@@ -202,6 +216,7 @@ function compressImage(file, callback) {
     img.src = e.target.result;
 
     img.onload = () => {
+      console.log("Image loaded for compression.");
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
@@ -213,12 +228,13 @@ function compressImage(file, callback) {
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
       const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+      console.log("Image compressed successfully.");
       callback(compressedDataUrl);
     };
   };
 
   reader.onerror = () => {
-    console.error("Error reading image file.");
+    console.error("Error reading the image file.");
     alert("Failed to upload the photo. Please try again.");
   };
 
@@ -265,142 +281,4 @@ function deletePhoto(index) {
   photos.splice(index, 1);
   localStorage.setItem("photos", JSON.stringify(photos));
   loadPhotos();
-}
-
-function clearPhotos() {
-  localStorage.removeItem("photos");
-  loadPhotos();
-}
-
-/* ================================
-    Export Options
-================================ */
-function setupExportOptions() {
-  const prepareExportButton = document.getElementById("prepare-export-btn");
-  const downloadExportButton = document.getElementById("download-export-btn");
-
-  prepareExportButton.addEventListener("click", () => {
-    const selectedExportTypeInput = document.querySelector('input[name="export-type"]:checked');
-    if (!selectedExportTypeInput) {
-      alert("Please select an export type before proceeding.");
-      return;
-    }
-
-    const selectedExportType = selectedExportTypeInput.value;
-
-    if (selectedExportType === "single-photo") {
-      prepareSinglePhotoExport();
-    } else if (selectedExportType === "photo-comparison") {
-      preparePhotoComparisonExport();
-    } else if (selectedExportType === "data-only") {
-      prepareDataOnlyExport();
-    }
-  });
-
-  downloadExportButton.addEventListener("click", downloadExport);
-}
-
-function prepareSinglePhotoExport() {
-  const selectedPhoto = getSelectedPhoto();
-  const overlayText = document.getElementById("overlay-text").value;
-
-  if (!selectedPhoto) {
-    alert("Please select a photo to export.");
-    return;
-  }
-
-  renderExportCanvas(selectedPhoto, overlayText);
-}
-
-function preparePhotoComparisonExport() {
-  const photo1 = document.getElementById("photo-select-1").value;
-  const photo2 = document.getElementById("photo-select-2").value;
-
-  if (!photo1 || !photo2) {
-    alert("Please select two photos for comparison.");
-    return;
-  }
-
-  renderExportCanvas([photo1, photo2], "Comparison");
-}
-
-function prepareDataOnlyExport() {
-  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-  const summary = generateDataSummary(progressData);
-  renderDataExport(summary);
-}
-
-function renderExportCanvas(photoSources, overlayText) {
-  const exportCanvas = document.getElementById("export-canvas");
-  const exportContainer = document.getElementById("export-canvas-container");
-
-  exportContainer.classList.remove("hidden");
-  exportCanvas.innerHTML = "";
-
-  if (Array.isArray(photoSources)) {
-    photoSources.forEach((src, index) => {
-      const img = document.createElement("img");
-      img.src = src;
-      img.alt = `Photo ${index + 1}`;
-      exportCanvas.appendChild(img);
-    });
-  } else {
-    const img = document.createElement("img");
-    img.src = photoSources;
-    img.alt = "Export Photo";
-    exportCanvas.appendChild(img);
-
-    if (overlayText) {
-      const overlay = document.createElement("div");
-      overlay.textContent = overlayText;
-      overlay.classList.add("photo-overlay");
-      exportCanvas.appendChild(overlay);
-    }
-  }
-}
-
-function renderDataExport(summary) {
-  const exportCanvas = document.getElementById("export-canvas");
-  const exportContainer = document.getElementById("export-canvas-container");
-
-  exportContainer.classList.remove("hidden");
-  exportCanvas.innerHTML = `
-    <h3>Progress Summary</h3>
-    <p>${summary}</p>
-  `;
-}
-
-function downloadExport() {
-  const exportCanvas = document.getElementById("export-canvas-container");
-
-  if (!exportCanvas) {
-    alert("No export preview available to download.");
-    return;
-  }
-
-  html2canvas(exportCanvas).then((canvas) => {
-    const link = document.createElement("a");
-    link.download = "fitjourney-export.png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  });
-}
-
-function getSelectedPhoto() {
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  return photos.length ? photos[0].src : null;
-}
-
-function generateDataSummary(progressData) {
-  if (!progressData.length) return "No progress data available.";
-  const weights = progressData.map((entry) => entry.weight);
-  const avgWeight = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
-  const maxWeight = Math.max(...weights);
-  const minWeight = Math.min(...weights);
-
-  return `
-    Average Weight: ${avgWeight} lbs
-    Highest Weight: ${maxWeight} lbs
-    Lowest Weight: ${minWeight} lbs
-  `;
 }
