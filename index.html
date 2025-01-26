@@ -6,13 +6,13 @@
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="script.js" defer></script>
 </head>
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v7.15</span></p>
+    <p>App Version: <span id="app-version"></span></p>
   </header>
 
   <main id="main-app">
@@ -70,53 +70,65 @@
         <h3>Upload Progress Photo</h3>
         <form id="photo-upload-form">
           <label for="photo-upload">Select Photo:</label>
-          <input id="photo-upload" type="file" accept="image/*" required>
+          <input id="photo-upload" type="file" accept="image/*">
           <label for="photo-date">Photo Date:</label>
-          <input id="photo-date" type="date" required>
-          <button id="upload-photo-btn" type="submit">Upload Photo</button>
+          <input id="photo-date" type="date">
+          <button id="upload-photo-btn" type="button">Upload Photo</button>
         </form>
       </div>
     </div>
 
-    <!-- Photo Gallery -->
-    <div id="photo-gallery" class="gallery">
-      <p class="placeholder">No photos uploaded yet.</p>
-    </div>
-    <button id="clear-photos-btn">Clear All Photos</button>
-
-    <!-- Photo Comparison Section -->
-    <div id="photo-comparison-section" class="card">
+    <!-- Photo Comparison -->
+    <div class="card">
       <h3>Photo Comparison</h3>
-      <div class="comparison-container">
-        <div id="photo-comparison">
-          <div id="photo-side-by-side">
-            <img id="photo-1" src="" alt="Photo 1">
-            <img id="photo-2" src="" alt="Photo 2">
-          </div>
-          <div id="comparison-results">
-            <p><strong>Date 1:</strong> <span id="date-1">N/A</span></p>
-            <p><strong>Date 2:</strong> <span id="date-2">N/A</span></p>
-            <p><strong>Weight Difference:</strong> <span id="weight-diff">N/A</span></p>
-          </div>
-        </div>
-        <button id="prepare-share-btn">Prepare to Share</button>
+      <div>
+        <label for="photo-select-1">Select Before Photo:</label>
+        <select id="photo-select-1" class="photo-select"></select>
       </div>
+      <div>
+        <label for="photo-select-2">Select After Photo:</label>
+        <select id="photo-select-2" class="photo-select"></select>
+      </div>
+      <button id="prepare-share-btn">Compare Photos</button>
+      <div id="side-by-side-comparison" class="comparison-display"></div>
     </div>
 
-    <!-- Export Area for Sharing -->
-    <div id="share-template" class="export-template">
-      <div id="side-by-side-export">
-        <img id="export-photo-1" src="" alt="Export Photo 1">
-        <img id="export-photo-2" src="" alt="Export Photo 2">
+    <!-- Export Options -->
+    <div id="export-options" class="card">
+      <h3>Export Options</h3>
+      <label>
+        <input type="radio" name="export-type" value="single-photo" checked>
+        Single Photo with Overlays
+      </label>
+      <label>
+        <input type="radio" name="export-type" value="photo-comparison">
+        Before/After Comparison
+      </label>
+      <label>
+        <input type="radio" name="export-type" value="data-only">
+        Data-Only Export
+      </label>
+      <div id="photo-comparison-options" class="hidden">
+        <h4>Select Photos for Comparison</h4>
+        <label for="photo-select-1">Before Photo:</label>
+        <select id="photo-select-1"></select>
+        <label for="photo-select-2">After Photo:</label>
+        <select id="photo-select-2"></select>
       </div>
-      <div class="export-data-overlay">
-        <h3>Progress Details</h3>
-        <p><strong>Weight Difference:</strong> <span id="export-weight-diff">N/A</span></p>
-        <p><strong>Milestone:</strong> <span id="export-milestone">N/A</span></p>
-        <p><strong>Streak:</strong> <span id="export-streak">N/A</span></p>
+      <div id="overlay-customization-options">
+        <h4>Overlay Customization</h4>
+        <label for="overlay-text">Add Overlay Text:</label>
+        <input id="overlay-text" type="text" placeholder="Add custom text">
       </div>
+      <button id="prepare-export-btn">Prepare Export</button>
+      <button id="download-export-btn">Download Export</button>
     </div>
-    <button id="export-results-btn">Export Results</button>
+
+    <!-- Export Canvas -->
+    <div id="export-canvas-container" class="card hidden">
+      <h3>Preview Export</h3>
+      <div id="export-canvas"></div>
+    </div>
   </main>
 </body>
 </html>
