@@ -1,4 +1,4 @@
-const appVersion = "v7.15b";
+const appVersion = "v7.16-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -273,37 +273,6 @@ function clearPhotos() {
 }
 
 /* ================================
-    Photo Comparison
-================================ */
-function setupPhotoComparison() {
-  const photo1Select = document.getElementById("photo-select-1");
-  const photo2Select = document.getElementById("photo-select-2");
-  const compareButton = document.getElementById("prepare-share-btn");
-
-  compareButton.addEventListener("click", () => {
-    const photo1Src = photo1Select.value;
-    const photo2Src = photo2Select.value;
-
-    if (!photo1Src || !photo2Src) {
-      alert("Please select two photos for comparison.");
-      return;
-    }
-
-    document.getElementById("photo-1").src = photo1Src;
-    document.getElementById("photo-2").src = photo2Src;
-
-    const photos = JSON.parse(localStorage.getItem("photos")) || [];
-    const photo1 = photos.find((photo) => photo.src === photo1Src);
-    const photo2 = photos.find((photo) => photo.src === photo2Src);
-
-    const weightDiff = Math.abs(photo1.weight - photo2.weight).toFixed(1);
-    document.getElementById("date-1").textContent = photo1.date;
-    document.getElementById("date-2").textContent = photo2.date;
-    document.getElementById("weight-diff").textContent = `${weightDiff} lbs`;
-  });
-}
-
-/* ================================
     Export Options
 ================================ */
 function setupExportOptions() {
@@ -332,25 +301,106 @@ function setupExportOptions() {
 }
 
 function prepareSinglePhotoExport() {
-  const selectedPhoto = getSelectedPhoto(); // Custom logic to select a single photo
-  const overlayData = getOverlayData(); // Get user-inputted overlay data
-  renderSinglePhotoExport(selectedPhoto, overlayData);
+  const selectedPhoto = getSelectedPhoto();
+  const overlayText = document.getElementById("overlay-text").value;
+
+  if (!selectedPhoto) {
+    alert("Please select a photo to export.");
+    return;
+  }
+
+  renderExportCanvas(selectedPhoto, overlayText);
 }
 
 function preparePhotoComparisonExport() {
-  // Existing photo comparison export logic
+  const photo1 = document.getElementById("photo-select-1").value;
+  const photo2 = document.getElementById("photo-select-2").value;
+
+  if (!photo1 || !photo2) {
+    alert("Please select two photos for comparison.");
+    return;
+  }
+
+  renderExportCanvas([photo1, photo2], "Comparison");
 }
 
 function prepareDataOnlyExport() {
-  // Generate data-only export logic
+  const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+  const summary = generateDataSummary(progressData);
+  renderDataExport(summary);
+}
+
+function renderExportCanvas(photoSources, overlayText) {
+  const exportCanvas = document.getElementById("export-canvas");
+  const exportContainer = document.getElementById("export-canvas-container");
+
+  exportContainer.classList.remove("hidden");
+  exportCanvas.innerHTML = "";
+
+  if (Array.isArray(photoSources)) {
+    photoSources.forEach((src, index) => {
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = `Photo ${index + 1}`;
+      exportCanvas.appendChild(img);
+    });
+  } else {
+    const img = document.createElement("img");
+    img.src = photoSources;
+    img.alt = "Export Photo";
+    exportCanvas.appendChild(img);
+
+    if (overlayText) {
+      const overlay = document.createElement("div");
+      overlay.textContent = overlayText;
+      overlay.classList.add("photo-overlay");
+      exportCanvas.appendChild(overlay);
+    }
+  }
+}
+
+function renderDataExport(summary) {
+  const exportCanvas = document.getElementById("export-canvas");
+  const exportContainer = document.getElementById("export-canvas-container");
+
+  exportContainer.classList.remove("hidden");
+  exportCanvas.innerHTML = `
+    <h3>Progress Summary</h3>
+    <p>${summary}</p>
+  `;
 }
 
 function downloadExport() {
-  const exportCanvas = document.getElementById("share-template");
+  const exportCanvas = document.getElementById("export-canvas-container");
+
+  if (!exportCanvas) {
+    alert("No export preview available to download.");
+    return;
+  }
+
   html2canvas(exportCanvas).then((canvas) => {
     const link = document.createElement("a");
     link.download = "fitjourney-export.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
   });
+}
+
+function getSelectedPhoto() {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  return photos.length ? photos[0].src : null;
+}
+
+function generateDataSummary(progressData) {
+  if (!progressData.length) return "No progress data available.";
+  const weights = progressData.map((entry) => entry.weight);
+  const avgWeight = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
+  const maxWeight = Math.max(...weights);
+  const minWeight = Math.min(...weights);
+
+  return `
+    Average Weight: ${avgWeight} lbs
+    Highest Weight: ${maxWeight} lbs
+    Lowest Weight: ${minWeight} lbs
+  `;
 }
