@@ -301,4 +301,44 @@ function setupPhotoComparison() {
       return;
     }
 
-    comparisonContainer.innerHTML
+    comparisonContainer.innerHTML = `
+      <div class="comparison-item">
+        <h4>Photo 1</h4>
+        <img src="${photo1}" alt="Photo 1">
+      </div>
+      <div class="comparison-item">
+        <h4>Photo 2</h4>
+        <img src="${photo2}" alt="Photo 2">
+      </div>
+    `;
+
+    console.log("Photo comparison rendered successfully.");
+  });
+}
+
+/* ================================
+    Export Options
+================================ */
+function setupSinglePhotoExport() {
+  const prepareExportButton = document.getElementById("prepare-export-btn");
+  if (!prepareExportButton) {
+    console.error("Prepare export button not found!");
+    return;
+  }
+
+  prepareExportButton.addEventListener("click", () => {
+    const selectedPhoto = document.getElementById("photo-select-1").value;
+
+    if (!selectedPhoto) {
+      alert("Please select a photo to export.");
+      return;
+    }
+
+    const overlayText = "My Progress with FitJourney Tracker";
+    renderExportCanvas(selectedPhoto, overlayText);
+  });
+}
+
+function renderExportCanvas(photoSource, overlayText) {
+  const exportCanvasContainer = document.getElementById("export-canvas-container");
+  const exportCanvas = document.getElementById("export-canvas");
