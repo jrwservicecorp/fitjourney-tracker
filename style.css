@@ -40,10 +40,6 @@ button:hover {
   background-color: #0056b3;
 }
 
-.chart-options {
-  margin-top: 1em;
-}
-
 .gallery {
   display: flex;
   gap: 1em;
@@ -53,6 +49,12 @@ button:hover {
 .photo-item img {
   max-width: 150px;
   border-radius: 8px;
+}
+
+.comparison-display img {
+  max-width: 300px;
+  border: 2px solid #007bff;
+  margin: 10px;
 }
 
 .placeholder {
