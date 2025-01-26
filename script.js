@@ -1,4 +1,4 @@
-const appVersion = "v7.10c";
+const appVersion = "v7.10";
 
 let chartInstance = null;
 
@@ -10,14 +10,13 @@ const demoData = [
 ];
 
 window.addEventListener("DOMContentLoaded", () => {
-  console.log("Initializing FitJourney Tracker...");
+  console.log("Document fully loaded. Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
   setupChart();
   setupWeightLogging();
-  setupStreaks();
-  setupPhotoComparison();
   setupPhotoUpload();
+  setupPhotoComparison();
   setupExportOptions();
   loadPhotos();
 });
@@ -93,6 +92,11 @@ function renderChart(demoData, userData, showDemo) {
 function setupWeightLogging() {
   const weightForm = document.getElementById("weight-form");
 
+  if (!weightForm) {
+    console.error("Weight logging form not found!");
+    return;
+  }
+
   weightForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
@@ -156,23 +160,21 @@ function updateRecentWeighIns(progressData) {
     Photo Upload
 ================================ */
 function setupPhotoUpload() {
-  const uploadButton = document.getElementById("upload-photo-btn");
+  const photoForm = document.getElementById("photo-upload-form");
 
-  if (!uploadButton) {
-    console.error("Upload button not found!");
+  if (!photoForm) {
+    console.error("Photo upload form not found!");
     return;
   }
 
-  console.log("Upload button found. Attaching event listener...");
-
-  uploadButton.addEventListener("click", () => {
-    console.log("Upload button clicked!");
+  photoForm.addEventListener("submit", (e) => {
+    e.preventDefault();
 
     const fileInput = document.getElementById("photo-upload");
     const dateInput = document.getElementById("photo-date");
 
     if (!fileInput || !dateInput) {
-      console.error("File input or date input not found!");
+      alert("Please fill in all fields!");
       return;
     }
 
@@ -180,31 +182,26 @@ function setupPhotoUpload() {
     const date = dateInput.value;
 
     if (!file) {
-      alert("Please select a photo file to upload.");
+      alert("Please select a photo file.");
       return;
     }
 
     if (!date) {
-      alert("Please enter a valid date.");
+      alert("Please select a valid date.");
       return;
     }
 
     const reader = new FileReader();
-
     reader.onload = (e) => {
-      console.log("File read successfully!");
-      const photoDataUrl = e.target.result;
-
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
-      photos.push({ date, src: photoDataUrl });
+      photos.push({ date, src: e.target.result });
       localStorage.setItem("photos", JSON.stringify(photos));
-
       alert("Photo uploaded successfully!");
       loadPhotos();
     };
 
     reader.onerror = (e) => {
-      console.error("Error reading file:", e);
+      console.error("File reading error:", e);
     };
 
     reader.readAsDataURL(file);
@@ -221,7 +218,14 @@ function loadPhotos() {
   }
 
   gallery.innerHTML = photos
-    .map((photo) => `<div class="photo-item"><img src="${photo.src}" alt="Progress Photo"><p>${photo.date}</p></div>`)
+    .map(
+      (photo) => `
+      <div class="photo-item">
+        <img src="${photo.src}" alt="Progress Photo">
+        <p>${photo.date}</p>
+      </div>
+    `
+    )
     .join("");
 }
 
@@ -229,11 +233,19 @@ function loadPhotos() {
     Photo Comparison
 ================================ */
 function setupPhotoComparison() {
-  document.getElementById("compare-photos-btn").addEventListener("click", () => {
-    const photo1 = document.getElementById("photo-select-1").value;
-    const photo2 = document.getElementById("photo-select-2").value;
+  const photo1 = document.getElementById("photo-select-1");
+  const photo2 = document.getElementById("photo-select-2");
 
-    if (!photo1 || !photo2) {
+  if (!photo1 || !photo2) {
+    console.error("Photo comparison select elements not found!");
+    return;
+  }
+
+  document.getElementById("compare-photos-btn").addEventListener("click", () => {
+    const photo1Value = photo1.value;
+    const photo2Value = photo2.value;
+
+    if (!photo1Value || !photo2Value) {
       alert("Please select two photos for comparison.");
       return;
     }
@@ -241,11 +253,11 @@ function setupPhotoComparison() {
     document.getElementById("side-by-side-comparison").innerHTML = `
       <div>
         <h4>Photo 1</h4>
-        <img src="${photo1}" alt="Photo 1">
+        <img src="${photo1Value}" alt="Photo 1">
       </div>
       <div>
         <h4>Photo 2</h4>
-        <img src="${photo2}" alt="Photo 2">
+        <img src="${photo2Value}" alt="Photo 2">
       </div>
     `;
   });
@@ -258,22 +270,26 @@ function setupExportOptions() {
   const exportPhotoBtn = document.getElementById("export-photo-with-data");
   const exportDataBtn = document.getElementById("export-data-only");
 
-  exportPhotoBtn.addEventListener("click", () => {
-    alert("Photo export functionality coming soon!");
-  });
+  if (exportPhotoBtn) {
+    exportPhotoBtn.addEventListener("click", () => {
+      alert("Photo export functionality coming soon!");
+    });
+  }
 
-  exportDataBtn.addEventListener("click", () => {
-    const overlayData = {
-      weight: "200 lbs",
-      milestone: "10 lbs lost",
-      progress: "50%",
-    };
-    const blob = new Blob([JSON.stringify(overlayData)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
+  if (exportDataBtn) {
+    exportDataBtn.addEventListener("click", () => {
+      const overlayData = {
+        weight: "200 lbs",
+        milestone: "10 lbs lost",
+        progress: "50%",
+      };
+      const blob = new Blob([JSON.stringify(overlayData)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "progress-data.json";
-    link.click();
-  });
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "progress-data.json";
+      link.click();
+    });
+  }
 }
