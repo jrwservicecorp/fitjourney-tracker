@@ -1,4 +1,4 @@
-const appVersion = "v7.10b";
+const appVersion = "v7.10c";
 
 let chartInstance = null;
 
