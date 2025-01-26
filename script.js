@@ -19,7 +19,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupWeightLogging();
   setupPhotoUpload();
   setupPhotoComparison();
-  setupExportTemplate();
+  setupExportOptions();
   loadPhotos();
 
   document.getElementById("clear-photos-btn")?.addEventListener("click", clearPhotos);
@@ -304,25 +304,41 @@ function setupPhotoComparison() {
 }
 
 /* ================================
-    Export Template
+    Export Options
 ================================ */
-function setupExportTemplate() {
-  const exportButton = document.getElementById("export-results-btn");
+function setupExportOptions() {
+  const prepareExportButton = document.getElementById("prepare-export-btn");
+  const downloadExportButton = document.getElementById("download-export-btn");
 
-  exportButton.addEventListener("click", () => {
-    const exportTemplate = document.getElementById("share-template");
-    const photo1Src = document.getElementById("photo-1").src;
-    const photo2Src = document.getElementById("photo-2").src;
+  prepareExportButton.addEventListener("click", () => {
+    const selectedExportTypeInput = document.querySelector('input[name="export-type"]:checked');
+    if (!selectedExportTypeInput) {
+      alert("Please select an export type before proceeding.");
+      return;
+    }
 
-    document.getElementById("export-photo-1").src = photo1Src;
-    document.getElementById("export-photo-2").src = photo2Src;
-    document.getElementById("export-weight-diff").textContent = document.getElementById("weight-diff").textContent;
+    const selectedExportType = selectedExportTypeInput.value;
 
-    html2canvas(exportTemplate).then((canvas) => {
-      const link = document.createElement("a");
-      link.download = "fitjourney-comparison.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-    });
+    if (selectedExportType === "single-photo") {
+      prepareSinglePhotoExport();
+    } else if (selectedExportType === "photo-comparison") {
+      preparePhotoComparisonExport();
+    } else if (selectedExportType === "data-only") {
+      prepareDataOnlyExport();
+    }
   });
+
+  downloadExportButton.addEventListener("click", downloadExport);
 }
+
+function prepareSinglePhotoExport() {
+  const selectedPhoto = getSelectedPhoto(); // Custom logic to select a single photo
+  const overlayData = getOverlayData(); // Get user-inputted overlay data
+  renderSinglePhotoExport(selectedPhoto, overlayData);
+}
+
+function preparePhotoComparisonExport() {
+  // Existing photo comparison export logic
+}
+
+function prepare
