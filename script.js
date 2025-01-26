@@ -1,4 +1,4 @@
-const appVersion = "v7.36-beta";
+const appVersion = "v7.37-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -301,14 +301,20 @@ function setupPhotoComparison() {
       return;
     }
 
+    // Clear the previous comparison
+    comparisonContainer.innerHTML = "";
+
+    // Render the selected photos side by side
     comparisonContainer.innerHTML = `
-      <div>
-        <h4>Photo 1</h4>
-        <img src="${photo1}" alt="Photo 1">
-      </div>
-      <div>
-        <h4>Photo 2</h4>
-        <img src="${photo2}" alt="Photo 2">
+      <div style="display: flex; justify-content: space-between;">
+        <div>
+          <h4>Photo 1</h4>
+          <img src="${photo1}" alt="Photo 1" style="max-width: 45%;">
+        </div>
+        <div>
+          <h4>Photo 2</h4>
+          <img src="${photo2}" alt="Photo 2" style="max-width: 45%;">
+        </div>
       </div>
     `;
 
