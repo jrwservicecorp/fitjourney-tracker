@@ -1,4 +1,4 @@
-const appVersion = "v7.25-fix4";
+const appVersion = "v7.25-fix5";
 
 // Global Variables
 let chartInstance = null;
@@ -96,7 +96,10 @@ function renderChart(demoData, userData, showDemo) {
 ================================ */
 function setupPhotoUpload() {
   const photoForm = document.getElementById("photo-upload-form");
-  if (!photoForm) return;
+  if (!photoForm) {
+    console.error("Photo upload form not found!");
+    return;
+  }
 
   photoForm.addEventListener("submit", (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
@@ -105,11 +108,17 @@ function setupPhotoUpload() {
     const fileInput = document.getElementById("photo-upload");
     const dateInput = document.getElementById("photo-date");
 
+    if (!fileInput || !dateInput) {
+      console.error("File input or date input not found!");
+      return;
+    }
+
     if (!fileInput.files[0] || !dateInput.value) {
       alert("Please provide a photo and a date.");
       return;
     }
 
+    console.log("Processing photo upload...");
     const reader = new FileReader();
     reader.onload = () => {
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
@@ -126,6 +135,8 @@ function setupPhotoUpload() {
 
     reader.readAsDataURL(fileInput.files[0]);
   });
+
+  console.log("Photo upload setup complete.");
 }
 
 /* ================================
@@ -133,6 +144,11 @@ function setupPhotoUpload() {
 ================================ */
 function loadPhotos() {
   const gallery = document.getElementById("photo-gallery");
+  if (!gallery) {
+    console.error("Photo gallery element not found!");
+    return;
+  }
+
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
 
   // Clear the gallery before adding new elements
@@ -161,6 +177,8 @@ function loadPhotos() {
       deletePhoto(index);
     })
   );
+
+  console.log("Photo gallery updated successfully.");
 }
 
 function deletePhoto(index) {
