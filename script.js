@@ -1,4 +1,4 @@
-const appVersion = "v7.10k";
+const appVersion = "v7.12";
 
 let chartInstance = null;
 
@@ -39,7 +39,6 @@ function setupChart() {
 
 function ensureCanvasReady(callback) {
   const canvas = document.getElementById("weight-chart");
-
   if (!canvas) {
     console.error("Chart canvas element not found!");
     return;
@@ -173,35 +172,30 @@ function setupPhotoUpload() {
     const fileInput = document.getElementById("photo-upload");
     const dateInput = document.getElementById("photo-date");
 
-    if (!fileInput || !dateInput) {
-      alert("Please fill in all fields!");
-      return;
-    }
-
     const file = fileInput.files[0];
     const date = dateInput.value;
 
-    if (!file) {
-      alert("Please select a photo file.");
-      return;
-    }
-
-    if (!date) {
-      alert("Please select a valid date.");
+    if (!file || !date) {
+      alert("Please complete all fields.");
       return;
     }
 
     const reader = new FileReader();
+
     reader.onload = (e) => {
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
       photos.push({ date, src: e.target.result });
-      localStorage.setItem("photos", JSON.stringify(photos));
-      alert("Photo uploaded successfully!");
-      loadPhotos();
+      try {
+        localStorage.setItem("photos", JSON.stringify(photos));
+        loadPhotos();
+      } catch (err) {
+        console.error("QuotaExceededError: Cannot save photo to localStorage.", err);
+        alert("Storage limit exceeded. Try removing older photos.");
+      }
     };
 
-    reader.onerror = (e) => {
-      console.error("File reading error:", e);
+    reader.onerror = () => {
+      alert("Error uploading photo.");
     };
 
     reader.readAsDataURL(file);
@@ -212,20 +206,16 @@ function loadPhotos() {
   const gallery = document.getElementById("photo-gallery");
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
 
-  if (!photos.length) {
-    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
-    return;
-  }
-
   gallery.innerHTML = photos
-    .map(
-      (photo) => `
-      <div class="photo-item">
-        <img src="${photo.src}" alt="Progress Photo">
-        <p>${photo.date}</p>
-      </div>
-    `
-    )
+    .map((photo) => {
+      if (!photo.src) return "";
+      return `
+        <div class="photo-item">
+          <img src="${photo.src}" alt="Progress Photo">
+          <p>${photo.date}</p>
+        </div>
+      `;
+    })
     .join("");
 }
 
@@ -237,7 +227,7 @@ function setupPhotoComparison() {
   const photo2 = document.getElementById("photo-select-2");
 
   if (!photo1 || !photo2) {
-    console.error("Photo comparison select elements not found!");
+    console.warn("Photo comparison select elements not found. Skipping setup.");
     return;
   }
 
