@@ -1,4 +1,4 @@
-const appVersion = "v7.20-beta";
+const appVersion = "v7.21-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -204,3 +204,77 @@ function setupPhotoUpload() {
   });
 }
 
+function compressImage(file, callback) {
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    const img = new Image();
+    img.src = e.target.result;
+
+    img.onload = () => {
+      console.log("Image loaded for compression.");
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const maxWidth = 800;
+      const scale = maxWidth / img.width;
+      canvas.width = maxWidth;
+      canvas.height = img.height * scale;
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+      console.log("Image compressed successfully.");
+      callback(compressedDataUrl);
+    };
+  };
+
+  reader.onerror = () => {
+    console.error("Error reading the image file.");
+    alert("Failed to upload the photo. Please try again.");
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function loadPhotos() {
+  const gallery = document.getElementById("photo-gallery");
+  if (!gallery) {
+    console.error("Photo gallery element not found!");
+    return;
+  }
+
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+
+  if (!photos.length) {
+    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
+    return;
+  }
+
+  gallery.innerHTML = photos
+    .map(
+      (photo, index) => `
+      <div class="photo-item">
+        <img src="${photo.src}" alt="Progress Photo">
+        <p>${photo.date}</p>
+        <button class="delete-photo-btn" data-index="${index}">Delete</button>
+      </div>
+    `
+    )
+    .join("");
+
+  const deleteButtons = document.querySelectorAll(".delete-photo-btn");
+  deleteButtons.forEach((button) =>
+    button.addEventListener("click", (e) => {
+      const index = e.target.getAttribute("data-index");
+      deletePhoto(index);
+    })
+  );
+}
+
+function deletePhoto(index) {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  photos.splice(index, 1);
+  localStorage.setItem("photos", JSON.stringify(photos));
+  loadPhotos();
+}
