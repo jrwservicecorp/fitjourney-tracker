@@ -19,7 +19,6 @@ window.addEventListener("DOMContentLoaded", () => {
   setupWeightLogging();
   setupPhotoUpload();
   setupPhotoComparison();
-  setupExportOptions();
   loadPhotos();
 
   document.getElementById("clear-photos-btn").addEventListener("click", clearPhotos);
@@ -205,14 +204,14 @@ function compressImage(file, callback) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      const maxWidth = 800; // Maximum width for the compressed image
+      const maxWidth = 800;
       const scale = maxWidth / img.width;
       canvas.width = maxWidth;
       canvas.height = img.height * scale;
 
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7); // 70% quality
+      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
       callback(compressedDataUrl);
     };
   };
@@ -248,6 +247,50 @@ function loadPhotos() {
 
   photoSelect1.innerHTML = photos.map((photo) => `<option value="${photo.src}">${photo.date}</option>`).join("");
   photoSelect2.innerHTML = photoSelect1.innerHTML;
+
+  const deleteButtons = document.querySelectorAll(".delete-photo-btn");
+  deleteButtons.forEach((button) =>
+    button.addEventListener("click", (e) => {
+      const index = e.target.getAttribute("data-index");
+      deletePhoto(index);
+    })
+  );
+}
+
+function deletePhoto(index) {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  photos.splice(index, 1);
+  localStorage.setItem("photos", JSON.stringify(photos));
+  loadPhotos();
+}
+
+/* ================================
+    Photo Comparison
+================================ */
+function setupPhotoComparison() {
+  const compareButton = document.getElementById("compare-photos-btn");
+  const sideBySideDisplay = document.getElementById("side-by-side-comparison");
+
+  compareButton.addEventListener("click", () => {
+    const photo1 = document.getElementById("photo-select-1").value;
+    const photo2 = document.getElementById("photo-select-2").value;
+
+    if (!photo1 || !photo2) {
+      alert("Please select two photos for comparison.");
+      return;
+    }
+
+    sideBySideDisplay.innerHTML = `
+      <div>
+        <img src="${photo1}" alt="Photo 1">
+        <p>Photo 1</p>
+      </div>
+      <div>
+        <img src="${photo2}" alt="Photo 2">
+        <p>Photo 2</p>
+      </div>
+    `;
+  });
 }
 
 function clearPhotos() {
