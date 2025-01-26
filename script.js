@@ -1,4 +1,4 @@
-const appVersion = "v7.34-beta";
+const appVersion = "v7.35-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -155,20 +155,6 @@ function updateSummary(progressData) {
   `;
 }
 
-function updateRecentWeighIns(progressData) {
-  const recentContainer = document.getElementById("recent-weighins");
-
-  if (!progressData.length) {
-    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
-    return;
-  }
-
-  const recentWeighIns = progressData.slice(-4).reverse();
-  recentContainer.innerHTML = recentWeighIns
-    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
-    .join("");
-}
-
 /* ================================
     Photo Upload
 ================================ */
@@ -235,4 +221,47 @@ function compressImage(file, callback) {
   };
 
   reader.readAsDataURL(file);
+}
+
+function loadPhotos() {
+  const gallery = document.getElementById("photo-gallery");
+  const photo1Select = document.getElementById("photo-select-1");
+  const photo2Select = document.getElementById("photo-select-2");
+
+  if (!gallery) {
+    console.error("Photo gallery element not found!");
+    return;
+  }
+
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+
+  gallery.innerHTML = "";
+  photo1Select.innerHTML = "<option value=''>Select Photo 1</option>";
+  photo2Select.innerHTML = "<option value=''>Select Photo 2</option>";
+
+  if (!photos.length) {
+    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
+    return;
+  }
+
+  photos.forEach((photo, index) => {
+    const option1 = document.createElement("option");
+    const option2 = document.createElement("option");
+
+    option1.value = photo.src;
+    option1.textContent = `Photo ${index + 1} - ${photo.date}`;
+    option2.value = photo.src;
+    option2.textContent = `Photo ${index + 1} - ${photo.date}`;
+
+    photo1Select.appendChild(option1);
+    photo2Select.appendChild(option2);
+
+    gallery.innerHTML += `
+      <div class="photo-item">
+        <img src="${photo.src}" alt="Progress Photo">
+        <p>${photo.date}</p>
+      </div>`;
+  });
+
+  console.log("Photo gallery and comparison dropdowns updated successfully.");
 }
