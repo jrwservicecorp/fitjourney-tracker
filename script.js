@@ -1,4 +1,4 @@
-const appVersion = "v7.25-fix3";
+const appVersion = "v7.25-fix4";
 
 // Global Variables
 let chartInstance = null;
@@ -99,7 +99,8 @@ function setupPhotoUpload() {
   if (!photoForm) return;
 
   photoForm.addEventListener("submit", (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent the default form submission behavior
+    console.log("Photo upload form submitted!");
 
     const fileInput = document.getElementById("photo-upload");
     const dateInput = document.getElementById("photo-date");
@@ -114,7 +115,13 @@ function setupPhotoUpload() {
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
       photos.push({ src: reader.result, date: dateInput.value });
       localStorage.setItem("photos", JSON.stringify(photos));
+      console.log("Photo saved to localStorage successfully.");
       loadPhotos();
+    };
+
+    reader.onerror = () => {
+      console.error("Error reading the photo file.");
+      alert("There was an error uploading your photo. Please try again.");
     };
 
     reader.readAsDataURL(fileInput.files[0]);
