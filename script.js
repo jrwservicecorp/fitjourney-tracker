@@ -1,4 +1,4 @@
-const appVersion = "v7.30-beta";
+const appVersion = "v7.31-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -19,6 +19,8 @@ window.addEventListener("DOMContentLoaded", () => {
   setupChart();
   setupWeightLogging();
   setupPhotoUpload();
+  setupPhotoComparison();
+  setupExportOptions();
   loadPhotos();
 
   // Event listeners for buttons
@@ -134,40 +136,6 @@ function setupWeightLogging() {
   });
 }
 
-function updateSummary(progressData) {
-  const summaryContainer = document.getElementById("weight-summary");
-
-  if (!progressData.length) {
-    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
-    return;
-  }
-
-  const weights = progressData.map((entry) => entry.weight);
-  const averageWeight = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
-  const maxWeight = Math.max(...weights);
-  const minWeight = Math.min(...weights);
-
-  summaryContainer.innerHTML = `
-    <p><strong>Average Weight:</strong> ${averageWeight} lbs</p>
-    <p><strong>Highest Weight:</strong> ${maxWeight} lbs</p>
-    <p><strong>Lowest Weight:</strong> ${minWeight} lbs</p>
-  `;
-}
-
-function updateRecentWeighIns(progressData) {
-  const recentContainer = document.getElementById("recent-weighins");
-
-  if (!progressData.length) {
-    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
-    return;
-  }
-
-  const recentWeighIns = progressData.slice(-4).reverse();
-  recentContainer.innerHTML = recentWeighIns
-    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
-    .join("");
-}
-
 /* ================================
     Photo Upload
 ================================ */
@@ -241,6 +209,9 @@ function compressImage(file, callback) {
 ================================ */
 function loadPhotos() {
   const gallery = document.getElementById("photo-gallery");
+  const photo1Select = document.getElementById("photo-select-1");
+  const photo2Select = document.getElementById("photo-select-2");
+
   if (!gallery) {
     console.error("Photo gallery element not found!");
     return;
@@ -249,42 +220,83 @@ function loadPhotos() {
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
 
   gallery.innerHTML = "";
+  photo1Select.innerHTML = "<option value=''>Select Photo 1</option>";
+  photo2Select.innerHTML = "<option value=''>Select Photo 2</option>";
 
   if (!photos.length) {
     gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
     return;
   }
 
-  gallery.innerHTML = photos
-    .map(
-      (photo, index) => `
+  photos.forEach((photo, index) => {
+    const option1 = document.createElement("option");
+    const option2 = document.createElement("option");
+
+    option1.value = photo.src;
+    option1.textContent = `Photo ${index + 1} - ${photo.date}`;
+    option2.value = photo.src;
+    option2.textContent = `Photo ${index + 1} - ${photo.date}`;
+
+    photo1Select.appendChild(option1);
+    photo2Select.appendChild(option2);
+
+    gallery.innerHTML += `
       <div class="photo-item">
         <img src="${photo.src}" alt="Progress Photo">
         <p>${photo.date}</p>
-        <button class="delete-photo-btn" data-index="${index}">Delete</button>
+      </div>`;
+  });
+
+  console.log("Photo gallery and comparison dropdowns updated successfully.");
+}
+
+/* ================================
+    Photo Comparison
+================================ */
+function setupPhotoComparison() {
+  const compareButton = document.getElementById("compare-photos-btn");
+  if (!compareButton) {
+    console.error("Photo comparison button not found!");
+    return;
+  }
+
+  compareButton.addEventListener("click", () => {
+    const photo1 = document.getElementById("photo-select-1").value;
+    const photo2 = document.getElementById("photo-select-2").value;
+
+    if (!photo1 || !photo2) {
+      alert("Please select two photos to compare.");
+      return;
+    }
+
+    const comparisonContainer = document.getElementById("comparison-container");
+    comparisonContainer.innerHTML = `
+      <div>
+        <h4>Photo 1</h4>
+        <img src="${photo1}" alt="Photo 1">
       </div>
-    `
-    )
-    .join("");
-
-  document.querySelectorAll(".delete-photo-btn").forEach((btn) =>
-    btn.addEventListener("click", (e) => {
-      const index = e.target.getAttribute("data-index");
-      deletePhoto(index);
-    })
-  );
-
-  console.log("Photo gallery updated successfully.");
+      <div>
+        <h4>Photo 2</h4>
+        <img src="${photo2}" alt="Photo 2">
+      </div>
+    `;
+    console.log("Photo comparison rendered successfully.");
+  });
 }
 
-function deletePhoto(index) {
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  photos.splice(index, 1);
-  localStorage.setItem("photos", JSON.stringify(photos));
-  loadPhotos();
-}
+/* ================================
+    Export Options
+================================ */
+function setupExportOptions() {
+  const prepareExportButton = document.getElementById("prepare-export-btn");
 
-function clearPhotos() {
-  localStorage.removeItem("photos");
-  loadPhotos();
+  if (!prepareExportButton) {
+    console.error("Export button not found!");
+    return;
+  }
+
+  prepareExportButton.addEventListener("click", () => {
+    alert("Export functionality is under construction. Stay tuned!");
+    console.log("Export feature triggered.");
+  });
 }
