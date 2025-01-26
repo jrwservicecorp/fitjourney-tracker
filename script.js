@@ -1,4 +1,4 @@
-const appVersion = "v7.24-beta";
+const appVersion = "v7.25-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -16,13 +16,13 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("app-version").textContent = appVersion;
 
   // Initialize modules
-  setupChart(); // M1
-  setupWeightLogging(); // M2
-  setupPhotoUpload(); // M3
-  setupPhotoComparison(); // M4
-  setupExportOptions(); // M5
-  loadPhotos(); // M6
-  setupStreakAwards(); // M7
+  setupChart();
+  setupWeightLogging();
+  setupPhotoUpload();
+  setupPhotoComparison();
+  setupExportOptions();
+  loadPhotos();
+  setupStreakAwards();
 
   // Add event listeners
   document.getElementById("clear-photos-btn")?.addEventListener("click", clearPhotos);
@@ -164,66 +164,71 @@ function updateRecentWeighIns(progressData) {
 ================================ */
 function setupPhotoUpload() {
   const photoForm = document.getElementById("photo-upload-form");
-  const uploadButton = document.getElementById("upload-photo-btn");
+  if (!photoForm) return;
 
-  if (!photoForm) {
-    console.error("Photo upload form not found!");
-    return;
-  }
-
-  console.log("Photo upload form found. Attaching event listeners...");
-
-  // Main listener: Form 'submit' event
   photoForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    console.log("Photo upload form submitted!");
 
     const fileInput = document.getElementById("photo-upload");
     const dateInput = document.getElementById("photo-date");
 
-    if (!fileInput || !dateInput) {
-      console.error("File input or date input is missing!");
-      alert("Photo upload failed. Please ensure all fields are filled.");
+    if (!fileInput.files[0] || !dateInput.value) {
+      alert("Please provide a photo and a date.");
       return;
     }
 
-    const file = fileInput.files[0];
-    const date = dateInput.value;
-
-    if (!file || !date) {
-      console.log("Photo or date not provided.");
-      alert("Please select a photo file and enter a valid date.");
-      return;
-    }
-
-    console.log("Processing photo upload...");
-    compressImage(file, (compressedDataUrl) => {
+    const reader = new FileReader();
+    reader.onload = () => {
       const photos = JSON.parse(localStorage.getItem("photos")) || [];
-      photos.push({ date, src: compressedDataUrl });
+      photos.push({ src: reader.result, date: dateInput.value });
+      localStorage.setItem("photos", JSON.stringify(photos));
+      loadPhotos();
+    };
 
-      try {
-        localStorage.setItem("photos", JSON.stringify(photos));
-        console.log("Photo saved to localStorage successfully.");
-        loadPhotos();
-      } catch (err) {
-        console.error("QuotaExceededError: Cannot save photo to localStorage.", err);
-        alert(
-          "Storage limit exceeded. Please clear some photos using the 'Clear Photos' button and try again."
-        );
-      }
-    });
+    reader.readAsDataURL(fileInput.files[0]);
   });
-
-  // Fallback: Add 'click' event listener to the button
-  if (uploadButton) {
-    uploadButton.addEventListener("click", () => {
-      console.log("Fallback: Upload button clicked, ensure form submission works.");
-      photoForm.requestSubmit(); // Trigger the form submission
-    });
-  } else {
-    console.error("Upload photo button not found!");
-  }
 }
 
-// Include Photo Comparison, Export, Streaks & Gallery modules here.
+/* ================================
+    M4: Photo Gallery
+================================ */
+function loadPhotos() {
+  const gallery = document.getElementById("photo-gallery");
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
 
+  if (!photos.length) {
+    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
+    return;
+  }
+
+  gallery.innerHTML = photos
+    .map(
+      (photo, index) => `
+      <div class="photo-item">
+        <img src="${photo.src}" alt="Progress Photo">
+        <p>${photo.date}</p>
+        <button class="delete-photo-btn" data-index="${index}">Delete</button>
+      </div>
+    `
+    )
+    .join("");
+
+  document.querySelectorAll(".delete-photo-btn").forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      const index = e.target.getAttribute("data-index");
+      deletePhoto(index);
+    })
+  );
+}
+
+function deletePhoto(index) {
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  photos.splice(index, 1);
+  localStorage.setItem("photos", JSON.stringify(photos));
+  loadPhotos();
+}
+
+function clearPhotos() {
+  localStorage.removeItem("photos");
+  loadPhotos();
+}
