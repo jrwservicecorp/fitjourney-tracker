@@ -1,4 +1,4 @@
-const appVersion = "v7.32-beta";
+const appVersion = "v7.33-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -136,6 +136,26 @@ function setupWeightLogging() {
   });
 }
 
+function updateSummary(progressData) {
+  const summaryContainer = document.getElementById("weight-summary");
+
+  if (!progressData.length) {
+    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
+    return;
+  }
+
+  const weights = progressData.map((entry) => entry.weight);
+  const averageWeight = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
+  const maxWeight = Math.max(...weights);
+  const minWeight = Math.min(...weights);
+
+  summaryContainer.innerHTML = `
+    <p><strong>Average Weight:</strong> ${averageWeight} lbs</p>
+    <p><strong>Highest Weight:</strong> ${maxWeight} lbs</p>
+    <p><strong>Lowest Weight:</strong> ${minWeight} lbs</p>
+  `;
+}
+
 /* ================================
     Photo Upload
 ================================ */
@@ -174,133 +194,6 @@ function setupPhotoUpload() {
   });
 }
 
-function compressImage(file, callback) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.src = e.target.result;
-
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-
-      const maxWidth = 800;
-      const scale = maxWidth / img.width;
-      canvas.width = maxWidth;
-      canvas.height = img.height * scale;
-
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7); // Compress image
-      callback(compressedDataUrl);
-    };
-  };
-
-  reader.onerror = () => {
-    console.error("Error reading the photo file.");
-    alert("There was an error processing your photo. Please try again.");
-  };
-
-  reader.readAsDataURL(file);
-}
-
-/* ================================
-    Photo Gallery
-================================ */
-function loadPhotos() {
-  const gallery = document.getElementById("photo-gallery");
-  const photo1Select = document.getElementById("photo-select-1");
-  const photo2Select = document.getElementById("photo-select-2");
-
-  if (!gallery) {
-    console.error("Photo gallery element not found!");
-    return;
-  }
-
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-
-  gallery.innerHTML = "";
-  photo1Select.innerHTML = "<option value=''>Select Photo 1</option>";
-  photo2Select.innerHTML = "<option value=''>Select Photo 2</option>";
-
-  if (!photos.length) {
-    gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
-    return;
-  }
-
-  photos.forEach((photo, index) => {
-    const option1 = document.createElement("option");
-    const option2 = document.createElement("option");
-
-    option1.value = photo.src;
-    option1.textContent = `Photo ${index + 1} - ${photo.date}`;
-    option2.value = photo.src;
-    option2.textContent = `Photo ${index + 1} - ${photo.date}`;
-
-    photo1Select.appendChild(option1);
-    photo2Select.appendChild(option2);
-
-    gallery.innerHTML += `
-      <div class="photo-item">
-        <img src="${photo.src}" alt="Progress Photo">
-        <p>${photo.date}</p>
-      </div>`;
-  });
-
-  console.log("Photo gallery and comparison dropdowns updated successfully.");
-}
-
-function deletePhoto(index) {
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  photos.splice(index, 1);
-  localStorage.setItem("photos", JSON.stringify(photos));
-  loadPhotos();
-}
-
-function clearPhotos() {
-  localStorage.removeItem("photos");
-  loadPhotos();
-}
-
-/* ================================
-    Photo Comparison
-================================ */
-function setupPhotoComparison() {
-  const compareButton = document.getElementById("compare-photos-btn");
-  if (!compareButton) {
-    console.error("Photo comparison button not found!");
-    return;
-  }
-
-  compareButton.addEventListener("click", () => {
-    const photo1 = document.getElementById("photo-select-1").value;
-    const photo2 = document.getElementById("photo-select-2").value;
-
-    if (!photo1 || !photo2) {
-      alert("Please select two photos to compare.");
-      return;
-    }
-
-    const comparisonContainer = document.getElementById("comparison-container");
-    if (!comparisonContainer) {
-      console.error("Comparison container not found!");
-      return;
-    }
-
-    comparisonContainer.innerHTML = `
-      <div>
-        <h4>Photo 1</h4>
-        <img src="${photo1}" alt="Photo 1">
-      </div>
-      <div>
-        <h4>Photo 2</h4>
-        <img src="${photo2}" alt="Photo 2">
-      </div>
-    `;
-    console.log("Photo comparison rendered successfully.");
-  });
-}
-
 /* ================================
     Export Options
 ================================ */
@@ -313,7 +206,32 @@ function setupExportOptions() {
   }
 
   prepareExportButton.addEventListener("click", () => {
-    alert("Export functionality is under construction. Stay tuned!");
-    console.log("Export feature triggered.");
+    const selectedType = document.querySelector('input[name="export-type"]:checked');
+    if (!selectedType) {
+      alert("Please select an export type.");
+      return;
+    }
+
+    const exportType = selectedType.value;
+
+    switch (exportType) {
+      case "single-photo":
+        console.log("Preparing single-photo export...");
+        // Add single-photo export logic here
+        break;
+
+      case "photo-comparison":
+        console.log("Preparing photo comparison export...");
+        // Add photo comparison export logic here
+        break;
+
+      case "data-only":
+        console.log("Preparing data-only export...");
+        // Add data-only export logic here
+        break;
+
+      default:
+        alert("Invalid export type.");
+    }
   });
 }
