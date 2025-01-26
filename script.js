@@ -1,4 +1,4 @@
-const appVersion = "v7.14a";
+const appVersion = "v7.15";
 
 // Global Variables
 let chartInstance = null;
@@ -19,9 +19,10 @@ window.addEventListener("DOMContentLoaded", () => {
   setupWeightLogging();
   setupPhotoUpload();
   setupPhotoComparison();
+  setupExportTemplate();
   loadPhotos();
 
-  document.getElementById("clear-photos-btn").addEventListener("click", clearPhotos);
+  document.getElementById("clear-photos-btn")?.addEventListener("click", clearPhotos);
 });
 
 /* ================================
@@ -33,7 +34,7 @@ function setupChart() {
     renderChart(demoData, storedData, true);
   });
 
-  document.getElementById("toggle-demo-data").addEventListener("change", () => {
+  document.getElementById("toggle-demo-data")?.addEventListener("change", () => {
     const showDemo = document.getElementById("toggle-demo-data").checked;
     const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
     renderChart(demoData, progressData, showDemo);
@@ -268,34 +269,53 @@ function deletePhoto(index) {
     Photo Comparison
 ================================ */
 function setupPhotoComparison() {
-  const compareButton = document.getElementById("compare-photos-btn");
-  const sideBySideDisplay = document.getElementById("side-by-side-comparison");
+  const photo1Select = document.getElementById("photo-select-1");
+  const photo2Select = document.getElementById("photo-select-2");
+  const compareButton = document.getElementById("prepare-share-btn");
 
   compareButton.addEventListener("click", () => {
-    const photo1 = document.getElementById("photo-select-1").value;
-    const photo2 = document.getElementById("photo-select-2").value;
+    const photo1Src = photo1Select.value;
+    const photo2Src = photo2Select.value;
 
-    if (!photo1 || !photo2) {
+    if (!photo1Src || !photo2Src) {
       alert("Please select two photos for comparison.");
       return;
     }
 
-    sideBySideDisplay.innerHTML = `
-      <div>
-        <img src="${photo1}" alt="Photo 1">
-        <p>Photo 1</p>
-      </div>
-      <div>
-        <img src="${photo2}" alt="Photo 2">
-        <p>Photo 2</p>
-      </div>
-    `;
+    document.getElementById("photo-1").src = photo1Src;
+    document.getElementById("photo-2").src = photo2Src;
+
+    const photos = JSON.parse(localStorage.getItem("photos")) || [];
+    const photo1 = photos.find((photo) => photo.src === photo1Src);
+    const photo2 = photos.find((photo) => photo.src === photo2Src);
+
+    const weightDiff = Math.abs(photo1.weight - photo2.weight).toFixed(1);
+    document.getElementById("date-1").textContent = photo1.date;
+    document.getElementById("date-2").textContent = photo2.date;
+    document.getElementById("weight-diff").textContent = `${weightDiff} lbs`;
   });
 }
 
-function clearPhotos() {
-  if (confirm("Are you sure you want to clear all photos?")) {
-    localStorage.removeItem("photos");
-    loadPhotos();
-  }
+/* ================================
+    Export Template
+================================ */
+function setupExportTemplate() {
+  const exportButton = document.getElementById("export-results-btn");
+
+  exportButton.addEventListener("click", () => {
+    const exportTemplate = document.getElementById("share-template");
+    const photo1Src = document.getElementById("photo-1").src;
+    const photo2Src = document.getElementById("photo-2").src;
+
+    document.getElementById("export-photo-1").src = photo1Src;
+    document.getElementById("export-photo-2").src = photo2Src;
+    document.getElementById("export-weight-diff").textContent = document.getElementById("weight-diff").textContent;
+
+    html2canvas(exportTemplate).then((canvas) => {
+      const link = document.createElement("a");
+      link.download = "fitjourney-comparison.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+  });
 }
