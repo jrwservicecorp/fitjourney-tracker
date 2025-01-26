@@ -19,7 +19,8 @@ window.addEventListener("DOMContentLoaded", () => {
   setupChart();
   setupWeightLogging();
   setupPhotoUpload();
-  setupPhotoComparison();
+  // Comment out setupPhotoComparison until it's implemented
+  // setupPhotoComparison();
   loadPhotos();
 
   // Add event listeners
@@ -92,75 +93,6 @@ function renderChart(demoData, userData, showDemo) {
 }
 
 /* ================================
-    Weight Logging
-================================ */
-function setupWeightLogging() {
-  const weightForm = document.getElementById("weight-form");
-  if (!weightForm) {
-    console.error("Weight form not found!");
-    return;
-  }
-
-  weightForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const weight = parseFloat(document.getElementById("weight-input").value);
-    const date = document.getElementById("date-input").value;
-
-    if (!weight || !date) {
-      alert("Please enter valid weight and date.");
-      return;
-    }
-
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-    progressData.push({ weight, date });
-    localStorage.setItem("progressData", JSON.stringify(progressData));
-
-    const showDemo = document.getElementById("toggle-demo-data").checked;
-    renderChart(demoData, progressData, showDemo);
-    updateSummary(progressData);
-    updateRecentWeighIns(progressData);
-
-    document.getElementById("weight-input").value = "";
-    document.getElementById("date-input").value = "";
-  });
-}
-
-function updateSummary(progressData) {
-  const summaryContainer = document.getElementById("weight-summary");
-
-  if (!progressData.length) {
-    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
-    return;
-  }
-
-  const weights = progressData.map((entry) => entry.weight);
-  const averageWeight = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
-  const maxWeight = Math.max(...weights);
-  const minWeight = Math.min(...weights);
-
-  summaryContainer.innerHTML = `
-    <p><strong>Average Weight:</strong> ${averageWeight} lbs</p>
-    <p><strong>Highest Weight:</strong> ${maxWeight} lbs</p>
-    <p><strong>Lowest Weight:</strong> ${minWeight} lbs</p>
-  `;
-}
-
-function updateRecentWeighIns(progressData) {
-  const recentContainer = document.getElementById("recent-weighins");
-
-  if (!progressData.length) {
-    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
-    return;
-  }
-
-  const recentWeighIns = progressData.slice(-4).reverse();
-  recentContainer.innerHTML = recentWeighIns
-    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
-    .join("");
-}
-
-/* ================================
     Photo Upload
 ================================ */
 function setupPhotoUpload() {
@@ -188,22 +120,51 @@ function setupPhotoUpload() {
     }
 
     console.log("Processing photo upload...");
-    const reader = new FileReader();
-    reader.onload = () => {
-      const photos = JSON.parse(localStorage.getItem("photos")) || [];
-      photos.push({ src: reader.result, date: dateInput.value });
-      localStorage.setItem("photos", JSON.stringify(photos));
-      console.log("Photo saved to localStorage successfully.");
-      loadPhotos();
-    };
-
-    reader.onerror = () => {
-      console.error("Error reading the photo file.");
-      alert("There was an error uploading your photo. Please try again.");
-    };
-
-    reader.readAsDataURL(fileInput.files[0]);
+    compressImage(fileInput.files[0], (compressedDataUrl) => {
+      try {
+        const photos = JSON.parse(localStorage.getItem("photos")) || [];
+        photos.push({ src: compressedDataUrl, date: dateInput.value });
+        localStorage.setItem("photos", JSON.stringify(photos));
+        console.log("Photo saved to localStorage successfully.");
+        loadPhotos();
+      } catch (error) {
+        console.error("QuotaExceededError: Failed to save photo to localStorage.", error);
+        alert("Storage limit exceeded. Please clear some photos and try again.");
+      }
+    });
   });
+
+  console.log("Photo upload setup complete.");
+}
+
+function compressImage(file, callback) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.src = e.target.result;
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const maxWidth = 800;
+      const scale = maxWidth / img.width;
+      canvas.width = maxWidth;
+      canvas.height = img.height * scale;
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7); // Compress image
+      callback(compressedDataUrl);
+    };
+  };
+
+  reader.onerror = () => {
+    console.error("Error reading the photo file.");
+    alert("There was an error processing your photo. Please try again.");
+  };
+
+  reader.readAsDataURL(file);
 }
 
 /* ================================
