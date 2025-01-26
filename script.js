@@ -1,4 +1,4 @@
-const appVersion = "v7.35-beta";
+const appVersion = "v7.36-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -155,6 +155,20 @@ function updateSummary(progressData) {
   `;
 }
 
+function updateRecentWeighIns(progressData) {
+  const recentContainer = document.getElementById("recent-weighins");
+
+  if (!progressData.length) {
+    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
+    return;
+  }
+
+  const recentWeighIns = progressData.slice(-4).reverse();
+  recentContainer.innerHTML = recentWeighIns
+    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
+    .join("");
+}
+
 /* ================================
     Photo Upload
 ================================ */
@@ -264,4 +278,65 @@ function loadPhotos() {
   });
 
   console.log("Photo gallery and comparison dropdowns updated successfully.");
+}
+
+/* ================================
+    Photo Comparison
+================================ */
+function setupPhotoComparison() {
+  const compareButton = document.getElementById("compare-photos-btn");
+  const comparisonContainer = document.getElementById("comparison-container");
+
+  if (!compareButton || !comparisonContainer) {
+    console.error("Photo comparison elements not found!");
+    return;
+  }
+
+  compareButton.addEventListener("click", () => {
+    const photo1 = document.getElementById("photo-select-1").value;
+    const photo2 = document.getElementById("photo-select-2").value;
+
+    if (!photo1 || !photo2) {
+      alert("Please select two photos for comparison.");
+      return;
+    }
+
+    comparisonContainer.innerHTML = `
+      <div>
+        <h4>Photo 1</h4>
+        <img src="${photo1}" alt="Photo 1">
+      </div>
+      <div>
+        <h4>Photo 2</h4>
+        <img src="${photo2}" alt="Photo 2">
+      </div>
+    `;
+
+    console.log("Photo comparison rendered successfully.");
+  });
+}
+
+/* ================================
+    Clear Photos
+================================ */
+function clearPhotos() {
+  localStorage.removeItem("photos");
+  loadPhotos();
+  console.log("All photos cleared from localStorage.");
+}
+
+/* ================================
+    Export Options
+================================ */
+function setupExportOptions() {
+  const prepareExportButton = document.getElementById("prepare-export-btn");
+
+  if (!prepareExportButton) {
+    console.error("Export button not found!");
+    return;
+  }
+
+  prepareExportButton.addEventListener("click", () => {
+    alert("Export feature coming soon!");
+  });
 }
