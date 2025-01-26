@@ -6,12 +6,13 @@
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas"></script>
   <script src="script.js" defer></script>
 </head>
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v7.37-beta</span></p>
+    <p>App Version: <span id="app-version">v7.38-beta</span></p>
   </header>
 
   <main id="main-app">
@@ -91,31 +92,20 @@
       <div id="comparison-container" class="comparison-display"></div>
     </div>
 
-    <!-- Export Options -->
-    <div class="card">
-      <h3>Export Options</h3>
-      <div class="export-options">
-        <label>
-          <input type="radio" name="export-type" value="single-photo">
-          Single Photo with Overlay
-        </label>
-        <label>
-          <input type="radio" name="export-type" value="photo-comparison">
-          Photo Comparison
-        </label>
-        <label>
-          <input type="radio" name="export-type" value="data-only">
-          Data Only
-        </label>
+    <!-- Single Photo Export -->
+    <div class="card export-preview">
+      <h3>Single Photo Export</h3>
+      <div id="single-photo-export-container" class="export-container">
+        <div id="single-photo-export" class="export-content">
+          <img id="export-photo" src="" alt="Export Photo">
+          <div id="export-overlay" class="export-overlay">
+            <p id="export-weight">Weight: 180 lbs</p>
+            <p id="export-date">Date: 2023-12-01</p>
+            <p id="export-milestone">Milestone: 20 lbs lost!</p>
+          </div>
+        </div>
       </div>
-      <button id="prepare-export-btn">Prepare Export</button>
-    </div>
-
-    <!-- Export Canvas -->
-    <div id="export-canvas-container" class="hidden">
-      <h3>Export Preview</h3>
-      <div id="export-canvas"></div>
-      <button id="download-export-btn">Download Export</button>
+      <button id="download-single-photo-btn">Download Export</button>
     </div>
   </main>
 </body>
