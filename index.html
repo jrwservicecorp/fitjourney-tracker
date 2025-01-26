@@ -11,7 +11,7 @@
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v7.11</span></p>
+    <p>App Version: <span id="app-version">v7.13</span></p>
   </header>
 
   <main id="main-app">
@@ -75,6 +75,28 @@
           <button id="upload-photo-btn" type="submit">Upload Photo</button>
         </form>
       </div>
+    </div>
+
+    <!-- Photo Comparison -->
+    <div class="card">
+      <h3>Photo Comparison</h3>
+      <div>
+        <label for="photo-select-1">Select Photo 1:</label>
+        <select id="photo-select-1" class="photo-select"></select>
+      </div>
+      <div>
+        <label for="photo-select-2">Select Photo 2:</label>
+        <select id="photo-select-2" class="photo-select"></select>
+      </div>
+      <button id="compare-photos-btn">Compare Photos</button>
+      <div id="side-by-side-comparison" class="comparison-display"></div>
+    </div>
+
+    <!-- Photo Export -->
+    <div class="card">
+      <h3>Export Progress Photo</h3>
+      <button id="export-photo-btn">Export Selected Photo</button>
+      <button id="export-comparison-btn">Export Comparison</button>
     </div>
 
     <!-- Photo Gallery -->
