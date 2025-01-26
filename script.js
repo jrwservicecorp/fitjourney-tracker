@@ -1,4 +1,4 @@
-const appVersion = "v7.25-fix5";
+const appVersion = "v7.26-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -92,6 +92,75 @@ function renderChart(demoData, userData, showDemo) {
 }
 
 /* ================================
+    Weight Logging
+================================ */
+function setupWeightLogging() {
+  const weightForm = document.getElementById("weight-form");
+  if (!weightForm) {
+    console.error("Weight form not found!");
+    return;
+  }
+
+  weightForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const weight = parseFloat(document.getElementById("weight-input").value);
+    const date = document.getElementById("date-input").value;
+
+    if (!weight || !date) {
+      alert("Please enter valid weight and date.");
+      return;
+    }
+
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    progressData.push({ weight, date });
+    localStorage.setItem("progressData", JSON.stringify(progressData));
+
+    const showDemo = document.getElementById("toggle-demo-data").checked;
+    renderChart(demoData, progressData, showDemo);
+    updateSummary(progressData);
+    updateRecentWeighIns(progressData);
+
+    document.getElementById("weight-input").value = "";
+    document.getElementById("date-input").value = "";
+  });
+}
+
+function updateSummary(progressData) {
+  const summaryContainer = document.getElementById("weight-summary");
+
+  if (!progressData.length) {
+    summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
+    return;
+  }
+
+  const weights = progressData.map((entry) => entry.weight);
+  const averageWeight = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
+  const maxWeight = Math.max(...weights);
+  const minWeight = Math.min(...weights);
+
+  summaryContainer.innerHTML = `
+    <p><strong>Average Weight:</strong> ${averageWeight} lbs</p>
+    <p><strong>Highest Weight:</strong> ${maxWeight} lbs</p>
+    <p><strong>Lowest Weight:</strong> ${minWeight} lbs</p>
+  `;
+}
+
+function updateRecentWeighIns(progressData) {
+  const recentContainer = document.getElementById("recent-weighins");
+
+  if (!progressData.length) {
+    recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
+    return;
+  }
+
+  const recentWeighIns = progressData.slice(-4).reverse();
+  recentContainer.innerHTML = recentWeighIns
+    .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
+    .join("");
+}
+
+/* ================================
     Photo Upload
 ================================ */
 function setupPhotoUpload() {
@@ -135,8 +204,6 @@ function setupPhotoUpload() {
 
     reader.readAsDataURL(fileInput.files[0]);
   });
-
-  console.log("Photo upload setup complete.");
 }
 
 /* ================================
@@ -151,7 +218,6 @@ function loadPhotos() {
 
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
 
-  // Clear the gallery before adding new elements
   gallery.innerHTML = "";
 
   if (!photos.length) {
