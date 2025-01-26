@@ -342,3 +342,19 @@ function setupSinglePhotoExport() {
 function renderExportCanvas(photoSource, overlayText) {
   const exportCanvasContainer = document.getElementById("export-canvas-container");
   const exportCanvas = document.getElementById("export-canvas");
+
+  if (!exportCanvasContainer || !exportCanvas) {
+    console.error("Export canvas or container not found!");
+    return;
+  }
+
+  exportCanvasContainer.classList.remove("hidden");
+  exportCanvas.innerHTML = `
+    <div class="export-item">
+      <img src="${photoSource}" alt="Exported Photo">
+      <div class="overlay-text">${overlayText}</div>
+    </div>
+  `;
+
+  console.log("Export canvas prepared successfully.");
+}
