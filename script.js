@@ -1,4 +1,4 @@
-const appVersion = "v7.27-beta";
+const appVersion = "v7.28-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -15,72 +15,165 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("Document fully loaded. Initializing FitJourney Tracker...");
   document.getElementById("app-version").textContent = appVersion;
 
-  // Initialize modules
+  // Ensure all modules are initialized
   setupChart();
   setupWeightLogging();
   setupPhotoUpload();
   loadPhotos();
 
-  // Add event listeners
+  // Event listeners for buttons
   document.getElementById("clear-photos-btn")?.addEventListener("click", clearPhotos);
 });
+
+/* ================================
+    Chart Setup
+================================ */
+function setupChart() {
+  const canvas = document.getElementById("weight-chart");
+  if (!canvas) {
+    console.error("Chart canvas not found!");
+    return;
+  }
+
+  ensureCanvasReady(() => {
+    const storedData = JSON.parse(localStorage.getItem("progressData")) || [];
+    renderChart(demoData, storedData, true);
+  });
+
+  const toggleDemoCheckbox = document.getElementById("toggle-demo-data");
+  if (toggleDemoCheckbox) {
+    toggleDemoCheckbox.addEventListener("change", () => {
+      const showDemo = toggleDemoCheckbox.checked;
+      const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+      renderChart(demoData, progressData, showDemo);
+    });
+  }
+}
+
+function ensureCanvasReady(callback) {
+  const canvas = document.getElementById("weight-chart");
+  if (!canvas) return;
+
+  const interval = setInterval(() => {
+    if (canvas.getContext("2d")) {
+      clearInterval(interval);
+      callback();
+    }
+  }, 50);
+}
+
+function renderChart(demoData, userData, showDemo) {
+  const ctx = document.getElementById("weight-chart").getContext("2d");
+  if (chartInstance) chartInstance.destroy();
+
+  const datasets = [];
+  if (showDemo) {
+    datasets.push({
+      label: "Demo Data",
+      data: demoData.map((d) => d.weight),
+      borderColor: "#e91e63",
+      backgroundColor: "rgba(233, 30, 99, 0.2)",
+    });
+  }
+  datasets.push({
+    label: "User Data",
+    data: userData.map((u) => u.weight),
+    borderColor: "#3498db",
+    backgroundColor: "rgba(52, 152, 219, 0.2)",
+  });
+
+  chartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: [...demoData.map((d) => d.date), ...userData.map((u) => u.date)],
+      datasets,
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+        },
+      },
+    },
+  });
+}
+
+/* ================================
+    Weight Logging
+================================ */
+function setupWeightLogging() {
+  const weightForm = document.getElementById("weight-form");
+  if (!weightForm) {
+    console.error("Weight form not found!");
+    return;
+  }
+
+  weightForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const weight = parseFloat(document.getElementById("weight-input").value);
+    const date = document.getElementById("date-input").value;
+
+    if (!weight || !date) {
+      alert("Please enter valid weight and date.");
+      return;
+    }
+
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+    progressData.push({ weight, date });
+    localStorage.setItem("progressData", JSON.stringify(progressData));
+
+    const showDemo = document.getElementById("toggle-demo-data").checked;
+    renderChart(demoData, progressData, showDemo);
+    updateSummary(progressData);
+    updateRecentWeighIns(progressData);
+
+    document.getElementById("weight-input").value = "";
+    document.getElementById("date-input").value = "";
+  });
+}
 
 /* ================================
     Photo Upload
 ================================ */
 function setupPhotoUpload() {
   const photoForm = document.getElementById("photo-upload-form");
-
   if (!photoForm) {
     console.error("Photo upload form not found!");
     return;
   }
 
   photoForm.addEventListener("submit", (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
     console.log("Photo upload form submitted!");
 
     const fileInput = document.getElementById("photo-upload");
     const dateInput = document.getElementById("photo-date");
 
     if (!fileInput || !dateInput) {
-      console.error("File input or date input element not found!");
+      console.error("File input or date input not found!");
       return;
     }
 
-    // Validate inputs
-    if (!fileInput.files[0]) {
-      alert("Please select a photo to upload.");
-      console.log("No photo file selected.");
-      return;
-    }
-    if (!dateInput.value) {
-      alert("Please enter a date for the photo.");
-      console.log("No date entered.");
+    if (!fileInput.files[0] || !dateInput.value) {
+      alert("Please provide a photo and a date.");
+      console.log("Validation failed: missing file or date.");
       return;
     }
 
-    console.log("Processing photo upload...");
     compressImage(fileInput.files[0], (compressedDataUrl) => {
-      try {
-        const photos = JSON.parse(localStorage.getItem("photos")) || [];
-        photos.push({ src: compressedDataUrl, date: dateInput.value });
-        localStorage.setItem("photos", JSON.stringify(photos));
-        console.log("Photo saved to localStorage successfully.");
-        loadPhotos();
-      } catch (error) {
-        console.error("QuotaExceededError: Failed to save photo to localStorage.", error);
-        alert("Storage limit exceeded. Please clear some photos and try again.");
-      }
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
+      photos.push({ src: compressedDataUrl, date: dateInput.value });
+      localStorage.setItem("photos", JSON.stringify(photos));
+      console.log("Photo saved successfully!");
+      loadPhotos();
     });
   });
-
-  console.log("Photo upload setup complete.");
 }
 
 function compressImage(file, callback) {
   const reader = new FileReader();
-
   reader.onload = (e) => {
     const img = new Image();
     img.src = e.target.result;
@@ -120,7 +213,6 @@ function loadPhotos() {
   }
 
   const photos = JSON.parse(localStorage.getItem("photos")) || [];
-
   gallery.innerHTML = "";
 
   if (!photos.length) {
@@ -146,8 +238,6 @@ function loadPhotos() {
       deletePhoto(index);
     })
   );
-
-  console.log("Photo gallery updated successfully.");
 }
 
 function deletePhoto(index) {
