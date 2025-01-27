@@ -1,4 +1,4 @@
-const appVersion = "v7.40-beta";
+const appVersion = "v7.40-zeta";
 
 // Global Variables
 let chartInstance = null;
@@ -288,9 +288,8 @@ function setupPhotoComparison() {
   const compareButton = document.getElementById("compare-photos-btn");
   const photo1Select = document.getElementById("photo-select-1");
   const photo2Select = document.getElementById("photo-select-2");
-  const comparisonContainer = document.getElementById("comparison-container");
 
-  if (!compareButton || !photo1Select || !photo2Select || !comparisonContainer) {
+  if (!compareButton || !photo1Select || !photo2Select) {
     console.error("Photo comparison elements not found!");
     return;
   }
@@ -304,97 +303,69 @@ function setupPhotoComparison() {
       return;
     }
 
+    const comparisonContainer = document.getElementById("side-by-side-comparison");
+    if (!comparisonContainer) {
+      console.error("Comparison container not found!");
+      return;
+    }
+
     comparisonContainer.innerHTML = `
-      <div class="comparison-photo">
+      <div class="comparison-item">
+        <h4>Photo 1</h4>
         <img src="${photo1}" alt="Photo 1">
-        <p>Photo 1</p>
       </div>
-      <div class="comparison-photo">
+      <div class="comparison-item">
+        <h4>Photo 2</h4>
         <img src="${photo2}" alt="Photo 2">
-        <p>Photo 2</p>
-      </div>
-    `;
+      </div>`;
+
     console.log("Photo comparison rendered successfully.");
   });
 }
 
 /* ================================
-    Single Photo Export
+    Export Options
 ================================ */
 function setupSinglePhotoExport() {
-  const exportButton = document.getElementById("prepare-export-btn");
-  if (!exportButton) {
+  const prepareExportButton = document.getElementById("prepare-export-btn");
+
+  if (!prepareExportButton) {
     console.error("Prepare export button not found!");
     return;
   }
 
-  exportButton.addEventListener("click", () => {
-    const selectedPhoto = document.getElementById("photo-select-1").value;
-    const overlayText = document.getElementById("overlay-text").value;
-
+  prepareExportButton.addEventListener("click", () => {
+    const selectedPhoto = document.querySelector("input[name='export-type']:checked");
     if (!selectedPhoto) {
-      alert("Please select a photo to export.");
+      alert("Please select an export type.");
       return;
     }
 
-    renderExportCanvas(selectedPhoto, overlayText);
-  });
-}
-
-function renderExportCanvas(photoSource, overlayText) {
-  const exportCanvas = document.getElementById("export-canvas");
-  const exportContainer = document.getElementById("export-canvas-container");
-
-  if (!exportCanvas || !exportContainer) {
-    console.error("Export canvas or container not found!");
-    return;
-  }
-
-  exportContainer.classList.remove("hidden");
-  exportCanvas.innerHTML = "";
-
-  const img = document.createElement("img");
-  img.src = photoSource;
-  img.alt = "Export Photo";
-  exportCanvas.appendChild(img);
-
-  if (overlayText) {
-    const overlay = document.createElement("div");
-    overlay.textContent = overlayText;
-    overlay.classList.add("photo-overlay");
-    exportCanvas.appendChild(overlay);
-  }
-
-  console.log("Export canvas prepared successfully.");
-}
-
-function setupDataOnlyExport() {
-  const dataExportButton = document.getElementById("data-only-export-btn");
-  if (!dataExportButton) {
-    console.error("Data-only export button not found!");
-    return;
-  }
-
-  dataExportButton.addEventListener("click", () => {
-    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-
-    if (!progressData.length) {
-      alert("No data available for export.");
+    const exportCanvas = document.getElementById("export-canvas");
+    if (!exportCanvas) {
+      console.error("Export canvas not found!");
       return;
     }
 
-    const dataBlob = new Blob([JSON.stringify(progressData, null, 2)], { type: "application/json" });
-    const downloadLink = document.createElement("a");
-    downloadLink.href = URL.createObjectURL(dataBlob);
-    downloadLink.download = "fitjourney_data.json";
-    downloadLink.click();
+    const ctx = exportCanvas.getContext("2d");
+    const photoSrc = document.getElementById("photo-select-1").value;
+    const overlayText = "Progress Overlay";
 
-    console.log("Data-only export prepared successfully.");
+    const img = new Image();
+    img.src = photoSrc;
+
+    img.onload = () => {
+      exportCanvas.width = img.width;
+      exportCanvas.height = img.height;
+
+      ctx.drawImage(img, 0, 0);
+
+      ctx.font = "20px Arial";
+      ctx.fillStyle = "#000";
+      ctx.fillText(overlayText, 20, 30);
+
+      console.log("Export canvas prepared successfully.");
+    };
   });
 }
 
-function clearPhotos() {
-  localStorage.removeItem("photos");
-  loadPhotos();
-  console.log("All photos cleared from localStorage.");
-}
