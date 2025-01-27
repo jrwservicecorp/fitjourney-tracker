@@ -1,4 +1,4 @@
-const appVersion = "v7.38-beta";
+const appVersion = "v7.40-beta";
 
 // Global Variables
 let chartInstance = null;
@@ -21,6 +21,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupPhotoUpload();
   setupPhotoComparison();
   setupSinglePhotoExport();
+  setupDataOnlyExport();
   loadPhotos();
 
   document.getElementById("clear-photos-btn")?.addEventListener("click", clearPhotos);
@@ -290,80 +291,41 @@ function clearPhotos() {
 }
 
 /* ================================
-    Photo Comparison
+    Data Only Export
 ================================ */
-function setupPhotoComparison() {
-  const compareButton = document.getElementById("compare-photos-btn");
-  const comparisonContainer = document.getElementById("comparison-container");
-
-  if (!compareButton || !comparisonContainer) {
-    console.error("Photo comparison elements not found!");
+function setupDataOnlyExport() {
+  const dataExportButton = document.getElementById("data-export-btn");
+  if (!dataExportButton) {
+    console.error("Data export button not found!");
     return;
   }
 
-  compareButton.addEventListener("click", () => {
-    const photo1 = document.getElementById("photo-select-1").value;
-    const photo2 = document.getElementById("photo-select-2").value;
+  dataExportButton.addEventListener("click", () => {
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
 
-    if (!photo1 || !photo2) {
-      alert("Please select two photos for comparison.");
+    if (!progressData.length) {
+      alert("No data available for export.");
       return;
     }
 
-    comparisonContainer.innerHTML = `
-      <div class="comparison-item">
-        <h4>Photo 1</h4>
-        <img src="${photo1}" alt="Photo 1">
-      </div>
-      <div class="comparison-item">
-        <h4>Photo 2</h4>
-        <img src="${photo2}" alt="Photo 2">
-      </div>
-    `;
+    const csvContent = generateCSV(progressData);
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "progress-data.csv";
+    link.click();
 
-    console.log("Photo comparison rendered successfully.");
+    console.log("Data exported successfully as CSV.");
   });
 }
 
-/* ================================
-    Export Options
-================================ */
-function setupSinglePhotoExport() {
-  const prepareExportButton = document.getElementById("prepare-export-btn");
-  if (!prepareExportButton) {
-    console.error("Prepare export button not found!");
-    return;
-  }
+function generateCSV(data) {
+  const headers = ["Date", "Weight (lbs)"];
+  const rows = data.map((entry) => [entry.date, entry.weight]);
 
-  prepareExportButton.addEventListener("click", () => {
-    const selectedPhoto = document.getElementById("photo-select-1").value;
+  const csvContent = [headers, ...rows]
+    .map((row) => row.join(","))
+    .join("\n");
 
-    if (!selectedPhoto) {
-      alert("Please select a photo to export.");
-      return;
-    }
-
-    const overlayText = "My Progress with FitJourney Tracker";
-    renderExportCanvas(selectedPhoto, overlayText);
-  });
-}
-
-function renderExportCanvas(photoSource, overlayText) {
-  const exportCanvasContainer = document.getElementById("export-canvas-container");
-  const exportCanvas = document.getElementById("export-canvas");
-
-  if (!exportCanvasContainer || !exportCanvas) {
-    console.error("Export canvas or container not found!");
-    return;
-  }
-
-  exportCanvasContainer.classList.remove("hidden");
-  exportCanvas.innerHTML = `
-    <div class="export-item">
-      <img src="${photoSource}" alt="Exported Photo">
-      <div class="overlay-text">${overlayText}</div>
-    </div>
-  `;
-
-  console.log("Export canvas prepared successfully.");
+  return csvContent;
 }
