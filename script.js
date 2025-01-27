@@ -1,4 +1,4 @@
-const appVersion = "v7.40-beta-z";
+const appVersion = "v7.40-delta";
 
 // Global Variables
 let chartInstance = null;
@@ -316,4 +316,85 @@ function setupPhotoComparison() {
     `;
     console.log("Photo comparison rendered successfully.");
   });
+}
+
+/* ================================
+    Single Photo Export
+================================ */
+function setupSinglePhotoExport() {
+  const exportButton = document.getElementById("prepare-export-btn");
+  if (!exportButton) {
+    console.error("Prepare export button not found!");
+    return;
+  }
+
+  exportButton.addEventListener("click", () => {
+    const selectedPhoto = document.getElementById("photo-select-1").value;
+    const overlayText = document.getElementById("overlay-text").value;
+
+    if (!selectedPhoto) {
+      alert("Please select a photo to export.");
+      return;
+    }
+
+    renderExportCanvas(selectedPhoto, overlayText);
+  });
+}
+
+function renderExportCanvas(photoSource, overlayText) {
+  const exportCanvas = document.getElementById("export-canvas");
+  const exportContainer = document.getElementById("export-canvas-container");
+
+  if (!exportCanvas || !exportContainer) {
+    console.error("Export canvas or container not found!");
+    return;
+  }
+
+  exportContainer.classList.remove("hidden");
+  exportCanvas.innerHTML = "";
+
+  const img = document.createElement("img");
+  img.src = photoSource;
+  img.alt = "Export Photo";
+  exportCanvas.appendChild(img);
+
+  if (overlayText) {
+    const overlay = document.createElement("div");
+    overlay.textContent = overlayText;
+    overlay.classList.add("photo-overlay");
+    exportCanvas.appendChild(overlay);
+  }
+
+  console.log("Export canvas prepared successfully.");
+}
+
+function setupDataOnlyExport() {
+  const dataExportButton = document.getElementById("data-only-export-btn");
+  if (!dataExportButton) {
+    console.error("Data-only export button not found!");
+    return;
+  }
+
+  dataExportButton.addEventListener("click", () => {
+    const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+
+    if (!progressData.length) {
+      alert("No data available for export.");
+      return;
+    }
+
+    const dataBlob = new Blob([JSON.stringify(progressData, null, 2)], { type: "application/json" });
+    const downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(dataBlob);
+    downloadLink.download = "fitjourney_data.json";
+    downloadLink.click();
+
+    console.log("Data-only export prepared successfully.");
+  });
+}
+
+function clearPhotos() {
+  localStorage.removeItem("photos");
+  loadPhotos();
+  console.log("All photos cleared from localStorage.");
 }
