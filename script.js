@@ -64,6 +64,7 @@ const GeneralModule = {
 ================================ */
 const ChartModule = {
   init: function () {
+    console.log("Initializing Chart Module...");
     const canvas = document.getElementById("weight-chart");
     if (!canvas) {
       console.error("Chart canvas not found!");
@@ -88,6 +89,7 @@ const ChartModule = {
   },
 
   ensureCanvasReady: function (callback) {
+    console.log("Ensuring canvas is ready...");
     const canvas = document.getElementById("weight-chart");
     if (!canvas) return;
 
@@ -100,6 +102,7 @@ const ChartModule = {
   },
 
   renderChart: function (demoData, userData, showDemo) {
+    console.log("Rendering chart...");
     const ctx = document.getElementById("weight-chart")?.getContext("2d");
     if (!ctx) {
       console.error("Chart context not found.");
@@ -147,6 +150,7 @@ const ChartModule = {
 ================================ */
 const WeightLoggingModule = {
   init: function () {
+    console.log("Initializing Weight Logging Module...");
     const weightForm = document.getElementById("weight-form");
     if (!weightForm) {
       console.error("Weight form not found!");
@@ -179,6 +183,7 @@ const WeightLoggingModule = {
   },
 
   updateSummary: function (progressData) {
+    console.log("Updating weight summary...");
     const summaryContainer = document.getElementById("weight-summary");
 
     if (!progressData.length) {
@@ -199,6 +204,7 @@ const WeightLoggingModule = {
   },
 
   updateRecentWeighIns: function (progressData) {
+    console.log("Updating recent weigh-ins...");
     const recentContainer = document.getElementById("recent-weighins");
 
     if (!progressData.length) {
@@ -218,6 +224,7 @@ const WeightLoggingModule = {
 ================================ */
 const PhotoUploadModule = {
   init: function () {
+    console.log("Initializing Photo Upload Module...");
     const photoForm = document.getElementById("photo-upload-form");
     if (!photoForm) {
       console.error("Photo upload form not found!");
@@ -284,6 +291,7 @@ const PhotoUploadModule = {
   },
 
   loadPhotos: function () {
+    console.log("Loading photos...");
     const gallery = document.getElementById("photo-gallery");
     if (!gallery) {
       console.error("Photo gallery element not found!");
@@ -319,6 +327,7 @@ const PhotoUploadModule = {
   },
 
   deletePhoto: function (index) {
+    console.log(`Deleting photo at index: ${index}`);
     const photos = JSON.parse(localStorage.getItem("photos")) || [];
     photos.splice(index, 1);
     localStorage.setItem("photos", JSON.stringify(photos));
@@ -326,7 +335,11 @@ const PhotoUploadModule = {
   },
 
   clearPhotos: function () {
+    console.log("Clearing all photos...");
     localStorage.removeItem("photos");
-    this.loadPhotos();
+    PhotoUploadModule.loadPhotos();
   },
 };
+
+// Initialize the application
+window.addEventListener("DOMContentLoaded", GeneralModule.init);
