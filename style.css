@@ -72,6 +72,11 @@ button:hover {
 .export-item img {
   width: 100%;
 }
+.photo-item img {
+  max-width: 300px;
+  max-height: 300px;
+  object-fit: contain;
+}
 
 .overlay-text {
   position: absolute;
