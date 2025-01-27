@@ -1,4 +1,4 @@
-const appVersion = "v7.40-megga";
+const appVersion = "v7.40-beta";
 
 // Global Variables
 let chartInstance = null;
