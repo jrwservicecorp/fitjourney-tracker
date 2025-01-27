@@ -280,3 +280,40 @@ function loadPhotos() {
 
   console.log("Photo gallery and comparison dropdowns updated successfully.");
 }
+
+/* ================================
+    Photo Comparison
+================================ */
+function setupPhotoComparison() {
+  const compareButton = document.getElementById("compare-photos-btn");
+  const photo1Select = document.getElementById("photo-select-1");
+  const photo2Select = document.getElementById("photo-select-2");
+  const comparisonContainer = document.getElementById("comparison-container");
+
+  if (!compareButton || !photo1Select || !photo2Select || !comparisonContainer) {
+    console.error("Photo comparison elements not found!");
+    return;
+  }
+
+  compareButton.addEventListener("click", () => {
+    const photo1 = photo1Select.value;
+    const photo2 = photo2Select.value;
+
+    if (!photo1 || !photo2) {
+      alert("Please select two photos for comparison.");
+      return;
+    }
+
+    comparisonContainer.innerHTML = `
+      <div class="comparison-photo">
+        <img src="${photo1}" alt="Photo 1">
+        <p>Photo 1</p>
+      </div>
+      <div class="comparison-photo">
+        <img src="${photo2}" alt="Photo 2">
+        <p>Photo 2</p>
+      </div>
+    `;
+    console.log("Photo comparison rendered successfully.");
+  });
+}
