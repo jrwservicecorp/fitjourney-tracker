@@ -1,13 +1,9 @@
 
+
 const appVersion = "v7.42-beta";
 
-// Global Variables
+// Declare global variables
 let chartInstance = null;
-const demoData = [
-  { date: "2023-12-01", weight: 200 },
-  { date: "2023-12-02", weight: 198 },
-  { date: "2023-12-03", weight: 195 },
-];
 
 /* ================================
     General Functionality
@@ -58,6 +54,13 @@ const GeneralModule = {
     } catch (err) {
       console.error("Photo loading failed:", err);
     }
+
+    const clearPhotosBtn = document.getElementById("clear-photos-btn");
+    if (clearPhotosBtn) {
+      clearPhotosBtn.addEventListener("click", PhotoUploadModule.clearPhotos);
+    } else {
+      console.warn("Clear photos button not found.");
+    }
   },
 };
 
@@ -75,7 +78,7 @@ const ChartModule = {
 
     this.ensureCanvasReady(() => {
       const storedData = JSON.parse(localStorage.getItem("progressData")) || [];
-      this.renderChart(demoData, storedData, true);
+      this.renderChart([], storedData, true);
     });
 
     const toggleDemoCheckbox = document.getElementById("toggle-demo-data");
@@ -83,7 +86,7 @@ const ChartModule = {
       toggleDemoCheckbox.addEventListener("change", () => {
         const showDemo = toggleDemoCheckbox.checked;
         const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-        this.renderChart(demoData, progressData, showDemo);
+        this.renderChart([], progressData, showDemo);
       });
     } else {
       console.warn("Demo data toggle checkbox not found.");
@@ -175,7 +178,7 @@ const WeightLoggingModule = {
       localStorage.setItem("progressData", JSON.stringify(progressData));
 
       const showDemo = document.getElementById("toggle-demo-data")?.checked;
-      ChartModule.renderChart(demoData, progressData, showDemo);
+      ChartModule.renderChart([], progressData, showDemo);
       this.updateSummary(progressData);
       this.updateRecentWeighIns(progressData);
 
@@ -221,6 +224,143 @@ const WeightLoggingModule = {
   },
 };
 
-// Remaining modules are defined similarly (PhotoUploadModule, PhotoComparisonModule, ExportModule)
+/* ================================
+    Photo Upload Module
+================================ */
+const PhotoUploadModule = {
+  init: function () {
+    console.log("Initializing Photo Upload Module...");
+    const photoForm = document.getElementById("photo-upload-form");
+    if (!photoForm) {
+      console.error("Photo upload form not found!");
+      return;
+    }
 
-// Write the full file content
+    photoForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      console.log("Photo upload form submitted!");
+
+      const fileInput = document.getElementById("photo-upload");
+      const dateInput = document.getElementById("photo-date");
+
+      if (!fileInput || !dateInput) {
+        console.error("File input or date input not found!");
+        return;
+      }
+
+      if (!fileInput.files[0] || !dateInput.value) {
+        alert("Please provide a photo and a date.");
+        console.log("Validation failed: missing file or date.");
+        return;
+      }
+
+      this.compressImage(fileInput.files[0], (compressedDataUrl) => {
+        const photos = JSON.parse(localStorage.getItem("photos")) || [];
+        photos.push({ src: compressedDataUrl, date: dateInput.value });
+        localStorage.setItem("photos", JSON.stringify(photos));
+        console.log("Photo saved successfully!");
+        this.loadPhotos();
+      });
+    });
+  },
+
+  compressImage: function (file, callback) {
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const img = new Image();
+      img.src = e.target.result;
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        const maxWidth = 800;
+        const scale = maxWidth / img.width;
+        canvas.width = maxWidth;
+        canvas.height = img.height * scale;
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+        callback(compressedDataUrl);
+      };
+    };
+
+    reader.onerror = () => {
+      console.error("Error reading image file.");
+      alert("Failed to upload the photo. Please try again.");
+    };
+
+    reader.readAsDataURL(file);
+  },
+
+  loadPhotos: function () {
+    console.log("Loading photos...");
+    const gallery = document.getElementById("photo-gallery");
+    if (!gallery) {
+      console.error("Photo gallery element not found!");
+      return;
+    }
+
+    const photos = JSON.parse(localStorage.getItem("photos")) || [];
+
+    if (!photos.length) {
+      gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
+      return;
+    }
+
+    gallery.innerHTML = photos
+      .map(
+        (photo, index) => `
+        <div class="photo-item">
+          <img src="${photo.src}" alt="Progress Photo">
+          <p>${photo.date}</p>
+          <button class="delete-photo-btn" data-index="${index}">Delete</button>
+        </div>
+      `
+      )
+      .join("");
+
+    const deleteButtons = document.querySelectorAll(".delete-photo-btn");
+    deleteButtons.forEach((button) =>
+      button.addEventListener("click", (e) => {
+        const index = e.target.getAttribute("data-index");
+        this.deletePhoto(index);
+      })
+    );
+  },
+
+  deletePhoto: function (index) {
+    console.log(`Deleting photo at index: ${index}`);
+    const photos = JSON.parse(localStorage.getItem("photos")) || [];
+    photos.splice(index, 1);
+    localStorage.setItem("photos", JSON.stringify(photos));
+    this.loadPhotos();
+  },
+
+  clearPhotos: function () {
+    console.log("Clearing all photos...");
+    localStorage.removeItem("photos");
+    PhotoUploadModule.loadPhotos();
+  },
+};
+
+// Placeholder for PhotoComparisonModule
+const PhotoComparisonModule = {
+  init: function () {
+    console.log("Initializing Photo Comparison Module...");
+    // Placeholder logic for future implementation
+  },
+};
+
+// Placeholder for ExportModule
+const ExportModule = {
+  init: function () {
+    console.log("Initializing Export Module...");
+    // Placeholder logic for future implementation
+  },
+};
+
+// Initialize the application
+window.addEventListener("DOMContentLoaded", GeneralModule.init);
