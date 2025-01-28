@@ -1,4 +1,8 @@
-const appVersion = "v7.41-beta";
+
+const appVersion = "v7.42-beta";
+
+// Declare global variables
+let chartInstance = null;
 
 /* ================================
     General Functionality
@@ -73,7 +77,7 @@ const ChartModule = {
 
     this.ensureCanvasReady(() => {
       const storedData = JSON.parse(localStorage.getItem("progressData")) || [];
-      this.renderChart([], storedData, true); // Replace demoData with an empty array for now
+      this.renderChart([], storedData, true);
     });
 
     const toggleDemoCheckbox = document.getElementById("toggle-demo-data");
@@ -173,7 +177,7 @@ const WeightLoggingModule = {
       localStorage.setItem("progressData", JSON.stringify(progressData));
 
       const showDemo = document.getElementById("toggle-demo-data")?.checked;
-      ChartModule.renderChart([], progressData, showDemo); // Replace demoData with empty array
+      ChartModule.renderChart([], progressData, showDemo);
       this.updateSummary(progressData);
       this.updateRecentWeighIns(progressData);
 
@@ -338,6 +342,22 @@ const PhotoUploadModule = {
     console.log("Clearing all photos...");
     localStorage.removeItem("photos");
     PhotoUploadModule.loadPhotos();
+  },
+};
+
+// Placeholder for PhotoComparisonModule
+const PhotoComparisonModule = {
+  init: function () {
+    console.log("Initializing Photo Comparison Module...");
+    // Placeholder logic for future implementation
+  },
+};
+
+// Placeholder for ExportModule
+const ExportModule = {
+  init: function () {
+    console.log("Initializing Export Module...");
+    // Placeholder logic for future implementation
   },
 };
 
