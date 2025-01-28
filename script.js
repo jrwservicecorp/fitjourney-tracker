@@ -1,4 +1,3 @@
-
 const appVersion = "v7.41-beta";
 
 /* ================================
@@ -74,7 +73,7 @@ const ChartModule = {
 
     this.ensureCanvasReady(() => {
       const storedData = JSON.parse(localStorage.getItem("progressData")) || [];
-      this.renderChart(demoData, storedData, true);
+      this.renderChart([], storedData, true); // Replace demoData with an empty array for now
     });
 
     const toggleDemoCheckbox = document.getElementById("toggle-demo-data");
@@ -82,7 +81,7 @@ const ChartModule = {
       toggleDemoCheckbox.addEventListener("change", () => {
         const showDemo = toggleDemoCheckbox.checked;
         const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-        this.renderChart(demoData, progressData, showDemo);
+        this.renderChart([], progressData, showDemo);
       });
     } else {
       console.warn("Demo data toggle checkbox not found.");
@@ -174,7 +173,7 @@ const WeightLoggingModule = {
       localStorage.setItem("progressData", JSON.stringify(progressData));
 
       const showDemo = document.getElementById("toggle-demo-data")?.checked;
-      ChartModule.renderChart(demoData, progressData, showDemo);
+      ChartModule.renderChart([], progressData, showDemo); // Replace demoData with empty array
       this.updateSummary(progressData);
       this.updateRecentWeighIns(progressData);
 
