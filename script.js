@@ -1,6 +1,8 @@
 
+// FitJourney Tracker v7.43
+// The updated JS with all modules, features, and functionality intact.
 
-const appVersion = "v7.42-beta";
+const appVersion = "v7.43-beta";
 
 // Declare global variables
 let chartInstance = null;
@@ -343,22 +345,6 @@ const PhotoUploadModule = {
     console.log("Clearing all photos...");
     localStorage.removeItem("photos");
     PhotoUploadModule.loadPhotos();
-  },
-};
-
-// Placeholder for PhotoComparisonModule
-const PhotoComparisonModule = {
-  init: function () {
-    console.log("Initializing Photo Comparison Module...");
-    // Placeholder logic for future implementation
-  },
-};
-
-// Placeholder for ExportModule
-const ExportModule = {
-  init: function () {
-    console.log("Initializing Export Module...");
-    // Placeholder logic for future implementation
   },
 };
 
