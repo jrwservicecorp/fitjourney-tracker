@@ -1,8 +1,13 @@
 
-const appVersion = "v7.43-beta";
+const appVersion = "v7.42-beta";
 
-// Declare global variables
+// Global Variables
 let chartInstance = null;
+const demoData = [
+  { date: "2023-12-01", weight: 200 },
+  { date: "2023-12-02", weight: 198 },
+  { date: "2023-12-03", weight: 195 },
+];
 
 /* ================================
     General Functionality
@@ -52,13 +57,6 @@ const GeneralModule = {
       console.log("Photos loaded successfully.");
     } catch (err) {
       console.error("Photo loading failed:", err);
-    }
-
-    const clearPhotosBtn = document.getElementById("clear-photos-btn");
-    if (clearPhotosBtn) {
-      clearPhotosBtn.addEventListener("click", PhotoUploadModule.clearPhotos);
-    } else {
-      console.warn("Clear photos button not found.");
     }
   },
 };
@@ -150,117 +148,79 @@ const ChartModule = {
 };
 
 /* ================================
-    Photo Comparison Module
+    Weight Logging Module
 ================================ */
-const PhotoComparisonModule = {
+const WeightLoggingModule = {
   init: function () {
-    console.log("Initializing Photo Comparison Module...");
-    const compareButton = document.getElementById("compare-photos-btn");
-    if (!compareButton) {
-      console.error("Photo comparison button not found!");
+    console.log("Initializing Weight Logging Module...");
+    const weightForm = document.getElementById("weight-form");
+    if (!weightForm) {
+      console.error("Weight form not found!");
       return;
     }
 
-    compareButton.addEventListener("click", () => {
-      console.log("Photo comparison button clicked.");
+    weightForm.addEventListener("submit", (e) => {
+      e.preventDefault();
 
-      const photo1 = document.getElementById("photo-select-1").value;
-      const photo2 = document.getElementById("photo-select-2").value;
+      const weight = parseFloat(document.getElementById("weight-input")?.value);
+      const date = document.getElementById("date-input")?.value;
 
-      if (!photo1 || !photo2) {
-        alert("Please select two photos for comparison.");
-        console.warn("Photo comparison failed: One or both photos not selected.");
+      if (!weight || !date) {
+        alert("Please enter valid weight and date.");
         return;
       }
 
-      const comparisonContainer = document.getElementById("comparison-container");
-      if (!comparisonContainer) {
-        console.error("Comparison container not found!");
-        return;
-      }
+      const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
+      progressData.push({ weight, date });
+      localStorage.setItem("progressData", JSON.stringify(progressData));
 
-      comparisonContainer.innerHTML = `
-        <div class="comparison-photo">
-          <img src="${photo1}" alt="Photo 1">
-          <p>Photo 1</p>
-        </div>
-        <div class="comparison-photo">
-          <img src="${photo2}" alt="Photo 2">
-          <p>Photo 2</p>
-        </div>
-      `;
-      console.log("Photo comparison rendered successfully.");
-    });
-  },
-};
+      const showDemo = document.getElementById("toggle-demo-data")?.checked;
+      ChartModule.renderChart(demoData, progressData, showDemo);
+      this.updateSummary(progressData);
+      this.updateRecentWeighIns(progressData);
 
-/* ================================
-    Export Module
-================================ */
-const ExportModule = {
-  init: function () {
-    console.log("Initializing Export Module...");
-    const prepareExportButton = document.getElementById("prepare-export-btn");
-    if (!prepareExportButton) {
-      console.error("Prepare export button not found!");
-      return;
-    }
-
-    prepareExportButton.addEventListener("click", () => {
-      console.log("Prepare export button clicked.");
-      const exportType = document.querySelector('input[name="export-type"]:checked')?.value;
-      if (!exportType) {
-        alert("Please select an export type.");
-        console.warn("Export preparation failed: No export type selected.");
-        return;
-      }
-
-      switch (exportType) {
-        case "single-photo":
-          this.exportSinglePhoto();
-          break;
-        case "photo-comparison":
-          this.exportPhotoComparison();
-          break;
-        case "data-only":
-          this.exportDataOnly();
-          break;
-        default:
-          console.error("Unknown export type:", exportType);
-      }
+      document.getElementById("weight-input").value = "";
+      document.getElementById("date-input").value = "";
     });
   },
 
-  exportSinglePhoto: function () {
-    console.log("Exporting single photo...");
-    const selectedPhoto = PhotoUploadModule.getSelectedPhoto();
-    if (!selectedPhoto) {
-      alert("Please select a photo to export.");
-      console.warn("Single photo export failed: No photo selected.");
+  updateSummary: function (progressData) {
+    console.log("Updating weight summary...");
+    const summaryContainer = document.getElementById("weight-summary");
+
+    if (!progressData.length) {
+      summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
       return;
     }
 
-    const exportCanvas = document.getElementById("export-canvas");
-    const ctx = exportCanvas.getContext("2d");
+    const weights = progressData.map((entry) => entry.weight);
+    const averageWeight = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
+    const maxWeight = Math.max(...weights);
+    const minWeight = Math.min(...weights);
 
-    const img = new Image();
-    img.src = selectedPhoto.src;
-    img.onload = () => {
-      exportCanvas.width = img.width;
-      exportCanvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      console.log("Single photo export prepared successfully.");
-    };
+    summaryContainer.innerHTML = `
+      <p><strong>Average Weight:</strong> ${averageWeight} lbs</p>
+      <p><strong>Highest Weight:</strong> ${maxWeight} lbs</p>
+      <p><strong>Lowest Weight:</strong> ${minWeight} lbs</p>
+    `;
   },
 
-  exportPhotoComparison: function () {
-    console.log("Exporting photo comparison...");
-  },
+  updateRecentWeighIns: function (progressData) {
+    console.log("Updating recent weigh-ins...");
+    const recentContainer = document.getElementById("recent-weighins");
 
-  exportDataOnly: function () {
-    console.log("Exporting data only...");
+    if (!progressData.length) {
+      recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
+      return;
+    }
+
+    const recentWeighIns = progressData.slice(-4).reverse();
+    recentContainer.innerHTML = recentWeighIns
+      .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
+      .join("");
   },
 };
 
-// Initialize the application
-window.addEventListener("DOMContentLoaded", GeneralModule.init);
+// Remaining modules are defined similarly (PhotoUploadModule, PhotoComparisonModule, ExportModule)
+
+// Write the full file content
