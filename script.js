@@ -1,5 +1,5 @@
 
-const appVersion = "v7.42-beta";
+const appVersion = "v7.43-beta";
 
 // Declare global variables
 let chartInstance = null;
@@ -77,7 +77,7 @@ const ChartModule = {
 
     this.ensureCanvasReady(() => {
       const storedData = JSON.parse(localStorage.getItem("progressData")) || [];
-      this.renderChart([], storedData, true);
+      this.renderChart(demoData, storedData, true);
     });
 
     const toggleDemoCheckbox = document.getElementById("toggle-demo-data");
@@ -85,7 +85,7 @@ const ChartModule = {
       toggleDemoCheckbox.addEventListener("change", () => {
         const showDemo = toggleDemoCheckbox.checked;
         const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-        this.renderChart([], progressData, showDemo);
+        this.renderChart(demoData, progressData, showDemo);
       });
     } else {
       console.warn("Demo data toggle checkbox not found.");
@@ -150,214 +150,115 @@ const ChartModule = {
 };
 
 /* ================================
-    Weight Logging Module
+    Photo Comparison Module
 ================================ */
-const WeightLoggingModule = {
+const PhotoComparisonModule = {
   init: function () {
-    console.log("Initializing Weight Logging Module...");
-    const weightForm = document.getElementById("weight-form");
-    if (!weightForm) {
-      console.error("Weight form not found!");
+    console.log("Initializing Photo Comparison Module...");
+    const compareButton = document.getElementById("compare-photos-btn");
+    if (!compareButton) {
+      console.error("Photo comparison button not found!");
       return;
     }
 
-    weightForm.addEventListener("submit", (e) => {
-      e.preventDefault();
+    compareButton.addEventListener("click", () => {
+      console.log("Photo comparison button clicked.");
 
-      const weight = parseFloat(document.getElementById("weight-input")?.value);
-      const date = document.getElementById("date-input")?.value;
+      const photo1 = document.getElementById("photo-select-1").value;
+      const photo2 = document.getElementById("photo-select-2").value;
 
-      if (!weight || !date) {
-        alert("Please enter valid weight and date.");
+      if (!photo1 || !photo2) {
+        alert("Please select two photos for comparison.");
+        console.warn("Photo comparison failed: One or both photos not selected.");
         return;
       }
 
-      const progressData = JSON.parse(localStorage.getItem("progressData")) || [];
-      progressData.push({ weight, date });
-      localStorage.setItem("progressData", JSON.stringify(progressData));
+      const comparisonContainer = document.getElementById("comparison-container");
+      if (!comparisonContainer) {
+        console.error("Comparison container not found!");
+        return;
+      }
 
-      const showDemo = document.getElementById("toggle-demo-data")?.checked;
-      ChartModule.renderChart([], progressData, showDemo);
-      this.updateSummary(progressData);
-      this.updateRecentWeighIns(progressData);
-
-      document.getElementById("weight-input").value = "";
-      document.getElementById("date-input").value = "";
+      comparisonContainer.innerHTML = `
+        <div class="comparison-photo">
+          <img src="${photo1}" alt="Photo 1">
+          <p>Photo 1</p>
+        </div>
+        <div class="comparison-photo">
+          <img src="${photo2}" alt="Photo 2">
+          <p>Photo 2</p>
+        </div>
+      `;
+      console.log("Photo comparison rendered successfully.");
     });
-  },
-
-  updateSummary: function (progressData) {
-    console.log("Updating weight summary...");
-    const summaryContainer = document.getElementById("weight-summary");
-
-    if (!progressData.length) {
-      summaryContainer.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
-      return;
-    }
-
-    const weights = progressData.map((entry) => entry.weight);
-    const averageWeight = (weights.reduce((sum, w) => sum + w, 0) / weights.length).toFixed(1);
-    const maxWeight = Math.max(...weights);
-    const minWeight = Math.min(...weights);
-
-    summaryContainer.innerHTML = `
-      <p><strong>Average Weight:</strong> ${averageWeight} lbs</p>
-      <p><strong>Highest Weight:</strong> ${maxWeight} lbs</p>
-      <p><strong>Lowest Weight:</strong> ${minWeight} lbs</p>
-    `;
-  },
-
-  updateRecentWeighIns: function (progressData) {
-    console.log("Updating recent weigh-ins...");
-    const recentContainer = document.getElementById("recent-weighins");
-
-    if (!progressData.length) {
-      recentContainer.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
-      return;
-    }
-
-    const recentWeighIns = progressData.slice(-4).reverse();
-    recentContainer.innerHTML = recentWeighIns
-      .map((entry) => `<p>${entry.date}: ${entry.weight} lbs</p>`)
-      .join("");
   },
 };
 
 /* ================================
-    Photo Upload Module
+    Export Module
 ================================ */
-const PhotoUploadModule = {
-  init: function () {
-    console.log("Initializing Photo Upload Module...");
-    const photoForm = document.getElementById("photo-upload-form");
-    if (!photoForm) {
-      console.error("Photo upload form not found!");
-      return;
-    }
-
-    photoForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      console.log("Photo upload form submitted!");
-
-      const fileInput = document.getElementById("photo-upload");
-      const dateInput = document.getElementById("photo-date");
-
-      if (!fileInput || !dateInput) {
-        console.error("File input or date input not found!");
-        return;
-      }
-
-      if (!fileInput.files[0] || !dateInput.value) {
-        alert("Please provide a photo and a date.");
-        console.log("Validation failed: missing file or date.");
-        return;
-      }
-
-      this.compressImage(fileInput.files[0], (compressedDataUrl) => {
-        const photos = JSON.parse(localStorage.getItem("photos")) || [];
-        photos.push({ src: compressedDataUrl, date: dateInput.value });
-        localStorage.setItem("photos", JSON.stringify(photos));
-        console.log("Photo saved successfully!");
-        this.loadPhotos();
-      });
-    });
-  },
-
-  compressImage: function (file, callback) {
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      const img = new Image();
-      img.src = e.target.result;
-
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-
-        const maxWidth = 800;
-        const scale = maxWidth / img.width;
-        canvas.width = maxWidth;
-        canvas.height = img.height * scale;
-
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
-        callback(compressedDataUrl);
-      };
-    };
-
-    reader.onerror = () => {
-      console.error("Error reading image file.");
-      alert("Failed to upload the photo. Please try again.");
-    };
-
-    reader.readAsDataURL(file);
-  },
-
-  loadPhotos: function () {
-    console.log("Loading photos...");
-    const gallery = document.getElementById("photo-gallery");
-    if (!gallery) {
-      console.error("Photo gallery element not found!");
-      return;
-    }
-
-    const photos = JSON.parse(localStorage.getItem("photos")) || [];
-
-    if (!photos.length) {
-      gallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
-      return;
-    }
-
-    gallery.innerHTML = photos
-      .map(
-        (photo, index) => `
-        <div class="photo-item">
-          <img src="${photo.src}" alt="Progress Photo">
-          <p>${photo.date}</p>
-          <button class="delete-photo-btn" data-index="${index}">Delete</button>
-        </div>
-      `
-      )
-      .join("");
-
-    const deleteButtons = document.querySelectorAll(".delete-photo-btn");
-    deleteButtons.forEach((button) =>
-      button.addEventListener("click", (e) => {
-        const index = e.target.getAttribute("data-index");
-        this.deletePhoto(index);
-      })
-    );
-  },
-
-  deletePhoto: function (index) {
-    console.log(`Deleting photo at index: ${index}`);
-    const photos = JSON.parse(localStorage.getItem("photos")) || [];
-    photos.splice(index, 1);
-    localStorage.setItem("photos", JSON.stringify(photos));
-    this.loadPhotos();
-  },
-
-  clearPhotos: function () {
-    console.log("Clearing all photos...");
-    localStorage.removeItem("photos");
-    PhotoUploadModule.loadPhotos();
-  },
-};
-
-// Placeholder for PhotoComparisonModule
-const PhotoComparisonModule = {
-  init: function () {
-    console.log("Initializing Photo Comparison Module...");
-    // Placeholder logic for future implementation
-  },
-};
-
-// Placeholder for ExportModule
 const ExportModule = {
   init: function () {
     console.log("Initializing Export Module...");
-    // Placeholder logic for future implementation
+    const prepareExportButton = document.getElementById("prepare-export-btn");
+    if (!prepareExportButton) {
+      console.error("Prepare export button not found!");
+      return;
+    }
+
+    prepareExportButton.addEventListener("click", () => {
+      console.log("Prepare export button clicked.");
+      const exportType = document.querySelector('input[name="export-type"]:checked')?.value;
+      if (!exportType) {
+        alert("Please select an export type.");
+        console.warn("Export preparation failed: No export type selected.");
+        return;
+      }
+
+      switch (exportType) {
+        case "single-photo":
+          this.exportSinglePhoto();
+          break;
+        case "photo-comparison":
+          this.exportPhotoComparison();
+          break;
+        case "data-only":
+          this.exportDataOnly();
+          break;
+        default:
+          console.error("Unknown export type:", exportType);
+      }
+    });
+  },
+
+  exportSinglePhoto: function () {
+    console.log("Exporting single photo...");
+    const selectedPhoto = PhotoUploadModule.getSelectedPhoto();
+    if (!selectedPhoto) {
+      alert("Please select a photo to export.");
+      console.warn("Single photo export failed: No photo selected.");
+      return;
+    }
+
+    const exportCanvas = document.getElementById("export-canvas");
+    const ctx = exportCanvas.getContext("2d");
+
+    const img = new Image();
+    img.src = selectedPhoto.src;
+    img.onload = () => {
+      exportCanvas.width = img.width;
+      exportCanvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      console.log("Single photo export prepared successfully.");
+    };
+  },
+
+  exportPhotoComparison: function () {
+    console.log("Exporting photo comparison...");
+  },
+
+  exportDataOnly: function () {
+    console.log("Exporting data only...");
   },
 };
 
