@@ -1,7 +1,7 @@
 
-// FitJourney Tracker - Version v7.46 (Fixed Chart Issue)
+// FitJourney Tracker - Version v7.46 (Fixed Canvas & EventListener Errors)
 
-document.addEventListener('DOMContentLoaded', () => {
+window.onload = function() {
     console.log("FitJourney Tracker v7.46 initializing...");
 
     try {
@@ -20,16 +20,16 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
-});
+};
 
-// Chart Module (Fixed)
+// Chart Module (Fixed for Missing Canvas)
 const ChartModule = {
     init: function() {
         console.log("ChartModule loaded");
         const canvas = document.getElementById('weightChart');
 
         if (!canvas) {
-            console.error("Canvas element #weightChart is missing!");
+            console.warn("Warning: Canvas element #weightChart is missing! Chart will not load.");
             return;
         }
 
@@ -49,43 +49,72 @@ const ChartModule = {
     }
 };
 
-// Weight Logging Module
+// Weight Logging Module (Fixed for Missing Button)
 const WeightLoggingModule = {
     init: function() {
         console.log("WeightLoggingModule loaded");
-        document.getElementById('logWeightBtn').addEventListener('click', () => {
-            const weight = document.getElementById('weightInput').value;
+        const button = document.getElementById('logWeightBtn');
+        const input = document.getElementById('weightInput');
+
+        if (!button || !input) {
+            console.warn("Warning: Weight logging elements are missing! Weight logging will not work.");
+            return;
+        }
+
+        button.addEventListener('click', () => {
+            const weight = input.value;
             console.log("Weight logged:", weight);
         });
     }
 };
 
-// Photo Upload Module
+// Photo Upload Module (Fixed for Missing Input)
 const PhotoUploadModule = {
     init: function() {
         console.log("PhotoUploadModule loaded");
-        document.getElementById('uploadPhoto').addEventListener('change', (event) => {
+        const input = document.getElementById('uploadPhoto');
+
+        if (!input) {
+            console.warn("Warning: Photo upload input is missing! Photo upload will not work.");
+            return;
+        }
+
+        input.addEventListener('change', (event) => {
             const file = event.target.files[0];
             console.log("Photo uploaded:", file.name);
         });
     }
 };
 
-// Photo Comparison Module
+// Photo Comparison Module (Fixed for Missing Button)
 const PhotoComparisonModule = {
     init: function() {
         console.log("PhotoComparisonModule loaded");
-        document.getElementById('comparePhotosBtn').addEventListener('click', () => {
+        const button = document.getElementById('comparePhotosBtn');
+
+        if (!button) {
+            console.warn("Warning: Photo comparison button is missing! Comparison will not work.");
+            return;
+        }
+
+        button.addEventListener('click', () => {
             console.log("Photo comparison triggered");
         });
     }
 };
 
-// Export Module
+// Export Module (Fixed for Missing Button)
 const ExportModule = {
     init: function() {
         console.log("ExportModule loaded");
-        document.getElementById('exportDataBtn').addEventListener('click', () => {
+        const button = document.getElementById('exportDataBtn');
+
+        if (!button) {
+            console.warn("Warning: Export button is missing! Export will not work.");
+            return;
+        }
+
+        button.addEventListener('click', () => {
             console.log("Exporting data...");
         });
     }
