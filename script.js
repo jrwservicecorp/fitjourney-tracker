@@ -1,5 +1,5 @@
 
-// FitJourney Tracker - Version v7.46
+// FitJourney Tracker - Version v7.46 (Fixed Chart Issue)
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("FitJourney Tracker v7.46 initializing...");
@@ -22,12 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Chart Module
+// Chart Module (Fixed)
 const ChartModule = {
     init: function() {
         console.log("ChartModule loaded");
+        const canvas = document.getElementById('weightChart');
+
+        if (!canvas) {
+            console.error("Canvas element #weightChart is missing!");
+            return;
+        }
+
         if (typeof Chart !== 'undefined') {
-            const ctx = document.getElementById('weightChart').getContext('2d');
+            const ctx = canvas.getContext('2d');
             new Chart(ctx, {
                 type: 'line',
                 data: {
