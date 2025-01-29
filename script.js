@@ -1,14 +1,22 @@
 
-// FitJourney Tracker - Main Script with All Modules
+// FitJourney Tracker - Version v7.46
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("FitJourney Tracker v7.46 initializing...");
+
     try {
         ChartModule.init();
         WeightLoggingModule.init();
         PhotoUploadModule.init();
         PhotoComparisonModule.init();
         ExportModule.init();
-        console.log("All modules initialized successfully.");
+        StreakTrackerModule.init();
+        UserProfileModule.init();
+        CommunityEngagementModule.init();
+        DarkModeModule.init();
+        CsvExportModule.init();
+
+        console.log("All modules initialized successfully in FitJourney Tracker v7.46.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -73,5 +81,40 @@ const ExportModule = {
         document.getElementById('exportDataBtn').addEventListener('click', () => {
             console.log("Exporting data...");
         });
+    }
+};
+
+// Streak Tracker Module
+const StreakTrackerModule = {
+    init: function() {
+        console.log("StreakTrackerModule loaded");
+    }
+};
+
+// User Profile Module
+const UserProfileModule = {
+    init: function() {
+        console.log("UserProfileModule loaded");
+    }
+};
+
+// Community Engagement Module
+const CommunityEngagementModule = {
+    init: function() {
+        console.log("CommunityEngagementModule loaded");
+    }
+};
+
+// Dark Mode Module
+const DarkModeModule = {
+    init: function() {
+        console.log("DarkModeModule loaded");
+    }
+};
+
+// CSV Export Module
+const CsvExportModule = {
+    init: function() {
+        console.log("CsvExportModule loaded");
     }
 };
