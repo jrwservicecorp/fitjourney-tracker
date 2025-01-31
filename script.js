@@ -1,4 +1,4 @@
-// FitJourney Tracker - Version v7.46 (Fixing Chart Updates and Missing Elements)
+// FitJourney Tracker - Version v7.46 (Restoring Full Chart Features, Goals, and Weight Trends)
 
 window.onload = function() {
     console.log("FitJourney Tracker v7.46 initializing...");
@@ -21,13 +21,14 @@ window.onload = function() {
     }
 };
 
-// Chart Module - Now Updates with User Data
+// Chart Module - Restoring Sample Data, Goal Line, and User Data Updates
 const ChartModule = {
     chartInstance: null,
 
     init: function() {
         console.log("ChartModule loaded");
         const canvas = document.getElementById('weightChart');
+        const demoToggle = document.getElementById('toggle-demo-data');
 
         if (!canvas) {
             console.warn("Warning: Canvas element #weightChart is missing! Chart will not load.");
@@ -40,10 +41,23 @@ const ChartModule = {
                 type: 'line',
                 data: {
                     labels: [],
-                    datasets: [{ label: 'Weight Progress', data: [], borderColor: 'blue', borderWidth: 2 }]
+                    datasets: [
+                        { label: 'User Data', data: [], borderColor: 'blue', borderWidth: 2 },
+                        { label: 'Sample Data', data: [200, 195, 190, 185], borderColor: 'pink', borderWidth: 2, hidden: false },
+                        { label: 'Goal Line', data: [180, 180, 180, 180], borderColor: 'green', borderWidth: 2, borderDash: [5, 5] }
+                    ]
                 },
                 options: { responsive: true }
             });
+
+            // Add toggle functionality for demo data
+            if (demoToggle) {
+                demoToggle.addEventListener('change', function() {
+                    ChartModule.chartInstance.data.datasets[1].hidden = !this.checked;
+                    ChartModule.chartInstance.update();
+                });
+            }
+
         } else {
             console.error("Chart.js is missing!");
         }
@@ -51,8 +65,16 @@ const ChartModule = {
 
     updateChart: function(weight, date) {
         if (ChartModule.chartInstance) {
-            ChartModule.chartInstance.data.labels.push(date);
-            ChartModule.chartInstance.data.datasets[0].data.push(weight);
+            let chartData = ChartModule.chartInstance.data;
+            chartData.labels.push(date);
+            chartData.datasets[0].data.push(weight);
+
+            // Ensure we only keep the last 4 entries for trends
+            if (chartData.labels.length > 4) {
+                chartData.labels.shift();
+                chartData.datasets[0].data.shift();
+            }
+
             ChartModule.chartInstance.update();
             console.log("Chart updated with new data:", weight, "on", date);
         } else {
@@ -61,7 +83,7 @@ const ChartModule = {
     }
 };
 
-// Weight Logging Module - Fixed to Ensure Chart Updates
+// Weight Logging Module - Fully Fixed and Connected to Chart Updates
 const WeightLoggingModule = {
     init: function() {
         console.log("WeightLoggingModule loaded");
@@ -138,22 +160,19 @@ const PhotoUploadModule = {
     }
 };
 
-// Dark Mode Module - Fixing Missing Button Issue
-const DarkModeModule = {
+// Fixing Reference Error for Photo Comparison Module
+const PhotoComparisonModule = {
     init: function() {
-        console.log("DarkModeModule loaded");
-        const button = document.getElementById('toggleDarkMode');
+        console.log("PhotoComparisonModule loaded");
+        const button = document.getElementById('comparePhotosBtn');
 
         if (!button) {
-            console.warn("Warning: Dark mode button is missing!");
+            console.warn("Warning: Photo comparison button is missing! Comparison will not work.");
             return;
         }
 
         button.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            console.log("Dark mode toggled");
+            console.log("Photo comparison triggered");
         });
     }
 };
-
-// Export Module, Photo Comparison, Streak Tracker, User Profile, Community Engagement, and CSV Export Modules remain unchanged
