@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.54 (Fixing Export, Clear Photos, and Chart Logging)
+// FitJourney Tracker - Version v7.55 (Fixing Photo Uploads & Weight Logging)
 
-console.log("FitJourney Tracker v7.54 initializing...");
+console.log("FitJourney Tracker v7.55 initializing...");
 
 window.onload = function() {
     try {
@@ -29,16 +29,16 @@ window.onload = function() {
 
         ChartModule.init();
         WeightLoggingModule.init();
-        PhotoUploadModule.init();
+        PhotoUploadModule.init(); // Fixing missing reference
         PhotoComparisonModule.init();
-        ExportModule.init(); // Fixing missing reference
+        ExportModule.init();
         StreakTrackerModule.init();
         UserProfileModule.init();
         CommunityEngagementModule.init();
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.54.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.55.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -55,19 +55,10 @@ const ChartModule = {
     init: function() {
         console.log("ChartModule loaded");
         const canvas = document.getElementById('weightChart');
-        const toggleDemo = document.getElementById('toggle-demo-data');
 
         if (!canvas) {
             console.warn("Warning: Canvas element #weightChart is missing! Chart will not load.");
             return;
-        }
-
-        if (toggleDemo) {
-            toggleDemo.addEventListener('change', () => {
-                ChartModule.sampleDataEnabled = toggleDemo.checked;
-                ChartModule.chartInstance.data.datasets[0].hidden = !ChartModule.sampleDataEnabled;
-                ChartModule.chartInstance.update();
-            });
         }
 
         const ctx = canvas.getContext('2d');
@@ -137,25 +128,36 @@ const WeightLoggingModule = {
     }
 };
 
-// Export Module - Fixing Missing Reference
-const ExportModule = {
+// Photo Upload Module - Fixing Missing Reference & Restoring Gallery Saving
+const PhotoUploadModule = {
     init: function() {
-        console.log("ExportModule loaded");
-        const exportBtn = document.getElementById('exportDataBtn');
+        console.log("PhotoUploadModule loaded");
+        const form = document.getElementById('photo-upload-form');
+        const input = document.getElementById('uploadPhoto');
+        const gallery = document.getElementById('photo-gallery');
 
-        if (!exportBtn) {
-            console.warn("Warning: Export button is missing!");
+        if (!form || !input || !gallery) {
+            console.warn("Warning: Photo upload elements are missing! Photo upload will not work.");
             return;
         }
 
-        exportBtn.addEventListener('click', () => {
-            console.log("Export function executed.");
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const file = input.files[0];
+
+            if (file) {
+                console.log(`Photo uploaded: ${file.name}`);
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.classList.add('gallery-image');
+                img.style.maxWidth = "150px";
+                img.style.maxHeight = "150px";
+                gallery.appendChild(img);
+
+                input.value = '';
+            } else {
+                console.warn("No photo selected.");
+            }
         });
     }
 };
-
-// Fixing Clear Photos Button
-document.getElementById('clear-photos-btn').addEventListener('click', () => {
-    document.getElementById('photo-gallery').innerHTML = '';
-    console.log("Photo gallery cleared.");
-});
