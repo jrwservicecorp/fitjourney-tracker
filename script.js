@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.51 (Fixing Chart, Weight Logging & Photo Uploads)
+// FitJourney Tracker - Version v7.52 (Restoring Sample Data & Fixing Features)
 
-console.log("FitJourney Tracker v7.51 initializing...");
+console.log("FitJourney Tracker v7.52 initializing...");
 
 window.onload = function() {
     try {
@@ -14,7 +14,10 @@ window.onload = function() {
             recentWeighIns: document.getElementById('recent-weighins'),
             photoUploadForm: document.getElementById('photo-upload-form'),
             photoUploadInput: document.getElementById('uploadPhoto'),
-            photoGallery: document.getElementById('photo-gallery')
+            photoGallery: document.getElementById('photo-gallery'),
+            clearPhotosButton: document.getElementById('clear-photos-btn'),
+            comparePhotosButton: document.getElementById('comparePhotosBtn'),
+            exportButton: document.getElementById('exportDataBtn')
         };
 
         for (const [key, value] of Object.entries(requiredElements)) {
@@ -34,19 +37,32 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.51.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.52.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
 };
 
-// Chart Module - Fixes Display Issue
+// Chart Module - Restoring Sample Data & Toggle Feature
 const ChartModule = {
     chartInstance: null,
+    sampleDataEnabled: true,
+    sampleWeights: [200, 195, 190, 185],
+    userWeights: [],
+    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
 
     init: function() {
         console.log("ChartModule loaded");
         const canvas = document.getElementById('weightChart');
+        const toggleDemo = document.createElement('input');
+        toggleDemo.type = "checkbox";
+        toggleDemo.checked = ChartModule.sampleDataEnabled;
+        toggleDemo.id = "toggle-demo-data";
+        toggleDemo.addEventListener("change", () => {
+            ChartModule.sampleDataEnabled = toggleDemo.checked;
+            ChartModule.chartInstance.data.datasets[0].hidden = !ChartModule.sampleDataEnabled;
+            ChartModule.chartInstance.update();
+        });
 
         if (!canvas) {
             console.warn("Warning: Canvas element #weightChart is missing! Chart will not load.");
@@ -57,8 +73,11 @@ const ChartModule = {
         ChartModule.chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [],
-                datasets: [{ label: 'Your Progress', data: [], borderColor: 'blue', borderWidth: 2 }]
+                labels: ChartModule.labels,
+                datasets: [
+                    { label: 'Sample Data', data: ChartModule.sampleWeights, borderColor: 'pink', borderWidth: 2 },
+                    { label: 'Your Progress', data: ChartModule.userWeights, borderColor: 'blue', borderWidth: 2 }
+                ]
             },
             options: { responsive: true }
         });
@@ -68,8 +87,16 @@ const ChartModule = {
 
     updateChart: function(weight, date) {
         if (ChartModule.chartInstance) {
-            ChartModule.chartInstance.data.labels.push(date);
-            ChartModule.chartInstance.data.datasets[0].data.push(weight);
+            ChartModule.labels.push(date);
+            ChartModule.userWeights.push(weight);
+
+            if (ChartModule.labels.length > 4) {
+                ChartModule.labels.shift();
+                ChartModule.userWeights.shift();
+            }
+
+            ChartModule.chartInstance.data.labels = ChartModule.labels;
+            ChartModule.chartInstance.data.datasets[1].data = ChartModule.userWeights;
             ChartModule.chartInstance.update();
             console.log(`Chart updated: ${weight} lbs on ${date}`);
         } else {
@@ -125,8 +152,9 @@ const PhotoUploadModule = {
         const form = document.getElementById('photo-upload-form');
         const input = document.getElementById('uploadPhoto');
         const gallery = document.getElementById('photo-gallery');
+        const clearPhotosButton = document.getElementById('clear-photos-btn');
 
-        if (!form || !input || !gallery) {
+        if (!form || !input || !gallery || !clearPhotosButton) {
             console.warn("Warning: Photo upload elements are missing! Photo upload will not work.");
             return;
         }
@@ -147,54 +175,10 @@ const PhotoUploadModule = {
                 console.warn("No photo selected.");
             }
         });
-    }
-};
 
-// Photo Comparison Module - Debugging Initialization
-const PhotoComparisonModule = {
-    init: function() {
-        console.log("PhotoComparisonModule loaded");
-    }
-};
-
-// Export Module - Debugging Initialization
-const ExportModule = {
-    init: function() {
-        console.log("ExportModule loaded");
-    }
-};
-
-// Streak Tracker Module - Debugging Initialization
-const StreakTrackerModule = {
-    init: function() {
-        console.log("StreakTrackerModule loaded");
-    }
-};
-
-// User Profile Module - Debugging Initialization
-const UserProfileModule = {
-    init: function() {
-        console.log("UserProfileModule loaded");
-    }
-};
-
-// Community Engagement Module - Debugging Initialization
-const CommunityEngagementModule = {
-    init: function() {
-        console.log("CommunityEngagementModule loaded");
-    }
-};
-
-// Dark Mode Module - Debugging Initialization
-const DarkModeModule = {
-    init: function() {
-        console.log("DarkModeModule loaded");
-    }
-};
-
-// CSV Export Module - Debugging Initialization
-const CsvExportModule = {
-    init: function() {
-        console.log("CsvExportModule loaded");
+        clearPhotosButton.addEventListener('click', () => {
+            gallery.innerHTML = '<p class="placeholder">No photos uploaded yet.</p>';
+            console.log("Photo gallery cleared.");
+        });
     }
 };
