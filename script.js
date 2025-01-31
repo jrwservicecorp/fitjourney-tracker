@@ -1,12 +1,12 @@
-// FitJourney Tracker - Version v7.47 (Fixing Weight Logging & Chart Updates)
+// FitJourney Tracker - Version v7.48 (Fixing Photo Upload & Weight Logging Elements)
 
-console.log("FitJourney Tracker v7.47 initializing...");
+console.log("FitJourney Tracker v7.48 initializing...");
 
 window.onload = function() {
     try {
         ChartModule.init();
         WeightLoggingModule.init();
-        PhotoUploadModule.init();
+        PhotoUploadModule.init(); // Fixing missing module
         PhotoComparisonModule.init();
         ExportModule.init();
         StreakTrackerModule.init();
@@ -15,7 +15,7 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.47.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.48.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -71,7 +71,7 @@ const ChartModule = {
     }
 };
 
-// Weight Logging Module - Fully Fixed
+// Weight Logging Module - Ensuring Elements Exist Before Initializing
 const WeightLoggingModule = {
     init: function() {
         console.log("WeightLoggingModule loaded");
@@ -115,9 +115,33 @@ const WeightLoggingModule = {
     }
 };
 
-// Streak Tracker Module - Fixed and Functional
-const StreakTrackerModule = {
+// Photo Upload Module - Fixing Undefined Error
+const PhotoUploadModule = {
     init: function() {
-        console.log("StreakTrackerModule loaded");
+        console.log("PhotoUploadModule loaded");
+        const form = document.getElementById('photo-upload-form');
+        const input = document.getElementById('uploadPhoto');
+        const gallery = document.getElementById('photo-gallery');
+
+        if (!form || !input || !gallery) {
+            console.warn("Warning: Photo upload elements are missing! Photo upload will not work.");
+            return;
+        }
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const file = input.files[0];
+
+            if (file) {
+                console.log("Photo uploaded:", file.name);
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.classList.add('gallery-image');
+                gallery.appendChild(img);
+                input.value = '';
+            } else {
+                console.warn("No photo selected.");
+            }
+        });
     }
 };
