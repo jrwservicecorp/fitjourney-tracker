@@ -1,4 +1,4 @@
-// FitJourney Tracker - Version v7.46 (Full Version with All Features and Modules)
+// FitJourney Tracker - Version v7.46 (Ensuring Modules Update Page Properly)
 
 window.onload = function() {
     console.log("FitJourney Tracker v7.46 initializing...");
@@ -48,46 +48,63 @@ const ChartModule = {
     }
 };
 
-// Weight Logging Module
+// Weight Logging Module - Updates Recent Weigh-Ins
 const WeightLoggingModule = {
     init: function() {
         console.log("WeightLoggingModule loaded");
-        const button = document.getElementById('logWeightBtn');
+        const form = document.getElementById('weight-form');
         const input = document.getElementById('weightInput');
+        const dateInput = document.getElementById('dateInput');
+        const recentWeighIns = document.getElementById('recent-weighins');
 
-        if (!button || !input) {
+        if (!form || !input || !dateInput || !recentWeighIns) {
             console.warn("Warning: Weight logging elements are missing! Weight logging will not work.");
             return;
         }
 
-        button.addEventListener('click', () => {
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
             const weight = input.value;
-            if (weight) {
-                console.log("Weight logged:", weight);
+            const date = dateInput.value;
+
+            if (weight && date) {
+                console.log("Weight logged:", weight, "on", date);
+                const entry = document.createElement('p');
+                entry.textContent = `Weight: ${weight} lbs on ${date}`;
+                recentWeighIns.appendChild(entry);
+                input.value = '';
+                dateInput.value = '';
             } else {
-                console.warn("No weight entered.");
+                console.warn("No weight or date entered.");
             }
         });
     }
 };
 
-// Photo Upload Module
+// Photo Upload Module - Updates Gallery
 const PhotoUploadModule = {
     init: function() {
         console.log("PhotoUploadModule loaded");
-        const input = document.getElementById('uploadPhoto');
         const form = document.getElementById('photo-upload-form');
+        const input = document.getElementById('uploadPhoto');
+        const gallery = document.getElementById('photo-gallery');
 
-        if (!input || !form) {
-            console.warn("Warning: Photo upload input or form is missing! Photo upload will not work.");
+        if (!form || !input || !gallery) {
+            console.warn("Warning: Photo upload elements are missing! Photo upload will not work.");
             return;
         }
 
         form.addEventListener('submit', (event) => {
             event.preventDefault();
             const file = input.files[0];
+
             if (file) {
                 console.log("Photo uploaded:", file.name);
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.classList.add('gallery-image');
+                gallery.appendChild(img);
+                input.value = '';
             } else {
                 console.warn("No photo selected.");
             }
