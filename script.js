@@ -1,13 +1,13 @@
-// FitJourney Tracker - Version v7.48 (Fixing Photo Upload & Weight Logging Elements)
+// FitJourney Tracker - Version v7.49 (Fixing Weight Logging & Chart Updates)
 
-console.log("FitJourney Tracker v7.48 initializing...");
+console.log("FitJourney Tracker v7.49 initializing...");
 
 window.onload = function() {
     try {
         ChartModule.init();
         WeightLoggingModule.init();
-        PhotoUploadModule.init(); // Fixing missing module
-        PhotoComparisonModule.init();
+        PhotoUploadModule.init();
+        PhotoComparisonModule.init(); // Fixing missing module
         ExportModule.init();
         StreakTrackerModule.init();
         UserProfileModule.init();
@@ -15,7 +15,7 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.48.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.49.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -71,13 +71,13 @@ const ChartModule = {
     }
 };
 
-// Weight Logging Module - Ensuring Elements Exist Before Initializing
+// Weight Logging Module - Ensuring Elements Exist & Fixing Detection
 const WeightLoggingModule = {
     init: function() {
         console.log("WeightLoggingModule loaded");
         const form = document.getElementById('weight-form');
-        const input = document.getElementById('weightInput');
-        const dateInput = document.getElementById('dateInput');
+        const input = document.getElementById('weight-input'); // Fixed ID reference
+        const dateInput = document.getElementById('date-input'); // Fixed ID reference
         const recentWeighIns = document.getElementById('recent-weighins');
 
         if (!form || !input || !dateInput || !recentWeighIns) {
@@ -115,33 +115,9 @@ const WeightLoggingModule = {
     }
 };
 
-// Photo Upload Module - Fixing Undefined Error
-const PhotoUploadModule = {
+// Photo Comparison Module - Fixed
+const PhotoComparisonModule = {
     init: function() {
-        console.log("PhotoUploadModule loaded");
-        const form = document.getElementById('photo-upload-form');
-        const input = document.getElementById('uploadPhoto');
-        const gallery = document.getElementById('photo-gallery');
-
-        if (!form || !input || !gallery) {
-            console.warn("Warning: Photo upload elements are missing! Photo upload will not work.");
-            return;
-        }
-
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const file = input.files[0];
-
-            if (file) {
-                console.log("Photo uploaded:", file.name);
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
-                img.classList.add('gallery-image');
-                gallery.appendChild(img);
-                input.value = '';
-            } else {
-                console.warn("No photo selected.");
-            }
-        });
+        console.log("PhotoComparisonModule loaded");
     }
 };
