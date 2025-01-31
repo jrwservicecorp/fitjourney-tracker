@@ -1,27 +1,27 @@
-// FitJourney Tracker - Version v7.46 (Fixing Sample Data on Load and Missing Streak Tracker)
+// FitJourney Tracker - Version v7.47 (Fixing Weight Logging & Chart Updates)
+
+console.log("FitJourney Tracker v7.47 initializing...");
 
 window.onload = function() {
-    console.log("FitJourney Tracker v7.46 initializing...");
-
     try {
         ChartModule.init();
         WeightLoggingModule.init();
         PhotoUploadModule.init();
         PhotoComparisonModule.init();
         ExportModule.init();
-        StreakTrackerModule.init(); // Fixing missing module
+        StreakTrackerModule.init();
         UserProfileModule.init();
         CommunityEngagementModule.init();
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.46.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.47.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
 };
 
-// Chart Module - Ensuring Sample Data Loads on First Page Load
+// Chart Module - Ensuring Sample Data Loads and User Data Updates Chart
 const ChartModule = {
     chartInstance: null,
     labels: ["Day 1", "Day 2", "Day 3", "Day 4"],
@@ -71,7 +71,51 @@ const ChartModule = {
     }
 };
 
-// Streak Tracker Module - Fixing Undefined Error
+// Weight Logging Module - Fully Fixed
+const WeightLoggingModule = {
+    init: function() {
+        console.log("WeightLoggingModule loaded");
+        const form = document.getElementById('weight-form');
+        const input = document.getElementById('weightInput');
+        const dateInput = document.getElementById('dateInput');
+        const recentWeighIns = document.getElementById('recent-weighins');
+
+        if (!form || !input || !dateInput || !recentWeighIns) {
+            console.warn("Warning: Weight logging elements are missing! Weight logging will not work.");
+            return;
+        }
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const weight = parseFloat(input.value.trim());
+            const date = dateInput.value.trim();
+
+            if (weight && date) {
+                console.log("Weight logged:", weight, "on", date);
+
+                // Ensure the placeholder is removed
+                const placeholder = recentWeighIns.querySelector('.placeholder');
+                if (placeholder) placeholder.remove();
+
+                // Add the new weight entry
+                const entry = document.createElement('p');
+                entry.textContent = `Weight: ${weight} lbs on ${date}`;
+                recentWeighIns.appendChild(entry);
+
+                // Update the Chart
+                ChartModule.updateChart(weight, date);
+
+                // Clear input fields after logging
+                input.value = '';
+                dateInput.value = '';
+            } else {
+                console.warn("No weight or date entered.");
+            }
+        });
+    }
+};
+
+// Streak Tracker Module - Fixed and Functional
 const StreakTrackerModule = {
     init: function() {
         console.log("StreakTrackerModule loaded");
