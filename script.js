@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.73 (Chart Upgrades: Goal Line, Trend Analysis, Interactive Sample Data Toggle)
+// FitJourney Tracker - Version v7.74 (Restored Stability + Chart Upgrades)
 
-console.log("FitJourney Tracker v7.73 initializing...");
+console.log("FitJourney Tracker v7.74 initializing...");
 
 window.onload = function() {
     try {
@@ -31,7 +31,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.73";
+            requiredElements.versionDisplay.innerText = "v7.74";
         }
 
         ChartModule.init();
@@ -45,13 +45,13 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.73.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.74.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
 };
 
-// Chart Module - Adding Goal Line & Trend Analysis
+// Chart Module - RESTORING & ENHANCING (Goal Line, Trend Analysis, Sample Data Toggle)
 const ChartModule = {
     chartInstance: null,
     sampleDataEnabled: true,
