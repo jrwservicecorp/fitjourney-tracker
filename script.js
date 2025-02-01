@@ -114,3 +114,46 @@ const ChartModule = {
         console.log(`Chart updated: ${weight} lbs on ${date}`);
     }
 };
+
+// Weight Logging Module - FINAL FIX: Updates Summary & Chart
+const WeightLoggingModule = {
+    init: function() {
+        console.log("WeightLoggingModule loaded");
+        const form = document.getElementById('weight-form');
+        const input = document.getElementById('weight-input');
+        const dateInput = document.getElementById('date-input');
+        const recentWeighIns = document.getElementById('recent-weighins');
+        const weightSummary = document.getElementById('weight-summary');
+
+        if (!form || !input || !dateInput || !recentWeighIns || !weightSummary) {
+            console.warn("Warning: Weight logging elements are missing! Weight logging will not work.");
+            return;
+        }
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const weight = parseFloat(input.value.trim());
+            const date = dateInput.value.trim();
+
+            if (weight && date) {
+                console.log(`Weight logged: ${weight} lbs on ${date}`);
+
+                if (recentWeighIns.querySelector('.placeholder')) {
+                    recentWeighIns.innerHTML = "";
+                }
+                recentWeighIns.innerHTML += `<p>Weight: ${weight} lbs on ${date}</p>`;
+
+                // Update weight summary
+                weightSummary.innerHTML = `<p>Latest weight: ${weight} lbs on ${date}</p>`;
+
+                // Update chart
+                ChartModule.updateChart(weight, date);
+
+                input.value = '';
+                dateInput.value = '';
+            } else {
+                console.warn("No weight or date entered.");
+            }
+        });
+    }
+};
