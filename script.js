@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.75 (Fixing Weight Logging & Missing Elements)
+// FitJourney Tracker - Version v7.76 (FULL RESTORE - CHART FIXES)
 
-console.log("FitJourney Tracker v7.75 initializing...");
+console.log("FitJourney Tracker v7.76 initializing...");
 
 window.onload = function() {
     try {
@@ -31,11 +31,11 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.75";
+            requiredElements.versionDisplay.innerText = "v7.76";
         }
 
-        ChartModule.init();
-        WeightLoggingModule.init();  // Ensuring Weight Logging initializes
+        ChartModule.init();  // FULL RESTORE
+        WeightLoggingModule.init();
         PhotoUploadModule.init();
         PhotoComparisonModule.init();
         ExportModule.init();
@@ -45,48 +45,96 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.75.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.76.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
 };
 
-// Weight Logging Module - FIXED
-const WeightLoggingModule = {
-    init: function() {
-        console.log("WeightLoggingModule loaded");
-        const form = document.getElementById('weight-form');
-        const input = document.getElementById('weight-input');
-        const dateInput = document.getElementById('date-input');
-        const recentWeighIns = document.getElementById('recent-weighins');
-        const weightSummary = document.getElementById('weight-summary');
+// Chart Module - FULL RESTORE
+const ChartModule = {
+    chartInstance: null,
+    sampleDataEnabled: true,
+    sampleWeights: [200, 195, 190, 185],
+    userWeights: [],
+    labels: ["Day 1", "Day 2", "Day 3", "Day 4"],
+    goalWeight: null,
 
-        if (!form || !input || !dateInput || !recentWeighIns || !weightSummary) {
-            console.warn("Warning: Weight logging elements are missing! Weight logging will not work.");
+    init: function() {
+        console.log("ChartModule loaded");
+        const canvas = document.getElementById('weightChart');
+
+        if (!canvas) {
+            console.warn("Warning: Canvas element #weightChart is missing! Chart will not load.");
             return;
         }
 
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const weight = parseFloat(input.value.trim());
-            const date = dateInput.value.trim();
-
-            if (weight && date) {
-                console.log(`Weight logged: ${weight} lbs on ${date}`);
-
-                if (recentWeighIns.querySelector('.placeholder')) {
-                    recentWeighIns.innerHTML = "";
-                }
-                recentWeighIns.innerHTML += `<p>Weight: ${weight} lbs on ${date}</p>`;
-                weightSummary.innerHTML = `<p>Latest weight: ${weight} lbs on ${date}</p>`;
-
-                ChartModule.updateChart(weight, date);
-
-                input.value = '';
-                dateInput.value = '';
-            } else {
-                console.warn("No weight or date entered.");
-            }
+        const ctx = canvas.getContext('2d');
+        ChartModule.chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ChartModule.labels,
+                datasets: [
+                    { label: 'Sample Data', data: ChartModule.sampleWeights, borderColor: 'pink', borderWidth: 2, hidden: !ChartModule.sampleDataEnabled },
+                    { label: 'Your Progress', data: ChartModule.userWeights, borderColor: 'blue', borderWidth: 2 },
+                    { label: 'Goal Weight', data: [], borderColor: 'green', borderWidth: 2, borderDash: [5, 5], hidden: false }
+                ]
+            },
+            options: { responsive: true }
         });
+
+        const toggleSampleData = document.getElementById('toggle-demo-data');
+        if (toggleSampleData) {
+            toggleSampleData.addEventListener('change', function() {
+                ChartModule.sampleDataEnabled = this.checked;
+                ChartModule.chartInstance.data.datasets[0].hidden = !this.checked;
+                ChartModule.chartInstance.update();
+            });
+        }
+    },
+
+    updateChart: function(weight, date) {
+        if (!ChartModule.chartInstance) {
+            console.warn("Chart not initialized properly!");
+            return;
+        }
+
+        ChartModule.labels.push(date);
+        ChartModule.userWeights.push(weight);
+
+        if (ChartModule.labels.length > 5) {
+            ChartModule.labels.shift();
+            ChartModule.userWeights.shift();
+        }
+
+        if (!ChartModule.goalWeight) {
+            ChartModule.goalWeight = weight - 10; // Default goal is 10 lbs below first entry
+        }
+
+        ChartModule.chartInstance.data.labels = [...ChartModule.labels];
+        ChartModule.chartInstance.data.datasets[1].data = [...ChartModule.userWeights];
+        ChartModule.chartInstance.data.datasets[2].data = Array(ChartModule.labels.length).fill(ChartModule.goalWeight);
+        ChartModule.chartInstance.update();
+
+        ChartModule.calculateTrend();
+        console.log(`Chart updated: ${weight} lbs on ${date}`);
+    },
+
+    calculateTrend: function() {
+        const trendAnalysis = document.getElementById('trend-analysis');
+        if (!trendAnalysis || ChartModule.userWeights.length < 2) return;
+
+        const recentChange = ChartModule.userWeights[ChartModule.userWeights.length - 1] - ChartModule.userWeights[0];
+        let trendText = `Trend: `;
+
+        if (recentChange < 0) {
+            trendText += `⬇️ ${Math.abs(recentChange).toFixed(1)} lbs lost.`;
+        } else if (recentChange > 0) {
+            trendText += `⬆️ ${recentChange.toFixed(1)} lbs gained.`;
+        } else {
+            trendText += `No change in weight.`;
+        }
+
+        trendAnalysis.innerText = trendText;
     }
 };
