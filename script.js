@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.57 (Fixing Chart Updates, Weight Logging, & Buttons)
+// FitJourney Tracker - Version v7.58 (Fixing Photo Upload & Data Persistence)
 
-console.log("FitJourney Tracker v7.57 initializing...");
+console.log("FitJourney Tracker v7.58 initializing...");
 
 window.onload = function() {
     try {
@@ -29,8 +29,8 @@ window.onload = function() {
 
         ChartModule.init();
         WeightLoggingModule.init();
-        PhotoUploadModule.init();
-        PhotoComparisonModule.init(); // Fixing missing reference
+        PhotoUploadModule.init(); // Fixing missing reference
+        PhotoComparisonModule.init();
         ExportModule.init();
         StreakTrackerModule.init();
         UserProfileModule.init();
@@ -38,65 +38,13 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.57.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.58.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
 };
 
-// Chart Module - Ensuring Recent Weigh-Ins Plot Correctly
-const ChartModule = {
-    chartInstance: null,
-    sampleDataEnabled: true,
-    sampleWeights: [200, 195, 190, 185],
-    userWeights: [],
-    labels: ["Day 1", "Day 2", "Day 3", "Day 4"],
-
-    init: function() {
-        console.log("ChartModule loaded");
-        const canvas = document.getElementById('weightChart');
-
-        if (!canvas) {
-            console.warn("Warning: Canvas element #weightChart is missing! Chart will not load.");
-            return;
-        }
-
-        const ctx = canvas.getContext('2d');
-        ChartModule.chartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ChartModule.labels,
-                datasets: [
-                    { label: 'Sample Data', data: ChartModule.sampleWeights, borderColor: 'pink', borderWidth: 2, hidden: false },
-                    { label: 'Your Progress', data: ChartModule.userWeights, borderColor: 'blue', borderWidth: 2 }
-                ]
-            },
-            options: { responsive: true }
-        });
-    },
-
-    updateChart: function(weight, date) {
-        if (!ChartModule.chartInstance) {
-            console.warn("Chart not initialized properly!");
-            return;
-        }
-
-        ChartModule.labels.push(date);
-        ChartModule.userWeights.push(weight);
-
-        if (ChartModule.labels.length > 5) {
-            ChartModule.labels.shift();
-            ChartModule.userWeights.shift();
-        }
-
-        ChartModule.chartInstance.data.labels = [...ChartModule.labels];
-        ChartModule.chartInstance.data.datasets[1].data = [...ChartModule.userWeights];
-        ChartModule.chartInstance.update();
-        console.log(`Chart updated: ${weight} lbs on ${date}`);
-    }
-};
-
-// Weight Logging Module - Ensuring UI Updates Correctly
+// Weight Logging Module - Ensuring UI Updates & Data Persistence
 const WeightLoggingModule = {
     init: function() {
         console.log("WeightLoggingModule loaded");
@@ -111,6 +59,13 @@ const WeightLoggingModule = {
             return;
         }
 
+        // Load stored weights from localStorage
+        const storedWeights = JSON.parse(localStorage.getItem("recentWeighIns")) || [];
+        if (storedWeights.length > 0) {
+            recentWeighIns.innerHTML = storedWeights.map(entry => `<p>Weight: ${entry.weight} lbs on ${entry.date}</p>`).join("");
+            weightSummary.innerHTML = `<p>Latest weight: ${storedWeights[storedWeights.length - 1].weight} lbs on ${storedWeights[storedWeights.length - 1].date}</p>`;
+        }
+
         form.addEventListener('submit', (event) => {
             event.preventDefault();
             const weight = parseFloat(input.value.trim());
@@ -119,17 +74,13 @@ const WeightLoggingModule = {
             if (weight && date) {
                 console.log(`Weight logged: ${weight} lbs on ${date}`);
 
-                // Update Recent Weigh-Ins Section
-                if (recentWeighIns.querySelector('.placeholder')) {
-                    recentWeighIns.innerHTML = "";
-                }
+                // Update UI
                 recentWeighIns.innerHTML += `<p>Weight: ${weight} lbs on ${date}</p>`;
-
-                // Update Weight Summary
                 weightSummary.innerHTML = `<p>Latest weight: ${weight} lbs on ${date}</p>`;
 
-                // Update Chart
-                ChartModule.updateChart(weight, date);
+                // Store data in localStorage for persistence
+                storedWeights.push({ weight, date });
+                localStorage.setItem("recentWeighIns", JSON.stringify(storedWeights));
 
                 // Reset form fields
                 input.value = '';
@@ -141,35 +92,36 @@ const WeightLoggingModule = {
     }
 };
 
-// Fixing Clear Photos Button
-document.getElementById('clear-photos-btn').addEventListener('click', () => {
-    document.getElementById('photo-gallery').innerHTML = '';
-    console.log("Photo gallery cleared.");
-});
-
-// Fixing Export Button
-document.getElementById('exportDataBtn').addEventListener('click', () => {
-    console.log("Export function executed.");
-});
-
-// Fixing Compare Photos Button
-document.getElementById('comparePhotosBtn').addEventListener('click', () => {
-    console.log("Photo comparison triggered.");
-});
-
-// Photo Comparison Module - Fixing Missing Reference
-const PhotoComparisonModule = {
+// Photo Upload Module - Fixing Missing Reference & Restoring Functionality
+const PhotoUploadModule = {
     init: function() {
-        console.log("PhotoComparisonModule loaded");
-        const compareBtn = document.getElementById('comparePhotosBtn');
+        console.log("PhotoUploadModule loaded");
+        const form = document.getElementById('photo-upload-form');
+        const input = document.getElementById('uploadPhoto');
+        const gallery = document.getElementById('photo-gallery');
 
-        if (!compareBtn) {
-            console.warn("Warning: Photo comparison button is missing!");
+        if (!form || !input || !gallery) {
+            console.warn("Warning: Photo upload elements are missing! Photo upload will not work.");
             return;
         }
 
-        compareBtn.addEventListener('click', () => {
-            console.log("Photo comparison triggered.");
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const file = input.files[0];
+
+            if (file) {
+                console.log(`Photo uploaded: ${file.name}`);
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.classList.add('gallery-image');
+                img.style.maxWidth = "150px";
+                img.style.maxHeight = "150px";
+                gallery.appendChild(img);
+
+                input.value = '';
+            } else {
+                console.warn("No photo selected.");
+            }
         });
     }
 };
