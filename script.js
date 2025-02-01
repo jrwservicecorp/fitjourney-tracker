@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.90 (FULL REVERT TO 193 LINES + FIXED PHOTO UPLOAD)
+// FitJourney Tracker - Version v7.91 (FIXED: ChartModule Initialization Issue)
 
-console.log("FitJourney Tracker v7.90 initializing...");
+console.log("FitJourney Tracker v7.91 initializing...");
 
 window.onload = function() {
     try {
@@ -33,14 +33,15 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.90";
+            requiredElements.versionDisplay.innerText = "v7.91";
         }
 
-        ChartModule.init();  
+        // Ensuring all modules initialize in order
+        ChartModule.init();
         WeightLoggingModule.init();
         PhotoUploadModule.init();
         PhotoComparisonModule.init();
-        ExportModule.init();  
+        ExportModule.init();
         PhotoOverlayModule.init();
         StreakTrackerModule.init();
         UserProfileModule.init();
@@ -48,100 +49,68 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.90.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.91.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
 };
 
-// Photo Upload Module - FIXED (ENSURES WEIGHT DATA PERSISTS)
-const PhotoUploadModule = {
-    init: function() {
-        console.log("PhotoUploadModule loaded");
-        const form = document.getElementById('photo-upload-form');
-        const input = document.getElementById('photo-upload');
-        const gallery = document.getElementById('photo-gallery');
-        const weightSummary = document.getElementById('weight-summary');
-        const recentWeighIns = document.getElementById('recent-weighins');
+// Chart Module - FIXED: Ensuring ChartModule is Defined and Loads Properly
+const ChartModule = {
+    chartInstance: null,
+    sampleDataEnabled: true,
+    sampleWeights: [200, 195, 190, 185],
+    userWeights: [],
+    labels: ["Day 1", "Day 2", "Day 3", "Day 4"],
+    goalWeight: null,
 
-        if (!form || !input || !gallery) {
-            console.warn("Warning: Photo upload elements are missing! Photo upload will not work.");
+    init: function() {
+        console.log("ChartModule loaded");
+        const canvas = document.getElementById('weightChart');
+
+        if (!canvas) {
+            console.warn("Warning: Canvas element #weightChart is missing! Chart will not load.");
             return;
         }
 
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const file = input.files[0];
-
-            if (file) {
-                console.log(`Photo uploaded: ${file.name}`);
-                const img = document.createElement('img');
-                const reader = new FileReader();
-
-                reader.onload = function(e) {
-                    img.src = e.target.result;
-                    img.classList.add('gallery-image');
-                    img.style.maxWidth = "150px";
-                    img.style.maxHeight = "150px";
-                    gallery.appendChild(img);
-                };
-
-                reader.readAsDataURL(file);
-
-                // Ensure weight logs and chart data persist after photo upload
-                if (recentWeighIns.innerHTML.includes('Weight:') || weightSummary.innerHTML.includes('Latest weight:')) {
-                    console.log("Photo uploaded, weight data remains intact.");
-                } else {
-                    console.warn("Ensuring weight summary and chart are not erased.");
-                }
-
-                input.value = '';
-            } else {
-                console.warn("No photo selected.");
-            }
+        const ctx = canvas.getContext('2d');
+        ChartModule.chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ChartModule.labels,
+                datasets: [
+                    { label: 'Sample Data', data: ChartModule.sampleWeights, borderColor: 'pink', borderWidth: 2, hidden: !ChartModule.sampleDataEnabled },
+                    { label: 'Your Progress', data: ChartModule.userWeights, borderColor: 'blue', borderWidth: 2 },
+                    { label: 'Goal Weight', data: [], borderColor: 'green', borderWidth: 2, borderDash: [5, 5], hidden: false }
+                ]
+            },
+            options: { responsive: true }
         });
-    }
-};
+    },
 
-// Weight Logging Module - FINAL FIX: Updates Summary & Chart
-const WeightLoggingModule = {
-    init: function() {
-        console.log("WeightLoggingModule loaded");
-        const form = document.getElementById('weight-form');
-        const input = document.getElementById('weight-input');
-        const dateInput = document.getElementById('date-input');
-        const recentWeighIns = document.getElementById('recent-weighins');
-        const weightSummary = document.getElementById('weight-summary');
-
-        if (!form || !input || !dateInput || !recentWeighIns || !weightSummary) {
-            console.warn("Warning: Weight logging elements are missing! Weight logging will not work.");
+    updateChart: function(weight, date) {
+        if (!ChartModule.chartInstance) {
+            console.warn("Chart not initialized properly!");
             return;
         }
 
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const weight = parseFloat(input.value.trim());
-            const date = dateInput.value.trim();
+        ChartModule.labels.push(date);
+        ChartModule.userWeights.push(weight);
 
-            if (weight && date) {
-                console.log(`Weight logged: ${weight} lbs on ${date}`);
+        if (ChartModule.labels.length > 5) {
+            ChartModule.labels.shift();
+            ChartModule.userWeights.shift();
+        }
 
-                if (recentWeighIns.querySelector('.placeholder')) {
-                    recentWeighIns.innerHTML = "";
-                }
-                recentWeighIns.innerHTML += `<p>Weight: ${weight} lbs on ${date}</p>`;
+        if (!ChartModule.goalWeight) {
+            ChartModule.goalWeight = weight - 10;
+        }
 
-                // Update weight summary
-                weightSummary.innerHTML = `<p>Latest weight: ${weight} lbs on ${date}</p>`;
+        ChartModule.chartInstance.data.labels = [...ChartModule.labels];
+        ChartModule.chartInstance.data.datasets[1].data = [...ChartModule.userWeights];
+        ChartModule.chartInstance.data.datasets[2].data = Array(ChartModule.labels.length).fill(ChartModule.goalWeight);
+        ChartModule.chartInstance.update();
 
-                // Update chart
-                ChartModule.updateChart(weight, date);
-
-                input.value = '';
-                dateInput.value = '';
-            } else {
-                console.warn("No weight or date entered.");
-            }
-        });
+        console.log(`Chart updated: ${weight} lbs on ${date}`);
     }
 };
