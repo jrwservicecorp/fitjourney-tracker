@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.77 (FULL RESTORE - Weight Logging & Photo Upload)
+// FitJourney Tracker - Version v7.78 (FULL RESTORE - NO REMOVALS)
 
-console.log("FitJourney Tracker v7.77 initializing...");
+console.log("FitJourney Tracker v7.78 initializing...");
 
 window.onload = function() {
     try {
@@ -31,12 +31,12 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.77";
+            requiredElements.versionDisplay.innerText = "v7.78";
         }
 
-        ChartModule.init();
-        WeightLoggingModule.init(); // RESTORED
-        PhotoUploadModule.init();  // RESTORED
+        ChartModule.init();  
+        WeightLoggingModule.init();
+        PhotoUploadModule.init();
         PhotoComparisonModule.init();
         ExportModule.init();
         StreakTrackerModule.init();
@@ -45,9 +45,67 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.77.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.78.");
     } catch (error) {
         console.error("Error initializing modules:", error);
+    }
+};
+
+// Chart Module - FULL RESTORE
+const ChartModule = {
+    chartInstance: null,
+    sampleDataEnabled: true,
+    sampleWeights: [200, 195, 190, 185],
+    userWeights: [],
+    labels: ["Day 1", "Day 2", "Day 3", "Day 4"],
+    goalWeight: null,
+
+    init: function() {
+        console.log("ChartModule loaded");
+        const canvas = document.getElementById('weightChart');
+
+        if (!canvas) {
+            console.warn("Warning: Canvas element #weightChart is missing! Chart will not load.");
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        ChartModule.chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ChartModule.labels,
+                datasets: [
+                    { label: 'Sample Data', data: ChartModule.sampleWeights, borderColor: 'pink', borderWidth: 2, hidden: !ChartModule.sampleDataEnabled },
+                    { label: 'Your Progress', data: ChartModule.userWeights, borderColor: 'blue', borderWidth: 2 },
+                    { label: 'Goal Weight', data: [], borderColor: 'green', borderWidth: 2, borderDash: [5, 5], hidden: false }
+                ]
+            },
+            options: { responsive: true }
+        });
+    },
+
+    updateChart: function(weight, date) {
+        if (!ChartModule.chartInstance) {
+            console.warn("Chart not initialized properly!");
+            return;
+        }
+
+        ChartModule.labels.push(date);
+        ChartModule.userWeights.push(weight);
+
+        if (ChartModule.labels.length > 5) {
+            ChartModule.labels.shift();
+            ChartModule.userWeights.shift();
+        }
+
+        if (!ChartModule.goalWeight) {
+            ChartModule.goalWeight = weight - 10; // Default goal is 10 lbs below first entry
+        }
+
+        ChartModule.chartInstance.data.labels = [...ChartModule.labels];
+        ChartModule.chartInstance.data.datasets[1].data = [...ChartModule.userWeights];
+        ChartModule.chartInstance.data.datasets[2].data = Array(ChartModule.labels.length).fill(ChartModule.goalWeight);
+        ChartModule.chartInstance.update();
     }
 };
 
@@ -104,17 +162,6 @@ const PhotoUploadModule = {
             return;
         }
 
-        // Load stored photos from localStorage
-        const storedPhotos = JSON.parse(localStorage.getItem("photoGallery")) || [];
-        storedPhotos.forEach(src => {
-            const img = document.createElement('img');
-            img.src = src;
-            img.classList.add('gallery-image');
-            img.style.maxWidth = "150px";
-            img.style.maxHeight = "150px";
-            gallery.appendChild(img);
-        });
-
         form.addEventListener('submit', (event) => {
             event.preventDefault();
             const file = input.files[0];
@@ -130,10 +177,6 @@ const PhotoUploadModule = {
                     img.style.maxWidth = "150px";
                     img.style.maxHeight = "150px";
                     gallery.appendChild(img);
-
-                    // Save to localStorage
-                    storedPhotos.push(e.target.result);
-                    localStorage.setItem("photoGallery", JSON.stringify(storedPhotos));
                 };
 
                 reader.readAsDataURL(file);
