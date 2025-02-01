@@ -7,12 +7,12 @@
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script defer src="script.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v7.50</span></p>
+    <p>App Version: <span id="app-version"></span></p>
   </header>
 
   <main id="main-app">
@@ -20,11 +20,24 @@
     <div class="card prominent">
       <canvas id="weightChart"></canvas>
       <p id="chart-placeholder">Start logging weight to see trends!</p>
+      <div class="chart-options">
+        <label>
+          <input type="checkbox" id="toggle-demo-data" checked>
+          Show Demo Data
+        </label>
+      </div>
+      <p id="trend-analysis">Trend: No data yet.</p> <!-- Added Trend Analysis Display -->
     </div>
 
     <!-- Streak Awards -->
     <div class="card">
       <h3>Streak Awards</h3>
+      <div class="streak-options">
+        <label>
+          <input type="checkbox" id="toggle-streaks" checked>
+          Show Streaks
+        </label>
+      </div>
       <div id="streaks-section">
         <p>No streaks yet! Log your weight to unlock awards.</p>
       </div>
@@ -57,8 +70,10 @@
       <div class="card upload-photo">
         <h3>Upload Progress Photo</h3>
         <form id="photo-upload-form">
-          <label for="uploadPhoto">Select Photo:</label>
-          <input id="uploadPhoto" type="file" accept="image/*">
+          <label for="photo-upload">Select Photo:</label>
+          <input id="photo-upload" type="file" accept="image/*">
+          <label for="photo-date">Photo Date:</label>
+          <input id="photo-date" type="date">
           <button id="upload-photo-btn" type="submit">Upload Photo</button>
         </form>
       </div>
@@ -67,7 +82,16 @@
     <!-- Photo Comparison -->
     <div class="card">
       <h3>Photo Comparison</h3>
-      <button id="comparePhotosBtn">Compare Photos</button>
+      <div>
+        <label for="photo-select-1">Select Photo 1:</label>
+        <select id="photo-select-1" class="photo-select"></select>
+      </div>
+      <div>
+        <label for="photo-select-2">Select Photo 2:</label>
+        <select id="photo-select-2" class="photo-select"></select>
+      </div>
+      <button id="compare-photos-btn">Compare Photos</button>
+      <div id="side-by-side-comparison" class="comparison-display"></div>
     </div>
 
     <!-- Photo Gallery -->
@@ -82,7 +106,22 @@
     <!-- Export Section -->
     <div class="card">
       <h3>Export Options</h3>
-      <button id="exportDataBtn">Export Data</button>
+      <div class="export-options">
+        <label>
+          <input type="radio" name="export-type" value="single-photo">
+          Single Photo with Overlay
+        </label>
+        <label>
+          <input type="radio" name="export-type" value="photo-comparison">
+          Photo Comparison
+        </label>
+        <label>
+          <input type="radio" name="export-type" value="data-only">
+          Data Only
+        </label>
+      </div>
+      <button id="prepare-export-btn">Prepare Export</button>
+      <button id="download-export-btn">Download Export</button>
     </div>
   </main>
 </body>
