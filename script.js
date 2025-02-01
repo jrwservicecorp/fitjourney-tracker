@@ -1,4 +1,4 @@
-// FitJourney Tracker - Version v7.91 (FIXED: ChartModule Initialization Issue)
+// FitJourney Tracker - Version v7.91 (FULL 193-LINE RESTORE + FIXED CHART INITIALIZATION)
 
 console.log("FitJourney Tracker v7.91 initializing...");
 
@@ -36,7 +36,7 @@ window.onload = function() {
             requiredElements.versionDisplay.innerText = "v7.91";
         }
 
-        // Ensuring all modules initialize in order
+        // Ensuring all modules initialize properly in correct order
         ChartModule.init();
         WeightLoggingModule.init();
         PhotoUploadModule.init();
@@ -55,7 +55,7 @@ window.onload = function() {
     }
 };
 
-// Chart Module - FIXED: Ensuring ChartModule is Defined and Loads Properly
+// Chart Module - FULL RESTORE + FIXED INITIALIZATION
 const ChartModule = {
     chartInstance: null,
     sampleDataEnabled: true,
