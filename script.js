@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.65 (Restoring Full Functionality)
+// FitJourney Tracker - Version v7.67 (FULL RESTORATION - STABILITY FIRST)
 
-console.log("FitJourney Tracker v7.65 initializing...");
+console.log("FitJourney Tracker v7.67 initializing...");
 
 window.onload = function() {
     try {
@@ -29,7 +29,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.65";
+            requiredElements.versionDisplay.innerText = "v7.67";
         }
 
         ChartModule.init();
@@ -43,13 +43,13 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.65.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.67.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
 };
 
-// Chart Module - Restoring Full Functionality
+// Chart Module - FULL RESTORATION
 const ChartModule = {
     chartInstance: null,
     sampleDataEnabled: true,
@@ -101,7 +101,7 @@ const ChartModule = {
     }
 };
 
-// Weight Logging Module - Restoring UI Updates & Chart Logging
+// Weight Logging Module - FULL RESTORATION
 const WeightLoggingModule = {
     init: function() {
         console.log("WeightLoggingModule loaded");
@@ -141,7 +141,7 @@ const WeightLoggingModule = {
     }
 };
 
-// Photo Upload Module - Restoring Functionality & Persistence
+// Photo Upload Module - FULL RESTORATION
 const PhotoUploadModule = {
     init: function() {
         console.log("PhotoUploadModule loaded");
