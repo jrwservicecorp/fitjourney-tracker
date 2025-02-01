@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.84 (NEW FEATURE: Photo Progress Overlays)
+// FitJourney Tracker - Version v7.85 (FULL ROLLBACK + PHOTO OVERLAYS)
 
-console.log("FitJourney Tracker v7.84 initializing...");
+console.log("FitJourney Tracker v7.85 initializing...");
 
 window.onload = function() {
     try {
@@ -33,7 +33,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.84";
+            requiredElements.versionDisplay.innerText = "v7.85";
         }
 
         ChartModule.init();  
@@ -41,20 +41,80 @@ window.onload = function() {
         PhotoUploadModule.init();
         PhotoComparisonModule.init();
         ExportModule.init();
-        PhotoOverlayModule.init();  // NEW FEATURE ADDED
+        PhotoOverlayModule.init();  // NEW FEATURE ADDED, but no removals.
         StreakTrackerModule.init();
         UserProfileModule.init();
         CommunityEngagementModule.init();
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.84.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.85.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
 };
 
-// Photo Overlay Module - NEW FEATURE
+// Chart Module - FULL ROLLBACK
+const ChartModule = {
+    chartInstance: null,
+    sampleDataEnabled: true,
+    sampleWeights: [200, 195, 190, 185],
+    userWeights: [],
+    labels: ["Day 1", "Day 2", "Day 3", "Day 4"],
+    goalWeight: null,
+
+    init: function() {
+        console.log("ChartModule loaded");
+        const canvas = document.getElementById('weightChart');
+
+        if (!canvas) {
+            console.warn("Warning: Canvas element #weightChart is missing! Chart will not load.");
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        ChartModule.chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ChartModule.labels,
+                datasets: [
+                    { label: 'Sample Data', data: ChartModule.sampleWeights, borderColor: 'pink', borderWidth: 2, hidden: !ChartModule.sampleDataEnabled },
+                    { label: 'Your Progress', data: ChartModule.userWeights, borderColor: 'blue', borderWidth: 2 },
+                    { label: 'Goal Weight', data: [], borderColor: 'green', borderWidth: 2, borderDash: [5, 5], hidden: false }
+                ]
+            },
+            options: { responsive: true }
+        });
+    },
+
+    updateChart: function(weight, date) {
+        if (!ChartModule.chartInstance) {
+            console.warn("Chart not initialized properly!");
+            return;
+        }
+
+        ChartModule.labels.push(date);
+        ChartModule.userWeights.push(weight);
+
+        if (ChartModule.labels.length > 5) {
+            ChartModule.labels.shift();
+            ChartModule.userWeights.shift();
+        }
+
+        if (!ChartModule.goalWeight) {
+            ChartModule.goalWeight = weight - 10; // Default goal is 10 lbs below first entry
+        }
+
+        ChartModule.chartInstance.data.labels = [...ChartModule.labels];
+        ChartModule.chartInstance.data.datasets[1].data = [...ChartModule.userWeights];
+        ChartModule.chartInstance.data.datasets[2].data = Array(ChartModule.labels.length).fill(ChartModule.goalWeight);
+        ChartModule.chartInstance.update();
+
+        console.log(`Chart updated: ${weight} lbs on ${date}`);
+    }
+};
+
+// Photo Overlay Module - NEW FEATURE ADDED, NO REMOVALS
 const PhotoOverlayModule = {
     init: function() {
         console.log("PhotoOverlayModule loaded");
@@ -74,7 +134,6 @@ const PhotoOverlayModule = {
                 return;
             }
 
-            // Use the latest uploaded photo
             const lastPhoto = photos[photos.length - 1];
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
