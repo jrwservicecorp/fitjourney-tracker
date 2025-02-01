@@ -1,4 +1,4 @@
-// FitJourney Tracker - Version v7.91 (FULL 193-LINE RESTORE + FIXED CHART INITIALIZATION)
+// FitJourney Tracker - Version v7.91 (FULL RESTORE TO 193 LINES + FIXED CHART INITIALIZATION)
 
 console.log("FitJourney Tracker v7.91 initializing...");
 
@@ -36,7 +36,7 @@ window.onload = function() {
             requiredElements.versionDisplay.innerText = "v7.91";
         }
 
-        // Ensuring all modules initialize properly in correct order
+        // Ensuring all modules initialize properly
         ChartModule.init();
         WeightLoggingModule.init();
         PhotoUploadModule.init();
