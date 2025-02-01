@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.87 (FULL ROLLBACK - ALL FUNCTIONALITY RESTORED)
+// FitJourney Tracker - Version v7.90 (FULL ROLLBACK + CSV EXPORT ONLY)
 
-console.log("FitJourney Tracker v7.87 initializing...");
+console.log("FitJourney Tracker v7.90 initializing...");
 
 window.onload = function() {
     try {
@@ -33,14 +33,14 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.87";
+            requiredElements.versionDisplay.innerText = "v7.90";
         }
 
         ChartModule.init();  
         WeightLoggingModule.init();
         PhotoUploadModule.init();
         PhotoComparisonModule.init();
-        ExportModule.init();
+        ExportModule.init();  // CSV Export Only
         PhotoOverlayModule.init();
         StreakTrackerModule.init();
         UserProfileModule.init();
@@ -48,7 +48,7 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.87.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.90.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -154,41 +154,40 @@ const WeightLoggingModule = {
     }
 };
 
-// Photo Upload Module - FULL ROLLBACK (FIXED PHOTO UPLOAD & GALLERY)
-const PhotoUploadModule = {
+// Export Module - CSV Export Only
+const ExportModule = {
     init: function() {
-        console.log("PhotoUploadModule loaded");
-        const form = document.getElementById('photo-upload-form');
-        const input = document.getElementById('photo-upload');
-        const gallery = document.getElementById('photo-gallery');
-
-        if (!form || !input || !gallery) {
-            console.warn("Warning: Photo upload elements are missing! Photo upload will not work.");
+        console.log("ExportModule loaded");
+        const exportBtn = document.getElementById('exportDataBtn');
+        
+        if (!exportBtn) {
+            console.warn("Warning: Export button is missing! Export will not work.");
             return;
         }
 
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const file = input.files[0];
-
-            if (file) {
-                console.log(`Photo uploaded: ${file.name}`);
-                const img = document.createElement('img');
-                const reader = new FileReader();
-
-                reader.onload = function(e) {
-                    img.src = e.target.result;
-                    img.classList.add('gallery-image');
-                    img.style.maxWidth = "150px";
-                    img.style.maxHeight = "150px";
-                    gallery.appendChild(img);
-                };
-
-                reader.readAsDataURL(file);
-                input.value = '';
-            } else {
-                console.warn("No photo selected.");
-            }
+        exportBtn.addEventListener('click', function() {
+            ExportModule.exportCSV();
         });
+    },
+
+    exportCSV: function() {
+        console.log("Exporting weight log to CSV...");
+
+        const logs = document.querySelectorAll("#recent-weighins p");
+        let csvContent = "Date,Weight\n";
+
+        logs.forEach(log => {
+            const text = log.innerText.replace("Weight: ", "").replace(" lbs on ", ",");
+            csvContent += text + "\n";
+        });
+
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.setAttribute("href", url);
+        a.setAttribute("download", "weight_log.csv");
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
 };
