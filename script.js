@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.60 (Fixing Weight Logging & Photo Upload)
+// FitJourney Tracker - Version v7.61 (Fixing ChartModule & Weight Logging)
 
-console.log("FitJourney Tracker v7.60 initializing...");
+console.log("FitJourney Tracker v7.61 initializing...");
 
 window.onload = function() {
     try {
@@ -29,11 +29,11 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.60";
+            requiredElements.versionDisplay.innerText = "v7.61";
         }
 
-        ChartModule.init();
-        WeightLoggingModule.init(); // Fixing missing reference
+        ChartModule.init(); // Fixing missing reference
+        WeightLoggingModule.init();
         PhotoUploadModule.init();
         PhotoComparisonModule.init();
         ExportModule.init();
@@ -43,9 +43,61 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.60.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.61.");
     } catch (error) {
         console.error("Error initializing modules:", error);
+    }
+};
+
+// Chart Module - Ensuring Chart Loads & Updates Correctly
+const ChartModule = {
+    chartInstance: null,
+    sampleDataEnabled: true,
+    sampleWeights: [200, 195, 190, 185],
+    userWeights: [],
+    labels: ["Day 1", "Day 2", "Day 3", "Day 4"],
+
+    init: function() {
+        console.log("ChartModule loaded");
+        const canvas = document.getElementById('weightChart');
+
+        if (!canvas) {
+            console.warn("Warning: Canvas element #weightChart is missing! Chart will not load.");
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        ChartModule.chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ChartModule.labels,
+                datasets: [
+                    { label: 'Sample Data', data: ChartModule.sampleWeights, borderColor: 'pink', borderWidth: 2, hidden: false },
+                    { label: 'Your Progress', data: ChartModule.userWeights, borderColor: 'blue', borderWidth: 2 }
+                ]
+            },
+            options: { responsive: true }
+        });
+    },
+
+    updateChart: function(weight, date) {
+        if (!ChartModule.chartInstance) {
+            console.warn("Chart not initialized properly!");
+            return;
+        }
+
+        ChartModule.labels.push(date);
+        ChartModule.userWeights.push(weight);
+
+        if (ChartModule.labels.length > 5) {
+            ChartModule.labels.shift();
+            ChartModule.userWeights.shift();
+        }
+
+        ChartModule.chartInstance.data.labels = [...ChartModule.labels];
+        ChartModule.chartInstance.data.datasets[1].data = [...ChartModule.userWeights];
+        ChartModule.chartInstance.update();
+        console.log(`Chart updated: ${weight} lbs on ${date}`);
     }
 };
 
@@ -84,40 +136,6 @@ const WeightLoggingModule = {
                 dateInput.value = '';
             } else {
                 console.warn("No weight or date entered.");
-            }
-        });
-    }
-};
-
-// Photo Upload Module - Fixing Missing Reference & Restoring Functionality
-const PhotoUploadModule = {
-    init: function() {
-        console.log("PhotoUploadModule loaded");
-        const form = document.getElementById('photo-upload-form');
-        const input = document.getElementById('uploadPhoto');
-        const gallery = document.getElementById('photo-gallery');
-
-        if (!form || !input || !gallery) {
-            console.warn("Warning: Photo upload elements are missing! Photo upload will not work.");
-            return;
-        }
-
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const file = input.files[0];
-
-            if (file) {
-                console.log(`Photo uploaded: ${file.name}`);
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
-                img.classList.add('gallery-image');
-                img.style.maxWidth = "150px";
-                img.style.maxHeight = "150px";
-                gallery.appendChild(img);
-
-                input.value = '';
-            } else {
-                console.warn("No photo selected.");
             }
         });
     }
