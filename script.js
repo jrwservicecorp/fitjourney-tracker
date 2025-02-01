@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.93 (FULL ROLLBACK + PERMANENT FIX FOR PHOTO UPLOAD)
+// FitJourney Tracker - Version v7.94 (FIXED: Weight Summary & Chart Update)
 
-console.log("FitJourney Tracker v7.93 initializing...");
+console.log("FitJourney Tracker v7.94 initializing...");
 
 window.onload = function() {
     try {
@@ -33,12 +33,12 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.93";
+            requiredElements.versionDisplay.innerText = "v7.94";
         }
 
         ChartModule.init();  
         WeightLoggingModule.init();
-        PhotoUploadModule.init(); // FIXED: Photo Upload Doesn't Erase Data
+        PhotoUploadModule.init();
         PhotoComparisonModule.init();
         ExportModule.init();
         PhotoOverlayModule.init();
@@ -48,62 +48,56 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.93.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.94.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
 };
 
-// Photo Upload Module - FIXED (NO LONGER ERASES DATA)
-const PhotoUploadModule = {
+// Weight Logging Module - FIXED: Now Updates Summary & Chart
+const WeightLoggingModule = {
     init: function() {
-        console.log("PhotoUploadModule loaded");
-        const form = document.getElementById('photo-upload-form');
-        const input = document.getElementById('photo-upload');
-        const gallery = document.getElementById('photo-gallery');
-        const weightSummary = document.getElementById('weight-summary');
+        console.log("WeightLoggingModule loaded");
+        const form = document.getElementById('weight-form');
+        const input = document.getElementById('weight-input');
+        const dateInput = document.getElementById('date-input');
         const recentWeighIns = document.getElementById('recent-weighins');
+        const weightSummary = document.getElementById('weight-summary');
 
-        if (!form || !input || !gallery) {
-            console.warn("Warning: Photo upload elements are missing! Photo upload will not work.");
+        if (!form || !input || !dateInput || !recentWeighIns || !weightSummary) {
+            console.warn("Warning: Weight logging elements are missing! Weight logging will not work.");
             return;
         }
 
         form.addEventListener('submit', (event) => {
             event.preventDefault();
-            const file = input.files[0];
+            const weight = parseFloat(input.value.trim());
+            const date = dateInput.value.trim();
 
-            if (file) {
-                console.log(`Photo uploaded: ${file.name}`);
-                const img = document.createElement('img');
-                const reader = new FileReader();
+            if (weight && date) {
+                console.log(`Weight logged: ${weight} lbs on ${date}`);
 
-                reader.onload = function(e) {
-                    img.src = e.target.result;
-                    img.classList.add('gallery-image');
-                    img.style.maxWidth = "150px";
-                    img.style.maxHeight = "150px";
-                    gallery.appendChild(img);
-                };
-
-                reader.readAsDataURL(file);
-
-                // Ensure weight logs are not cleared when uploading a photo
-                if (recentWeighIns.innerHTML.includes('Weight:') || weightSummary.innerHTML.includes('Latest weight:')) {
-                    console.log("Photo upload occurred, but weight data remains intact.");
-                } else {
-                    console.warn("Weight data persisted correctly after photo upload.");
+                if (recentWeighIns.querySelector('.placeholder')) {
+                    recentWeighIns.innerHTML = "";
                 }
+                recentWeighIns.innerHTML += `<p>Weight: ${weight} lbs on ${date}</p>`;
+
+                // Update weight summary
+                weightSummary.innerHTML = `<p>Latest weight: ${weight} lbs on ${date}</p>`;
+
+                // Update chart
+                ChartModule.updateChart(weight, date);
 
                 input.value = '';
+                dateInput.value = '';
             } else {
-                console.warn("No photo selected.");
+                console.warn("No weight or date entered.");
             }
         });
     }
 };
 
-// Chart Module - Ensuring Weight Data Persists
+// Chart Module - Ensuring Chart Updates Properly
 const ChartModule = {
     chartInstance: null,
     sampleDataEnabled: true,
@@ -160,43 +154,5 @@ const ChartModule = {
         ChartModule.chartInstance.update();
 
         console.log(`Chart updated: ${weight} lbs on ${date}`);
-    }
-};
-
-// Export Module - CSV Export Only
-const ExportModule = {
-    init: function() {
-        console.log("ExportModule loaded");
-        const exportBtn = document.getElementById('exportDataBtn');
-        
-        if (!exportBtn) {
-            console.warn("Warning: Export button is missing! Export will not work.");
-            return;
-        }
-
-        exportBtn.addEventListener('click', function() {
-            ExportModule.exportCSV();
-        });
-    },
-
-    exportCSV: function() {
-        console.log("Exporting weight log to CSV...");
-
-        const logs = document.querySelectorAll("#recent-weighins p");
-        let csvContent = "Date,Weight\n";
-
-        logs.forEach(log => {
-            const text = log.innerText.replace("Weight: ", "").replace(" lbs on ", ",");
-            csvContent += text + "\n";
-        });
-
-        const blob = new Blob([csvContent], { type: "text/csv" });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.setAttribute("href", url);
-        a.setAttribute("download", "weight_log.csv");
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
     }
 };
