@@ -429,14 +429,231 @@ const ExportModule = {
         });
     },
     prepareSinglePhotoExport: function() {
-        // (Use your previous implementation with modern styling from v8.2)
-        // For brevity, this function's code is omitted here; replace it with your v8.2 code if needed.
-        alert("Single Photo Export not re-implemented in this version. Please use the previous version's code.");
+        // Get the last uploaded photo and the latest weight log.
+        const photos = DataPersistenceModule.getPhotos();
+        const logs = DataPersistenceModule.getWeightLogs();
+        if (photos.length === 0) {
+            alert("No photo available for export.");
+            return;
+        }
+        const lastPhoto = photos[photos.length - 1];
+        let latestWeight = "N/A", latestDate = "";
+        if (logs.length > 0) {
+            const lastLog = logs[logs.length - 1];
+            latestWeight = lastLog.weight;
+            latestDate = lastLog.date;
+        }
+    
+        // Create a canvas for export (1200x800)
+        const canvas = document.createElement('canvas');
+        canvas.width = 1200;
+        canvas.height = 800;
+        const ctx = canvas.getContext('2d');
+    
+        // Create a modern gradient background.
+        const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        bgGradient.addColorStop(0, "#1a1a1a");
+        bgGradient.addColorStop(1, "#333333");
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+        // Draw a rounded rectangle as a container for the photo.
+        const photoX = 100, photoY = 100, photoW = 1000, photoH = 500, radius = 20;
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = "rgba(0,0,0,0.4)";
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetX = 5;
+        ctx.shadowOffsetY = 5;
+        ctx.beginPath();
+        ctx.moveTo(photoX + radius, photoY);
+        ctx.lineTo(photoX + photoW - radius, photoY);
+        ctx.quadraticCurveTo(photoX + photoW, photoY, photoX + photoW, photoY + radius);
+        ctx.lineTo(photoX + photoW, photoY + photoH - radius);
+        ctx.quadraticCurveTo(photoX + photoW, photoY + photoH, photoX + photoW - radius, photoY + photoH);
+        ctx.lineTo(photoX + radius, photoY + photoH);
+        ctx.quadraticCurveTo(photoX, photoY + photoH, photoX, photoY + photoH - radius);
+        ctx.lineTo(photoX, photoY + radius);
+        ctx.quadraticCurveTo(photoX, photoY, photoX + radius, photoY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowColor = "transparent";
+    
+        // Draw the photo inside the rounded rectangle.
+        const photoImg = new Image();
+        photoImg.onload = function() {
+            const margin = 20;
+            const drawX = photoX + margin;
+            const drawY = photoY + margin;
+            const drawW = photoW - margin * 2;
+            const drawH = photoH - margin * 2;
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(photoX + radius, photoY);
+            ctx.lineTo(photoX + photoW - radius, photoY);
+            ctx.quadraticCurveTo(photoX + photoW, photoY, photoX + photoW, photoY + radius);
+            ctx.lineTo(photoX + photoW, photoY + photoH - radius);
+            ctx.quadraticCurveTo(photoX + photoW, photoY + photoH, photoX + photoW - radius, photoY + photoH);
+            ctx.lineTo(photoX + radius, photoY + photoH);
+            ctx.quadraticCurveTo(photoX, photoY + photoH, photoX, photoY + photoH - radius);
+            ctx.lineTo(photoX, photoY + radius);
+            ctx.quadraticCurveTo(photoX, photoY, photoX + radius, photoY);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(photoImg, drawX, drawY, drawW, drawH);
+            ctx.restore();
+    
+            // Overlay a translucent modern text box at the bottom.
+            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+            ctx.fillRect(100, 630, 1000, 100);
+    
+            // Write latest weight and date.
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "40px Helvetica, Arial, sans-serif";
+            ctx.textAlign = "left";
+            ctx.fillText(`Latest Weight: ${latestWeight} lbs`, 120, 680);
+            ctx.fillText(`Date: ${latestDate}`, 120, 730);
+    
+            // Draw a modern title at the top.
+            ctx.font = "50px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = "#00aced";
+            ctx.textAlign = "center";
+            ctx.fillText("My Progress", canvas.width / 2, 70);
+    
+            // Save and display the export.
+            ExportModule.exportCanvas = canvas;
+            const overlayPreview = document.getElementById('overlay-preview');
+            overlayPreview.innerHTML = "";
+            overlayPreview.appendChild(canvas);
+            overlayPreview.style.display = "block";
+            console.log("Single photo export prepared with modern styling.");
+        };
+        photoImg.onerror = function() {
+            console.error("Failed to load photo for export.");
+        };
+        photoImg.src = lastPhoto.dataUrl || lastPhoto.src || "";
     },
     preparePhotoComparisonExport: function() {
-        // (Use your previous implementation with modern styling from v8.2)
-        // For brevity, this function's code is omitted here; replace it with your v8.2 code if needed.
-        alert("Photo Comparison Export not re-implemented in this version. Please use the previous version's code.");
+        const select1 = document.getElementById('photo-select-1');
+        const select2 = document.getElementById('photo-select-2');
+        const overlayPreview = document.getElementById('overlay-preview');
+        if (!select1 || !select2) {
+            alert("Photo selectors not found.");
+            return;
+        }
+        const idx1 = parseInt(select1.value);
+        const idx2 = parseInt(select2.value);
+        if (isNaN(idx1) || isNaN(idx2)) {
+            alert("Please select valid photos for export.");
+            return;
+        }
+        if (idx1 === idx2) {
+            alert("Please select two different photos for export.");
+            return;
+        }
+        const photos = DataPersistenceModule.getPhotos();
+        const photo1 = photos[idx1];
+        const photo2 = photos[idx2];
+        if (!photo1 || !photo2) {
+            alert("Selected photos not found.");
+            return;
+        }
+    
+        // Create a canvas for export (1400x700: two panels of 650x650 with margins)
+        const canvas = document.createElement('canvas');
+        canvas.width = 1400;
+        canvas.height = 700;
+        const ctx = canvas.getContext('2d');
+    
+        // Create a modern gradient background.
+        const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        bgGradient.addColorStop(0, "#222222");
+        bgGradient.addColorStop(1, "#444444");
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+        // Define panel dimensions.
+        const margin = 25;
+        const panelWidth = 650;
+        const panelHeight = 650;
+    
+        // Draw panels with rounded corners and drop shadows.
+        const drawPanel = function(x, y) {
+            ctx.save();
+            ctx.shadowColor = "rgba(0,0,0,0.5)";
+            ctx.shadowBlur = 20;
+            ctx.shadowOffsetX = 5;
+            ctx.shadowOffsetY = 5;
+            ctx.fillStyle = "#ffffff";
+            const radius = 20;
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + panelWidth - radius, y);
+            ctx.quadraticCurveTo(x + panelWidth, y, x + panelWidth, y + radius);
+            ctx.lineTo(x + panelWidth, y + panelHeight - radius);
+            ctx.quadraticCurveTo(x + panelWidth, y + panelHeight, x + panelWidth - radius, y + panelHeight);
+            ctx.lineTo(x + radius, y + panelHeight);
+            ctx.quadraticCurveTo(x, y + panelHeight, x, y + panelHeight - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        };
+    
+        // Draw left and right panels.
+        const leftX = margin;
+        const leftY = (canvas.height - panelHeight) / 2;
+        const rightX = leftX + panelWidth + margin;
+        const rightY = leftY;
+        drawPanel(leftX, leftY);
+        drawPanel(rightX, rightY);
+    
+        // Load both images.
+        const img1 = new Image();
+        const img2 = new Image();
+        let imagesLoaded = 0;
+        const onImageLoad = function() {
+            imagesLoaded++;
+            if (imagesLoaded === 2) {
+                const innerMargin = 20;
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(leftX + innerMargin, leftY + innerMargin, panelWidth - innerMargin * 2, panelHeight - innerMargin * 2);
+                ctx.clip();
+                ctx.drawImage(img1, leftX + innerMargin, leftY + innerMargin, panelWidth - innerMargin * 2, panelHeight - innerMargin * 2);
+                ctx.restore();
+    
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(rightX + innerMargin, rightY + innerMargin, panelWidth - innerMargin * 2, panelHeight - innerMargin * 2);
+                ctx.clip();
+                ctx.drawImage(img2, rightX + innerMargin, rightY + innerMargin, panelWidth - innerMargin * 2, panelHeight - innerMargin * 2);
+                ctx.restore();
+    
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "30px Helvetica, Arial, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(`Date: ${photo1.date || "N/A"}`, leftX + panelWidth/2, leftY + panelHeight + 40);
+                ctx.fillText(`Date: ${photo2.date || "N/A"}`, rightX + panelWidth/2, rightY + panelHeight + 40);
+    
+                ctx.font = "50px Helvetica, Arial, sans-serif";
+                ctx.fillStyle = "#00aced";
+                ctx.textAlign = "center";
+                ctx.fillText("Photo Comparison Export", canvas.width / 2, 60);
+    
+                ExportModule.exportCanvas = canvas;
+                overlayPreview.innerHTML = "";
+                overlayPreview.appendChild(canvas);
+                overlayPreview.style.display = "block";
+                console.log("Photo comparison export prepared with modern styling.");
+            }
+        };
+        img1.onload = onImageLoad;
+        img2.onload = onImageLoad;
+        img1.onerror = function() { console.error("Failed to load photo 1 for export."); };
+        img2.onerror = function() { console.error("Failed to load photo 2 for export."); };
+        img1.src = photo1.dataUrl || photo1.src || "";
+        img2.src = photo2.dataUrl || photo2.src || "";
     },
     prepareCustomProgressExport: function() {
         const overlayPreview = document.getElementById('overlay-preview');
