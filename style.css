@@ -1,55 +1,96 @@
-/* FitJourney Tracker - CSS v8.5 */
+/* FitJourney Tracker - CSS v8.6 */
 
 /* General Styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
     margin: 0;
     padding: 0;
     text-align: center;
 }
 
 header {
-    background: #007bff;
-    color: white;
-    padding: 10px 0;
-    font-size: 1.5em;
+    background: #000;
+    color: #e0e0e0;
+    padding: 15px 0;
+    font-size: 1.8em;
+    border-bottom: 1px solid #333;
 }
 
 /* Card Component */
 .card {
-    background: white;
-    padding: 15px;
-    margin: 10px auto;
+    background: #1e1e1e;
+    padding: 20px;
+    margin: 15px auto;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+    color: #e0e0e0;
 }
 
 /* Chart Container (make it wider) */
 .chart-container {
     max-width: 900px;
-}
-
-/* Dashboard Section (grouped modules under the chart) */
-#dashboard-section {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    max-width: 900px;
     margin: 0 auto;
 }
 
+/* Dashboard Section: 3 modules side by side on desktop */
+#dashboard-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 15px;
+    max-width: 900px;
+    margin: 20px auto;
+}
 #dashboard-section .card {
     flex: 1 1 30%;
     min-width: 280px;
 }
 
-/* Export Section remains unchanged from previous version */
+/* Photo Upload and Comparison Cards */
+.upload-photo, .comparison-display {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Chart Styling */
+canvas {
+    width: 100% !important;
+    max-width: 900px;
+    height: auto !important;
+}
+
+/* Buttons */
+button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1em;
+    transition: background 0.3s;
+}
+button:hover {
+    background: #0056b3;
+}
+
+/* Photo Gallery */
+.gallery img {
+    max-width: 150px;
+    max-height: 150px;
+    margin: 5px;
+    border-radius: 5px;
+}
+
+/* Export Section */
 .export-options label {
     display: block;
     margin-top: 5px;
+    font-weight: bold;
+    color: #e0e0e0;
 }
 
 /* Overlay Elements */
@@ -60,7 +101,6 @@ header {
     z-index: 1000;
     padding: 10px 15px;
 }
-
 #overlay-preview {
     position: fixed;
     top: 50%;
@@ -70,10 +110,10 @@ header {
     max-height: 95%;
     border: 2px solid #007bff;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.97);
+    background: rgba(20, 20, 20, 0.98);
     z-index: 1000;
     display: none;
-    padding: 10px;
+    padding: 20px;
 }
 
 /* Responsive Styles */
@@ -81,13 +121,14 @@ header {
     .card {
         max-width: 95%;
         margin: 10px auto;
-        padding: 10px;
+        padding: 15px;
     }
     #dashboard-section {
         flex-direction: column;
+        align-items: center;
     }
     header {
-        font-size: 1.2em;
+        font-size: 1.4em;
     }
     button {
         font-size: 0.9em;
