@@ -1,4 +1,4 @@
-// FitJourney Tracker - Version v8.3
+// FitJourney Tracker - Version v8.3a
 
 console.log("FitJourney Tracker v8.3 initializing...");
 
