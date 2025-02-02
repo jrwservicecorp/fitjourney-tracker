@@ -1,7 +1,6 @@
-// FitJourney Tracker - Version v7.92 (Added Dummy Modules for Missing Functionality)
+// FitJourney Tracker - Version v7.93
 
-// Log the initialization version
-console.log("FitJourney Tracker v7.92 initializing...");
+console.log("FitJourney Tracker v7.93 initializing...");
 
 window.onload = function() {
     try {
@@ -34,7 +33,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.92";
+            requiredElements.versionDisplay.innerText = "v7.93";
         }
 
         // Initialize modules
@@ -50,13 +49,13 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.92.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.93.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
 };
 
-// Chart Module - FULL RESTORE + FIXED INITIALIZATION
+// Chart Module
 const ChartModule = {
     chartInstance: null,
     sampleDataEnabled: true,
@@ -116,7 +115,7 @@ const ChartModule = {
     }
 };
 
-// Weight Logging Module - FINAL FIX: Updates Summary & Chart
+// Weight Logging Module
 const WeightLoggingModule = {
     init: function() {
         console.log("WeightLoggingModule loaded");
@@ -159,22 +158,51 @@ const WeightLoggingModule = {
     }
 };
 
-/* Dummy Module Implementations */
-// These modules are not fully implemented yet. They are defined as dummy objects
-// so that the app initializes without errors. You can add functionality to them iteratively.
-
+// Photo Upload Module - Updated Implementation
 const PhotoUploadModule = {
     init: function() {
-        console.log("PhotoUploadModule loaded (dummy implementation).");
-        // Example: Attach a dummy event listener for the photo upload form.
+        console.log("PhotoUploadModule loaded (updated implementation).");
         const form = document.getElementById('photo-upload-form');
-        if (form) {
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
-                console.log("Photo upload attempted (dummy action).");
-                // Prevent any changes to other UI components.
-            });
+        const photoInput = document.getElementById('photo-upload');
+        const photoDateInput = document.getElementById('photo-date');
+        const gallery = document.getElementById('photo-gallery');
+
+        if (!form || !photoInput || !gallery) {
+            console.warn("Warning: Photo upload elements are missing! Photo upload will not work.");
+            return;
         }
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const file = photoInput.files[0];
+            const photoDate = photoDateInput.value;
+
+            if (!file) {
+                console.warn("No file selected for upload.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Create a new image element with constrained size (CSS handles sizing)
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = photoDate ? `Photo from ${photoDate}` : "Uploaded Photo";
+
+                // Remove the placeholder if it exists and append the new image
+                if (gallery.querySelector('.placeholder')) {
+                    gallery.innerHTML = "";
+                }
+                gallery.appendChild(img);
+                console.log("Photo uploaded and displayed in gallery.");
+            };
+
+            reader.readAsDataURL(file);
+
+            // Reset the form inputs after upload
+            photoInput.value = "";
+            photoDateInput.value = "";
+        });
     }
 };
 
