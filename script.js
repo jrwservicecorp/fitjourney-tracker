@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.95
+// FitJourney Tracker - Version v7.96
 
-console.log("FitJourney Tracker v7.95 initializing...");
+console.log("FitJourney Tracker v7.96 initializing...");
 
 window.onload = function() {
     try {
@@ -33,7 +33,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.95";
+            requiredElements.versionDisplay.innerText = "v7.96";
         }
 
         // Initialize modules in order:
@@ -49,7 +49,7 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.95.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.96.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -61,6 +61,9 @@ window.onload = function() {
 Provides helper functions to get, save, and update data in localStorage.
 */
 const DataPersistenceModule = {
+    // Maximum number of photos to store
+    MAX_PHOTOS: 20,
+
     // Weight Logs
     getWeightLogs: function() {
         let logs = localStorage.getItem("weightLogs");
@@ -86,9 +89,7 @@ const DataPersistenceModule = {
         } catch (e) {
             if (e.name === 'QuotaExceededError') {
                 console.error("LocalStorage quota exceeded. Consider clearing old photos or switching to IndexedDB.");
-                // Optionally, you could remove the oldest photo and try saving again:
-                // photos.shift();
-                // localStorage.setItem("photos", JSON.stringify(photos));
+                throw e;
             } else {
                 throw e;
             }
@@ -96,8 +97,19 @@ const DataPersistenceModule = {
     },
     addPhoto: function(photo) {
         let photos = this.getPhotos();
+        // If maximum number of photos reached, remove the oldest before adding new one.
+        if (photos.length >= this.MAX_PHOTOS) {
+            console.log(`Max photo limit reached (${this.MAX_PHOTOS}). Removing oldest photo.`);
+            photos.shift();
+        }
         photos.push(photo);
-        this.savePhotos(photos);
+        try {
+            this.savePhotos(photos);
+        } catch (e) {
+            if (e.name === 'QuotaExceededError') {
+                console.error("Quota exceeded even after removing the oldest photo.");
+            }
+        }
     }
 };
 
