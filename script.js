@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v8.4
+// FitJourney Tracker - Version v8.5
 
-console.log("FitJourney Tracker v8.4 initializing...");
+console.log("FitJourney Tracker v8.5 initializing...");
 
 window.onload = function() {
     try {
@@ -39,7 +39,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v8.4";
+            requiredElements.versionDisplay.innerText = "v8.5";
         }
 
         // Initialize modules in order:
@@ -55,15 +55,17 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        // Add click-outside-to-close overlay functionality:
+        // Click-outside-to-close overlay functionality:
         document.addEventListener('click', function(e) {
             const overlay = document.getElementById('overlay-preview');
-            if (overlay.style.display === "block" && !overlay.contains(e.target) && e.target.id !== 'prepare-export-btn' && e.target.id !== 'exportDataBtn') {
+            if (overlay.style.display === "block" && !overlay.contains(e.target) &&
+                e.target.id !== 'prepare-export-btn' &&
+                e.target.id !== 'exportDataBtn') {
                 overlay.style.display = "none";
             }
         });
 
-        console.log("All modules initialized successfully in FitJourney Tracker v8.4.");
+        console.log("All modules initialized successfully in FitJourney Tracker v8.5.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -437,7 +439,6 @@ const ExportModule = {
     },
     addOverlayControls: function() {
         const overlayPreview = document.getElementById('overlay-preview');
-        // Remove existing controls if any.
         let controls = document.getElementById('overlay-controls');
         if (controls) {
             controls.remove();
@@ -446,7 +447,6 @@ const ExportModule = {
         controls.id = "overlay-controls";
         controls.style.textAlign = "center";
         controls.style.marginTop = "10px";
-        // Style the controls container (modern look)
         controls.style.padding = "10px";
         controls.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
         controls.style.borderRadius = "5px";
@@ -462,7 +462,6 @@ const ExportModule = {
         const shareBtn = document.createElement('button');
         shareBtn.textContent = "Share";
         shareBtn.addEventListener('click', () => {
-            // Try to use the Web Share API if available.
             if (navigator.share) {
                 navigator.share({
                     title: 'My Progress Export',
