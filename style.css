@@ -1,4 +1,4 @@
-/* FitJourney Tracker - CSS v8.4 */
+/* FitJourney Tracker - CSS v8.5 */
 
 /* General Styles */
 body {
@@ -24,48 +24,29 @@ header {
     margin: 10px auto;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
 }
 
-/* Dashboard Row */
-.dashboard-row {
+/* Chart Container (make it wider) */
+.chart-container {
+    max-width: 900px;
+}
+
+/* Dashboard Section (grouped modules under the chart) */
+#dashboard-section {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    gap: 10px;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
-/* Chart Styling */
-canvas {
-    width: 100% !important;
-    max-width: 550px;
-    height: auto !important;
+#dashboard-section .card {
+    flex: 1 1 30%;
+    min-width: 280px;
 }
 
-/* Buttons */
-button {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    margin-top: 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 1em;
-}
-
-button:hover {
-    background: #0056b3;
-}
-
-/* Photo Gallery */
-.gallery img {
-    max-width: 150px;
-    max-height: 150px;
-    margin: 5px;
-    border-radius: 5px;
-}
-
-/* Export Section */
+/* Export Section remains unchanged from previous version */
 .export-options label {
     display: block;
     margin-top: 5px;
@@ -101,6 +82,9 @@ button:hover {
         max-width: 95%;
         margin: 10px auto;
         padding: 10px;
+    }
+    #dashboard-section {
+        flex-direction: column;
     }
     header {
         font-size: 1.2em;
