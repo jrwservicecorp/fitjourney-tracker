@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.94
+// FitJourney Tracker - Version v7.95
 
-console.log("FitJourney Tracker v7.94 initializing...");
+console.log("FitJourney Tracker v7.95 initializing...");
 
 window.onload = function() {
     try {
@@ -33,7 +33,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.94";
+            requiredElements.versionDisplay.innerText = "v7.95";
         }
 
         // Initialize modules in order:
@@ -49,7 +49,7 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.94.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.95.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -57,8 +57,8 @@ window.onload = function() {
 
 /* -------------------------------
    Data Persistence Module
-   ------------------------------- 
-This module provides helper functions to get, save, and update data in localStorage.
+   -------------------------------
+Provides helper functions to get, save, and update data in localStorage.
 */
 const DataPersistenceModule = {
     // Weight Logs
@@ -81,7 +81,18 @@ const DataPersistenceModule = {
         return photos ? JSON.parse(photos) : [];
     },
     savePhotos: function(photos) {
-        localStorage.setItem("photos", JSON.stringify(photos));
+        try {
+            localStorage.setItem("photos", JSON.stringify(photos));
+        } catch (e) {
+            if (e.name === 'QuotaExceededError') {
+                console.error("LocalStorage quota exceeded. Consider clearing old photos or switching to IndexedDB.");
+                // Optionally, you could remove the oldest photo and try saving again:
+                // photos.shift();
+                // localStorage.setItem("photos", JSON.stringify(photos));
+            } else {
+                throw e;
+            }
+        }
     },
     addPhoto: function(photo) {
         let photos = this.getPhotos();
@@ -243,10 +254,14 @@ const PhotoUploadModule = {
         if (existingPhotos.length > 0) {
             gallery.innerHTML = "";
             existingPhotos.forEach(photo => {
-                const img = document.createElement('img');
-                img.src = photo.dataUrl;
-                img.alt = photo.date ? `Photo from ${photo.date}` : "Uploaded Photo";
-                gallery.appendChild(img);
+                if (photo.dataUrl) { // Guard: only create images if dataUrl exists
+                    const img = document.createElement('img');
+                    img.src = photo.dataUrl;
+                    img.alt = photo.date ? `Photo from ${photo.date}` : "Uploaded Photo";
+                    gallery.appendChild(img);
+                } else {
+                    console.warn("Skipping photo with undefined dataUrl", photo);
+                }
             });
         }
 
