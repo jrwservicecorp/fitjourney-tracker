@@ -429,7 +429,6 @@ const ExportModule = {
         });
     },
     prepareSinglePhotoExport: function() {
-        // Get the last uploaded photo and the latest weight log.
         const photos = DataPersistenceModule.getPhotos();
         const logs = DataPersistenceModule.getWeightLogs();
         if (photos.length === 0) {
@@ -444,20 +443,17 @@ const ExportModule = {
             latestDate = lastLog.date;
         }
     
-        // Create a canvas for export (1200x800)
         const canvas = document.createElement('canvas');
         canvas.width = 1200;
         canvas.height = 800;
         const ctx = canvas.getContext('2d');
     
-        // Create a modern gradient background.
         const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         bgGradient.addColorStop(0, "#1a1a1a");
         bgGradient.addColorStop(1, "#333333");
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-        // Draw a rounded rectangle as a container for the photo.
         const photoX = 100, photoY = 100, photoW = 1000, photoH = 500, radius = 20;
         ctx.fillStyle = "#ffffff";
         ctx.shadowColor = "rgba(0,0,0,0.4)";
@@ -478,7 +474,6 @@ const ExportModule = {
         ctx.fill();
         ctx.shadowColor = "transparent";
     
-        // Draw the photo inside the rounded rectangle.
         const photoImg = new Image();
         photoImg.onload = function() {
             const margin = 20;
@@ -502,24 +497,20 @@ const ExportModule = {
             ctx.drawImage(photoImg, drawX, drawY, drawW, drawH);
             ctx.restore();
     
-            // Overlay a translucent modern text box at the bottom.
             ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
             ctx.fillRect(100, 630, 1000, 100);
     
-            // Write latest weight and date.
             ctx.fillStyle = "#ffffff";
             ctx.font = "40px Helvetica, Arial, sans-serif";
             ctx.textAlign = "left";
             ctx.fillText(`Latest Weight: ${latestWeight} lbs`, 120, 680);
             ctx.fillText(`Date: ${latestDate}`, 120, 730);
     
-            // Draw a modern title at the top.
             ctx.font = "50px Helvetica, Arial, sans-serif";
             ctx.fillStyle = "#00aced";
             ctx.textAlign = "center";
             ctx.fillText("My Progress", canvas.width / 2, 70);
     
-            // Save and display the export.
             ExportModule.exportCanvas = canvas;
             const overlayPreview = document.getElementById('overlay-preview');
             overlayPreview.innerHTML = "";
@@ -558,25 +549,21 @@ const ExportModule = {
             return;
         }
     
-        // Create a canvas for export (1400x700: two panels of 650x650 with margins)
         const canvas = document.createElement('canvas');
         canvas.width = 1400;
         canvas.height = 700;
         const ctx = canvas.getContext('2d');
     
-        // Create a modern gradient background.
         const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         bgGradient.addColorStop(0, "#222222");
         bgGradient.addColorStop(1, "#444444");
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-        // Define panel dimensions.
         const margin = 25;
         const panelWidth = 650;
         const panelHeight = 650;
     
-        // Draw panels with rounded corners and drop shadows.
         const drawPanel = function(x, y) {
             ctx.save();
             ctx.shadowColor = "rgba(0,0,0,0.5)";
@@ -600,7 +587,6 @@ const ExportModule = {
             ctx.restore();
         };
     
-        // Draw left and right panels.
         const leftX = margin;
         const leftY = (canvas.height - panelHeight) / 2;
         const rightX = leftX + panelWidth + margin;
@@ -608,7 +594,6 @@ const ExportModule = {
         drawPanel(leftX, leftY);
         drawPanel(rightX, rightY);
     
-        // Load both images.
         const img1 = new Image();
         const img2 = new Image();
         let imagesLoaded = 0;
