@@ -109,7 +109,7 @@
         </label>
         <label>
           <input type="radio" name="export-type" value="data-only">
-          Data Only
+          Data Only Export
         </label>
         <label>
           <input type="radio" name="export-type" value="custom-progress">
@@ -134,7 +134,7 @@
   <!-- Hidden overlay photo elements -->
   <button id="overlay-photo-btn" style="display: none;">Overlay Photo</button>
 
-  <!-- Script to toggle custom progress inputs -->
+  <!-- Toggle custom progress inputs based on export type selection -->
   <script>
     document.querySelectorAll('input[name="export-type"]').forEach(radio => {
       radio.addEventListener('change', () => {
