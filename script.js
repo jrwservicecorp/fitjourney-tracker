@@ -427,6 +427,32 @@ const ExportModule = {
             }
         });
     },
+    // Helper: add overlay controls (Close and Share buttons)
+    addOverlayControls: function() {
+        const overlayPreview = document.getElementById('overlay-preview');
+        // Remove any existing control container.
+        let controls = document.getElementById('overlay-controls');
+        if (controls) {
+            controls.remove();
+        }
+        controls = document.createElement('div');
+        controls.id = "overlay-controls";
+        controls.style.textAlign = "center";
+        controls.style.marginTop = "10px";
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = "Close";
+        closeBtn.addEventListener('click', () => {
+            overlayPreview.style.display = "none";
+        });
+        const shareBtn = document.createElement('button');
+        shareBtn.textContent = "Share";
+        shareBtn.addEventListener('click', () => {
+            alert("Share functionality not implemented yet.");
+        });
+        controls.appendChild(closeBtn);
+        controls.appendChild(shareBtn);
+        overlayPreview.appendChild(controls);
+    },
     prepareSinglePhotoExport: function() {
         const photos = DataPersistenceModule.getPhotos();
         const logs = DataPersistenceModule.getWeightLogs();
@@ -514,6 +540,7 @@ const ExportModule = {
             const overlayPreview = document.getElementById('overlay-preview');
             overlayPreview.innerHTML = "";
             overlayPreview.appendChild(canvas);
+            ExportModule.addOverlayControls();
             overlayPreview.style.display = "block";
             console.log("Single photo export prepared with modern styling.");
         };
@@ -628,6 +655,7 @@ const ExportModule = {
                 ExportModule.exportCanvas = canvas;
                 overlayPreview.innerHTML = "";
                 overlayPreview.appendChild(canvas);
+                ExportModule.addOverlayControls();
                 overlayPreview.style.display = "block";
                 console.log("Photo comparison export prepared with modern styling.");
             }
@@ -673,6 +701,7 @@ const ExportModule = {
         canvas.width = 1200;
         canvas.height = 800;
         const ctx = canvas.getContext('2d');
+    
         const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         bgGradient.addColorStop(0, "#0d0d0d");
         bgGradient.addColorStop(1, "#333333");
@@ -692,12 +721,12 @@ const ExportModule = {
         ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
         ctx.font = "30px Helvetica, Arial, sans-serif";
         ctx.fillStyle = "#ffffff";
-        ctx.fillText("Share your progress and inspire others!", canvas.width / 2, canvas.height - 15);
+        ctx.fillText("Keep pushing your limits!", canvas.width / 2, canvas.height - 15);
     
-        // Draw chart area between header and footer
+        // Main chart area between header and footer
         const chartMargin = 120;
-        const chartHeight = canvas.height - chartMargin - 70; // leaving space for footer
         const chartWidth = canvas.width - 200;
+        const chartHeight = canvas.height - chartMargin - 70;
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -707,7 +736,7 @@ const ExportModule = {
         ctx.stroke();
     
         const timeSpan = endDate.getTime() - startDate.getTime();
-        const weightSpan = maxWeight - minWeight || 1; // avoid division by zero
+        const weightSpan = maxWeight - minWeight || 1;
         ctx.strokeStyle = "#00aced";
         ctx.lineWidth = 4;
         ctx.beginPath();
@@ -723,7 +752,7 @@ const ExportModule = {
         });
         ctx.stroke();
     
-        // Draw data points on the chart
+        // Draw data points.
         ctx.fillStyle = "#ffffff";
         logs.forEach(log => {
             const logDate = new Date(log.date);
@@ -734,14 +763,14 @@ const ExportModule = {
             ctx.fill();
         });
     
-        // Draw summary box on the left
+        // Draw summary box on the left.
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(50, 110, 300, 150);
-        const weightChange = logs[logs.length - 1].weight - logs[0].weight;
-        const avgWeight = (logs.reduce((acc, log) => acc + log.weight, 0) / logs.length).toFixed(1);
         ctx.fillStyle = "#00aced";
         ctx.font = "30px Helvetica, Arial, sans-serif";
         ctx.textAlign = "left";
+        const weightChange = logs[logs.length - 1].weight - logs[0].weight;
+        const avgWeight = (logs.reduce((acc, log) => acc + log.weight, 0) / logs.length).toFixed(1);
         ctx.fillText(`Min: ${minWeight} lbs`, 60, 150);
         ctx.fillText(`Max: ${maxWeight} lbs`, 60, 190);
         ctx.fillText(`Avg: ${avgWeight} lbs`, 60, 230);
@@ -750,11 +779,11 @@ const ExportModule = {
         ExportModule.exportCanvas = canvas;
         overlayPreview.innerHTML = "";
         overlayPreview.appendChild(canvas);
+        ExportModule.addOverlayControls();
         overlayPreview.style.display = "block";
         console.log("Custom progress export prepared with modern styling.");
     },
     prepareDataOnlyExport: function() {
-        // New implementation for Data Only Export with header, main data section, and footer.
         const overlayPreview = document.getElementById('overlay-preview');
         const logs = DataPersistenceModule.getWeightLogs();
         if (logs.length === 0) {
@@ -762,7 +791,6 @@ const ExportModule = {
             return;
         }
     
-        // Compute summary statistics.
         let minWeight = Number.MAX_VALUE, maxWeight = Number.MIN_VALUE, total = 0;
         logs.forEach(log => {
             const weight = log.weight;
@@ -773,20 +801,18 @@ const ExportModule = {
         const avgWeight = (total / logs.length).toFixed(1);
         const weightChange = logs[logs.length - 1].weight - logs[0].weight;
     
-        // Create a canvas (1200x800)
         const canvas = document.createElement('canvas');
         canvas.width = 1200;
         canvas.height = 800;
         const ctx = canvas.getContext('2d');
     
-        // Draw a sleek gradient background.
         const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         bgGradient.addColorStop(0, "#0d0d0d");
         bgGradient.addColorStop(1, "#222222");
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-        // Header section (top 100px)
+        // Header section
         ctx.fillStyle = "#00aced";
         ctx.fillRect(0, 0, canvas.width, 100);
         ctx.font = "50px Helvetica, Arial, sans-serif";
@@ -794,14 +820,14 @@ const ExportModule = {
         ctx.textAlign = "center";
         ctx.fillText("Data Only Export", canvas.width / 2, 65);
     
-        // Footer section (bottom 50px)
+        // Footer section
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
         ctx.font = "30px Helvetica, Arial, sans-serif";
         ctx.fillStyle = "#ffffff";
         ctx.fillText("Keep pushing your limits!", canvas.width / 2, canvas.height - 15);
     
-        // Main data section: Draw a chart with all logs.
+        // Main chart area
         const chartMargin = 120;
         const chartWidth = canvas.width - 200;
         const chartHeight = canvas.height - chartMargin - 70;
@@ -832,7 +858,6 @@ const ExportModule = {
         });
         ctx.stroke();
     
-        // Draw data points.
         ctx.fillStyle = "#ffffff";
         logs.forEach(log => {
             const logDate = new Date(log.date);
@@ -843,7 +868,7 @@ const ExportModule = {
             ctx.fill();
         });
     
-        // Draw a summary text box on the left.
+        // Summary box
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(50, 110, 300, 150);
         ctx.fillStyle = "#00aced";
@@ -857,6 +882,7 @@ const ExportModule = {
         ExportModule.exportCanvas = canvas;
         overlayPreview.innerHTML = "";
         overlayPreview.appendChild(canvas);
+        ExportModule.addOverlayControls();
         overlayPreview.style.display = "block";
         console.log("Data Only export prepared with modern styling.");
     }
