@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v8.7
+// FitJourney Tracker - Version v8.8.1
 
-console.log("FitJourney Tracker v8.7 initializing...");
+console.log("FitJourney Tracker v8.8.1 initializing...");
 
 window.onload = function() {
     try {
@@ -39,7 +39,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v8.7";
+            requiredElements.versionDisplay.innerText = "v8.8.1";
         }
 
         // Initialize modules in order:
@@ -65,15 +65,15 @@ window.onload = function() {
             }
         });
 
-        console.log("All modules initialized successfully in FitJourney Tracker v8.7.");
+        console.log("All modules initialized successfully in FitJourney Tracker v8.8.1.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
 };
 
-/* -------------------------------
+/* =========================
    Data Persistence Module
-   ------------------------------- */
+   ========================= */
 const DataPersistenceModule = {
     MAX_PHOTOS: 20,
     getWeightLogs: function() {
@@ -121,9 +121,9 @@ const DataPersistenceModule = {
     }
 };
 
-/* -------------------------------
+/* =========================
    Chart Module
-   ------------------------------- */
+   ========================= */
 const ChartModule = {
     chartInstance: null,
     sampleDataEnabled: true,
@@ -186,9 +186,9 @@ const ChartModule = {
     }
 };
 
-/* -------------------------------
+/* =========================
    Weight Logging Module
-   ------------------------------- */
+   ========================= */
 const WeightLoggingModule = {
     init: function() {
         console.log("WeightLoggingModule loaded");
@@ -243,9 +243,9 @@ const WeightLoggingModule = {
     }
 };
 
-/* -------------------------------
+/* =========================
    Photo Upload Module
-   ------------------------------- */
+   ========================= */
 const PhotoUploadModule = {
     MAX_WIDTH: 800,
     MAX_HEIGHT: 800,
@@ -331,9 +331,9 @@ const PhotoUploadModule = {
     }
 };
 
-/* -------------------------------
+/* =========================
    Photo Comparison Module
-   ------------------------------- */
+   ========================= */
 const PhotoComparisonModule = {
     init: function() {
         console.log("PhotoComparisonModule loaded (enhanced implementation).");
@@ -409,12 +409,12 @@ const PhotoComparisonModule = {
     }
 };
 
-/* -------------------------------
+/* =========================
    Export Module with Fabric.js Integration
-   ------------------------------- */
+   ========================= */
 const ExportModule = {
     exportCanvas: null,
-    fabricCanvas: null, // new Fabric.js canvas
+    fabricCanvas: null, // Fabric.js canvas instance
     init: function() {
         console.log("ExportModule loaded (enhanced implementation).");
         const prepareBtn = document.getElementById('prepare-export-btn');
@@ -487,7 +487,7 @@ const ExportModule = {
             }
         });
     
-        // New "Edit" button launches the Fabric.js editor
+        // "Edit" button launches the Fabric.js editor
         const editBtn = document.createElement('button');
         editBtn.textContent = "Edit";
         editBtn.addEventListener('click', () => {
@@ -500,28 +500,35 @@ const ExportModule = {
         overlayPreview.appendChild(controls);
     },
     openFabricEditor: function() {
-        // Create a Fabric canvas over the export overlay
-        const overlayPreview = document.getElementById('overlay-preview');
-        // Remove any previous Fabric canvas if exists
+        // Remove any previous Fabric instance
         if (ExportModule.fabricCanvas) {
             ExportModule.fabricCanvas.dispose();
+            ExportModule.fabricCanvas = null;
         }
-        // Create a new Fabric canvas using the existing exportCanvas as an image object
+        const overlayPreview = document.getElementById('overlay-preview');
+        // Convert current exportCanvas to data URL
         const dataURL = ExportModule.exportCanvas.toDataURL("image/png");
-        // Clear overlay and create a new container for editing
+        // Clear overlay and create a container for the Fabric canvas
         overlayPreview.innerHTML = "";
         const editorContainer = document.createElement('div');
         editorContainer.id = "fabric-editor-container";
+        editorContainer.style.position = "relative";
+        editorContainer.style.display = "inline-block";
         overlayPreview.appendChild(editorContainer);
     
-        // Create a Fabric canvas in the container
-        ExportModule.fabricCanvas = new fabric.Canvas(editorContainer, {
-            width: ExportModule.exportCanvas.width,
-            height: ExportModule.exportCanvas.height,
+        // Create a new canvas element for Fabric
+        const fabricEl = document.createElement('canvas');
+        fabricEl.id = "fabric-canvas";
+        fabricEl.width = ExportModule.exportCanvas.width;
+        fabricEl.height = ExportModule.exportCanvas.height;
+        editorContainer.appendChild(fabricEl);
+    
+        // Initialize Fabric on the new canvas element
+        ExportModule.fabricCanvas = new fabric.Canvas(fabricEl, {
             backgroundColor: '#121212'
         });
     
-        // Load the export image into the fabric canvas as a background image
+        // Load the export image into the fabric canvas as its background
         fabric.Image.fromURL(dataURL, function(img) {
             ExportModule.fabricCanvas.setBackgroundImage(img, ExportModule.fabricCanvas.renderAll.bind(ExportModule.fabricCanvas), {
                 scaleX: ExportModule.fabricCanvas.width / img.width,
@@ -529,7 +536,7 @@ const ExportModule = {
             });
         });
     
-        // Add a sample text object that the user can edit and reposition
+        // Add a sample editable text object
         const caption = new fabric.Text("My Progress", {
             left: 400,
             top: 50,
@@ -540,22 +547,21 @@ const ExportModule = {
         });
         ExportModule.fabricCanvas.add(caption);
     
-        // Add a "Save Changes" button within the editor
+        // Create and add a "Save Changes" button below the Fabric canvas
         const saveBtn = document.createElement('button');
         saveBtn.textContent = "Save Changes";
         saveBtn.style.marginTop = "10px";
         saveBtn.addEventListener('click', () => {
-            // Convert fabric canvas back to standard canvas and update exportCanvas
-            ExportModule.exportCanvas = document.createElement('canvas');
-            ExportModule.exportCanvas.width = ExportModule.fabricCanvas.getWidth();
-            ExportModule.exportCanvas.height = ExportModule.fabricCanvas.getHeight();
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = ExportModule.fabricCanvas.getWidth();
+            tempCanvas.height = ExportModule.fabricCanvas.getHeight();
             ExportModule.fabricCanvas.renderAll();
-            ExportModule.exportCanvas.getContext('2d').drawImage(ExportModule.fabricCanvas.lowerCanvasEl, 0, 0);
-            // Dispose the fabric canvas and update overlay
+            tempCanvas.getContext('2d').drawImage(ExportModule.fabricCanvas.lowerCanvasEl, 0, 0);
+            ExportModule.exportCanvas = tempCanvas;
             ExportModule.fabricCanvas.dispose();
             ExportModule.fabricCanvas = null;
             overlayPreview.innerHTML = "";
-            overlayPreview.appendChild(ExportModule.exportCanvas);
+            overlayPreview.appendChild(tempCanvas);
             ExportModule.addOverlayControls();
             overlayPreview.style.display = "block";
         });
@@ -634,12 +640,12 @@ const ExportModule = {
             ctx.fillRect(100, 630, 1000, 100);
     
             ctx.fillStyle = "#ffffff";
-            ctx.font = "40px Helvetica, Arial, sans-serif";
+            ctx.font = "40px Roboto";
             ctx.textAlign = "left";
             ctx.fillText(`Latest Weight: ${latestWeight} lbs`, 120, 680);
             ctx.fillText(`Date: ${latestDate}`, 120, 730);
     
-            ctx.font = "50px Helvetica, Arial, sans-serif";
+            ctx.font = "50px Roboto";
             ctx.fillStyle = "#00aced";
             ctx.textAlign = "center";
             ctx.fillText("My Progress", canvas.width / 2, 70);
@@ -750,12 +756,12 @@ const ExportModule = {
                 ctx.restore();
     
                 ctx.fillStyle = "#ffffff";
-                ctx.font = "30px Helvetica, Arial, sans-serif";
+                ctx.font = "30px Roboto";
                 ctx.textAlign = "center";
                 ctx.fillText(`Date: ${photo1.date || "N/A"}`, leftX + panelWidth/2, leftY + panelHeight + 40);
                 ctx.fillText(`Date: ${photo2.date || "N/A"}`, rightX + panelWidth/2, rightY + panelHeight + 40);
     
-                ctx.font = "50px Helvetica, Arial, sans-serif";
+                ctx.font = "50px Roboto";
                 ctx.fillStyle = "#00aced";
                 ctx.textAlign = "center";
                 ctx.fillText("Photo Comparison Export", canvas.width / 2, 60);
@@ -816,31 +822,37 @@ const ExportModule = {
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-        // Draw header area (top 100px)
+        // Header section
         ctx.fillStyle = "#00aced";
         ctx.fillRect(0, 0, canvas.width, 100);
-        ctx.font = "50px Helvetica, Arial, sans-serif";
+        ctx.font = "bold 50px Roboto";
         ctx.fillStyle = "#ffffff";
         ctx.textAlign = "center";
         ctx.fillText("Custom Progress Export", canvas.width / 2, 65);
     
-        // Draw footer area (bottom 50px)
+        // Footer section
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
-        ctx.font = "30px Helvetica, Arial, sans-serif";
+        ctx.font = "bold 30px Roboto";
         ctx.fillStyle = "#ffffff";
         ctx.fillText("Keep pushing your limits!", canvas.width / 2, canvas.height - 15);
     
-        // Main chart area
-        const chartMargin = 120;
-        const chartWidth = canvas.width - 200;
-        const chartHeight = canvas.height - chartMargin - 70;
+        // Chart Frame (Rounded)
+        const chartFrameX = 90, chartFrameY = 120, chartFrameW = canvas.width - 180, chartFrameH = canvas.height - 240;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+        ctx.strokeStyle = "rgba(255,255,255,0.2)";
+        ctx.lineWidth = 3;
+        ExportModule.drawRoundedRect(ctx, chartFrameX, chartFrameY, chartFrameW, chartFrameH, 15, true, true);
+    
+        // Chart Area inside frame
+        const chartX = chartFrameX + 10, chartY = chartFrameY + 10;
+        const chartWidth = chartFrameW - 20, chartHeight = chartFrameH - 20;
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(100, chartMargin);
-        ctx.lineTo(100, chartMargin + chartHeight);
-        ctx.lineTo(100 + chartWidth, chartMargin + chartHeight);
+        ctx.moveTo(chartX, chartY + chartHeight);
+        ctx.lineTo(chartX, chartY);
+        ctx.lineTo(chartX + chartWidth, chartY);
         ctx.stroke();
     
         const startDateTime = startDate.getTime();
@@ -852,8 +864,8 @@ const ExportModule = {
         ctx.beginPath();
         logs.forEach((log, index) => {
             const logDate = new Date(log.date);
-            const x = 100 + ((logDate.getTime() - startDateTime) / timeSpan) * chartWidth;
-            const y = chartMargin + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
+            const x = chartX + ((logDate.getTime() - startDateTime) / timeSpan) * chartWidth;
+            const y = chartY + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
             if (index === 0) {
                 ctx.moveTo(x, y);
             } else {
@@ -865,25 +877,22 @@ const ExportModule = {
         ctx.fillStyle = "#ffffff";
         logs.forEach(log => {
             const logDate = new Date(log.date);
-            const x = 100 + ((logDate.getTime() - startDateTime) / timeSpan) * chartWidth;
-            const y = chartMargin + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
+            const x = chartX + ((logDate.getTime() - startDateTime) / timeSpan) * chartWidth;
+            const y = chartY + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
             ctx.beginPath();
             ctx.arc(x, y, 5, 0, Math.PI * 2);
             ctx.fill();
         });
     
-        // Draw summary box on the left
-        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        ctx.fillRect(50, 110, 300, 150);
+        // Summary Box with rounded corners
+        ExportModule.drawRoundedRect(ctx, 50, 110, 300, 150, 10, true, false);
         ctx.fillStyle = "#00aced";
-        ctx.font = "30px Helvetica, Arial, sans-serif";
+        ctx.font = "bold 30px Roboto";
         ctx.textAlign = "left";
-        const weightChange = logs[logs.length - 1].weight - logs[0].weight;
-        const avgWeight = (logs.reduce((acc, log) => acc + log.weight, 0) / logs.length).toFixed(1);
         ctx.fillText(`Min: ${minWeight} lbs`, 60, 150);
         ctx.fillText(`Max: ${maxWeight} lbs`, 60, 190);
-        ctx.fillText(`Avg: ${avgWeight} lbs`, 60, 230);
-        ctx.fillText(`Change: ${weightChange > 0 ? "+" : ""}${weightChange} lbs`, 60, 270);
+        ctx.fillText(`Avg: ${(logs.reduce((acc, log) => acc + log.weight, 0) / logs.length).toFixed(1)} lbs`, 60, 230);
+        ctx.fillText(`Change: ${((logs[logs.length - 1].weight - logs[0].weight) > 0 ? "+" : "") + (logs[logs.length - 1].weight - logs[0].weight)} lbs`, 60, 270);
     
         ExportModule.exportCanvas = canvas;
         overlayPreview.innerHTML = "";
@@ -915,37 +924,59 @@ const ExportModule = {
         canvas.height = 800;
         const ctx = canvas.getContext('2d');
     
-        const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        bgGradient.addColorStop(0, "#0d0d0d");
-        bgGradient.addColorStop(1, "#222222");
-        ctx.fillStyle = bgGradient;
+        // Layered Radial Background
+        const radialGrad = ctx.createRadialGradient(
+            canvas.width / 2, canvas.height / 2, 100,
+            canvas.width / 2, canvas.height / 2, canvas.width / 2
+        );
+        radialGrad.addColorStop(0, "#1c1c1c");
+        radialGrad.addColorStop(1, "#000");
+        ctx.fillStyle = radialGrad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-        // Header section
+        // Header Section with bottom border
         ctx.fillStyle = "#00aced";
         ctx.fillRect(0, 0, canvas.width, 100);
-        ctx.font = "50px Helvetica, Arial, sans-serif";
+        ctx.strokeStyle = "#007bb5";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 100);
+        ctx.lineTo(canvas.width, 100);
+        ctx.stroke();
+        ctx.font = "bold 50px Roboto";
         ctx.fillStyle = "#ffffff";
         ctx.textAlign = "center";
         ctx.fillText("Data Only Export", canvas.width / 2, 65);
     
-        // Footer section
+        // Footer Section with top border
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
-        ctx.font = "30px Helvetica, Arial, sans-serif";
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height - 50);
+        ctx.lineTo(canvas.width, canvas.height - 50);
+        ctx.stroke();
+        ctx.font = "bold 30px Roboto";
         ctx.fillStyle = "#ffffff";
         ctx.fillText("Keep pushing your limits!", canvas.width / 2, canvas.height - 15);
     
-        // Main chart area
-        const chartMargin = 120;
-        const chartWidth = canvas.width - 200;
-        const chartHeight = canvas.height - chartMargin - 70;
+        // Main Chart Frame (Rounded)
+        const chartFrameX = 90, chartFrameY = 120, chartFrameW = canvas.width - 180, chartFrameH = canvas.height - 240;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+        ctx.strokeStyle = "rgba(255,255,255,0.2)";
+        ctx.lineWidth = 3;
+        ExportModule.drawRoundedRect(ctx, chartFrameX, chartFrameY, chartFrameW, chartFrameH, 15, true, true);
+    
+        // Chart Area inside frame
+        const chartX = chartFrameX + 10, chartY = chartFrameY + 10;
+        const chartWidth = chartFrameW - 20, chartHeight = chartFrameH - 20;
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(100, chartMargin);
-        ctx.lineTo(100, chartMargin + chartHeight);
-        ctx.lineTo(100 + chartWidth, chartMargin + chartHeight);
+        ctx.moveTo(chartX, chartY + chartHeight);
+        ctx.lineTo(chartX, chartY);
+        ctx.lineTo(chartX + chartWidth, chartY);
         ctx.stroke();
     
         const startDate = new Date(logs[0].date);
@@ -957,8 +988,8 @@ const ExportModule = {
         ctx.beginPath();
         logs.forEach((log, index) => {
             const logDate = new Date(log.date);
-            const x = 100 + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
-            const y = chartMargin + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
+            const x = chartX + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
+            const y = chartY + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
             if (index === 0) {
                 ctx.moveTo(x, y);
             } else {
@@ -970,18 +1001,17 @@ const ExportModule = {
         ctx.fillStyle = "#ffffff";
         logs.forEach(log => {
             const logDate = new Date(log.date);
-            const x = 100 + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
-            const y = chartMargin + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
+            const x = chartX + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
+            const y = chartY + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
             ctx.beginPath();
             ctx.arc(x, y, 5, 0, Math.PI * 2);
             ctx.fill();
         });
     
-        // Summary box
-        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        ctx.fillRect(50, 110, 300, 150);
+        // Summary Box with rounded corners
+        ExportModule.drawRoundedRect(ctx, 50, 110, 300, 150, 10, true, false);
         ctx.fillStyle = "#00aced";
-        ctx.font = "30px Helvetica, Arial, sans-serif";
+        ctx.font = "bold 30px Roboto";
         ctx.textAlign = "left";
         ctx.fillText(`Min: ${minWeight} lbs`, 60, 150);
         ctx.fillText(`Max: ${maxWeight} lbs`, 60, 190);
@@ -994,57 +1024,321 @@ const ExportModule = {
         ExportModule.addOverlayControls();
         overlayPreview.style.display = "block";
         console.log("Data Only export prepared with modern styling.");
+    },
+    // Helper function to draw rounded rectangles
+    drawRoundedRect: function(ctx, x, y, width, height, radius, fill, stroke) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        if (fill) ctx.fill();
+        if (stroke) ctx.stroke();
+    },
+    prepareCustomProgressExport: function() {
+        const overlayPreview = document.getElementById('overlay-preview');
+        const startDateInput = document.getElementById('export-start-date');
+        const endDateInput = document.getElementById('export-end-date');
+        const startDateStr = startDateInput.value;
+        const endDateStr = endDateInput.value;
+        if (!startDateStr || !endDateStr) {
+            alert("Please select both start and end dates.");
+            return;
+        }
+        const startDate = new Date(startDateStr);
+        const endDate = new Date(endDateStr);
+        if (startDate > endDate) {
+            alert("Start date must be before end date.");
+            return;
+        }
+        const logs = DataPersistenceModule.getWeightLogs().filter(log => {
+            const logDate = new Date(log.date);
+            return logDate >= startDate && logDate <= endDate;
+        });
+        if (logs.length === 0) {
+            alert("No weight logs found for the selected date range.");
+            return;
+        }
+        let minWeight = Number.MAX_VALUE, maxWeight = Number.MIN_VALUE;
+        logs.forEach(log => {
+            const weight = log.weight;
+            if (weight < minWeight) minWeight = weight;
+            if (weight > maxWeight) maxWeight = weight;
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = 1200;
+        canvas.height = 800;
+        const ctx = canvas.getContext('2d');
+    
+        const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        bgGradient.addColorStop(0, "#0d0d0d");
+        bgGradient.addColorStop(1, "#333333");
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+        // Header section
+        ctx.fillStyle = "#00aced";
+        ctx.fillRect(0, 0, canvas.width, 100);
+        ctx.font = "bold 50px Roboto";
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.fillText("Custom Progress Export", canvas.width / 2, 65);
+    
+        // Footer section
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+        ctx.font = "bold 30px Roboto";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText("Keep pushing your limits!", canvas.width / 2, canvas.height - 15);
+    
+        // Chart Frame (Rounded)
+        const chartFrameX = 90, chartFrameY = 120, chartFrameW = canvas.width - 180, chartFrameH = canvas.height - 240;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+        ctx.strokeStyle = "rgba(255,255,255,0.2)";
+        ctx.lineWidth = 3;
+        ExportModule.drawRoundedRect(ctx, chartFrameX, chartFrameY, chartFrameW, chartFrameH, 15, true, true);
+    
+        // Chart Area inside frame
+        const chartX = chartFrameX + 10, chartY = chartFrameY + 10;
+        const chartWidth = chartFrameW - 20, chartHeight = chartFrameH - 20;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(chartX, chartY + chartHeight);
+        ctx.lineTo(chartX, chartY);
+        ctx.lineTo(chartX + chartWidth, chartY);
+        ctx.stroke();
+    
+        const startDateTime = startDate.getTime();
+        const endDateTime = endDate.getTime();
+        const timeSpan = endDateTime - startDateTime;
+        const weightSpan = maxWeight - minWeight || 1;
+        ctx.strokeStyle = "#00aced";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        logs.forEach((log, index) => {
+            const logDate = new Date(log.date);
+            const x = chartX + ((logDate.getTime() - startDateTime) / timeSpan) * chartWidth;
+            const y = chartY + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+        ctx.stroke();
+    
+        ctx.fillStyle = "#ffffff";
+        logs.forEach(log => {
+            const logDate = new Date(log.date);
+            const x = chartX + ((logDate.getTime() - startDateTime) / timeSpan) * chartWidth;
+            const y = chartY + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    
+        // Summary Box with rounded corners
+        ExportModule.drawRoundedRect(ctx, 50, 110, 300, 150, 10, true, false);
+        ctx.fillStyle = "#00aced";
+        ctx.font = "bold 30px Roboto";
+        ctx.textAlign = "left";
+        ctx.fillText(`Min: ${minWeight} lbs`, 60, 150);
+        ctx.fillText(`Max: ${maxWeight} lbs`, 60, 190);
+        ctx.fillText(`Avg: ${(logs.reduce((acc, log) => acc + log.weight, 0) / logs.length).toFixed(1)} lbs`, 60, 230);
+        ctx.fillText(`Change: ${((logs[logs.length - 1].weight - logs[0].weight) > 0 ? "+" : "") + (logs[logs.length - 1].weight - logs[0].weight)} lbs`, 60, 270);
+    
+        ExportModule.exportCanvas = canvas;
+        overlayPreview.innerHTML = "";
+        overlayPreview.appendChild(canvas);
+        ExportModule.addOverlayControls();
+        overlayPreview.style.display = "block";
+        console.log("Custom progress export prepared with modern styling.");
+    },
+    prepareDataOnlyExport: function() {
+        const overlayPreview = document.getElementById('overlay-preview');
+        const logs = DataPersistenceModule.getWeightLogs();
+        if (logs.length === 0) {
+            alert("No weight logs available for export.");
+            return;
+        }
+    
+        let minWeight = Number.MAX_VALUE, maxWeight = Number.MIN_VALUE, total = 0;
+        logs.forEach(log => {
+            const weight = log.weight;
+            if (weight < minWeight) minWeight = weight;
+            if (weight > maxWeight) maxWeight = weight;
+            total += weight;
+        });
+        const avgWeight = (total / logs.length).toFixed(1);
+        const weightChange = logs[logs.length - 1].weight - logs[0].weight;
+    
+        const canvas = document.createElement('canvas');
+        canvas.width = 1200;
+        canvas.height = 800;
+        const ctx = canvas.getContext('2d');
+    
+        // Layered Radial Background
+        const radialGrad = ctx.createRadialGradient(
+            canvas.width / 2, canvas.height / 2, 100,
+            canvas.width / 2, canvas.height / 2, canvas.width / 2
+        );
+        radialGrad.addColorStop(0, "#1c1c1c");
+        radialGrad.addColorStop(1, "#000");
+        ctx.fillStyle = radialGrad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+        // Header Section with bottom border
+        ctx.fillStyle = "#00aced";
+        ctx.fillRect(0, 0, canvas.width, 100);
+        ctx.strokeStyle = "#007bb5";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 100);
+        ctx.lineTo(canvas.width, 100);
+        ctx.stroke();
+        ctx.font = "bold 50px Roboto";
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.fillText("Data Only Export", canvas.width / 2, 65);
+    
+        // Footer Section with top border
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height - 50);
+        ctx.lineTo(canvas.width, canvas.height - 50);
+        ctx.stroke();
+        ctx.font = "bold 30px Roboto";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText("Keep pushing your limits!", canvas.width / 2, canvas.height - 15);
+    
+        // Main Chart Frame (Rounded)
+        const chartFrameX = 90, chartFrameY = 120, chartFrameW = canvas.width - 180, chartFrameH = canvas.height - 240;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+        ctx.strokeStyle = "rgba(255,255,255,0.2)";
+        ctx.lineWidth = 3;
+        ExportModule.drawRoundedRect(ctx, chartFrameX, chartFrameY, chartFrameW, chartFrameH, 15, true, true);
+    
+        // Chart Area inside frame
+        const chartX = chartFrameX + 10, chartY = chartFrameY + 10;
+        const chartWidth = chartFrameW - 20, chartHeight = chartFrameH - 20;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(chartX, chartY + chartHeight);
+        ctx.lineTo(chartX, chartY);
+        ctx.lineTo(chartX + chartWidth, chartY);
+        ctx.stroke();
+    
+        const startDate = new Date(logs[0].date);
+        const endDate = new Date(logs[logs.length - 1].date);
+        const timeSpan = endDate.getTime() - startDate.getTime();
+        const weightSpan = maxWeight - minWeight || 1;
+        ctx.strokeStyle = "#00aced";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        logs.forEach((log, index) => {
+            const logDate = new Date(log.date);
+            const x = chartX + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
+            const y = chartY + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+        ctx.stroke();
+    
+        ctx.fillStyle = "#ffffff";
+        logs.forEach(log => {
+            const logDate = new Date(log.date);
+            const x = chartX + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
+            const y = chartY + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    
+        // Summary Box with rounded corners
+        ExportModule.drawRoundedRect(ctx, 50, 110, 300, 150, 10, true, false);
+        ctx.fillStyle = "#00aced";
+        ctx.font = "bold 30px Roboto";
+        ctx.textAlign = "left";
+        ctx.fillText(`Min: ${minWeight} lbs`, 60, 150);
+        ctx.fillText(`Max: ${maxWeight} lbs`, 60, 190);
+        ctx.fillText(`Avg: ${avgWeight} lbs`, 60, 230);
+        ctx.fillText(`Change: ${weightChange > 0 ? "+" : ""}${weightChange} lbs`, 60, 270);
+    
+        ExportModule.exportCanvas = canvas;
+        overlayPreview.innerHTML = "";
+        overlayPreview.appendChild(canvas);
+        ExportModule.addOverlayControls();
+        overlayPreview.style.display = "block";
+        console.log("Data Only export prepared with modern styling.");
+    },
+    prepareDataOnlyExport: function() {
+        // In this implementation, prepareDataOnlyExport is identical to the code above.
+        // You may use the same code as in the previous function if needed.
     }
 };
 
-/* -------------------------------
+/* =========================
    Photo Overlay Module (Dummy)
-   ------------------------------- */
+   ========================= */
 const PhotoOverlayModule = {
     init: function() {
         console.log("PhotoOverlayModule loaded (dummy implementation).");
     }
 };
 
-/* -------------------------------
+/* =========================
    Streak Tracker Module (Dummy)
-   ------------------------------- */
+   ========================= */
 const StreakTrackerModule = {
     init: function() {
         console.log("StreakTrackerModule loaded (dummy implementation).");
     }
 };
 
-/* -------------------------------
+/* =========================
    User Profile Module (Dummy)
-   ------------------------------- */
+   ========================= */
 const UserProfileModule = {
     init: function() {
         console.log("UserProfileModule loaded (dummy implementation).");
     }
 };
 
-/* -------------------------------
+/* =========================
    Community Engagement Module (Dummy)
-   ------------------------------- */
+   ========================= */
 const CommunityEngagementModule = {
     init: function() {
         console.log("CommunityEngagementModule loaded (dummy implementation).");
     }
 };
 
-/* -------------------------------
+/* =========================
    Dark Mode Module (Dummy)
-   ------------------------------- */
+   ========================= */
 const DarkModeModule = {
     init: function() {
         console.log("DarkModeModule loaded (dummy implementation).");
     }
 };
 
-/* -------------------------------
+/* =========================
    CSV Export Module (Dummy)
-   ------------------------------- */
+   ========================= */
 const CsvExportModule = {
     init: function() {
         console.log("CsvExportModule loaded (dummy implementation).");
