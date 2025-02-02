@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v8.1
+// FitJourney Tracker - Version v8.2
 
-console.log("FitJourney Tracker v8.1 initializing...");
+console.log("FitJourney Tracker v8.2 initializing...");
 
 window.onload = function() {
     try {
@@ -37,7 +37,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v8.1";
+            requiredElements.versionDisplay.innerText = "v8.2";
         }
 
         // Initialize modules in order:
@@ -53,7 +53,7 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v8.1.");
+        console.log("All modules initialized successfully in FitJourney Tracker v8.2.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -475,9 +475,9 @@ const PhotoComparisonModule = {
    Export Module
    -------------------------------
 This module now provides two export templates:
-1. "Single Photo with Overlay" (existing)
-2. "Photo Comparison Export" (new in v8.1)
-It creates a canvas with the selected export, displays it in the overlay preview, and allows the user to download the final image.
+1. "Single Photo with Overlay" (enhanced with modern styling)
+2. "Photo Comparison Export" (enhanced with modern styling)
+Both use canvas features such as gradients, drop shadows, and rounded borders to achieve a modern look.
 */
 const ExportModule = {
     exportCanvas: null,
@@ -535,33 +535,82 @@ const ExportModule = {
             latestDate = lastLog.date;
         }
 
-        // Create a canvas for export (800x600)
+        // Create a canvas for export (1200x800)
         const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 600;
+        canvas.width = 1200;
+        canvas.height = 800;
         const ctx = canvas.getContext('2d');
 
-        // Fill background with white.
-        ctx.fillStyle = "#ffffff";
+        // Create a modern gradient background.
+        const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        bgGradient.addColorStop(0, "#1a1a1a");
+        bgGradient.addColorStop(1, "#333333");
+        ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw the photo: scale it to fit within a 600x400 area (centered at (100,50)).
+        // Draw a rounded rectangle as a container for the photo.
+        const photoX = 100, photoY = 100, photoW = 1000, photoH = 500, radius = 20;
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = "rgba(0,0,0,0.4)";
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetX = 5;
+        ctx.shadowOffsetY = 5;
+        ctx.beginPath();
+        ctx.moveTo(photoX + radius, photoY);
+        ctx.lineTo(photoX + photoW - radius, photoY);
+        ctx.quadraticCurveTo(photoX + photoW, photoY, photoX + photoW, photoY + radius);
+        ctx.lineTo(photoX + photoW, photoY + photoH - radius);
+        ctx.quadraticCurveTo(photoX + photoW, photoY + photoH, photoX + photoW - radius, photoY + photoH);
+        ctx.lineTo(photoX + radius, photoY + photoH);
+        ctx.quadraticCurveTo(photoX, photoY + photoH, photoX, photoY + photoH - radius);
+        ctx.lineTo(photoX, photoY + radius);
+        ctx.quadraticCurveTo(photoX, photoY, photoX + radius, photoY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowColor = "transparent";
+
+        // Draw the photo inside the rounded rectangle.
         const photoImg = new Image();
         photoImg.onload = function() {
-            const drawWidth = 600, drawHeight = 400;
-            const x = 100, y = 50;
-            ctx.drawImage(photoImg, x, y, drawWidth, drawHeight);
+            // Calculate dimensions to fit within photoW x photoH with proper margins.
+            const margin = 20;
+            const drawX = photoX + margin;
+            const drawY = photoY + margin;
+            const drawW = photoW - margin * 2;
+            const drawH = photoH - margin * 2;
+            ctx.save();
+            // Clip to the rounded rectangle area.
+            ctx.beginPath();
+            ctx.moveTo(photoX + radius, photoY);
+            ctx.lineTo(photoX + photoW - radius, photoY);
+            ctx.quadraticCurveTo(photoX + photoW, photoY, photoX + photoW, photoY + radius);
+            ctx.lineTo(photoX + photoW, photoY + photoH - radius);
+            ctx.quadraticCurveTo(photoX + photoW, photoY + photoH, photoX + photoW - radius, photoY + photoH);
+            ctx.lineTo(photoX + radius, photoY + photoH);
+            ctx.quadraticCurveTo(photoX, photoY + photoH, photoX, photoY + photoH - radius);
+            ctx.lineTo(photoX, photoY + radius);
+            ctx.quadraticCurveTo(photoX, photoY, photoX + radius, photoY);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(photoImg, drawX, drawY, drawW, drawH);
+            ctx.restore();
 
-            // Overlay text for latest weight and date.
-            ctx.fillStyle = "#000000";
-            ctx.font = "30px Arial";
-            ctx.fillText(`Latest Weight: ${latestWeight} lbs`, 100, 500);
-            ctx.fillText(`Date: ${latestDate}`, 100, 540);
+            // Overlay a translucent modern text box at the bottom.
+            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+            ctx.fillRect(100, 630, 1000, 100);
 
-            // Draw a border around the photo.
-            ctx.strokeStyle = "#007bff";
-            ctx.lineWidth = 5;
-            ctx.strokeRect(x, y, drawWidth, drawHeight);
+            // Write latest weight and date.
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "40px Helvetica, Arial, sans-serif";
+            ctx.textAlign = "left";
+            ctx.fillText(`Latest Weight: ${latestWeight} lbs`, 120, 680);
+            ctx.fillText(`Date: ${latestDate}`, 120, 730);
+
+            // Draw a modern title at the top.
+            ctx.font = "50px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = "#00aced";
+            ctx.textAlign = "center";
+            ctx.fillText("My Progress", canvas.width / 2, 70);
 
             // Save and display the export.
             ExportModule.exportCanvas = canvas;
@@ -569,7 +618,7 @@ const ExportModule = {
             overlayPreview.innerHTML = "";
             overlayPreview.appendChild(canvas);
             overlayPreview.style.display = "block";
-            console.log("Single photo export prepared.");
+            console.log("Single photo export prepared with modern styling.");
         };
         photoImg.onerror = function() {
             console.error("Failed to load photo for export.");
@@ -603,15 +652,55 @@ const ExportModule = {
             return;
         }
 
-        // Create a canvas for export (1200x600: two panels of 600x600)
+        // Create a canvas for export (1400x700: two panels of 650x650 with margins)
         const canvas = document.createElement('canvas');
-        canvas.width = 1200;
-        canvas.height = 600;
+        canvas.width = 1400;
+        canvas.height = 700;
         const ctx = canvas.getContext('2d');
 
-        // Fill background with white.
-        ctx.fillStyle = "#ffffff";
+        // Create a modern gradient background.
+        const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        bgGradient.addColorStop(0, "#222222");
+        bgGradient.addColorStop(1, "#444444");
+        ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Define panel dimensions.
+        const margin = 25;
+        const panelWidth = 650;
+        const panelHeight = 650;
+
+        // Draw panels with rounded corners and drop shadows.
+        const drawPanel = function(x, y) {
+            ctx.save();
+            ctx.shadowColor = "rgba(0,0,0,0.5)";
+            ctx.shadowBlur = 20;
+            ctx.shadowOffsetX = 5;
+            ctx.shadowOffsetY = 5;
+            ctx.fillStyle = "#ffffff";
+            const radius = 20;
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + panelWidth - radius, y);
+            ctx.quadraticCurveTo(x + panelWidth, y, x + panelWidth, y + radius);
+            ctx.lineTo(x + panelWidth, y + panelHeight - radius);
+            ctx.quadraticCurveTo(x + panelWidth, y + panelHeight, x + panelWidth - radius, y + panelHeight);
+            ctx.lineTo(x + radius, y + panelHeight);
+            ctx.quadraticCurveTo(x, y + panelHeight, x, y + panelHeight - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        };
+
+        // Draw left and right panels.
+        const leftX = margin;
+        const leftY = (canvas.height - panelHeight) / 2;
+        const rightX = leftX + panelWidth + margin;
+        const rightY = leftY;
+        drawPanel(leftX, leftY);
+        drawPanel(rightX, rightY);
 
         // Load both images.
         const img1 = new Image();
@@ -620,28 +709,42 @@ const ExportModule = {
         const onImageLoad = function() {
             imagesLoaded++;
             if (imagesLoaded === 2) {
-                // Draw the first image scaled to a 600x600 area in the left panel.
-                ctx.drawImage(img1, 0, 0, 600, 600);
-                // Draw the second image scaled to a 600x600 area in the right panel.
-                ctx.drawImage(img2, 600, 0, 600, 600);
+                // Draw the first image scaled to fit within the left panel (with some inner margin).
+                const innerMargin = 20;
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(leftX + innerMargin, leftY + innerMargin, panelWidth - innerMargin * 2, panelHeight - innerMargin * 2);
+                ctx.clip();
+                ctx.drawImage(img1, leftX + innerMargin, leftY + innerMargin, panelWidth - innerMargin * 2, panelHeight - innerMargin * 2);
+                ctx.restore();
 
-                // Overlay text for each photo.
-                ctx.fillStyle = "#000000";
-                ctx.font = "30px Arial";
-                ctx.fillText(`Date: ${photo1.date || "N/A"}`, 20, 580);
-                ctx.fillText(`Date: ${photo2.date || "N/A"}`, 620, 580);
+                // Draw the second image scaled to fit within the right panel.
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(rightX + innerMargin, rightY + innerMargin, panelWidth - innerMargin * 2, panelHeight - innerMargin * 2);
+                ctx.clip();
+                ctx.drawImage(img2, rightX + innerMargin, rightY + innerMargin, panelWidth - innerMargin * 2, panelHeight - innerMargin * 2);
+                ctx.restore();
 
-                // Draw a title across the top.
-                ctx.font = "40px Arial";
-                ctx.fillStyle = "#007bff";
-                ctx.fillText("Photo Comparison Export", 300, 50);
+                // Overlay text below each panel with a modern look.
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "30px Helvetica, Arial, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(`Date: ${photo1.date || "N/A"}`, leftX + panelWidth/2, leftY + panelHeight + 40);
+                ctx.fillText(`Date: ${photo2.date || "N/A"}`, rightX + panelWidth/2, rightY + panelHeight + 40);
+
+                // Draw a modern title at the top.
+                ctx.font = "50px Helvetica, Arial, sans-serif";
+                ctx.fillStyle = "#00aced";
+                ctx.textAlign = "center";
+                ctx.fillText("Photo Comparison Export", canvas.width / 2, 60);
 
                 // Save and display the export.
                 ExportModule.exportCanvas = canvas;
                 overlayPreview.innerHTML = "";
                 overlayPreview.appendChild(canvas);
                 overlayPreview.style.display = "block";
-                console.log("Photo comparison export prepared.");
+                console.log("Photo comparison export prepared with modern styling.");
             }
         };
         img1.onload = onImageLoad;
