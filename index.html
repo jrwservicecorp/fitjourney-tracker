@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Our script file -->
   <script src="script.js" defer></script>
 </head>
 <body>
@@ -125,14 +127,14 @@
       <button id="exportDataBtn">Download Export</button>
     </div>
 
-    <!-- Overlay Preview -->
-    <div id="overlay-preview" style="display:none;"></div>
+    <!-- Overlay Preview (hidden by default) -->
+    <div id="overlay-preview" style="display: none;"></div>
   </main>
 
   <!-- Hidden overlay photo elements -->
-  <button id="overlay-photo-btn" style="display:none;">Overlay Photo</button>
+  <button id="overlay-photo-btn" style="display: none;">Overlay Photo</button>
 
-  <!-- Toggle custom progress inputs based on export type selection -->
+  <!-- Script to toggle custom progress inputs -->
   <script>
     document.querySelectorAll('input[name="export-type"]').forEach(radio => {
       radio.addEventListener('change', () => {
