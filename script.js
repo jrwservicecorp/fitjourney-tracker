@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v8.3
+// FitJourney Tracker - Version v8.4
 
-console.log("FitJourney Tracker v8.3 initializing...");
+console.log("FitJourney Tracker v8.4 initializing...");
 
 window.onload = function() {
     try {
@@ -39,7 +39,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v8.3";
+            requiredElements.versionDisplay.innerText = "v8.4";
         }
 
         // Initialize modules in order:
@@ -55,7 +55,15 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v8.3.");
+        // Add click-outside-to-close overlay functionality:
+        document.addEventListener('click', function(e) {
+            const overlay = document.getElementById('overlay-preview');
+            if (overlay.style.display === "block" && !overlay.contains(e.target) && e.target.id !== 'prepare-export-btn' && e.target.id !== 'exportDataBtn') {
+                overlay.style.display = "none";
+            }
+        });
+
+        console.log("All modules initialized successfully in FitJourney Tracker v8.4.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -427,10 +435,9 @@ const ExportModule = {
             }
         });
     },
-    // Helper: add overlay controls (Close and Share buttons)
     addOverlayControls: function() {
         const overlayPreview = document.getElementById('overlay-preview');
-        // Remove any existing control container.
+        // Remove existing controls if any.
         let controls = document.getElementById('overlay-controls');
         if (controls) {
             controls.remove();
@@ -439,16 +446,34 @@ const ExportModule = {
         controls.id = "overlay-controls";
         controls.style.textAlign = "center";
         controls.style.marginTop = "10px";
+        // Style the controls container (modern look)
+        controls.style.padding = "10px";
+        controls.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+        controls.style.borderRadius = "5px";
+        controls.style.display = "inline-block";
+    
         const closeBtn = document.createElement('button');
         closeBtn.textContent = "Close";
+        closeBtn.style.marginRight = "10px";
         closeBtn.addEventListener('click', () => {
             overlayPreview.style.display = "none";
         });
+    
         const shareBtn = document.createElement('button');
         shareBtn.textContent = "Share";
         shareBtn.addEventListener('click', () => {
-            alert("Share functionality not implemented yet.");
+            // Try to use the Web Share API if available.
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Progress Export',
+                    text: 'Check out my progress!',
+                    url: ExportModule.exportCanvas.toDataURL("image/png")
+                }).catch(err => console.error("Error sharing:", err));
+            } else {
+                alert("Share functionality is not supported on this device.");
+            }
         });
+    
         controls.appendChild(closeBtn);
         controls.appendChild(shareBtn);
         overlayPreview.appendChild(controls);
@@ -723,7 +748,7 @@ const ExportModule = {
         ctx.fillStyle = "#ffffff";
         ctx.fillText("Keep pushing your limits!", canvas.width / 2, canvas.height - 15);
     
-        // Main chart area between header and footer
+        // Main chart area
         const chartMargin = 120;
         const chartWidth = canvas.width - 200;
         const chartHeight = canvas.height - chartMargin - 70;
@@ -735,14 +760,16 @@ const ExportModule = {
         ctx.lineTo(100 + chartWidth, chartMargin + chartHeight);
         ctx.stroke();
     
-        const timeSpan = endDate.getTime() - startDate.getTime();
+        const startDateTime = startDate.getTime();
+        const endDateTime = endDate.getTime();
+        const timeSpan = endDateTime - startDateTime;
         const weightSpan = maxWeight - minWeight || 1;
         ctx.strokeStyle = "#00aced";
         ctx.lineWidth = 4;
         ctx.beginPath();
         logs.forEach((log, index) => {
             const logDate = new Date(log.date);
-            const x = 100 + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
+            const x = 100 + ((logDate.getTime() - startDateTime) / timeSpan) * chartWidth;
             const y = chartMargin + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
             if (index === 0) {
                 ctx.moveTo(x, y);
@@ -752,18 +779,17 @@ const ExportModule = {
         });
         ctx.stroke();
     
-        // Draw data points.
         ctx.fillStyle = "#ffffff";
         logs.forEach(log => {
             const logDate = new Date(log.date);
-            const x = 100 + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
+            const x = 100 + ((logDate.getTime() - startDateTime) / timeSpan) * chartWidth;
             const y = chartMargin + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
             ctx.beginPath();
             ctx.arc(x, y, 5, 0, Math.PI * 2);
             ctx.fill();
         });
     
-        // Draw summary box on the left.
+        // Draw summary box on the left
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(50, 110, 300, 150);
         ctx.fillStyle = "#00aced";
