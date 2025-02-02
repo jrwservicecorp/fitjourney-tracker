@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v8.6
+// FitJourney Tracker - Version v8.7
 
-console.log("FitJourney Tracker v8.6 initializing...");
+console.log("FitJourney Tracker v8.7 initializing...");
 
 window.onload = function() {
     try {
@@ -39,7 +39,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v8.6";
+            requiredElements.versionDisplay.innerText = "v8.7";
         }
 
         // Initialize modules in order:
@@ -65,7 +65,7 @@ window.onload = function() {
             }
         });
 
-        console.log("All modules initialized successfully in FitJourney Tracker v8.6.");
+        console.log("All modules initialized successfully in FitJourney Tracker v8.7.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -149,7 +149,19 @@ const ChartModule = {
                     { label: 'Goal Weight', data: [], borderColor: 'green', borderWidth: 2, borderDash: [5, 5], hidden: false }
                 ]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        ticks: { color: '#ffffff', font: { size: 14 } },
+                        grid: { color: 'rgba(255,255,255,0.2)' }
+                    },
+                    y: {
+                        ticks: { color: '#ffffff', font: { size: 14 } },
+                        grid: { color: 'rgba(255,255,255,0.2)' }
+                    }
+                }
+            }
         });
     },
     updateChart: function(weight, date) {
@@ -732,7 +744,7 @@ const ExportModule = {
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-        // Header section (top 100px)
+        // Draw header area (top 100px)
         ctx.fillStyle = "#00aced";
         ctx.fillRect(0, 0, canvas.width, 100);
         ctx.font = "50px Helvetica, Arial, sans-serif";
@@ -740,7 +752,7 @@ const ExportModule = {
         ctx.textAlign = "center";
         ctx.fillText("Custom Progress Export", canvas.width / 2, 65);
     
-        // Footer section (bottom 50px)
+        // Draw footer area (bottom 50px)
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
         ctx.font = "30px Helvetica, Arial, sans-serif";
@@ -788,7 +800,7 @@ const ExportModule = {
             ctx.fill();
         });
     
-        // Summary box on the left
+        // Draw summary box on the left
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(50, 110, 300, 150);
         ctx.fillStyle = "#00aced";
