@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.98
+// FitJourney Tracker - Version v8.0
 
-console.log("FitJourney Tracker v7.98 initializing...");
+console.log("FitJourney Tracker v8.0 initializing...");
 
 window.onload = function() {
     try {
@@ -26,7 +26,8 @@ window.onload = function() {
             versionDisplay: document.getElementById('app-version'),
             photoSelect1: document.getElementById('photo-select-1'),
             photoSelect2: document.getElementById('photo-select-2'),
-            sideBySideComparison: document.getElementById('side-by-side-comparison')
+            sideBySideComparison: document.getElementById('side-by-side-comparison'),
+            prepareExportBtn: document.getElementById('prepare-export-btn')
         };
 
         for (const [key, value] of Object.entries(requiredElements)) {
@@ -36,7 +37,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.98";
+            requiredElements.versionDisplay.innerText = "v8.0";
         }
 
         // Initialize modules in order:
@@ -52,7 +53,7 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.98.");
+        console.log("All modules initialized successfully in FitJourney Tracker v8.0.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -471,15 +472,116 @@ const PhotoComparisonModule = {
 };
 
 /* -------------------------------
-   Other Modules (Dummy Implementations)
-   ------------------------------- */
+   Export Module
+   -------------------------------
+This module now provides a basic export overlay for social sharing.
+It reads the selected export type (currently, only "single-photo" is implemented),
+creates a canvas with a shareable image, displays it in the overlay preview,
+and allows the user to download the final image.
+*/
 const ExportModule = {
+    exportCanvas: null,
     init: function() {
-        console.log("ExportModule loaded (dummy implementation).");
-        // Placeholder for export functionality.
+        console.log("ExportModule loaded (enhanced implementation).");
+        const prepareBtn = document.getElementById('prepare-export-btn');
+        const downloadBtn = document.getElementById('exportDataBtn');
+        const overlayPreview = document.getElementById('overlay-preview');
+
+        if (!prepareBtn || !downloadBtn || !overlayPreview) {
+            console.warn("Warning: Export elements are missing.");
+            return;
+        }
+
+        prepareBtn.addEventListener('click', () => {
+            // Get selected export type from radio buttons.
+            const exportType = document.querySelector('input[name="export-type"]:checked').value;
+            if (exportType === "single-photo") {
+                ExportModule.prepareSinglePhotoExport();
+            } else if (exportType === "photo-comparison") {
+                overlayPreview.innerHTML = "Photo Comparison export not implemented yet.";
+                overlayPreview.style.display = "block";
+            } else if (exportType === "data-only") {
+                overlayPreview.innerHTML = "Data Only export not implemented yet.";
+                overlayPreview.style.display = "block";
+            }
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            if (ExportModule.exportCanvas) {
+                const dataURL = ExportModule.exportCanvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                link.href = dataURL;
+                link.download = "export.png";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                console.warn("No export available. Please prepare export first.");
+            }
+        });
+    },
+    prepareSinglePhotoExport: function() {
+        // Get the last uploaded photo and the latest weight log.
+        const photos = DataPersistenceModule.getPhotos();
+        const logs = DataPersistenceModule.getWeightLogs();
+        if (photos.length === 0) {
+            alert("No photo available for export.");
+            return;
+        }
+        const lastPhoto = photos[photos.length - 1];
+        let latestWeight = "N/A", latestDate = "";
+        if (logs.length > 0) {
+            const lastLog = logs[logs.length - 1];
+            latestWeight = lastLog.weight;
+            latestDate = lastLog.date;
+        }
+
+        // Create a canvas for export (800x600)
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 600;
+        const ctx = canvas.getContext('2d');
+
+        // Fill background with white.
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the photo: scale it to fit within a 600x400 area (centered at (100,50)).
+        const photoImg = new Image();
+        photoImg.onload = function() {
+            const drawWidth = 600, drawHeight = 400;
+            const x = 100, y = 50;
+            ctx.drawImage(photoImg, x, y, drawWidth, drawHeight);
+
+            // Overlay text for latest weight and date.
+            ctx.fillStyle = "#000000";
+            ctx.font = "30px Arial";
+            ctx.fillText(`Latest Weight: ${latestWeight} lbs`, 100, 500);
+            ctx.fillText(`Date: ${latestDate}`, 100, 540);
+
+            // Draw a border around the photo.
+            ctx.strokeStyle = "#007bff";
+            ctx.lineWidth = 5;
+            ctx.strokeRect(x, y, drawWidth, drawHeight);
+
+            // Save and display the export.
+            ExportModule.exportCanvas = canvas;
+            const overlayPreview = document.getElementById('overlay-preview');
+            overlayPreview.innerHTML = "";
+            overlayPreview.appendChild(canvas);
+            overlayPreview.style.display = "block";
+            console.log("Single photo export prepared.");
+        };
+        photoImg.onerror = function() {
+            console.error("Failed to load photo for export.");
+        };
+        photoImg.src = lastPhoto.dataUrl || lastPhoto.src || "";
     }
 };
 
+/* -------------------------------
+   Photo Overlay Module (Dummy)
+   ------------------------------- */
 const PhotoOverlayModule = {
     init: function() {
         console.log("PhotoOverlayModule loaded (dummy implementation).");
@@ -487,6 +589,9 @@ const PhotoOverlayModule = {
     }
 };
 
+/* -------------------------------
+   Streak Tracker Module (Dummy)
+   ------------------------------- */
 const StreakTrackerModule = {
     init: function() {
         console.log("StreakTrackerModule loaded (dummy implementation).");
@@ -494,6 +599,9 @@ const StreakTrackerModule = {
     }
 };
 
+/* -------------------------------
+   User Profile Module (Dummy)
+   ------------------------------- */
 const UserProfileModule = {
     init: function() {
         console.log("UserProfileModule loaded (dummy implementation).");
@@ -501,6 +609,9 @@ const UserProfileModule = {
     }
 };
 
+/* -------------------------------
+   Community Engagement Module (Dummy)
+   ------------------------------- */
 const CommunityEngagementModule = {
     init: function() {
         console.log("CommunityEngagementModule loaded (dummy implementation).");
@@ -508,6 +619,9 @@ const CommunityEngagementModule = {
     }
 };
 
+/* -------------------------------
+   Dark Mode Module (Dummy)
+   ------------------------------- */
 const DarkModeModule = {
     init: function() {
         console.log("DarkModeModule loaded (dummy implementation).");
@@ -515,6 +629,9 @@ const DarkModeModule = {
     }
 };
 
+/* -------------------------------
+   CSV Export Module (Dummy)
+   ------------------------------- */
 const CsvExportModule = {
     init: function() {
         console.log("CsvExportModule loaded (dummy implementation).");
