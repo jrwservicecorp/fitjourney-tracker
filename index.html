@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Ensure proper scaling on mobile devices -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
@@ -17,8 +18,8 @@
   </header>
 
   <main id="main-app">
-    <!-- Chart Section -->
-    <div class="card prominent">
+    <!-- Chart Section (Wider Chart) -->
+    <div class="card prominent chart-container">
       <canvas id="weightChart"></canvas>
       <p id="chart-placeholder">Start logging weight to see trends!</p>
       <div class="chart-options">
@@ -30,22 +31,8 @@
       <p id="trend-analysis">Trend: No data yet.</p>
     </div>
 
-    <!-- Streak Awards -->
-    <div class="card">
-      <h3>Streak Awards</h3>
-      <div class="streak-options">
-        <label>
-          <input type="checkbox" id="toggle-streaks" checked>
-          Show Streaks
-        </label>
-      </div>
-      <div id="streaks-section">
-        <p>No streaks yet! Log your weight to unlock awards.</p>
-      </div>
-    </div>
-
-    <!-- Dashboard Row -->
-    <div class="dashboard-row">
+    <!-- Dashboard Section: Weight Summary, Recent Weigh-Ins, and Log Your Weight -->
+    <section id="dashboard-section">
       <div class="card weight-summary">
         <h3>Weight Summary</h3>
         <div id="weight-summary">
@@ -68,19 +55,21 @@
           <button type="submit">Log Weight</button>
         </form>
       </div>
-      <div class="card upload-photo">
-        <h3>Upload Progress Photo</h3>
-        <form id="photo-upload-form">
-          <label for="photo-upload">Select Photo:</label>
-          <input id="photo-upload" type="file" accept="image/*">
-          <label for="photo-date">Photo Date:</label>
-          <input id="photo-date" type="date">
-          <button id="upload-photo-btn" type="submit">Upload Photo</button>
-        </form>
-      </div>
+    </section>
+
+    <!-- Photo Upload Section -->
+    <div class="card upload-photo">
+      <h3>Upload Progress Photo</h3>
+      <form id="photo-upload-form">
+        <label for="photo-upload">Select Photo:</label>
+        <input id="photo-upload" type="file" accept="image/*">
+        <label for="photo-date">Photo Date:</label>
+        <input id="photo-date" type="date">
+        <button id="upload-photo-btn" type="submit">Upload Photo</button>
+      </form>
     </div>
 
-    <!-- Photo Comparison -->
+    <!-- Photo Comparison Section -->
     <div class="card">
       <h3>Photo Comparison</h3>
       <div>
@@ -128,7 +117,7 @@
     </div>
 
     <!-- Overlay Preview (hidden by default) -->
-    <div id="overlay-preview" class="overlay-preview"></div>
+    <div id="overlay-preview" style="display: none;"></div>
   </main>
 
   <!-- Hidden overlay photo element (if needed) -->
