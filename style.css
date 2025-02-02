@@ -1,4 +1,4 @@
-/* FitJourney Tracker - Restored CSS Styles */
+/* FitJourney Tracker - CSS v7.93 */
 
 /* General Styles */
 body {
@@ -17,6 +17,7 @@ header {
     font-size: 1.5em;
 }
 
+/* Card Component */
 .card {
     background: white;
     padding: 15px;
@@ -61,4 +62,28 @@ button:hover {
 .export-options label {
     display: block;
     margin-top: 5px;
+}
+
+/* Overlay Elements */
+/* These styles prepare the overlay button and preview for future functionality. */
+#overlay-photo-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    padding: 10px 15px;
+}
+
+#overlay-preview {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90%;
+    max-height: 90%;
+    border: 2px solid #007bff;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 1000;
+    display: none; /* Remains hidden until activated */
 }
