@@ -410,10 +410,11 @@ const PhotoComparisonModule = {
 };
 
 /* -------------------------------
-   Export Module
+   Export Module with Fabric.js Integration
    ------------------------------- */
 const ExportModule = {
     exportCanvas: null,
+    fabricCanvas: null, // new Fabric.js canvas
     init: function() {
         console.log("ExportModule loaded (enhanced implementation).");
         const prepareBtn = document.getElementById('prepare-export-btn');
@@ -473,6 +474,7 @@ const ExportModule = {
     
         const shareBtn = document.createElement('button');
         shareBtn.textContent = "Share";
+        shareBtn.style.marginRight = "10px";
         shareBtn.addEventListener('click', () => {
             if (navigator.share) {
                 navigator.share({
@@ -485,9 +487,79 @@ const ExportModule = {
             }
         });
     
+        // New "Edit" button launches the Fabric.js editor
+        const editBtn = document.createElement('button');
+        editBtn.textContent = "Edit";
+        editBtn.addEventListener('click', () => {
+            ExportModule.openFabricEditor();
+        });
+    
         controls.appendChild(closeBtn);
+        controls.appendChild(editBtn);
         controls.appendChild(shareBtn);
         overlayPreview.appendChild(controls);
+    },
+    openFabricEditor: function() {
+        // Create a Fabric canvas over the export overlay
+        const overlayPreview = document.getElementById('overlay-preview');
+        // Remove any previous Fabric canvas if exists
+        if (ExportModule.fabricCanvas) {
+            ExportModule.fabricCanvas.dispose();
+        }
+        // Create a new Fabric canvas using the existing exportCanvas as an image object
+        const dataURL = ExportModule.exportCanvas.toDataURL("image/png");
+        // Clear overlay and create a new container for editing
+        overlayPreview.innerHTML = "";
+        const editorContainer = document.createElement('div');
+        editorContainer.id = "fabric-editor-container";
+        overlayPreview.appendChild(editorContainer);
+    
+        // Create a Fabric canvas in the container
+        ExportModule.fabricCanvas = new fabric.Canvas(editorContainer, {
+            width: ExportModule.exportCanvas.width,
+            height: ExportModule.exportCanvas.height,
+            backgroundColor: '#121212'
+        });
+    
+        // Load the export image into the fabric canvas as a background image
+        fabric.Image.fromURL(dataURL, function(img) {
+            ExportModule.fabricCanvas.setBackgroundImage(img, ExportModule.fabricCanvas.renderAll.bind(ExportModule.fabricCanvas), {
+                scaleX: ExportModule.fabricCanvas.width / img.width,
+                scaleY: ExportModule.fabricCanvas.height / img.height
+            });
+        });
+    
+        // Add a sample text object that the user can edit and reposition
+        const caption = new fabric.Text("My Progress", {
+            left: 400,
+            top: 50,
+            fontSize: 50,
+            fill: "#00aced",
+            fontFamily: "Roboto",
+            editable: true
+        });
+        ExportModule.fabricCanvas.add(caption);
+    
+        // Add a "Save Changes" button within the editor
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = "Save Changes";
+        saveBtn.style.marginTop = "10px";
+        saveBtn.addEventListener('click', () => {
+            // Convert fabric canvas back to standard canvas and update exportCanvas
+            ExportModule.exportCanvas = document.createElement('canvas');
+            ExportModule.exportCanvas.width = ExportModule.fabricCanvas.getWidth();
+            ExportModule.exportCanvas.height = ExportModule.fabricCanvas.getHeight();
+            ExportModule.fabricCanvas.renderAll();
+            ExportModule.exportCanvas.getContext('2d').drawImage(ExportModule.fabricCanvas.lowerCanvasEl, 0, 0);
+            // Dispose the fabric canvas and update overlay
+            ExportModule.fabricCanvas.dispose();
+            ExportModule.fabricCanvas = null;
+            overlayPreview.innerHTML = "";
+            overlayPreview.appendChild(ExportModule.exportCanvas);
+            ExportModule.addOverlayControls();
+            overlayPreview.style.display = "block";
+        });
+        overlayPreview.appendChild(saveBtn);
     },
     prepareSinglePhotoExport: function() {
         const photos = DataPersistenceModule.getPhotos();
