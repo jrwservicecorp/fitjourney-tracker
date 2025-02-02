@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.97
+// FitJourney Tracker - Version v7.98
 
-console.log("FitJourney Tracker v7.97 initializing...");
+console.log("FitJourney Tracker v7.98 initializing...");
 
 window.onload = function() {
     try {
@@ -23,7 +23,10 @@ window.onload = function() {
             overlayPreview: document.getElementById('overlay-preview'),
             toggleSampleData: document.getElementById('toggle-demo-data'),
             trendAnalysis: document.getElementById('trend-analysis'),
-            versionDisplay: document.getElementById('app-version')
+            versionDisplay: document.getElementById('app-version'),
+            photoSelect1: document.getElementById('photo-select-1'),
+            photoSelect2: document.getElementById('photo-select-2'),
+            sideBySideComparison: document.getElementById('side-by-side-comparison')
         };
 
         for (const [key, value] of Object.entries(requiredElements)) {
@@ -33,7 +36,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.97";
+            requiredElements.versionDisplay.innerText = "v7.98";
         }
 
         // Initialize modules in order:
@@ -49,7 +52,7 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.97.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.98.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -363,15 +366,113 @@ const PhotoUploadModule = {
 };
 
 /* -------------------------------
-   Other Modules (Dummy Implementations)
-   ------------------------------- */
+   Photo Comparison Module
+   -------------------------------
+This module populates the photo selection dropdowns and displays a side-by-side comparison.
+*/
 const PhotoComparisonModule = {
     init: function() {
-        console.log("PhotoComparisonModule loaded (dummy implementation).");
-        // Placeholder for photo comparison functionality.
+        console.log("PhotoComparisonModule loaded (enhanced implementation).");
+        const select1 = document.getElementById('photo-select-1');
+        const select2 = document.getElementById('photo-select-2');
+        const compareBtn = document.getElementById('compare-photos-btn');
+        const comparisonArea = document.getElementById('side-by-side-comparison');
+
+        if (!select1 || !select2 || !compareBtn || !comparisonArea) {
+            console.warn("Warning: Photo comparison elements are missing! Photo comparison will not work.");
+            return;
+        }
+
+        // Function to populate the selects with stored photos.
+        const populateSelects = function() {
+            const photos = DataPersistenceModule.getPhotos();
+            // Clear existing options
+            select1.innerHTML = "";
+            select2.innerHTML = "";
+
+            photos.forEach((photo, index) => {
+                // Use photo.date if available; otherwise use a default label.
+                const label = photo.date ? `Photo (${photo.date})` : `Photo ${index + 1}`;
+                const option1 = document.createElement('option');
+                option1.value = index;
+                option1.text = label;
+                select1.appendChild(option1);
+
+                // Clone option for second select
+                const option2 = document.createElement('option');
+                option2.value = index;
+                option2.text = label;
+                select2.appendChild(option2);
+            });
+        };
+
+        // Initially populate the selects.
+        populateSelects();
+
+        // When user clicks the compare button, display the selected photos side-by-side.
+        compareBtn.addEventListener('click', function() {
+            const photos = DataPersistenceModule.getPhotos();
+            const idx1 = parseInt(select1.value);
+            const idx2 = parseInt(select2.value);
+
+            if (isNaN(idx1) || isNaN(idx2)) {
+                console.warn("Please select valid photos for comparison.");
+                return;
+            }
+            if (idx1 === idx2) {
+                console.warn("Please select two different photos for comparison.");
+                return;
+            }
+
+            // Retrieve the selected photo objects.
+            const photo1 = photos[idx1];
+            const photo2 = photos[idx2];
+
+            // Clear previous comparison content.
+            comparisonArea.innerHTML = "";
+
+            // Create container elements for each photo.
+            const container1 = document.createElement('div');
+            container1.style.display = "inline-block";
+            container1.style.margin = "10px";
+            const container2 = document.createElement('div');
+            container2.style.display = "inline-block";
+            container2.style.margin = "10px";
+
+            // Create image elements for each photo.
+            const img1 = document.createElement('img');
+            img1.src = photo1.dataUrl || photo1.src || "";
+            img1.alt = photo1.date ? `Photo from ${photo1.date}` : "Uploaded Photo";
+            img1.style.maxWidth = "300px";
+            img1.style.display = "block";
+            const info1 = document.createElement('p');
+            info1.innerText = photo1.date ? `Date: ${photo1.date}` : "";
+            info1.style.margin = "0";
+
+            const img2 = document.createElement('img');
+            img2.src = photo2.dataUrl || photo2.src || "";
+            img2.alt = photo2.date ? `Photo from ${photo2.date}` : "Uploaded Photo";
+            img2.style.maxWidth = "300px";
+            img2.style.display = "block";
+            const info2 = document.createElement('p');
+            info2.innerText = photo2.date ? `Date: ${photo2.date}` : "";
+            info2.style.margin = "0";
+
+            container1.appendChild(img1);
+            container1.appendChild(info1);
+            container2.appendChild(img2);
+            container2.appendChild(info2);
+
+            // Append both containers to the comparison area.
+            comparisonArea.appendChild(container1);
+            comparisonArea.appendChild(container2);
+        });
     }
 };
 
+/* -------------------------------
+   Other Modules (Dummy Implementations)
+   ------------------------------- */
 const ExportModule = {
     init: function() {
         console.log("ExportModule loaded (dummy implementation).");
