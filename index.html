@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -90,7 +89,7 @@
         <label for="photo-select-2">Select Photo 2:</label>
         <select id="photo-select-2" class="photo-select"></select>
       </div>
-      <button id="compare-photos-btn">Compare Photos</button> <!-- Fixed Missing Button -->
+      <button id="compare-photos-btn">Compare Photos</button>
       <div id="side-by-side-comparison" class="comparison-display"></div>
     </div>
 
@@ -121,8 +120,12 @@
         </label>
       </div>
       <button id="prepare-export-btn">Prepare Export</button>
-      <button id="exportDataBtn">Download Export</button> <!-- Fixed Missing Button -->
+      <button id="exportDataBtn">Download Export</button>
     </div>
   </main>
+
+  <!-- Added Missing Elements for Photo Overlay -->
+  <button id="overlay-photo-btn" style="display: none;">Overlay Photo</button>
+  <div id="overlay-preview" style="display: none;"></div>
 </body>
 </html>
