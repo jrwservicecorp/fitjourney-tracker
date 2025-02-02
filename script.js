@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v8.0
+// FitJourney Tracker - Version v8.1
 
-console.log("FitJourney Tracker v8.0 initializing...");
+console.log("FitJourney Tracker v8.1 initializing...");
 
 window.onload = function() {
     try {
@@ -37,7 +37,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v8.0";
+            requiredElements.versionDisplay.innerText = "v8.1";
         }
 
         // Initialize modules in order:
@@ -53,7 +53,7 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v8.0.");
+        console.log("All modules initialized successfully in FitJourney Tracker v8.1.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -474,10 +474,10 @@ const PhotoComparisonModule = {
 /* -------------------------------
    Export Module
    -------------------------------
-This module now provides a basic export overlay for social sharing.
-It reads the selected export type (currently, only "single-photo" is implemented),
-creates a canvas with a shareable image, displays it in the overlay preview,
-and allows the user to download the final image.
+This module now provides two export templates:
+1. "Single Photo with Overlay" (existing)
+2. "Photo Comparison Export" (new in v8.1)
+It creates a canvas with the selected export, displays it in the overlay preview, and allows the user to download the final image.
 */
 const ExportModule = {
     exportCanvas: null,
@@ -498,8 +498,7 @@ const ExportModule = {
             if (exportType === "single-photo") {
                 ExportModule.prepareSinglePhotoExport();
             } else if (exportType === "photo-comparison") {
-                overlayPreview.innerHTML = "Photo Comparison export not implemented yet.";
-                overlayPreview.style.display = "block";
+                ExportModule.preparePhotoComparisonExport();
             } else if (exportType === "data-only") {
                 overlayPreview.innerHTML = "Data Only export not implemented yet.";
                 overlayPreview.style.display = "block";
@@ -576,6 +575,81 @@ const ExportModule = {
             console.error("Failed to load photo for export.");
         };
         photoImg.src = lastPhoto.dataUrl || lastPhoto.src || "";
+    },
+    preparePhotoComparisonExport: function() {
+        // Retrieve the selected photos from the dropdowns.
+        const select1 = document.getElementById('photo-select-1');
+        const select2 = document.getElementById('photo-select-2');
+        const overlayPreview = document.getElementById('overlay-preview');
+        if (!select1 || !select2) {
+            alert("Photo selectors not found.");
+            return;
+        }
+        const idx1 = parseInt(select1.value);
+        const idx2 = parseInt(select2.value);
+        if (isNaN(idx1) || isNaN(idx2)) {
+            alert("Please select valid photos for export.");
+            return;
+        }
+        if (idx1 === idx2) {
+            alert("Please select two different photos for export.");
+            return;
+        }
+        const photos = DataPersistenceModule.getPhotos();
+        const photo1 = photos[idx1];
+        const photo2 = photos[idx2];
+        if (!photo1 || !photo2) {
+            alert("Selected photos not found.");
+            return;
+        }
+
+        // Create a canvas for export (1200x600: two panels of 600x600)
+        const canvas = document.createElement('canvas');
+        canvas.width = 1200;
+        canvas.height = 600;
+        const ctx = canvas.getContext('2d');
+
+        // Fill background with white.
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Load both images.
+        const img1 = new Image();
+        const img2 = new Image();
+        let imagesLoaded = 0;
+        const onImageLoad = function() {
+            imagesLoaded++;
+            if (imagesLoaded === 2) {
+                // Draw the first image scaled to a 600x600 area in the left panel.
+                ctx.drawImage(img1, 0, 0, 600, 600);
+                // Draw the second image scaled to a 600x600 area in the right panel.
+                ctx.drawImage(img2, 600, 0, 600, 600);
+
+                // Overlay text for each photo.
+                ctx.fillStyle = "#000000";
+                ctx.font = "30px Arial";
+                ctx.fillText(`Date: ${photo1.date || "N/A"}`, 20, 580);
+                ctx.fillText(`Date: ${photo2.date || "N/A"}`, 620, 580);
+
+                // Draw a title across the top.
+                ctx.font = "40px Arial";
+                ctx.fillStyle = "#007bff";
+                ctx.fillText("Photo Comparison Export", 300, 50);
+
+                // Save and display the export.
+                ExportModule.exportCanvas = canvas;
+                overlayPreview.innerHTML = "";
+                overlayPreview.appendChild(canvas);
+                overlayPreview.style.display = "block";
+                console.log("Photo comparison export prepared.");
+            }
+        };
+        img1.onload = onImageLoad;
+        img2.onload = onImageLoad;
+        img1.onerror = function() { console.error("Failed to load photo 1 for export."); };
+        img2.onerror = function() { console.error("Failed to load photo 2 for export."); };
+        img1.src = photo1.dataUrl || photo1.src || "";
+        img2.src = photo2.dataUrl || photo2.src || "";
     }
 };
 
