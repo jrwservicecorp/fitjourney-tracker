@@ -1,6 +1,6 @@
 /* FitJourney Tracker - CSS v8.7 */
 
-/* Import a modern font (optional) */
+/* Import a modern font */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 /* General Styles */
@@ -31,7 +31,7 @@ header {
     color: #e0e0e0;
 }
 
-/* Chart Container (make it wider) */
+/* Chart Container (wider chart) */
 .chart-container {
     max-width: 900px;
     margin: 0 auto;
