@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v7.96
+// FitJourney Tracker - Version v7.97
 
-console.log("FitJourney Tracker v7.96 initializing...");
+console.log("FitJourney Tracker v7.97 initializing...");
 
 window.onload = function() {
     try {
@@ -33,7 +33,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v7.96";
+            requiredElements.versionDisplay.innerText = "v7.97";
         }
 
         // Initialize modules in order:
@@ -49,7 +49,7 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        console.log("All modules initialized successfully in FitJourney Tracker v7.96.");
+        console.log("All modules initialized successfully in FitJourney Tracker v7.97.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -249,6 +249,10 @@ const WeightLoggingModule = {
    Photo Upload Module
    ------------------------------- */
 const PhotoUploadModule = {
+    // Maximum dimensions for stored images
+    MAX_WIDTH: 800,
+    MAX_HEIGHT: 800,
+
     init: function() {
         console.log("PhotoUploadModule loaded (updated implementation).");
         const form = document.getElementById('photo-upload-form');
@@ -266,13 +270,15 @@ const PhotoUploadModule = {
         if (existingPhotos.length > 0) {
             gallery.innerHTML = "";
             existingPhotos.forEach(photo => {
-                if (photo.dataUrl) { // Guard: only create images if dataUrl exists
+                // Support both "dataUrl" and legacy "src" properties.
+                let src = photo.dataUrl || photo.src;
+                if (src) {
                     const img = document.createElement('img');
-                    img.src = photo.dataUrl;
+                    img.src = src;
                     img.alt = photo.date ? `Photo from ${photo.date}` : "Uploaded Photo";
                     gallery.appendChild(img);
                 } else {
-                    console.warn("Skipping photo with undefined dataUrl", photo);
+                    console.warn("Skipping photo with undefined dataUrl/src", photo);
                 }
             });
         }
@@ -289,20 +295,8 @@ const PhotoUploadModule = {
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                // Create and display a new image element
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.alt = photoDate ? `Photo from ${photoDate}` : "Uploaded Photo";
-
-                // Remove the placeholder if it exists and append the new image
-                if (gallery.querySelector('.placeholder')) {
-                    gallery.innerHTML = "";
-                }
-                gallery.appendChild(img);
-                console.log("Photo uploaded and displayed in gallery.");
-
-                // Save the photo in localStorage
-                DataPersistenceModule.addPhoto({ dataUrl: e.target.result, date: photoDate });
+                // e.target.result is the original dataURL.
+                PhotoUploadModule.compressAndSave(e.target.result, photoDate, gallery);
             };
 
             reader.readAsDataURL(file);
@@ -311,6 +305,60 @@ const PhotoUploadModule = {
             photoInput.value = "";
             photoDateInput.value = "";
         });
+    },
+
+    /**
+     * Compress (resize) the image if needed, then update the gallery and save the photo.
+     */
+    compressAndSave: function(dataUrl, photoDate, gallery) {
+        const img = new Image();
+        img.onload = function() {
+            // Determine new dimensions while preserving aspect ratio
+            let width = img.width;
+            let height = img.height;
+            const maxWidth = PhotoUploadModule.MAX_WIDTH;
+            const maxHeight = PhotoUploadModule.MAX_HEIGHT;
+
+            if (width > maxWidth || height > maxHeight) {
+                const aspectRatio = width / height;
+                if (width > height) {
+                    width = maxWidth;
+                    height = Math.round(maxWidth / aspectRatio);
+                } else {
+                    height = maxHeight;
+                    width = Math.round(maxHeight * aspectRatio);
+                }
+            }
+
+            // Create an offscreen canvas and draw the image into it
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Get the compressed data URL
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7); // adjust quality if needed
+
+            // Create and display a new image element in the gallery
+            const newImg = document.createElement('img');
+            newImg.src = compressedDataUrl;
+            newImg.alt = photoDate ? `Photo from ${photoDate}` : "Uploaded Photo";
+
+            // Remove the placeholder if it exists and append the new image
+            if (gallery.querySelector('.placeholder')) {
+                gallery.innerHTML = "";
+            }
+            gallery.appendChild(newImg);
+            console.log("Photo uploaded, compressed, and displayed in gallery.");
+
+            // Save the compressed photo in localStorage
+            DataPersistenceModule.addPhoto({ dataUrl: compressedDataUrl, date: photoDate });
+        };
+        img.onerror = function() {
+            console.error("Error loading image for compression.");
+        };
+        img.src = dataUrl;
     }
 };
 
