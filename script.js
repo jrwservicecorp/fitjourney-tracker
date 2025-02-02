@@ -1,6 +1,6 @@
-// FitJourney Tracker - Version v8.5
+// FitJourney Tracker - Version v8.6
 
-console.log("FitJourney Tracker v8.5 initializing...");
+console.log("FitJourney Tracker v8.6 initializing...");
 
 window.onload = function() {
     try {
@@ -39,7 +39,7 @@ window.onload = function() {
         }
 
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v8.5";
+            requiredElements.versionDisplay.innerText = "v8.6";
         }
 
         // Initialize modules in order:
@@ -65,7 +65,7 @@ window.onload = function() {
             }
         });
 
-        console.log("All modules initialized successfully in FitJourney Tracker v8.5.");
+        console.log("All modules initialized successfully in FitJourney Tracker v8.6.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
@@ -732,7 +732,7 @@ const ExportModule = {
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-        // Draw header area (top 100px)
+        // Header section (top 100px)
         ctx.fillStyle = "#00aced";
         ctx.fillRect(0, 0, canvas.width, 100);
         ctx.font = "50px Helvetica, Arial, sans-serif";
@@ -740,7 +740,7 @@ const ExportModule = {
         ctx.textAlign = "center";
         ctx.fillText("Custom Progress Export", canvas.width / 2, 65);
     
-        // Draw footer area (bottom 50px)
+        // Footer section (bottom 50px)
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
         ctx.font = "30px Helvetica, Arial, sans-serif";
@@ -788,7 +788,7 @@ const ExportModule = {
             ctx.fill();
         });
     
-        // Draw summary box on the left
+        // Summary box on the left
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(50, 110, 300, 150);
         ctx.fillStyle = "#00aced";
