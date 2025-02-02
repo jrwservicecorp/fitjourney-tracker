@@ -1,4 +1,4 @@
-// FitJourney Tracker - Version v8.3a
+// FitJourney Tracker - Version v8.3
 
 console.log("FitJourney Tracker v8.3 initializing...");
 
@@ -408,8 +408,7 @@ const ExportModule = {
             } else if (exportType === "photo-comparison") {
                 ExportModule.preparePhotoComparisonExport();
             } else if (exportType === "data-only") {
-                overlayPreview.innerHTML = "Data Only export not implemented yet.";
-                overlayPreview.style.display = "block";
+                ExportModule.prepareDataOnlyExport();
             } else if (exportType === "custom-progress") {
                 ExportModule.prepareCustomProgressExport();
             }
@@ -679,26 +678,43 @@ const ExportModule = {
         bgGradient.addColorStop(1, "#333333");
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        const chartMargin = 100;
-        const chartWidth = canvas.width - chartMargin * 2;
-        const chartHeight = canvas.height - chartMargin * 2;
+    
+        // Draw header area (top 100px)
+        ctx.fillStyle = "#00aced";
+        ctx.fillRect(0, 0, canvas.width, 100);
+        ctx.font = "50px Helvetica, Arial, sans-serif";
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.fillText("Custom Progress Export", canvas.width / 2, 65);
+    
+        // Draw footer area (bottom 50px)
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+        ctx.font = "30px Helvetica, Arial, sans-serif";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText("Share your progress and inspire others!", canvas.width / 2, canvas.height - 15);
+    
+        // Draw chart area between header and footer
+        const chartMargin = 120;
+        const chartHeight = canvas.height - chartMargin - 70; // leaving space for footer
+        const chartWidth = canvas.width - 200;
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(chartMargin, chartMargin);
-        ctx.lineTo(chartMargin, canvas.height - chartMargin);
-        ctx.moveTo(chartMargin, canvas.height - chartMargin);
-        ctx.lineTo(canvas.width - chartMargin, canvas.height - chartMargin);
+        ctx.moveTo(100, chartMargin);
+        ctx.lineTo(100, chartMargin + chartHeight);
+        ctx.lineTo(100 + chartWidth, chartMargin + chartHeight);
         ctx.stroke();
+    
         const timeSpan = endDate.getTime() - startDate.getTime();
-        const weightSpan = maxWeight - minWeight;
+        const weightSpan = maxWeight - minWeight || 1; // avoid division by zero
         ctx.strokeStyle = "#00aced";
         ctx.lineWidth = 4;
         ctx.beginPath();
         logs.forEach((log, index) => {
             const logDate = new Date(log.date);
-            const x = chartMargin + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
-            const y = canvas.height - chartMargin - ((log.weight - minWeight) / weightSpan) * chartHeight;
+            const x = 100 + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
+            const y = chartMargin + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
             if (index === 0) {
                 ctx.moveTo(x, y);
             } else {
@@ -706,32 +722,143 @@ const ExportModule = {
             }
         });
         ctx.stroke();
+    
+        // Draw data points on the chart
         ctx.fillStyle = "#ffffff";
         logs.forEach(log => {
             const logDate = new Date(log.date);
-            const x = chartMargin + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
-            const y = canvas.height - chartMargin - ((log.weight - minWeight) / weightSpan) * chartHeight;
+            const x = 100 + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
+            const y = chartMargin + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
             ctx.beginPath();
             ctx.arc(x, y, 5, 0, Math.PI * 2);
             ctx.fill();
         });
+    
+        // Draw summary box on the left
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        ctx.fillRect(50, 50, 500, 100);
-        ctx.fillStyle = "#00aced";
-        ctx.font = "40px Helvetica, Arial, sans-serif";
-        ctx.textAlign = "left";
+        ctx.fillRect(50, 110, 300, 150);
         const weightChange = logs[logs.length - 1].weight - logs[0].weight;
-        ctx.fillText(`Progress from ${startDateStr} to ${endDateStr}:`, 70, 90);
-        ctx.fillText(`Change: ${weightChange > 0 ? "+" : ""}${weightChange} lbs`, 70, 140);
-        ctx.font = "60px Helvetica, Arial, sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText("Custom Progress Export", canvas.width / 2, 80);
+        const avgWeight = (logs.reduce((acc, log) => acc + log.weight, 0) / logs.length).toFixed(1);
+        ctx.fillStyle = "#00aced";
+        ctx.font = "30px Helvetica, Arial, sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText(`Min: ${minWeight} lbs`, 60, 150);
+        ctx.fillText(`Max: ${maxWeight} lbs`, 60, 190);
+        ctx.fillText(`Avg: ${avgWeight} lbs`, 60, 230);
+        ctx.fillText(`Change: ${weightChange > 0 ? "+" : ""}${weightChange} lbs`, 60, 270);
+    
         ExportModule.exportCanvas = canvas;
         overlayPreview.innerHTML = "";
         overlayPreview.appendChild(canvas);
         overlayPreview.style.display = "block";
         console.log("Custom progress export prepared with modern styling.");
+    },
+    prepareDataOnlyExport: function() {
+        // New implementation for Data Only Export with header, main data section, and footer.
+        const overlayPreview = document.getElementById('overlay-preview');
+        const logs = DataPersistenceModule.getWeightLogs();
+        if (logs.length === 0) {
+            alert("No weight logs available for export.");
+            return;
+        }
+    
+        // Compute summary statistics.
+        let minWeight = Number.MAX_VALUE, maxWeight = Number.MIN_VALUE, total = 0;
+        logs.forEach(log => {
+            const weight = log.weight;
+            if (weight < minWeight) minWeight = weight;
+            if (weight > maxWeight) maxWeight = weight;
+            total += weight;
+        });
+        const avgWeight = (total / logs.length).toFixed(1);
+        const weightChange = logs[logs.length - 1].weight - logs[0].weight;
+    
+        // Create a canvas (1200x800)
+        const canvas = document.createElement('canvas');
+        canvas.width = 1200;
+        canvas.height = 800;
+        const ctx = canvas.getContext('2d');
+    
+        // Draw a sleek gradient background.
+        const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        bgGradient.addColorStop(0, "#0d0d0d");
+        bgGradient.addColorStop(1, "#222222");
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+        // Header section (top 100px)
+        ctx.fillStyle = "#00aced";
+        ctx.fillRect(0, 0, canvas.width, 100);
+        ctx.font = "50px Helvetica, Arial, sans-serif";
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.fillText("Data Only Export", canvas.width / 2, 65);
+    
+        // Footer section (bottom 50px)
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+        ctx.font = "30px Helvetica, Arial, sans-serif";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText("Keep pushing your limits!", canvas.width / 2, canvas.height - 15);
+    
+        // Main data section: Draw a chart with all logs.
+        const chartMargin = 120;
+        const chartWidth = canvas.width - 200;
+        const chartHeight = canvas.height - chartMargin - 70;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(100, chartMargin);
+        ctx.lineTo(100, chartMargin + chartHeight);
+        ctx.lineTo(100 + chartWidth, chartMargin + chartHeight);
+        ctx.stroke();
+    
+        const startDate = new Date(logs[0].date);
+        const endDate = new Date(logs[logs.length - 1].date);
+        const timeSpan = endDate.getTime() - startDate.getTime();
+        const weightSpan = maxWeight - minWeight || 1;
+        ctx.strokeStyle = "#00aced";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        logs.forEach((log, index) => {
+            const logDate = new Date(log.date);
+            const x = 100 + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
+            const y = chartMargin + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+        ctx.stroke();
+    
+        // Draw data points.
+        ctx.fillStyle = "#ffffff";
+        logs.forEach(log => {
+            const logDate = new Date(log.date);
+            const x = 100 + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
+            const y = chartMargin + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    
+        // Draw a summary text box on the left.
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(50, 110, 300, 150);
+        ctx.fillStyle = "#00aced";
+        ctx.font = "30px Helvetica, Arial, sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText(`Min: ${minWeight} lbs`, 60, 150);
+        ctx.fillText(`Max: ${maxWeight} lbs`, 60, 190);
+        ctx.fillText(`Avg: ${avgWeight} lbs`, 60, 230);
+        ctx.fillText(`Change: ${weightChange > 0 ? "+" : ""}${weightChange} lbs`, 60, 270);
+    
+        ExportModule.exportCanvas = canvas;
+        overlayPreview.innerHTML = "";
+        overlayPreview.appendChild(canvas);
+        overlayPreview.style.display = "block";
+        console.log("Data Only export prepared with modern styling.");
     }
 };
 
