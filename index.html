@@ -93,21 +93,12 @@
       <div id="side-by-side-comparison" class="comparison-display"></div>
     </div>
 
-    <!-- Photo Gallery -->
-    <div class="card">
-      <h3>Photo Gallery</h3>
-      <div id="photo-gallery" class="gallery">
-        <p class="placeholder">No photos uploaded yet.</p>
-      </div>
-      <button id="clear-photos-btn">Clear All Photos</button>
-    </div>
-
     <!-- Export Section -->
     <div class="card">
       <h3>Export Options</h3>
       <div class="export-options">
         <label>
-          <input type="radio" name="export-type" value="single-photo">
+          <input type="radio" name="export-type" value="single-photo" checked>
           Single Photo with Overlay
         </label>
         <label>
@@ -118,14 +109,41 @@
           <input type="radio" name="export-type" value="data-only">
           Data Only
         </label>
+        <label>
+          <input type="radio" name="export-type" value="custom-progress">
+          Custom Progress Export
+        </label>
+      </div>
+      <!-- New date range inputs for Custom Progress Export -->
+      <div id="custom-progress-inputs" style="display: none; margin-top: 10px;">
+        <label for="export-start-date">Start Date:</label>
+        <input id="export-start-date" type="date">
+        <label for="export-end-date">End Date:</label>
+        <input id="export-end-date" type="date">
       </div>
       <button id="prepare-export-btn">Prepare Export</button>
       <button id="exportDataBtn">Download Export</button>
     </div>
+
+    <!-- Overlay Preview -->
+    <div id="overlay-preview" style="display:none;"></div>
   </main>
 
-  <!-- Added Missing Elements for Photo Overlay -->
-  <button id="overlay-photo-btn" style="display: none;">Overlay Photo</button>
-  <div id="overlay-preview" style="display: none;"></div>
+  <!-- Hidden overlay photo elements -->
+  <button id="overlay-photo-btn" style="display:none;">Overlay Photo</button>
+
+  <!-- Toggle custom progress inputs based on export type selection -->
+  <script>
+    document.querySelectorAll('input[name="export-type"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const customInputs = document.getElementById('custom-progress-inputs');
+        if (radio.value === "custom-progress" && radio.checked) {
+          customInputs.style.display = "block";
+        } else {
+          customInputs.style.display = "none";
+        }
+      });
+    });
+  </script>
 </body>
 </html>
