@@ -1,4 +1,4 @@
-/* FitJourney Tracker - CSS v8.3 */
+/* FitJourney Tracker - CSS v8.4 */
 
 /* General Styles */
 body {
@@ -85,12 +85,28 @@ button:hover {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 95%;
+    max-height: 95%;
     border: 2px solid #007bff;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.97);
     z-index: 1000;
     display: none;
     padding: 10px;
+}
+
+/* Responsive Styles */
+@media only screen and (max-width: 600px) {
+    .card {
+        max-width: 95%;
+        margin: 10px auto;
+        padding: 10px;
+    }
+    header {
+        font-size: 1.2em;
+    }
+    button {
+        font-size: 0.9em;
+        padding: 8px 12px;
+    }
 }
