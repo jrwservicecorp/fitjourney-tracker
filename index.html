@@ -8,10 +8,8 @@
   <link rel="stylesheet" href="style.css">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Fabric.js CDN (without defer so it loads immediately) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.6.0/fabric.min.js"></script>
-  <!-- Your main script file is loaded after the above scripts -->
-  <script src="script.js"></script>
+  <!-- Fabric.js CDN (using version 5.2.4) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
 </head>
 <body>
   <header>
@@ -33,7 +31,7 @@
       <p id="trend-analysis">Trend: No data yet.</p>
     </div>
 
-    <!-- Dashboard Section: Grouped Modules -->
+    <!-- Dashboard Section: Grouped Modules (Weight Summary, Recent Weigh‑Ins, Log Your Weight) -->
     <section id="dashboard-section">
       <div class="card weight-summary">
         <h3>Weight Summary</h3>
@@ -73,7 +71,7 @@
       <div id="photo-gallery" class="gallery">
         <p class="placeholder">No photos uploaded yet.</p>
       </div>
-      <!-- Dummy element for clearPhotosBtn -->
+      <!-- Dummy element for clearPhotosBtn to satisfy JS check -->
       <div id="clear-photos-btn" style="display: none;"></div>
     </div>
 
@@ -144,5 +142,8 @@
       });
     });
   </script>
+
+  <!-- Include your main script at the end of body -->
+  <script src="script.js"></script>
 </body>
 </html>
