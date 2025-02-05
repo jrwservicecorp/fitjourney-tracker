@@ -8,8 +8,10 @@
   <link rel="stylesheet" href="style.css">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Fabric.js CDN (using version 5.2.4) -->
+  <!-- Fabric.js CDN (version 5.2.4) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+  <!-- Your main script file; defer ensures libraries load first -->
+  <script src="script.js" defer></script>
 </head>
 <body>
   <header>
@@ -142,8 +144,5 @@
       });
     });
   </script>
-
-  <!-- Include your main script at the end of body -->
-  <script src="script.js"></script>
 </body>
 </html>
