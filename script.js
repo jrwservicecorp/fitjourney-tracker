@@ -1,11 +1,24 @@
-// FitJourney Tracker - Version v8.8.1
+// ============================================================
+// FitJourney Tracker - Version v8.8.3
+// ============================================================
 
-console.log("FitJourney Tracker v8.8.1 initializing...");
+// This file contains all modules required for the FitJourney Tracker app.
+// It handles charting, weight logging, photo upload and comparison,
+// export overlays (with Fabric.js editing support), and several dummy modules.
+// Extensive comments and spacing have been added to make the file
+// more verbose and easier to follow, similar to previous versions.
 
+console.log("FitJourney Tracker v8.8.3 initializing...");
+
+// ------------------------------------------------------------
+// Global Initialization
+// ------------------------------------------------------------
 window.onload = function() {
     try {
         console.log("Checking required elements before initializing modules...");
-        
+
+        // Define required elements by their IDs.
+        // These elements are expected to be present in the HTML.
         const requiredElements = {
             chart: document.getElementById('weightChart'),
             weightForm: document.getElementById('weight-form'),
@@ -32,17 +45,21 @@ window.onload = function() {
             exportEndDate: document.getElementById('export-end-date')
         };
 
+        // Log warnings if any required element is missing.
         for (const [key, value] of Object.entries(requiredElements)) {
             if (!value) {
                 console.warn(`Warning: Element with ID '${key}' is missing!`);
             }
         }
 
+        // Update the version display element.
         if (requiredElements.versionDisplay) {
-            requiredElements.versionDisplay.innerText = "v8.8.1";
+            requiredElements.versionDisplay.innerText = "v8.8.3";
         }
 
-        // Initialize modules in order:
+        // ------------------------------------------------------------
+        // Module Initializations
+        // ------------------------------------------------------------
         ChartModule.init();
         WeightLoggingModule.init();
         PhotoUploadModule.init();
@@ -55,43 +72,51 @@ window.onload = function() {
         DarkModeModule.init();
         CsvExportModule.init();
 
-        // Click-outside-to-close overlay functionality:
+        // ------------------------------------------------------------
+        // Global Click-Outside Handler for Overlay
+        // ------------------------------------------------------------
+        // This handler will close the overlay when clicking outside of it,
+        // except when clicking within elements that are part of the overlay controls.
         document.addEventListener('click', function(e) {
             const overlay = document.getElementById('overlay-preview');
             if (overlay.style.display === "block" && !overlay.contains(e.target) &&
-                e.target.id !== 'prepare-export-btn' &&
-                e.target.id !== 'exportDataBtn') {
+                !e.target.closest('#overlay-controls')) {
                 overlay.style.display = "none";
             }
         });
 
-        console.log("All modules initialized successfully in FitJourney Tracker v8.8.1.");
+        console.log("All modules initialized successfully in FitJourney Tracker v8.8.3.");
     } catch (error) {
         console.error("Error initializing modules:", error);
     }
 };
 
-/* =========================
-   Data Persistence Module
-   ========================= */
+// ============================================================
+// Data Persistence Module
+// ============================================================
 const DataPersistenceModule = {
     MAX_PHOTOS: 20,
+    // Get weight logs from localStorage
     getWeightLogs: function() {
         let logs = localStorage.getItem("weightLogs");
         return logs ? JSON.parse(logs) : [];
     },
+    // Save weight logs to localStorage
     saveWeightLogs: function(logs) {
         localStorage.setItem("weightLogs", JSON.stringify(logs));
     },
+    // Add a new weight log and save it
     addWeightLog: function(log) {
         let logs = this.getWeightLogs();
         logs.push(log);
         this.saveWeightLogs(logs);
     },
+    // Get photos from localStorage
     getPhotos: function() {
         let photos = localStorage.getItem("photos");
         return photos ? JSON.parse(photos) : [];
     },
+    // Save photos to localStorage
     savePhotos: function(photos) {
         try {
             localStorage.setItem("photos", JSON.stringify(photos));
@@ -104,6 +129,7 @@ const DataPersistenceModule = {
             }
         }
     },
+    // Add a new photo and save it
     addPhoto: function(photo) {
         let photos = this.getPhotos();
         if (photos.length >= this.MAX_PHOTOS) {
@@ -121,9 +147,9 @@ const DataPersistenceModule = {
     }
 };
 
-/* =========================
-   Chart Module
-   ========================= */
+// ============================================================
+// Chart Module
+// ============================================================
 const ChartModule = {
     chartInstance: null,
     sampleDataEnabled: true,
@@ -131,6 +157,7 @@ const ChartModule = {
     userWeights: [],
     labels: ["Day 1", "Day 2", "Day 3", "Day 4"],
     goalWeight: null,
+    // Initialize the Chart.js chart
     init: function() {
         console.log("ChartModule loaded");
         const canvas = document.getElementById('weightChart');
@@ -164,6 +191,7 @@ const ChartModule = {
             }
         });
     },
+    // Update the chart with new weight and date data
     updateChart: function(weight, date) {
         if (!ChartModule.chartInstance) {
             console.warn("Chart not initialized properly!");
@@ -186,9 +214,9 @@ const ChartModule = {
     }
 };
 
-/* =========================
-   Weight Logging Module
-   ========================= */
+// ============================================================
+// Weight Logging Module
+// ============================================================
 const WeightLoggingModule = {
     init: function() {
         console.log("WeightLoggingModule loaded");
@@ -201,6 +229,7 @@ const WeightLoggingModule = {
             console.warn("Warning: Weight logging elements are missing! Weight logging will not work.");
             return;
         }
+        // Load existing logs from localStorage
         const existingLogs = DataPersistenceModule.getWeightLogs();
         if (existingLogs.length > 0) {
             recentWeighIns.innerHTML = "";
@@ -221,6 +250,7 @@ const WeightLoggingModule = {
                 ChartModule.chartInstance.update();
             }
         }
+        // Listen for form submission to log new weight data
         form.addEventListener('submit', (event) => {
             event.preventDefault();
             const weight = parseFloat(input.value.trim());
@@ -243,9 +273,9 @@ const WeightLoggingModule = {
     }
 };
 
-/* =========================
-   Photo Upload Module
-   ========================= */
+// ============================================================
+// Photo Upload Module
+// ============================================================
 const PhotoUploadModule = {
     MAX_WIDTH: 800,
     MAX_HEIGHT: 800,
@@ -259,6 +289,7 @@ const PhotoUploadModule = {
             console.warn("Warning: Photo upload elements are missing! Photo upload will not work.");
             return;
         }
+        // Load existing photos from localStorage
         const existingPhotos = DataPersistenceModule.getPhotos();
         if (existingPhotos.length > 0) {
             gallery.innerHTML = "";
@@ -274,6 +305,7 @@ const PhotoUploadModule = {
                 }
             });
         }
+        // Listen for form submission for photo upload
         form.addEventListener('submit', function(event) {
             event.preventDefault();
             const file = photoInput.files[0];
@@ -331,9 +363,9 @@ const PhotoUploadModule = {
     }
 };
 
-/* =========================
-   Photo Comparison Module
-   ========================= */
+// ============================================================
+// Photo Comparison Module
+// ============================================================
 const PhotoComparisonModule = {
     init: function() {
         console.log("PhotoComparisonModule loaded (enhanced implementation).");
@@ -345,6 +377,7 @@ const PhotoComparisonModule = {
             console.warn("Warning: Photo comparison elements are missing! Photo comparison will not work.");
             return;
         }
+        // Populate the photo selectors with available photos
         const populateSelects = function() {
             const photos = DataPersistenceModule.getPhotos();
             select1.innerHTML = "";
@@ -362,6 +395,7 @@ const PhotoComparisonModule = {
             });
         };
         populateSelects();
+        // Listen for the Compare Photos button click
         compareBtn.addEventListener('click', function() {
             const photos = DataPersistenceModule.getPhotos();
             const idx1 = parseInt(select1.value);
@@ -376,6 +410,10 @@ const PhotoComparisonModule = {
             }
             const photo1 = photos[idx1];
             const photo2 = photos[idx2];
+            if (!photo1 || !photo2) {
+                alert("Selected photos not found.");
+                return;
+            }
             comparisonArea.innerHTML = "";
             const container1 = document.createElement('div');
             container1.style.display = "inline-block";
@@ -409,12 +447,12 @@ const PhotoComparisonModule = {
     }
 };
 
-/* =========================
-   Export Module with Fabric.js Integration
-   ========================= */
+// ============================================================
+// Export Module with Fabric.js Integration
+// ============================================================
 const ExportModule = {
     exportCanvas: null,
-    fabricCanvas: null, // Fabric.js canvas instance
+    fabricCanvas: null, // This will hold the Fabric.js canvas instance
     init: function() {
         console.log("ExportModule loaded (enhanced implementation).");
         const prepareBtn = document.getElementById('prepare-export-btn');
@@ -424,6 +462,7 @@ const ExportModule = {
             console.warn("Warning: Export elements are missing.");
             return;
         }
+        // Listen for Prepare Export button clicks
         prepareBtn.addEventListener('click', () => {
             const exportType = document.querySelector('input[name="export-type"]:checked').value;
             if (exportType === "single-photo") {
@@ -436,6 +475,7 @@ const ExportModule = {
                 ExportModule.prepareCustomProgressExport();
             }
         });
+        // Listen for Download Export button clicks
         downloadBtn.addEventListener('click', () => {
             if (ExportModule.exportCanvas) {
                 const dataURL = ExportModule.exportCanvas.toDataURL("image/png");
@@ -465,17 +505,21 @@ const ExportModule = {
         controls.style.borderRadius = "5px";
         controls.style.display = "inline-block";
     
+        // Create a Close button
         const closeBtn = document.createElement('button');
         closeBtn.textContent = "Close";
         closeBtn.style.marginRight = "10px";
-        closeBtn.addEventListener('click', () => {
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             overlayPreview.style.display = "none";
         });
     
+        // Create a Share button
         const shareBtn = document.createElement('button');
         shareBtn.textContent = "Share";
         shareBtn.style.marginRight = "10px";
-        shareBtn.addEventListener('click', () => {
+        shareBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             if (navigator.share) {
                 navigator.share({
                     title: 'My Progress Export',
@@ -487,26 +531,32 @@ const ExportModule = {
             }
         });
     
-        // "Edit" button launches the Fabric.js editor
+        // Create an Edit button to launch the Fabric.js editor
         const editBtn = document.createElement('button');
         editBtn.textContent = "Edit";
-        editBtn.addEventListener('click', () => {
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log("Edit button clicked");
             ExportModule.openFabricEditor();
         });
     
+        // Append buttons to the controls container
         controls.appendChild(closeBtn);
         controls.appendChild(editBtn);
         controls.appendChild(shareBtn);
         overlayPreview.appendChild(controls);
     },
     openFabricEditor: function() {
-        // Remove any previous Fabric instance
+        console.log("openFabricEditor called");
+        console.log("fabric type:", typeof fabric); // This should log "object" or "function"
+        
+        // Remove any previous Fabric instance if exists
         if (ExportModule.fabricCanvas) {
             ExportModule.fabricCanvas.dispose();
             ExportModule.fabricCanvas = null;
         }
         const overlayPreview = document.getElementById('overlay-preview');
-        // Convert current exportCanvas to data URL
+        // Convert current exportCanvas to a data URL
         const dataURL = ExportModule.exportCanvas.toDataURL("image/png");
         // Clear overlay and create a container for the Fabric canvas
         overlayPreview.innerHTML = "";
@@ -516,7 +566,7 @@ const ExportModule = {
         editorContainer.style.display = "inline-block";
         overlayPreview.appendChild(editorContainer);
     
-        // Create a new canvas element for Fabric
+        // Create a new canvas element for Fabric and append it to the container
         const fabricEl = document.createElement('canvas');
         fabricEl.id = "fabric-canvas";
         fabricEl.width = ExportModule.exportCanvas.width;
@@ -528,7 +578,7 @@ const ExportModule = {
             backgroundColor: '#121212'
         });
     
-        // Load the export image into the fabric canvas as its background
+        // Load the export image into the fabric canvas as its background image
         fabric.Image.fromURL(dataURL, function(img) {
             ExportModule.fabricCanvas.setBackgroundImage(img, ExportModule.fabricCanvas.renderAll.bind(ExportModule.fabricCanvas), {
                 scaleX: ExportModule.fabricCanvas.width / img.width,
@@ -536,7 +586,7 @@ const ExportModule = {
             });
         });
     
-        // Add a sample editable text object
+        // Add a sample editable text object (caption)
         const caption = new fabric.Text("My Progress", {
             left: 400,
             top: 50,
@@ -551,7 +601,8 @@ const ExportModule = {
         const saveBtn = document.createElement('button');
         saveBtn.textContent = "Save Changes";
         saveBtn.style.marginTop = "10px";
-        saveBtn.addEventListener('click', () => {
+        saveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = ExportModule.fabricCanvas.getWidth();
             tempCanvas.height = ExportModule.fabricCanvas.getHeight();
@@ -567,6 +618,9 @@ const ExportModule = {
         });
         overlayPreview.appendChild(saveBtn);
     },
+    // ========================================================
+    // Export Functions
+    // ========================================================
     prepareSinglePhotoExport: function() {
         const photos = DataPersistenceModule.getPhotos();
         const logs = DataPersistenceModule.getWeightLogs();
@@ -587,12 +641,14 @@ const ExportModule = {
         canvas.height = 800;
         const ctx = canvas.getContext('2d');
     
+        // Create a linear gradient background
         const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         bgGradient.addColorStop(0, "#1a1a1a");
         bgGradient.addColorStop(1, "#333333");
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+        // Draw photo container with rounded corners and drop shadow
         const photoX = 100, photoY = 100, photoW = 1000, photoH = 500, radius = 20;
         ctx.fillStyle = "#ffffff";
         ctx.shadowColor = "rgba(0,0,0,0.4)";
@@ -613,6 +669,7 @@ const ExportModule = {
         ctx.fill();
         ctx.shadowColor = "transparent";
     
+        // Load and draw the photo image
         const photoImg = new Image();
         photoImg.onload = function() {
             const margin = 20;
@@ -636,15 +693,18 @@ const ExportModule = {
             ctx.drawImage(photoImg, drawX, drawY, drawW, drawH);
             ctx.restore();
     
+            // Overlay a semi-transparent box for data overlay
             ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
             ctx.fillRect(100, 630, 1000, 100);
     
+            // Draw text for latest weight and date
             ctx.fillStyle = "#ffffff";
             ctx.font = "40px Roboto";
             ctx.textAlign = "left";
             ctx.fillText(`Latest Weight: ${latestWeight} lbs`, 120, 680);
             ctx.fillText(`Date: ${latestDate}`, 120, 730);
     
+            // Draw a title at the top of the export
             ctx.font = "50px Roboto";
             ctx.fillStyle = "#00aced";
             ctx.textAlign = "center";
@@ -694,16 +754,19 @@ const ExportModule = {
         canvas.height = 700;
         const ctx = canvas.getContext('2d');
     
+        // Create a linear gradient background for the comparison export
         const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         bgGradient.addColorStop(0, "#222222");
         bgGradient.addColorStop(1, "#444444");
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+        // Define margins and panel dimensions for photo comparison
         const margin = 25;
         const panelWidth = 650;
         const panelHeight = 650;
     
+        // Helper function: draw a panel with rounded corners
         const drawPanel = function(x, y) {
             ctx.save();
             ctx.shadowColor = "rgba(0,0,0,0.5)";
@@ -734,6 +797,7 @@ const ExportModule = {
         drawPanel(leftX, leftY);
         drawPanel(rightX, rightY);
     
+        // Load both photos and draw them side-by-side
         const img1 = new Image();
         const img2 = new Image();
         let imagesLoaded = 0;
@@ -767,6 +831,7 @@ const ExportModule = {
                 ctx.fillText("Photo Comparison Export", canvas.width / 2, 60);
     
                 ExportModule.exportCanvas = canvas;
+                const overlayPreview = document.getElementById('overlay-preview');
                 overlayPreview.innerHTML = "";
                 overlayPreview.appendChild(canvas);
                 ExportModule.addOverlayControls();
@@ -822,17 +887,29 @@ const ExportModule = {
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-        // Header section
+        // Header Section with bottom border
         ctx.fillStyle = "#00aced";
         ctx.fillRect(0, 0, canvas.width, 100);
+        ctx.strokeStyle = "#007bb5";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 100);
+        ctx.lineTo(canvas.width, 100);
+        ctx.stroke();
         ctx.font = "bold 50px Roboto";
         ctx.fillStyle = "#ffffff";
         ctx.textAlign = "center";
         ctx.fillText("Custom Progress Export", canvas.width / 2, 65);
     
-        // Footer section
+        // Footer Section with top border
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height - 50);
+        ctx.lineTo(canvas.width, canvas.height - 50);
+        ctx.stroke();
         ctx.font = "bold 30px Roboto";
         ctx.fillStyle = "#ffffff";
         ctx.fillText("Keep pushing your limits!", canvas.width / 2, canvas.height - 15);
@@ -892,138 +969,15 @@ const ExportModule = {
         ctx.fillText(`Min: ${minWeight} lbs`, 60, 150);
         ctx.fillText(`Max: ${maxWeight} lbs`, 60, 190);
         ctx.fillText(`Avg: ${(logs.reduce((acc, log) => acc + log.weight, 0) / logs.length).toFixed(1)} lbs`, 60, 230);
-        ctx.fillText(`Change: ${((logs[logs.length - 1].weight - logs[0].weight) > 0 ? "+" : "") + (logs[logs.length - 1].weight - logs[0].weight)} lbs`, 60, 270);
+        ctx.fillText(`Change: ${weightChange > 0 ? "+" : ""}${weightChange} lbs`, 60, 270);
     
         ExportModule.exportCanvas = canvas;
+        const overlayPreview = document.getElementById('overlay-preview');
         overlayPreview.innerHTML = "";
         overlayPreview.appendChild(canvas);
         ExportModule.addOverlayControls();
         overlayPreview.style.display = "block";
         console.log("Custom progress export prepared with modern styling.");
-    },
-    prepareDataOnlyExport: function() {
-        const overlayPreview = document.getElementById('overlay-preview');
-        const logs = DataPersistenceModule.getWeightLogs();
-        if (logs.length === 0) {
-            alert("No weight logs available for export.");
-            return;
-        }
-    
-        let minWeight = Number.MAX_VALUE, maxWeight = Number.MIN_VALUE, total = 0;
-        logs.forEach(log => {
-            const weight = log.weight;
-            if (weight < minWeight) minWeight = weight;
-            if (weight > maxWeight) maxWeight = weight;
-            total += weight;
-        });
-        const avgWeight = (total / logs.length).toFixed(1);
-        const weightChange = logs[logs.length - 1].weight - logs[0].weight;
-    
-        const canvas = document.createElement('canvas');
-        canvas.width = 1200;
-        canvas.height = 800;
-        const ctx = canvas.getContext('2d');
-    
-        // Layered Radial Background
-        const radialGrad = ctx.createRadialGradient(
-            canvas.width / 2, canvas.height / 2, 100,
-            canvas.width / 2, canvas.height / 2, canvas.width / 2
-        );
-        radialGrad.addColorStop(0, "#1c1c1c");
-        radialGrad.addColorStop(1, "#000");
-        ctx.fillStyle = radialGrad;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-        // Header Section with bottom border
-        ctx.fillStyle = "#00aced";
-        ctx.fillRect(0, 0, canvas.width, 100);
-        ctx.strokeStyle = "#007bb5";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(0, 100);
-        ctx.lineTo(canvas.width, 100);
-        ctx.stroke();
-        ctx.font = "bold 50px Roboto";
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "center";
-        ctx.fillText("Data Only Export", canvas.width / 2, 65);
-    
-        // Footer Section with top border
-        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
-        ctx.strokeStyle = "#333";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(0, canvas.height - 50);
-        ctx.lineTo(canvas.width, canvas.height - 50);
-        ctx.stroke();
-        ctx.font = "bold 30px Roboto";
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText("Keep pushing your limits!", canvas.width / 2, canvas.height - 15);
-    
-        // Main Chart Frame (Rounded)
-        const chartFrameX = 90, chartFrameY = 120, chartFrameW = canvas.width - 180, chartFrameH = canvas.height - 240;
-        ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-        ctx.strokeStyle = "rgba(255,255,255,0.2)";
-        ctx.lineWidth = 3;
-        ExportModule.drawRoundedRect(ctx, chartFrameX, chartFrameY, chartFrameW, chartFrameH, 15, true, true);
-    
-        // Chart Area inside frame
-        const chartX = chartFrameX + 10, chartY = chartFrameY + 10;
-        const chartWidth = chartFrameW - 20, chartHeight = chartFrameH - 20;
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(chartX, chartY + chartHeight);
-        ctx.lineTo(chartX, chartY);
-        ctx.lineTo(chartX + chartWidth, chartY);
-        ctx.stroke();
-    
-        const startDate = new Date(logs[0].date);
-        const endDate = new Date(logs[logs.length - 1].date);
-        const timeSpan = endDate.getTime() - startDate.getTime();
-        const weightSpan = maxWeight - minWeight || 1;
-        ctx.strokeStyle = "#00aced";
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        logs.forEach((log, index) => {
-            const logDate = new Date(log.date);
-            const x = chartX + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
-            const y = chartY + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
-            if (index === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-        });
-        ctx.stroke();
-    
-        ctx.fillStyle = "#ffffff";
-        logs.forEach(log => {
-            const logDate = new Date(log.date);
-            const x = chartX + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
-            const y = chartY + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
-            ctx.beginPath();
-            ctx.arc(x, y, 5, 0, Math.PI * 2);
-            ctx.fill();
-        });
-    
-        // Summary Box with rounded corners
-        ExportModule.drawRoundedRect(ctx, 50, 110, 300, 150, 10, true, false);
-        ctx.fillStyle = "#00aced";
-        ctx.font = "bold 30px Roboto";
-        ctx.textAlign = "left";
-        ctx.fillText(`Min: ${minWeight} lbs`, 60, 150);
-        ctx.fillText(`Max: ${maxWeight} lbs`, 60, 190);
-        ctx.fillText(`Avg: ${avgWeight} lbs`, 60, 230);
-        ctx.fillText(`Change: ${weightChange > 0 ? "+" : ""}${weightChange} lbs`, 60, 270);
-    
-        ExportModule.exportCanvas = canvas;
-        overlayPreview.innerHTML = "";
-        overlayPreview.appendChild(canvas);
-        ExportModule.addOverlayControls();
-        overlayPreview.style.display = "block";
-        console.log("Data Only export prepared with modern styling.");
     },
     // Helper function to draw rounded rectangles
     drawRoundedRect: function(ctx, x, y, width, height, radius, fill, stroke) {
@@ -1152,142 +1106,15 @@ const ExportModule = {
         ctx.fillText(`Min: ${minWeight} lbs`, 60, 150);
         ctx.fillText(`Max: ${maxWeight} lbs`, 60, 190);
         ctx.fillText(`Avg: ${(logs.reduce((acc, log) => acc + log.weight, 0) / logs.length).toFixed(1)} lbs`, 60, 230);
-        ctx.fillText(`Change: ${((logs[logs.length - 1].weight - logs[0].weight) > 0 ? "+" : "") + (logs[logs.length - 1].weight - logs[0].weight)} lbs`, 60, 270);
+        ctx.fillText(`Change: ${weightChange > 0 ? "+" : ""}${weightChange} lbs`, 60, 270);
     
         ExportModule.exportCanvas = canvas;
+        const overlayPreview = document.getElementById('overlay-preview');
         overlayPreview.innerHTML = "";
         overlayPreview.appendChild(canvas);
         ExportModule.addOverlayControls();
         overlayPreview.style.display = "block";
         console.log("Custom progress export prepared with modern styling.");
-    },
-    prepareDataOnlyExport: function() {
-        const overlayPreview = document.getElementById('overlay-preview');
-        const logs = DataPersistenceModule.getWeightLogs();
-        if (logs.length === 0) {
-            alert("No weight logs available for export.");
-            return;
-        }
-    
-        let minWeight = Number.MAX_VALUE, maxWeight = Number.MIN_VALUE, total = 0;
-        logs.forEach(log => {
-            const weight = log.weight;
-            if (weight < minWeight) minWeight = weight;
-            if (weight > maxWeight) maxWeight = weight;
-            total += weight;
-        });
-        const avgWeight = (total / logs.length).toFixed(1);
-        const weightChange = logs[logs.length - 1].weight - logs[0].weight;
-    
-        const canvas = document.createElement('canvas');
-        canvas.width = 1200;
-        canvas.height = 800;
-        const ctx = canvas.getContext('2d');
-    
-        // Layered Radial Background
-        const radialGrad = ctx.createRadialGradient(
-            canvas.width / 2, canvas.height / 2, 100,
-            canvas.width / 2, canvas.height / 2, canvas.width / 2
-        );
-        radialGrad.addColorStop(0, "#1c1c1c");
-        radialGrad.addColorStop(1, "#000");
-        ctx.fillStyle = radialGrad;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-        // Header Section with bottom border
-        ctx.fillStyle = "#00aced";
-        ctx.fillRect(0, 0, canvas.width, 100);
-        ctx.strokeStyle = "#007bb5";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(0, 100);
-        ctx.lineTo(canvas.width, 100);
-        ctx.stroke();
-        ctx.font = "bold 50px Roboto";
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "center";
-        ctx.fillText("Data Only Export", canvas.width / 2, 65);
-    
-        // Footer Section with top border
-        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
-        ctx.strokeStyle = "#333";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(0, canvas.height - 50);
-        ctx.lineTo(canvas.width, canvas.height - 50);
-        ctx.stroke();
-        ctx.font = "bold 30px Roboto";
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText("Keep pushing your limits!", canvas.width / 2, canvas.height - 15);
-    
-        // Main Chart Frame (Rounded)
-        const chartFrameX = 90, chartFrameY = 120, chartFrameW = canvas.width - 180, chartFrameH = canvas.height - 240;
-        ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-        ctx.strokeStyle = "rgba(255,255,255,0.2)";
-        ctx.lineWidth = 3;
-        ExportModule.drawRoundedRect(ctx, chartFrameX, chartFrameY, chartFrameW, chartFrameH, 15, true, true);
-    
-        // Chart Area inside frame
-        const chartX = chartFrameX + 10, chartY = chartFrameY + 10;
-        const chartWidth = chartFrameW - 20, chartHeight = chartFrameH - 20;
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(chartX, chartY + chartHeight);
-        ctx.lineTo(chartX, chartY);
-        ctx.lineTo(chartX + chartWidth, chartY);
-        ctx.stroke();
-    
-        const startDate = new Date(logs[0].date);
-        const endDate = new Date(logs[logs.length - 1].date);
-        const timeSpan = endDate.getTime() - startDate.getTime();
-        const weightSpan = maxWeight - minWeight || 1;
-        ctx.strokeStyle = "#00aced";
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        logs.forEach((log, index) => {
-            const logDate = new Date(log.date);
-            const x = chartX + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
-            const y = chartY + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
-            if (index === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-        });
-        ctx.stroke();
-    
-        ctx.fillStyle = "#ffffff";
-        logs.forEach(log => {
-            const logDate = new Date(log.date);
-            const x = chartX + ((logDate.getTime() - startDate.getTime()) / timeSpan) * chartWidth;
-            const y = chartY + chartHeight - ((log.weight - minWeight) / weightSpan) * chartHeight;
-            ctx.beginPath();
-            ctx.arc(x, y, 5, 0, Math.PI * 2);
-            ctx.fill();
-        });
-    
-        // Summary Box with rounded corners
-        ExportModule.drawRoundedRect(ctx, 50, 110, 300, 150, 10, true, false);
-        ctx.fillStyle = "#00aced";
-        ctx.font = "bold 30px Roboto";
-        ctx.textAlign = "left";
-        ctx.fillText(`Min: ${minWeight} lbs`, 60, 150);
-        ctx.fillText(`Max: ${maxWeight} lbs`, 60, 190);
-        ctx.fillText(`Avg: ${avgWeight} lbs`, 60, 230);
-        ctx.fillText(`Change: ${weightChange > 0 ? "+" : ""}${weightChange} lbs`, 60, 270);
-    
-        ExportModule.exportCanvas = canvas;
-        overlayPreview.innerHTML = "";
-        overlayPreview.appendChild(canvas);
-        ExportModule.addOverlayControls();
-        overlayPreview.style.display = "block";
-        console.log("Data Only export prepared with modern styling.");
-    },
-    prepareDataOnlyExport: function() {
-        // In this implementation, prepareDataOnlyExport is identical to the code above.
-        // You may use the same code as in the previous function if needed.
     }
 };
 
