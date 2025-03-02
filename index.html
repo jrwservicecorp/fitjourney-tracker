@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FitJourney Tracker - HTML v1.0.2 -->
+<!-- FitJourney Tracker - HTML v1.0.3 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -92,16 +92,32 @@
       <div id="clear-photos-btn" style="display: none;"></div>
     </div>
 
-    <!-- Side by Side Comparison Sections for Social Media Export -->
+    <!-- Side by Side Comparison - JuxtaposeJS -->
     <div class="card">
       <h3>Side by Side Comparison - JuxtaposeJS</h3>
+      <div class="photo-selectors">
+         <label for="juxta-before">Before:</label>
+         <select id="juxta-before"></select>
+         <label for="juxta-after">After:</label>
+         <select id="juxta-after"></select>
+         <button id="juxta-update">Update Comparison</button>
+      </div>
       <div id="juxtapose-container" class="juxtapose"></div>
       <button id="export-juxtapose-btn">Export Juxtapose Comparison</button>
     </div>
 
+    <!-- Side by Side Comparison - TwentyTwenty -->
     <div class="card">
       <h3>Side by Side Comparison - TwentyTwenty</h3>
+      <div class="photo-selectors">
+         <label for="tt-before">Before:</label>
+         <select id="tt-before"></select>
+         <label for="tt-after">After:</label>
+         <select id="tt-after"></select>
+         <button id="tt-update">Update Comparison</button>
+      </div>
       <div id="twentytwenty-container" class="twentytwenty-container">
+        <!-- Default images if no selection -->
         <img src="https://via.placeholder.com/300x400?text=Before" alt="Before">
         <img src="https://via.placeholder.com/300x400?text=After" alt="After">
       </div>
