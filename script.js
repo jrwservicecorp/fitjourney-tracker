@@ -1,11 +1,14 @@
-/* FitJourney Tracker - JS v1.0.2 */
-/* This script includes functionalities for chart rendering, weight logging, photo upload,
-   and advanced side-by-side comparisons using JuxtaposeJS and TwentyTwenty with export options
-   for social media. */
+/* FitJourney Tracker - JS v1.0.3 */
+/* This script now includes functionalities for:
+   - Chart rendering and weight logging
+   - Photo upload with a unified gallery display
+   - Advanced side-by-side comparisons using JuxtaposeJS and TwentyTwenty,
+     including photo selectors and export with a watermark overlay.
+*/
 
 document.addEventListener("DOMContentLoaded", function() {
   // App version initialization
-  const appVersion = "v1.0.2";
+  const appVersion = "v1.0.3";
   document.getElementById("app-version").textContent = appVersion;
 
   // Initialize the overlay preview element only once.
@@ -101,7 +104,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // ----------------------------
-  // Photo Upload Functionality
+  // Photo Upload Functionality & Gallery Display
   // ----------------------------
   const photoUploadForm = document.getElementById("photo-upload-form");
   const photoGallery = document.getElementById("photo-gallery");
@@ -117,6 +120,7 @@ document.addEventListener("DOMContentLoaded", function() {
       reader.onload = function(event) {
         photos.push({ src: event.target.result, date: photoDateInput.value });
         updatePhotoGallery();
+        updatePhotoSelectors();
       };
       reader.readAsDataURL(file);
       photoUploadForm.reset();
@@ -138,63 +142,147 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // ----------------------------
+  // Populate Photo Selectors for Comparisons
+  // ----------------------------
+  function updatePhotoSelectors() {
+    // Update selectors for JuxtaposeJS
+    const juxtaBefore = document.getElementById("juxta-before");
+    const juxtaAfter = document.getElementById("juxta-after");
+    // Update selectors for TwentyTwenty
+    const ttBefore = document.getElementById("tt-before");
+    const ttAfter = document.getElementById("tt-after");
+    
+    // Clear existing options
+    [juxtaBefore, juxtaAfter, ttBefore, ttAfter].forEach(select => {
+      select.innerHTML = "";
+    });
+    
+    photos.forEach((photo, index) => {
+      const optionText = `Photo ${index + 1} (${photo.date || "No date"})`;
+      [juxtaBefore, juxtaAfter, ttBefore, ttAfter].forEach(select => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = optionText;
+        select.appendChild(option);
+      });
+    });
+  }
+
+  // ----------------------------
   // JuxtaposeJS Side by Side Comparison
   // ----------------------------
+  let juxtaInstance;
   const juxtaposeContainer = document.getElementById("juxtapose-container");
-  if (juxtaposeContainer) {
-    window.juxtaposeInstance = new juxtapose.JXSlider('#juxtapose-container', {
+  const juxtaUpdateBtn = document.getElementById("juxta-update");
+
+  juxtaUpdateBtn.addEventListener("click", function() {
+    const beforeIndex = parseInt(document.getElementById("juxta-before").value);
+    const afterIndex = parseInt(document.getElementById("juxta-after").value);
+    let beforeSrc, afterSrc;
+    if (photos[beforeIndex]) {
+      beforeSrc = photos[beforeIndex].src;
+    } else {
+      beforeSrc = "https://via.placeholder.com/300x400?text=Before";
+    }
+    if (photos[afterIndex]) {
+      afterSrc = photos[afterIndex].src;
+    } else {
+      afterSrc = "https://via.placeholder.com/300x400?text=After";
+    }
+    // Clear existing content
+    juxtaposeContainer.innerHTML = "";
+    // Reinitialize JuxtaposeJS slider
+    juxtaInstance = new juxtapose.JXSlider('#juxtapose-container', {
       animate: true,
       showLabels: true,
       startingPosition: "50%",
       mode: "auto",
       images: [
         {
-          src: "https://via.placeholder.com/300x400?text=Before",
+          src: beforeSrc,
           label: "Before"
         },
         {
-          src: "https://via.placeholder.com/300x400?text=After",
+          src: afterSrc,
           label: "After"
         }
       ]
     });
-  }
+  });
 
-  // Export functionality for JuxtaposeJS section
-  const exportJuxtaposeBtn = document.getElementById("export-juxtapose-btn");
-  if (exportJuxtaposeBtn) {
-    exportJuxtaposeBtn.addEventListener("click", function() {
+  // Export functionality for JuxtaposeJS section with watermark overlay
+  const exportJuxtaBtn = document.getElementById("export-juxtapose-btn");
+  exportJuxtaBtn.addEventListener("click", function() {
+    addWatermark(juxtaposeContainer, function() {
       html2canvas(juxtaposeContainer).then(function(canvas) {
+        removeWatermark(juxtaposeContainer);
         var link = document.createElement("a");
         link.download = "juxtapose_comparison.png";
         link.href = canvas.toDataURL();
         link.click();
       });
     });
-  }
+  });
 
   // ----------------------------
   // TwentyTwenty Side by Side Comparison
   // ----------------------------
-  // Initialize TwentyTwenty slider using jQuery
-  $(document).ready(function() {
-    $("#twentytwenty-container").twentytwenty({
-      default_offset_pct: 0.5,
-      orientation: 'horizontal'
-    });
+  const ttUpdateBtn = document.getElementById("tt-update");
+  ttUpdateBtn.addEventListener("click", function() {
+    const beforeIndex = parseInt(document.getElementById("tt-before").value);
+    const afterIndex = parseInt(document.getElementById("tt-after").value);
+    let beforeSrc, afterSrc;
+    if (photos[beforeIndex]) {
+      beforeSrc = photos[beforeIndex].src;
+    } else {
+      beforeSrc = "https://via.placeholder.com/300x400?text=Before";
+    }
+    if (photos[afterIndex]) {
+      afterSrc = photos[afterIndex].src;
+    } else {
+      afterSrc = "https://via.placeholder.com/300x400?text=After";
+    }
+    // Update TwentyTwenty container with new images
+    const ttContainer = document.getElementById("twentytwenty-container");
+    ttContainer.innerHTML = `
+      <img src="${beforeSrc}" alt="Before">
+      <img src="${afterSrc}" alt="After">
+    `;
+    // Reinitialize the TwentyTwenty slider
+    $(ttContainer).twentytwenty({ default_offset_pct: 0.5, orientation: 'horizontal' });
   });
 
-  // Export functionality for TwentyTwenty section
-  const twentytwentyContainer = document.getElementById("twentytwenty-container");
-  const exportTwentyTwentyBtn = document.getElementById("export-twentytwenty-btn");
-  if (exportTwentyTwentyBtn) {
-    exportTwentyTwentyBtn.addEventListener("click", function() {
-      html2canvas(twentytwentyContainer).then(function(canvas) {
+  // Export functionality for TwentyTwenty section with watermark overlay
+  const exportTTBtn = document.getElementById("export-twentytwenty-btn");
+  exportTTBtn.addEventListener("click", function() {
+    addWatermark(document.getElementById("twentytwenty-container"), function() {
+      html2canvas(document.getElementById("twentytwenty-container")).then(function(canvas) {
+        removeWatermark(document.getElementById("twentytwenty-container"));
         var link = document.createElement("a");
         link.download = "twentytwenty_comparison.png";
         link.href = canvas.toDataURL();
         link.click();
       });
     });
+  });
+
+  // ----------------------------
+  // Watermark Overlay Functions
+  // ----------------------------
+  function addWatermark(container, callback) {
+    const watermark = document.createElement("div");
+    watermark.className = "watermark";
+    watermark.textContent = "FitJourney Tracker";
+    container.style.position = "relative";
+    container.appendChild(watermark);
+    // Give time for DOM update then call callback
+    setTimeout(callback, 100);
+  }
+  
+  function removeWatermark(container) {
+    const watermark = container.querySelector(".watermark");
+    if (watermark) {
+      container.removeChild(watermark);
+    }
   }
 });
