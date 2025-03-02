@@ -1,14 +1,14 @@
-/* FitJourney Tracker - JS v1.0.4 */
+/* FitJourney Tracker - JS v1.0.5 */
 /* This version includes:
    - Chart rendering, weight logging, and photo upload (with a unified gallery).
    - Advanced side-by-side comparisons using JuxtaposeJS and TwentyTwenty.
-   - Three approaches for selecting images: drop-downs, date range filtering, and clickable gallery images.
-   - Export functionality that adds a watermark overlay.
+   - Multiple methods for selecting images: drop-downs, date range filtering, and clickable gallery images.
+   - Export functionality with a watermark overlay.
 */
 
 document.addEventListener("DOMContentLoaded", function() {
   // App version initialization
-  const appVersion = "v1.0.4";
+  const appVersion = "v1.0.5";
   document.getElementById("app-version").textContent = appVersion;
 
   // Overlay preview element (used for export watermarking)
@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", function() {
     ];
     selectors.forEach(select => { select.innerHTML = ""; });
     displayPhotos.forEach((photo, index) => {
-      const optionText = `Photo ${index + 1} (${photo.date || "No date"})`;
+      const optionText = `Photo ${index + 1} (${photo.date || "No Date"})`;
       selectors.forEach(select => {
         const option = document.createElement("option");
         option.value = index;
@@ -208,29 +208,32 @@ document.addEventListener("DOMContentLoaded", function() {
   juxtaUpdateBtn.addEventListener("click", function() {
     const beforeIndex = parseInt(document.getElementById("juxta-before").value);
     const afterIndex = parseInt(document.getElementById("juxta-after").value);
-    let beforeSrc, afterSrc;
+    let beforeSrc, afterSrc, beforeLabel, afterLabel;
     // Use filtered photos if available; fallback to default placeholder
     if (displayPhotos[beforeIndex]) {
       beforeSrc = displayPhotos[beforeIndex].src;
+      beforeLabel = "Before: " + (displayPhotos[beforeIndex].date || "No Date");
     } else {
       beforeSrc = "https://placehold.co/300x400?text=Before";
+      beforeLabel = "Before";
     }
     if (displayPhotos[afterIndex]) {
       afterSrc = displayPhotos[afterIndex].src;
+      afterLabel = "After: " + (displayPhotos[afterIndex].date || "No Date");
     } else {
       afterSrc = "https://placehold.co/300x400?text=After";
+      afterLabel = "After";
     }
     // Clear existing content
     juxtaposeContainer.innerHTML = "";
-    // Reinitialize JuxtaposeJS slider
+    // Initialize JuxtaposeJS slider (without unsupported options)
     juxtaInstance = new juxtapose.JXSlider('#juxtapose-container', {
       animate: true,
       showLabels: true,
       startingPosition: "50%",
-      mode: "auto",
       images: [
-        { src: beforeSrc, label: "Before" },
-        { src: afterSrc, label: "After" }
+        { src: beforeSrc, label: beforeLabel },
+        { src: afterSrc, label: afterLabel }
       ]
     });
   });
