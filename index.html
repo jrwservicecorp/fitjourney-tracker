@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FitJourney Tracker - HTML v1.0.6 -->
+<!-- FitJourney Tracker - HTML v1.3.0 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -9,13 +9,11 @@
   
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Fabric.js CDN (version 5.2.4) -->
+  <!-- Fabric.js CDN (v5.2.4) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
-  
   <!-- JuxtaposeJS -->
   <link rel="stylesheet" href="https://cdn.knightlab.com/libs/juxtapose/latest/css/juxtapose.css">
   <script src="https://cdn.knightlab.com/libs/juxtapose/latest/js/juxtapose.min.js"></script>
-  
   <!-- jQuery for TwentyTwenty -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- jQuery Event Move (dependency for TwentyTwenty) -->
@@ -23,17 +21,16 @@
   <!-- TwentyTwenty -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twentytwenty/1.0.0/twentytwenty.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twentytwenty/1.0.0/jquery.twentytwenty.js"></script>
-  
   <!-- html2canvas for export functionality -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   
-  <!-- Main Script File; defer ensures libraries load first -->
+  <!-- Main Script File -->
   <script src="script.js" defer></script>
 </head>
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version"></span></p>
+    <p>App Version: <span id="app-version">v1.3.0</span></p>
   </header>
 
   <main id="main-app">
@@ -50,7 +47,7 @@
       <p id="trend-analysis">Trend: No data yet.</p>
     </div>
 
-    <!-- Dashboard Section: Weight Summary, Recent Weigh‑Ins, Log Your Weight -->
+    <!-- Dashboard Section -->
     <section id="dashboard-section">
       <div class="card weight-summary">
         <h3>Weight Summary</h3>
@@ -59,9 +56,9 @@
         </div>
       </div>
       <div class="card recent-weighins">
-        <h3>Recent Weigh-Ins</h3>
+        <h3>Recent Weigh‑Ins</h3>
         <div id="recent-weighins">
-          <p class="placeholder">No weigh-ins recorded yet.</p>
+          <p class="placeholder">No weigh‑ins recorded yet.</p>
         </div>
       </div>
       <div class="card weight-checkin">
@@ -129,7 +126,6 @@
          <button id="tt-update">Update Comparison</button>
       </div>
       <div id="twentytwenty-container" class="twentytwenty-container">
-        <!-- Default images if no selection -->
         <img src="https://placehold.co/300x400?text=Before" alt="Before">
         <img src="https://placehold.co/300x400?text=After" alt="After">
       </div>
@@ -137,7 +133,21 @@
       <button id="export-instagram-tt-btn">Export Instagram Image (TwentyTwenty)</button>
     </div>
 
-    <!-- Overlay Preview (hidden by default) -->
+    <!-- Customize Your Comparison (Fabric.js Editor) -->
+    <div class="card" id="editor-card">
+      <h3>Customize Your Comparison</h3>
+      <p>Drag and drop stickers onto your comparison image. Double‑click a sticker to edit its text.</p>
+      <!-- The editor-canvas will display the current comparison image with overlays -->
+      <canvas id="editor-canvas" width="1080" height="1080"></canvas>
+      <div id="editor-toolbar" class="editor-toolbar">
+        <button id="add-before-sticker-btn">Add "Before" Sticker</button>
+        <button id="add-after-sticker-btn">Add "After" Sticker</button>
+        <button id="add-timeline-sticker-btn">Add "6 Months" Sticker</button>
+        <button id="export-editor-btn">Export Instagram Image</button>
+      </div>
+    </div>
+    
+    <!-- Hidden Overlay Preview (if needed) -->
     <div id="overlay-preview" style="display: none;"></div>
   </main>
 
