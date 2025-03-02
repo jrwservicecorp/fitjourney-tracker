@@ -1,4 +1,4 @@
-/* FitJourney Tracker - CSS v1.3.0 */
+/* FitJourney Tracker - CSS v1.4.0 */
 /* Import a modern font */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
@@ -135,7 +135,7 @@ button:hover {
     border-radius: 5px;
 }
 
-/* Styles for the Fabric.js Editor (Customize Your Comparison) */
+/* Fabric.js Editor (Customize Your Comparison) */
 #editor-card {
     max-width: 600px;
     margin: 20px auto;
