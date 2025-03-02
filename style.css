@@ -1,4 +1,4 @@
-/* FitJourney Tracker - CSS v1.0.6 */
+/* FitJourney Tracker - CSS v1.3.0 */
 /* Import a modern font */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
@@ -26,6 +26,7 @@ header {
     border-radius: 10px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
     color: #e0e0e0;
+    max-width: 900px;
 }
 
 .chart-container {
@@ -132,6 +133,40 @@ button:hover {
     padding: 10px;
     border: 1px solid #333;
     border-radius: 5px;
+}
+
+/* Styles for the Fabric.js Editor (Customize Your Comparison) */
+#editor-card {
+    max-width: 600px;
+    margin: 20px auto;
+}
+#editor-canvas {
+    border: 2px solid #007bff;
+    border-radius: 10px;
+    margin-top: 10px;
+    background: #000;
+}
+.editor-toolbar {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.editor-toolbar button {
+    margin: 5px;
+    padding: 10px 15px;
+    font-size: 1em;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#export-editor-btn {
+    background: #28a745;
+}
+#export-editor-btn:hover {
+    background: #1e7e34;
 }
 
 /* Responsive Styles */
