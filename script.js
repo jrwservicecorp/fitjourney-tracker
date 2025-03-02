@@ -1,17 +1,17 @@
-/* FitJourney Tracker - JS v1.0.3 */
-/* This script now includes functionalities for:
-   - Chart rendering and weight logging
-   - Photo upload with a unified gallery display
-   - Advanced side-by-side comparisons using JuxtaposeJS and TwentyTwenty,
-     including photo selectors and export with a watermark overlay.
+/* FitJourney Tracker - JS v1.0.4 */
+/* This version includes:
+   - Chart rendering, weight logging, and photo upload (with a unified gallery).
+   - Advanced side-by-side comparisons using JuxtaposeJS and TwentyTwenty.
+   - Three approaches for selecting images: drop-downs, date range filtering, and clickable gallery images.
+   - Export functionality that adds a watermark overlay.
 */
 
 document.addEventListener("DOMContentLoaded", function() {
   // App version initialization
-  const appVersion = "v1.0.3";
+  const appVersion = "v1.0.4";
   document.getElementById("app-version").textContent = appVersion;
 
-  // Initialize the overlay preview element only once.
+  // Overlay preview element (used for export watermarking)
   const overlayPreview = document.getElementById("overlay-preview");
 
   // ----------------------------
@@ -36,10 +36,7 @@ document.addEventListener("DOMContentLoaded", function() {
     weightChart = new Chart(ctx, {
       type: "line",
       data: data,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-      }
+      options: { responsive: true, maintainAspectRatio: false }
     });
   }
 
@@ -104,11 +101,12 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // ----------------------------
-  // Photo Upload Functionality & Gallery Display
+  // Photo Upload Functionality & Unified Gallery
   // ----------------------------
   const photoUploadForm = document.getElementById("photo-upload-form");
   const photoGallery = document.getElementById("photo-gallery");
   let photos = [];
+  let displayPhotos = [];  // This array will be used for filtering/display
 
   photoUploadForm.addEventListener("submit", function(e) {
     e.preventDefault();
@@ -119,6 +117,7 @@ document.addEventListener("DOMContentLoaded", function() {
       const reader = new FileReader();
       reader.onload = function(event) {
         photos.push({ src: event.target.result, date: photoDateInput.value });
+        displayPhotos = photos.slice();
         updatePhotoGallery();
         updatePhotoSelectors();
       };
@@ -127,39 +126,46 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
+  // Update the photo gallery display with clickable images
   function updatePhotoGallery() {
     photoGallery.innerHTML = "";
-    if (photos.length === 0) {
+    if (displayPhotos.length === 0) {
       photoGallery.innerHTML = "<p class='placeholder'>No photos uploaded yet.</p>";
     } else {
-      photos.forEach((photo, index) => {
+      displayPhotos.forEach((photo, index) => {
         const img = document.createElement("img");
         img.src = photo.src;
         img.alt = `Progress Photo ${index + 1}`;
+        // Add click event to allow grid selection
+        img.addEventListener("click", function() {
+          const choice = prompt("Assign this image as 'B' for Before or 'A' for After?");
+          if (choice && (choice.toUpperCase() === "B" || choice.toUpperCase() === "A")) {
+            if (choice.toUpperCase() === "B") {
+              document.getElementById("juxta-before").value = index;
+              document.getElementById("tt-before").value = index;
+            } else {
+              document.getElementById("juxta-after").value = index;
+              document.getElementById("tt-after").value = index;
+            }
+          }
+        });
         photoGallery.appendChild(img);
       });
     }
   }
 
-  // ----------------------------
-  // Populate Photo Selectors for Comparisons
-  // ----------------------------
+  // Populate drop-down selectors using displayPhotos (filtered or full)
   function updatePhotoSelectors() {
-    // Update selectors for JuxtaposeJS
-    const juxtaBefore = document.getElementById("juxta-before");
-    const juxtaAfter = document.getElementById("juxta-after");
-    // Update selectors for TwentyTwenty
-    const ttBefore = document.getElementById("tt-before");
-    const ttAfter = document.getElementById("tt-after");
-    
-    // Clear existing options
-    [juxtaBefore, juxtaAfter, ttBefore, ttAfter].forEach(select => {
-      select.innerHTML = "";
-    });
-    
-    photos.forEach((photo, index) => {
+    const selectors = [
+      document.getElementById("juxta-before"),
+      document.getElementById("juxta-after"),
+      document.getElementById("tt-before"),
+      document.getElementById("tt-after")
+    ];
+    selectors.forEach(select => { select.innerHTML = ""; });
+    displayPhotos.forEach((photo, index) => {
       const optionText = `Photo ${index + 1} (${photo.date || "No date"})`;
-      [juxtaBefore, juxtaAfter, ttBefore, ttAfter].forEach(select => {
+      selectors.forEach(select => {
         const option = document.createElement("option");
         option.value = index;
         option.textContent = optionText;
@@ -167,6 +173,30 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     });
   }
+
+  // ----------------------------
+  // Date Range Filtering for Gallery
+  // ----------------------------
+  const filterPhotosBtn = document.getElementById("filter-photos-btn");
+  const clearFilterBtn = document.getElementById("clear-filter-btn");
+  filterPhotosBtn.addEventListener("click", function() {
+    const startDate = document.getElementById("filter-start-date").value;
+    const endDate = document.getElementById("filter-end-date").value;
+    if (startDate && endDate) {
+      displayPhotos = photos.filter(photo => {
+        return photo.date >= startDate && photo.date <= endDate;
+      });
+    }
+    updatePhotoGallery();
+    updatePhotoSelectors();
+  });
+  clearFilterBtn.addEventListener("click", function() {
+    displayPhotos = photos.slice();
+    document.getElementById("filter-start-date").value = "";
+    document.getElementById("filter-end-date").value = "";
+    updatePhotoGallery();
+    updatePhotoSelectors();
+  });
 
   // ----------------------------
   // JuxtaposeJS Side by Side Comparison
@@ -179,15 +209,16 @@ document.addEventListener("DOMContentLoaded", function() {
     const beforeIndex = parseInt(document.getElementById("juxta-before").value);
     const afterIndex = parseInt(document.getElementById("juxta-after").value);
     let beforeSrc, afterSrc;
-    if (photos[beforeIndex]) {
-      beforeSrc = photos[beforeIndex].src;
+    // Use filtered photos if available; fallback to default placeholder
+    if (displayPhotos[beforeIndex]) {
+      beforeSrc = displayPhotos[beforeIndex].src;
     } else {
-      beforeSrc = "https://via.placeholder.com/300x400?text=Before";
+      beforeSrc = "https://placehold.co/300x400?text=Before";
     }
-    if (photos[afterIndex]) {
-      afterSrc = photos[afterIndex].src;
+    if (displayPhotos[afterIndex]) {
+      afterSrc = displayPhotos[afterIndex].src;
     } else {
-      afterSrc = "https://via.placeholder.com/300x400?text=After";
+      afterSrc = "https://placehold.co/300x400?text=After";
     }
     // Clear existing content
     juxtaposeContainer.innerHTML = "";
@@ -198,14 +229,8 @@ document.addEventListener("DOMContentLoaded", function() {
       startingPosition: "50%",
       mode: "auto",
       images: [
-        {
-          src: beforeSrc,
-          label: "Before"
-        },
-        {
-          src: afterSrc,
-          label: "After"
-        }
+        { src: beforeSrc, label: "Before" },
+        { src: afterSrc, label: "After" }
       ]
     });
   });
@@ -232,23 +257,21 @@ document.addEventListener("DOMContentLoaded", function() {
     const beforeIndex = parseInt(document.getElementById("tt-before").value);
     const afterIndex = parseInt(document.getElementById("tt-after").value);
     let beforeSrc, afterSrc;
-    if (photos[beforeIndex]) {
-      beforeSrc = photos[beforeIndex].src;
+    if (displayPhotos[beforeIndex]) {
+      beforeSrc = displayPhotos[beforeIndex].src;
     } else {
-      beforeSrc = "https://via.placeholder.com/300x400?text=Before";
+      beforeSrc = "https://placehold.co/300x400?text=Before";
     }
-    if (photos[afterIndex]) {
-      afterSrc = photos[afterIndex].src;
+    if (displayPhotos[afterIndex]) {
+      afterSrc = displayPhotos[afterIndex].src;
     } else {
-      afterSrc = "https://via.placeholder.com/300x400?text=After";
+      afterSrc = "https://placehold.co/300x400?text=After";
     }
-    // Update TwentyTwenty container with new images
     const ttContainer = document.getElementById("twentytwenty-container");
     ttContainer.innerHTML = `
       <img src="${beforeSrc}" alt="Before">
       <img src="${afterSrc}" alt="After">
     `;
-    // Reinitialize the TwentyTwenty slider
     $(ttContainer).twentytwenty({ default_offset_pct: 0.5, orientation: 'horizontal' });
   });
 
@@ -275,7 +298,6 @@ document.addEventListener("DOMContentLoaded", function() {
     watermark.textContent = "FitJourney Tracker";
     container.style.position = "relative";
     container.appendChild(watermark);
-    // Give time for DOM update then call callback
     setTimeout(callback, 100);
   }
   
