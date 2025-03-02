@@ -1,8 +1,8 @@
-// FitJourney Tracker - JS v1.3.0
+// FitJourney Tracker - JS v1.4.0
 
 document.addEventListener("DOMContentLoaded", function() {
-    // Set App Version
-    const appVersion = "v1.3.0";
+    // Set app version
+    const appVersion = "v1.4.0";
     document.getElementById("app-version").textContent = appVersion;
 
     /***********************
@@ -161,26 +161,34 @@ document.addEventListener("DOMContentLoaded", function() {
     /****************************************
      * JuxtaposeJS & TwentyTwenty Comparison *
      ****************************************/
-    // For JuxtaposeJS comparison:
+    // JuxtaposeJS Comparison
     const juxtaBeforeSelect = document.getElementById("juxta-before");
     const juxtaAfterSelect = document.getElementById("juxta-after");
     const juxtaUpdateBtn = document.getElementById("juxta-update");
     const juxtaposeContainer = document.getElementById("juxtapose-container");
 
     juxtaUpdateBtn.addEventListener("click", function() {
-        // For simplicity, pick first two photos if selectors are empty
+        // Select photos by index from the photos array; if not available, use placeholders.
         const idx1 = parseInt(juxtaBeforeSelect.value) || 0;
         const idx2 = parseInt(juxtaAfterSelect.value) || 1;
-        const src1 = photos[idx1] ? photos[idx1].src : "https://placehold.co/300x400?text=Before";
-        const src2 = photos[idx2] ? photos[idx2].src : "https://placehold.co/300x400?text=After";
+        const photo1 = photos[idx1] ? photos[idx1] : { src: "https://placehold.co/300x400?text=Before", date: "" };
+        const photo2 = photos[idx2] ? photos[idx2] : { src: "https://placehold.co/300x400?text=After", date: "" };
+
+        // Check aspect ratio
+        checkAspectRatio(photo1.src, photo2.src);
+
+        if (!juxtaposeContainer) {
+            console.error("Juxtapose container not found!");
+            return;
+        }
         juxtaposeContainer.innerHTML = "";
         new juxtapose.JXSlider("#juxtapose-container", [
-            { src: src1, label: "Before" },
-            { src: src2, label: "After" }
-        ], { showLabels: false, startingPosition: "50%" });
+            { src: photo1.src, label: "Before" + (photo1.date ? `: ${photo1.date}` : "") },
+            { src: photo2.src, label: "After" + (photo2.date ? `: ${photo2.date}` : "") }
+        ], { showLabels: false, startingPosition: "50%", makeResponsive: true });
     });
 
-    // For TwentyTwenty comparison:
+    // TwentyTwenty Comparison - Only initialize if plugin is available.
     const ttBeforeSelect = document.getElementById("tt-before");
     const ttAfterSelect = document.getElementById("tt-after");
     const ttUpdateBtn = document.getElementById("tt-update");
@@ -189,31 +197,40 @@ document.addEventListener("DOMContentLoaded", function() {
     ttUpdateBtn.addEventListener("click", function() {
         const idx1 = parseInt(ttBeforeSelect.value) || 0;
         const idx2 = parseInt(ttAfterSelect.value) || 1;
-        const src1 = photos[idx1] ? photos[idx1].src : "https://placehold.co/300x400?text=Before";
-        const src2 = photos[idx2] ? photos[idx2].src : "https://placehold.co/300x400?text=After";
-        ttContainer.innerHTML = `<img src="${src1}" alt="Before"><img src="${src2}" alt="After">`;
-        $(ttContainer).twentytwenty({ default_offset_pct: 0.5, orientation: 'horizontal' });
+        const photo1 = photos[idx1] ? photos[idx1] : { src: "https://placehold.co/300x400?text=Before" };
+        const photo2 = photos[idx2] ? photos[idx2] : { src: "https://placehold.co/300x400?text=After" };
+        ttContainer.innerHTML = `<img src="${photo1.src}" alt="Before"><img src="${photo2.src}" alt="After">`;
+        if (typeof $(ttContainer).twentytwenty === "function") {
+            $(ttContainer).twentytwenty({ default_offset_pct: 0.5, orientation: 'horizontal' });
+        } else {
+            console.warn("TwentyTwenty plugin not loaded.");
+        }
     });
 
-    // Export functions for JuxtaposeJS and TwentyTwenty comparisons (using html2canvas)
+    // Export functions for comparisons
     const exportJuxtaBtn = document.getElementById("export-juxtapose-btn");
     exportJuxtaBtn.addEventListener("click", function() {
-        html2canvas(juxtaposeContainer).then(function(canvas) {
+        if (!juxtaposeContainer) return;
+        html2canvas(juxtaposeContainer, { useCORS: true }).then(function(canvas) {
+            // Set willReadFrequently to true on offscreen canvas context
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
             const link = document.createElement("a");
             link.download = "juxtapose_comparison.png";
             link.href = canvas.toDataURL();
             link.click();
-        });
+        }).catch(err => console.error(err));
     });
 
     const exportTTBtn = document.getElementById("export-twentytwenty-btn");
     exportTTBtn.addEventListener("click", function() {
-        html2canvas(ttContainer).then(function(canvas) {
+        if (!ttContainer) return;
+        html2canvas(ttContainer, { useCORS: true }).then(function(canvas) {
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
             const link = document.createElement("a");
             link.download = "twentytwenty_comparison.png";
             link.href = canvas.toDataURL();
             link.click();
-        });
+        }).catch(err => console.error(err));
     });
 
     const exportInstagramJuxtaBtn = document.getElementById("export-instagram-juxta-btn");
@@ -227,47 +244,64 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     function exportInstagramImage(container, fileName) {
-        html2canvas(container).then(function(canvas) {
-            // Create a new canvas for Instagram export (1080x1080)
+        if (!container) {
+            console.error("Invalid element for export.");
+            return;
+        }
+        html2canvas(container, { useCORS: true }).then(function(canvas) {
             const instaCanvas = document.createElement("canvas");
             instaCanvas.width = 1080;
             instaCanvas.height = 1080;
-            const ctx = instaCanvas.getContext("2d");
-
-            // Calculate centered square crop from captured canvas
+            // Use willReadFrequently attribute on export context
+            const ctx = instaCanvas.getContext("2d", { willReadFrequently: true });
             const cw = canvas.width;
             const ch = canvas.height;
             const squareSize = Math.min(cw, ch);
             const sx = (cw - squareSize) / 2;
             const sy = (ch - squareSize) / 2;
             ctx.drawImage(canvas, sx, sy, squareSize, squareSize, 0, 0, 1080, 1080);
-
-            // Add branding overlay
             ctx.font = "bold 36px Roboto";
             ctx.fillStyle = "rgba(255,255,255,0.8)";
             ctx.textAlign = "right";
             ctx.fillText("FitJourney Tracker", 1070, 1060);
-
             const link = document.createElement("a");
             link.download = fileName;
             link.href = instaCanvas.toDataURL();
             link.click();
-        });
+        }).catch(err => console.error(err));
     }
 
-    /***************************************
+    // Check Aspect Ratio of two images (loads them to get natural dimensions)
+    function checkAspectRatio(src1, src2) {
+        const img1 = new Image();
+        const img2 = new Image();
+        let ratio1, ratio2;
+        img1.onload = function() {
+            ratio1 = img1.naturalWidth / img1.naturalHeight;
+            if (ratio2 !== undefined && Math.abs(ratio1 - ratio2) > 0.01) {
+                console.warn("Warning: The two images have different aspect ratios. For best results, use images with the same aspect ratio.");
+            }
+        };
+        img2.onload = function() {
+            ratio2 = img2.naturalWidth / img2.naturalHeight;
+            if (ratio1 !== undefined && Math.abs(ratio1 - ratio2) > 0.01) {
+                console.warn("Warning: The two images have different aspect ratios. For best results, use images with the same aspect ratio.");
+            }
+        };
+        img1.src = src1;
+        img2.src = src2;
+    }
+
+    /****************************************
      * Fabric.js WYSIWYG Editor (New Module) *
-     ***************************************/
-    // This editor is for customizing the comparison image with stickers.
-    // It uses a dedicated canvas with id "editor-canvas"
+     ****************************************/
+    // This module lets the user customize a comparison image with stickers.
+    // It uses a dedicated canvas with id "editor-canvas".
     const editorCanvasEl = document.getElementById("editor-canvas");
     const editorToolbar = document.getElementById("editor-toolbar");
-    let editorCanvas; // Fabric canvas instance for editor
+    let editorCanvas;
 
-    // Initialize editor canvas and load current comparison image from Juxtapose slider
     function initEditor() {
-        // For simplicity, we use the Juxtapose slider’s image as the base.
-        // In a real implementation, you might allow the user to choose which comparison image to edit.
         if (!editorCanvas) {
             editorCanvas = new fabric.Canvas("editor-canvas", {
                 backgroundColor: "#000"
@@ -275,19 +309,17 @@ document.addEventListener("DOMContentLoaded", function() {
         } else {
             editorCanvas.clear();
         }
-        // Optionally, load a snapshot of the current comparison container into the editor.
-        html2canvas(document.getElementById("comparison-container")).then(function(canvasSnapshot) {
-            fabric.Image.fromURL(canvasSnapshot.toDataURL(), function(img) {
-                // Scale the image to fill the editor canvas
+        // Optionally, load a snapshot of the current comparison (from Juxtapose) into the editor.
+        html2canvas(document.getElementById("juxtapose-container"), { useCORS: true }).then(function(snapshot) {
+            fabric.Image.fromURL(snapshot.toDataURL(), function(img) {
                 img.set({ left: 0, top: 0, selectable: false });
                 img.scaleToWidth(editorCanvas.width);
                 editorCanvas.add(img);
                 editorCanvas.sendToBack(img);
             });
-        });
+        }).catch(err => console.error(err));
     }
 
-    // Add a sticker to the editor canvas
     function addEditorSticker(text) {
         if (!editorCanvas) return;
         const rect = new fabric.Rect({
@@ -315,19 +347,14 @@ document.addEventListener("DOMContentLoaded", function() {
         editorCanvas.setActiveObject(group);
     }
 
-    // Export the editor canvas as an Instagram-ready 1080x1080 image
     function exportEditorImage() {
-        // Ensure editor canvas is rendered fully
         editorCanvas.discardActiveObject();
         editorCanvas.renderAll();
-        // Create an off-screen canvas for export at 1080x1080
         const instaCanvas = document.createElement("canvas");
         instaCanvas.width = 1080;
         instaCanvas.height = 1080;
-        const ctx = instaCanvas.getContext("2d");
-        // Draw the editor canvas (assumed to be 1080x1080 or scale accordingly)
+        const ctx = instaCanvas.getContext("2d", { willReadFrequently: true });
         ctx.drawImage(editorCanvas.lowerCanvasEl, 0, 0, 1080, 1080);
-        // Add branding text overlay
         ctx.font = "bold 36px Roboto";
         ctx.fillStyle = "rgba(255,255,255,0.8)";
         ctx.textAlign = "right";
@@ -350,12 +377,8 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     document.getElementById("export-editor-btn").addEventListener("click", exportEditorImage);
 
-    // Initialize the editor when the user clicks to customize
-    // For example, you could add a button "Customize Comparison" that calls initEditor()
-    // Here, we automatically initialize the editor when the Juxtapose slider is updated.
-    // (In practice, you may want this to be a separate user action.)
+    // For demo purposes, initialize the editor when the Juxtapose slider is updated.
     document.getElementById("juxta-update").addEventListener("click", function() {
-        // Delay to ensure the slider has rendered
         setTimeout(initEditor, 1000);
     });
 });
