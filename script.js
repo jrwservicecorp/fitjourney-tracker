@@ -1,10 +1,11 @@
-/* FitJourney Tracker - JS v1.0.1 */
+/* FitJourney Tracker - JS v1.0.2 */
 /* This script includes functionalities for chart rendering, weight logging, photo upload,
-   photo comparison, and export options. It also fixes the duplicate declaration issue with overlayPreview. */
+   and advanced side-by-side comparisons using JuxtaposeJS and TwentyTwenty with export options
+   for social media. */
 
 document.addEventListener("DOMContentLoaded", function() {
   // App version initialization
-  const appVersion = "v1.0.1";
+  const appVersion = "v1.0.2";
   document.getElementById("app-version").textContent = appVersion;
 
   // Initialize the overlay preview element only once.
@@ -15,7 +16,6 @@ document.addEventListener("DOMContentLoaded", function() {
   // ----------------------------
   const ctx = document.getElementById("weightChart").getContext("2d");
   let weightChart;
-  // Demo data for chart
   let demoData = {
     labels: ["Jan", "Feb", "Mar", "Apr"],
     datasets: [{
@@ -40,7 +40,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  // Toggle demo data checkbox functionality
   const toggleDemoData = document.getElementById("toggle-demo-data");
   toggleDemoData.addEventListener("change", function() {
     if (this.checked) {
@@ -54,7 +53,6 @@ document.addEventListener("DOMContentLoaded", function() {
       document.getElementById("chart-placeholder").style.display = "block";
     }
   });
-  // Initialize chart with demo data if checkbox is checked
   if (toggleDemoData.checked) {
     initChart(demoData);
   }
@@ -76,7 +74,6 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!isNaN(weight) && date) {
       weighIns.push({ weight: weight, date: date });
       updateWeighIns();
-      // Update demoData for chart display
       demoData.labels.push(date);
       demoData.datasets[0].data.push(weight);
       if (toggleDemoData.checked) {
@@ -138,72 +135,66 @@ document.addEventListener("DOMContentLoaded", function() {
         photoGallery.appendChild(img);
       });
     }
-    updatePhotoSelects();
   }
 
   // ----------------------------
-  // Photo Comparison Functionality
+  // JuxtaposeJS Side by Side Comparison
   // ----------------------------
-  const photoSelect1 = document.getElementById("photo-select-1");
-  const photoSelect2 = document.getElementById("photo-select-2");
-  const comparePhotosBtn = document.getElementById("compare-photos-btn");
-  const sideBySideComparison = document.getElementById("side-by-side-comparison");
+  const juxtaposeContainer = document.getElementById("juxtapose-container");
+  if (juxtaposeContainer) {
+    window.juxtaposeInstance = new juxtapose.JXSlider('#juxtapose-container', {
+      animate: true,
+      showLabels: true,
+      startingPosition: "50%",
+      mode: "auto",
+      images: [
+        {
+          src: "https://via.placeholder.com/300x400?text=Before",
+          label: "Before"
+        },
+        {
+          src: "https://via.placeholder.com/300x400?text=After",
+          label: "After"
+        }
+      ]
+    });
+  }
 
-  function updatePhotoSelects() {
-    [photoSelect1, photoSelect2].forEach(select => {
-      select.innerHTML = "";
-      photos.forEach((photo, index) => {
-        const option = document.createElement("option");
-        option.value = index;
-        option.textContent = `Photo ${index + 1} (${photo.date || "No date"})`;
-        select.appendChild(option);
+  // Export functionality for JuxtaposeJS section
+  const exportJuxtaposeBtn = document.getElementById("export-juxtapose-btn");
+  if (exportJuxtaposeBtn) {
+    exportJuxtaposeBtn.addEventListener("click", function() {
+      html2canvas(juxtaposeContainer).then(function(canvas) {
+        var link = document.createElement("a");
+        link.download = "juxtapose_comparison.png";
+        link.href = canvas.toDataURL();
+        link.click();
       });
     });
   }
 
-  comparePhotosBtn.addEventListener("click", function() {
-    const index1 = parseInt(photoSelect1.value);
-    const index2 = parseInt(photoSelect2.value);
-    sideBySideComparison.innerHTML = "";
-    if (!isNaN(index1) && !isNaN(index2) && photos[index1] && photos[index2]) {
-      const img1 = document.createElement("img");
-      img1.src = photos[index1].src;
-      img1.alt = `Photo ${index1 + 1}`;
-      const img2 = document.createElement("img");
-      img2.src = photos[index2].src;
-      img2.alt = `Photo ${index2 + 1}`;
-      sideBySideComparison.appendChild(img1);
-      sideBySideComparison.appendChild(img2);
-    }
-  });
-
   // ----------------------------
-  // Export Functionality (Dummy Implementation)
+  // TwentyTwenty Side by Side Comparison
   // ----------------------------
-  const prepareExportBtn = document.getElementById("prepare-export-btn");
-  const exportDataBtn = document.getElementById("exportDataBtn");
-
-  prepareExportBtn.addEventListener("click", function() {
-    alert("Export prepared. Click 'Download Export' to proceed.");
+  // Initialize TwentyTwenty slider using jQuery
+  $(document).ready(function() {
+    $("#twentytwenty-container").twentytwenty({
+      default_offset_pct: 0.5,
+      orientation: 'horizontal'
+    });
   });
 
-  exportDataBtn.addEventListener("click", function() {
-    const exportData = {
-      weighIns: weighIns,
-      photos: photos,
-      version: appVersion
-    };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "fitjourney_export.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  });
-
-  // Note: All references to the overlay preview should use the single instance declared above.
-  // Additional functionalities can be built on here as needed.
+  // Export functionality for TwentyTwenty section
+  const twentytwentyContainer = document.getElementById("twentytwenty-container");
+  const exportTwentyTwentyBtn = document.getElementById("export-twentytwenty-btn");
+  if (exportTwentyTwentyBtn) {
+    exportTwentyTwentyBtn.addEventListener("click", function() {
+      html2canvas(twentytwentyContainer).then(function(canvas) {
+        var link = document.createElement("a");
+        link.download = "twentytwenty_comparison.png";
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    });
+  }
 });
