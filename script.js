@@ -404,7 +404,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     document.getElementById("export-editor-btn").addEventListener("click", exportEditorImage);
 
-    // For demo purposes, initialize the editor after Juxtapose update
+    // For demo purposes, initialize the editor after Juxtapose update.
     document.getElementById("juxta-update").addEventListener("click", function() {
         setTimeout(initEditor, 1500);
     });
