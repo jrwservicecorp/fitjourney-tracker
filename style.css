@@ -1,4 +1,4 @@
-/* FitJourney Tracker - CSS v8.8.3 */
+/* FitJourney Tracker - CSS v8.8.4 */
 /* Import a modern font */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
@@ -81,8 +81,16 @@ button:hover {
     background: #0056b3;
 }
 
-/* Photo Gallery */
+/* Photo Gallery Images */
 .gallery img {
+    max-width: 150px;
+    max-height: 150px;
+    margin: 5px;
+    border-radius: 5px;
+}
+
+/* Photo Comparison Images */
+.comparison-display img {
     max-width: 150px;
     max-height: 150px;
     margin: 5px;
