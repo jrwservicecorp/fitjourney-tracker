@@ -1,4 +1,4 @@
-/* FitJourney Tracker - CSS v8.0.3 */
+/* FitJourney Tracker - CSS v1.0.4 */
 /* Import a modern font */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
@@ -80,6 +80,7 @@ button:hover {
     max-height: 150px;
     margin: 5px;
     border-radius: 5px;
+    cursor: pointer;
 }
 
 /* Comparison Containers */
@@ -124,36 +125,16 @@ button:hover {
     z-index: 999;
 }
 
-/* Export Section (if needed) */
-.export-options label {
-    display: block;
-    margin-top: 5px;
-    font-weight: bold;
-    color: #e0e0e0;
+/* Photo Filter Card */
+#photo-filter-card {
+    max-width: 600px;
+    margin: 0 auto 20px;
+    padding: 10px;
+    border: 1px solid #333;
+    border-radius: 5px;
 }
 
-#overlay-photo-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-    padding: 10px 15px;
-}
-#overlay-preview {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 95%;
-    max-height: 95%;
-    border: 2px solid #007bff;
-    border-radius: 10px;
-    background: rgba(20, 20, 20, 0.98);
-    z-index: 1000;
-    display: none;
-    padding: 20px;
-}
-
+/* Responsive Styles */
 @media only screen and (max-width: 600px) {
     .card {
         max-width: 95%;
