@@ -181,7 +181,6 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     }
-    // Initial update of selectors
     updatePhotoSelectors();
 
     /****************************************
@@ -347,7 +346,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function addEditorSticker(text) {
         if (!editorCanvas) return;
-        // Create a rectangle with stroke to show the sticker shape clearly.
+        // Create a rectangle with stroke so the sticker is clearly visible
         const rect = new fabric.Rect({
             width: 150,
             height: 50,
@@ -405,7 +404,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     document.getElementById("export-editor-btn").addEventListener("click", exportEditorImage);
 
-    // For demo, initialize the editor when the Juxtapose slider is updated.
+    // For demo purposes, initialize the editor after Juxtapose update
     document.getElementById("juxta-update").addEventListener("click", function() {
         setTimeout(initEditor, 1500);
     });
