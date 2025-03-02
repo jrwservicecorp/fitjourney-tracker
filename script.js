@@ -1,8 +1,8 @@
-// FitJourney Tracker - JS v1.4.0
+// FitJourney Tracker - JS v1.4.1
 
 document.addEventListener("DOMContentLoaded", function() {
-    // Set app version
-    const appVersion = "v1.4.0";
+    // Set App Version
+    const appVersion = "v1.4.1";
     document.getElementById("app-version").textContent = appVersion;
 
     /***********************
@@ -99,6 +99,7 @@ document.addEventListener("DOMContentLoaded", function() {
             reader.onload = function(event) {
                 photos.push({ src: event.target.result, date: photoDateInput.value });
                 updateGallery();
+                updatePhotoSelectors();
             };
             reader.readAsDataURL(file);
             photoUploadForm.reset();
@@ -133,12 +134,14 @@ document.addEventListener("DOMContentLoaded", function() {
         if (startDate && endDate) {
             const filtered = photos.filter(photo => photo.date >= startDate && photo.date <= endDate);
             updateGalleryFiltered(filtered);
+            updatePhotoSelectors(filtered);
         }
     });
     clearFilterBtn.addEventListener("click", function() {
         document.getElementById("filter-start-date").value = "";
         document.getElementById("filter-end-date").value = "";
         updateGallery();
+        updatePhotoSelectors();
     });
 
     function updateGalleryFiltered(filteredPhotos) {
@@ -158,6 +161,29 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    // Update drop-down selectors for JuxtaposeJS and TwentyTwenty
+    function updatePhotoSelectors(filteredArray) {
+        const arr = filteredArray || photos;
+        const selectors = [
+            document.getElementById("juxta-before"),
+            document.getElementById("juxta-after"),
+            document.getElementById("tt-before"),
+            document.getElementById("tt-after")
+        ];
+        selectors.forEach(select => { select.innerHTML = ""; });
+        arr.forEach((photo, index) => {
+            const optionText = `Photo ${index + 1} (${photo.date || "No Date"})`;
+            selectors.forEach(select => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.textContent = optionText;
+                select.appendChild(option);
+            });
+        });
+    }
+    // Initial update of selectors
+    updatePhotoSelectors();
+
     /****************************************
      * JuxtaposeJS & TwentyTwenty Comparison *
      ****************************************/
@@ -168,13 +194,12 @@ document.addEventListener("DOMContentLoaded", function() {
     const juxtaposeContainer = document.getElementById("juxtapose-container");
 
     juxtaUpdateBtn.addEventListener("click", function() {
-        // Select photos by index from the photos array; if not available, use placeholders.
         const idx1 = parseInt(juxtaBeforeSelect.value) || 0;
         const idx2 = parseInt(juxtaAfterSelect.value) || 1;
         const photo1 = photos[idx1] ? photos[idx1] : { src: "https://placehold.co/300x400?text=Before", date: "" };
         const photo2 = photos[idx2] ? photos[idx2] : { src: "https://placehold.co/300x400?text=After", date: "" };
 
-        // Check aspect ratio
+        // Check aspect ratios
         checkAspectRatio(photo1.src, photo2.src);
 
         if (!juxtaposeContainer) {
@@ -188,7 +213,7 @@ document.addEventListener("DOMContentLoaded", function() {
         ], { showLabels: false, startingPosition: "50%", makeResponsive: true });
     });
 
-    // TwentyTwenty Comparison - Only initialize if plugin is available.
+    // TwentyTwenty Comparison (if plugin is loaded)
     const ttBeforeSelect = document.getElementById("tt-before");
     const ttAfterSelect = document.getElementById("tt-after");
     const ttUpdateBtn = document.getElementById("tt-update");
@@ -212,7 +237,6 @@ document.addEventListener("DOMContentLoaded", function() {
     exportJuxtaBtn.addEventListener("click", function() {
         if (!juxtaposeContainer) return;
         html2canvas(juxtaposeContainer, { useCORS: true }).then(function(canvas) {
-            // Set willReadFrequently to true on offscreen canvas context
             const ctx = canvas.getContext("2d", { willReadFrequently: true });
             const link = document.createElement("a");
             link.download = "juxtapose_comparison.png";
@@ -252,7 +276,6 @@ document.addEventListener("DOMContentLoaded", function() {
             const instaCanvas = document.createElement("canvas");
             instaCanvas.width = 1080;
             instaCanvas.height = 1080;
-            // Use willReadFrequently attribute on export context
             const ctx = instaCanvas.getContext("2d", { willReadFrequently: true });
             const cw = canvas.width;
             const ch = canvas.height;
@@ -271,7 +294,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }).catch(err => console.error(err));
     }
 
-    // Check Aspect Ratio of two images (loads them to get natural dimensions)
+    // Check that two images have the same aspect ratio
     function checkAspectRatio(src1, src2) {
         const img1 = new Image();
         const img2 = new Image();
@@ -302,30 +325,35 @@ document.addEventListener("DOMContentLoaded", function() {
     let editorCanvas;
 
     function initEditor() {
+        const baseEl = document.getElementById("juxtapose-container");
+        if (!baseEl) {
+            console.error("Juxtapose container not found for editor initialization.");
+            return;
+        }
         if (!editorCanvas) {
-            editorCanvas = new fabric.Canvas("editor-canvas", {
-                backgroundColor: "#000"
-            });
+            editorCanvas = new fabric.Canvas("editor-canvas", { backgroundColor: "#000" });
         } else {
             editorCanvas.clear();
         }
-        // Optionally, load a snapshot of the current comparison (from Juxtapose) into the editor.
-        html2canvas(document.getElementById("juxtapose-container"), { useCORS: true }).then(function(snapshot) {
+        html2canvas(baseEl, { useCORS: true }).then(function(snapshot) {
             fabric.Image.fromURL(snapshot.toDataURL(), function(img) {
                 img.set({ left: 0, top: 0, selectable: false });
                 img.scaleToWidth(editorCanvas.width);
                 editorCanvas.add(img);
                 editorCanvas.sendToBack(img);
             });
-        }).catch(err => console.error(err));
+        }).catch(err => console.error("initEditor error:", err));
     }
 
     function addEditorSticker(text) {
         if (!editorCanvas) return;
+        // Create a rectangle with a stroke so it's clearly visible
         const rect = new fabric.Rect({
             width: 150,
             height: 50,
             fill: "rgba(0,0,0,0.7)",
+            stroke: "#fff",
+            strokeWidth: 2,
             rx: 10,
             ry: 10,
             originX: "center",
@@ -377,8 +405,8 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     document.getElementById("export-editor-btn").addEventListener("click", exportEditorImage);
 
-    // For demo purposes, initialize the editor when the Juxtapose slider is updated.
+    // For demo purposes, initialize the editor after updating Juxtapose slider.
     document.getElementById("juxta-update").addEventListener("click", function() {
-        setTimeout(initEditor, 1000);
+        setTimeout(initEditor, 1500);
     });
 });
