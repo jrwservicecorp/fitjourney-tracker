@@ -1,8 +1,8 @@
-// FitJourney Tracker - JS v1.4.1
+// FitJourney Tracker - JS v1.4.2
 
 document.addEventListener("DOMContentLoaded", function() {
     // Set App Version
-    const appVersion = "v1.4.1";
+    const appVersion = "v1.4.2";
     document.getElementById("app-version").textContent = appVersion;
 
     /***********************
@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Update drop-down selectors for JuxtaposeJS and TwentyTwenty
+    // Update drop-down selectors for comparisons
     function updatePhotoSelectors(filteredArray) {
         const arr = filteredArray || photos;
         const selectors = [
@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", function() {
         ], { showLabels: false, startingPosition: "50%", makeResponsive: true });
     });
 
-    // TwentyTwenty Comparison (if plugin is loaded)
+    // TwentyTwenty Comparison
     const ttBeforeSelect = document.getElementById("tt-before");
     const ttAfterSelect = document.getElementById("tt-after");
     const ttUpdateBtn = document.getElementById("tt-update");
@@ -347,7 +347,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function addEditorSticker(text) {
         if (!editorCanvas) return;
-        // Create a rectangle with a stroke so it's clearly visible
+        // Create a rectangle with stroke to show the sticker shape clearly.
         const rect = new fabric.Rect({
             width: 150,
             height: 50,
@@ -405,7 +405,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     document.getElementById("export-editor-btn").addEventListener("click", exportEditorImage);
 
-    // For demo purposes, initialize the editor after updating Juxtapose slider.
+    // For demo, initialize the editor when the Juxtapose slider is updated.
     document.getElementById("juxta-update").addEventListener("click", function() {
         setTimeout(initEditor, 1500);
     });
