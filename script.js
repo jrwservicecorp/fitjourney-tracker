@@ -1,14 +1,15 @@
-/* FitJourney Tracker - JS v1.0.5 */
+/* FitJourney Tracker - JS v1.0.6 */
 /* This version includes:
    - Chart rendering, weight logging, and photo upload (with a unified gallery).
    - Advanced side-by-side comparisons using JuxtaposeJS and TwentyTwenty.
    - Multiple methods for selecting images: drop-downs, date range filtering, and clickable gallery images.
-   - Export functionality with a watermark overlay.
+   - Export functionality with watermark overlay.
+   - New Instagram-ready export functions that crop comparisons to a square (1080×1080) and add branding.
 */
 
 document.addEventListener("DOMContentLoaded", function() {
   // App version initialization
-  const appVersion = "v1.0.5";
+  const appVersion = "v1.0.6";
   document.getElementById("app-version").textContent = appVersion;
 
   // Overlay preview element (used for export watermarking)
@@ -209,7 +210,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const beforeIndex = parseInt(document.getElementById("juxta-before").value);
     const afterIndex = parseInt(document.getElementById("juxta-after").value);
     let beforeSrc, afterSrc, beforeLabel, afterLabel;
-    // Use filtered photos if available; fallback to default placeholder
     if (displayPhotos[beforeIndex]) {
       beforeSrc = displayPhotos[beforeIndex].src;
       beforeLabel = "Before: " + (displayPhotos[beforeIndex].date || "No Date");
@@ -224,9 +224,7 @@ document.addEventListener("DOMContentLoaded", function() {
       afterSrc = "https://placehold.co/300x400?text=After";
       afterLabel = "After";
     }
-    // Clear existing content
     juxtaposeContainer.innerHTML = "";
-    // Initialize JuxtaposeJS slider (without unsupported options)
     juxtaInstance = new juxtapose.JXSlider('#juxtapose-container', {
       animate: true,
       showLabels: true,
@@ -289,6 +287,56 @@ document.addEventListener("DOMContentLoaded", function() {
         link.href = canvas.toDataURL();
         link.click();
       });
+    });
+  });
+
+  // ----------------------------
+  // Instagram-Ready Export Functionality
+  // ----------------------------
+  // This function captures the container, crops it to a square (1080x1080),
+  // adds a branding overlay, and triggers a download.
+  function exportInstagramImage(container, fileName) {
+    html2canvas(container).then(function(canvas) {
+      const instaCanvas = document.createElement("canvas");
+      instaCanvas.width = 1080;
+      instaCanvas.height = 1080;
+      const ctx = instaCanvas.getContext("2d");
+      
+      const capturedWidth = canvas.width;
+      const capturedHeight = canvas.height;
+      const squareSize = Math.min(capturedWidth, capturedHeight);
+      const sx = (capturedWidth - squareSize) / 2;
+      const sy = (capturedHeight - squareSize) / 2;
+      
+      ctx.drawImage(canvas, sx, sy, squareSize, squareSize, 0, 0, 1080, 1080);
+      ctx.font = "bold 36px Roboto";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+      ctx.textAlign = "right";
+      ctx.fillText("FitJourney Tracker", 1070, 1060);
+      
+      const link = document.createElement("a");
+      link.download = fileName;
+      link.href = instaCanvas.toDataURL();
+      link.click();
+    });
+  }
+
+  // Instagram Export for JuxtaposeJS comparison
+  const exportInstagramJuxtaBtn = document.getElementById("export-instagram-juxta-btn");
+  exportInstagramJuxtaBtn.addEventListener("click", function() {
+    addWatermark(juxtaposeContainer, function() {
+      exportInstagramImage(juxtaposeContainer, "instagram_juxtapose.png");
+      removeWatermark(juxtaposeContainer);
+    });
+  });
+
+  // Instagram Export for TwentyTwenty comparison
+  const exportInstagramTTBtn = document.getElementById("export-instagram-tt-btn");
+  exportInstagramTTBtn.addEventListener("click", function() {
+    const ttContainer = document.getElementById("twentytwenty-container");
+    addWatermark(ttContainer, function() {
+      exportInstagramImage(ttContainer, "instagram_twentytwenty.png");
+      removeWatermark(ttContainer);
     });
   });
 
