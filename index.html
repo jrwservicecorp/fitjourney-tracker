@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- FitJourney Tracker - HTML v1.4.3-local -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -7,29 +6,40 @@
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Chart.js CDN -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <!-- Fabric.js (for overlays and customization) -->
+  <!-- Fabric.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js" crossorigin="anonymous"></script>
   
-  <!-- JuxtaposeJS -->
+  <!-- jQuery (load first!) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" crossorigin="anonymous"></script>
+  
+  <!-- jQuery Event Move -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery.event.move@1.3.6/js/jquery.event.move.min.js" crossorigin="anonymous"></script>
+  
+  <!-- jQuery TwentyTwenty Plugin -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.twentytwenty@1.0.0/css/twentytwenty.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery.twentytwenty@1.0.0/js/jquery.twentytwenty.min.js" crossorigin="anonymous"></script>
+  
+  <!-- JuxtaposeJS (local copy) -->
   <link rel="stylesheet" href="libs/juxtapose/juxtapose.css">
   <script src="libs/juxtapose/juxtapose.min.js"></script>
   
-  <!-- jQuery -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" crossorigin="anonymous"></script>
-  
-  <!-- jQuery Event Move & TwentyTwenty -->
-  <script src="https://cdn.jsdelivr.net/npm/jquery.event.move@1.3.6/js/jquery.event.move.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery.twentytwenty@1.0.0/js/jquery.twentytwenty.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.twentytwenty@1.0.0/css/twentytwenty.css">
-  
-  <!-- html2canvas for export functionality -->
+  <!-- html2canvas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
   
-  <!-- Main Script File -->
+  <!-- Main Script -->
   <script src="script.js" defer></script>
+  
+  <!-- Inline override (if needed) -->
+  <style>
+    .twentytwenty-container {
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -49,6 +59,7 @@
       </div>
       <p id="trend-analysis">Trend: No data yet.</p>
     </div>
+    
     <!-- Photo Upload Section -->
     <div class="card upload-photo">
       <h3>Upload Progress Photo</h3>
@@ -64,6 +75,7 @@
       </div>
       <div id="clear-photos-btn" style="display: none;"></div>
     </div>
+    
     <!-- Side by Side Comparison - TwentyTwenty -->
     <div class="card">
       <h3>Side by Side Comparison - TwentyTwenty</h3>
@@ -81,65 +93,6 @@
       <button id="export-twentytwenty-btn">Export Comparison</button>
       <button id="export-instagram-tt-btn">Export Instagram Image (TwentyTwenty)</button>
     </div>
-    <!-- Juxtapose Slider Example -->
-    <div class="card">
-      <h3>Side by Side Comparison - Juxtapose</h3>
-      <div id="juxtapose-container" class="juxtapose">
-        <!-- Replace these sample images with your own -->
-        <img src="https://placehold.co/300x400?text=Before" alt="Before" data-label="Before">
-        <img src="https://placehold.co/300x400?text=After" alt="After" data-label="After">
-      </div>
-    </div>
   </main>
-  <script>
-    // Update app version on DOMContentLoaded
-    document.addEventListener("DOMContentLoaded", function () {
-        document.getElementById("app-version").textContent = "v1.4.3-local";
-        
-        // Initialize TwentyTwenty slider
-        if ($.fn.twentytwenty) {
-            $("#twentytwenty-container").twentytwenty();
-        } else {
-            console.error("TwentyTwenty plugin failed to load.");
-        }
-        
-        // Initialize Juxtapose slider if available
-        if (window.jxSlider) {
-          new jxSlider({
-            selector: "#juxtapose-container",
-            options: {
-              animate: true,
-              showLabels: true,
-              showCredits: false,
-              makeResponsive: true,
-              startingPosition: "50%"
-            }
-          });
-        } else {
-          console.error("Juxtapose plugin failed to load.");
-        }
-        
-        // Photo upload handling
-        $("#photo-upload-form").on("submit", function (event) {
-            event.preventDefault();
-            const fileInput = $("#photo-upload")[0].files[0];
-            const dateInput = $("#photo-date").val();
-            if (!fileInput || !dateInput) {
-                alert("Please select a photo and date.");
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                $("#photo-gallery").append(`
-                    <div class="photo-entry">
-                        <img src="${e.target.result}" alt="Uploaded Progress Photo">
-                        <p>Date: ${dateInput}</p>
-                    </div>
-                `);
-            };
-            reader.readAsDataURL(fileInput);
-        });
-    });
-  </script>
 </body>
 </html>
