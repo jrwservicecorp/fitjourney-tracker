@@ -95,7 +95,7 @@ $(document).ready(function () {
           <p>Date: ${dateInput}</p>
         </div>
       `);
-      // Update dropdowns for comparison (use the image data URL as value)
+      // Update dropdowns for comparison (using the image data URL as value)
       var optionHTML = `<option value="${e.target.result}">${dateInput}</option>`;
       $("#tt-before").append(optionHTML);
       $("#tt-after").append(optionHTML);
