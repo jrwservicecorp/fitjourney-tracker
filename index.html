@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FitJourney Tracker - Tesla Edition</title>
-  <link rel="stylesheet" href="style.css">
-  
+  <link rel="stylesheet" href="style.css" />
+
   <!-- Chart.js and date adapter -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
@@ -14,17 +14,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js" crossorigin="anonymous"></script>
   
   <!-- JuxtaposeJS (local copy) -->
-  <link rel="stylesheet" href="libs/juxtapose/juxtapose.css">
+  <link rel="stylesheet" href="libs/juxtapose/juxtapose.css" />
   <script src="libs/juxtapose/juxtapose.min.js"></script>
   
-  <!-- jQuery -->
+  <!-- jQuery (load first) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" crossorigin="anonymous"></script>
   
-  <!-- jQuery Event Move & TwentyTwenty -->
-  <script src="https://cdn.jsdelivr.net/npm/jquery.event.move@1.3.6/js/jquery.event.move.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery.twentytwenty@1.0.0/js/jquery.twentytwenty.min.js"></script>
-  <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
+  <!-- jQuery Event Move (using cdnjs version) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.event.move/1.3.6/jquery.event.move.min.js" crossorigin="anonymous"></script>
   
+  <!-- TwentyTwenty plugin (using local copy) -->
+  <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
+  <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css" />
+
   <!-- html2canvas for export functionality -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
   
@@ -43,7 +45,7 @@
       <p id="chart-placeholder">Start logging weight to see trends!</p>
       <div class="chart-options">
         <label>
-          <input type="checkbox" id="toggle-demo-data" checked>
+          <input type="checkbox" id="toggle-demo-data" checked />
           Show Demo Data
         </label>
       </div>
@@ -56,16 +58,16 @@
         <h3>Log Your Progress</h3>
         <form id="data-log-form">
           <label for="weight-input">Weight (lbs):</label>
-          <input id="weight-input" type="number" step="0.1" placeholder="lbs" required>
+          <input id="weight-input" type="number" step="0.1" placeholder="lbs" required />
           <label for="date-input">Date:</label>
-          <input id="date-input" type="date" required>
+          <input id="date-input" type="date" required />
           <!-- Additional measurements -->
           <label for="waist-input">Waist (in):</label>
-          <input id="waist-input" type="number" step="0.1" placeholder="in">
+          <input id="waist-input" type="number" step="0.1" placeholder="in" />
           <label for="hips-input">Hips (in):</label>
-          <input id="hips-input" type="number" step="0.1" placeholder="in">
+          <input id="hips-input" type="number" step="0.1" placeholder="in" />
           <label for="chest-input">Chest (in):</label>
-          <input id="chest-input" type="number" step="0.1" placeholder="in">
+          <input id="chest-input" type="number" step="0.1" placeholder="in" />
           <button type="submit">Log Data</button>
         </form>
       </div>
@@ -88,9 +90,9 @@
       <h3>Upload Progress Photo</h3>
       <form id="photo-upload-form">
         <label for="photo-upload">Select Photo:</label>
-        <input id="photo-upload" type="file" accept="image/*">
+        <input id="photo-upload" type="file" accept="image/*" />
         <label for="photo-date">Photo Date:</label>
-        <input id="photo-date" type="date">
+        <input id="photo-date" type="date" />
         <button id="upload-photo-btn" type="submit">Upload Photo</button>
       </form>
       <div id="photo-gallery" class="gallery">
@@ -100,9 +102,9 @@
       <div id="photo-filter-card">
         <h3>Filter Photo Timeline</h3>
         <label for="filter-start-date">Start Date:</label>
-        <input id="filter-start-date" type="date">
+        <input id="filter-start-date" type="date" />
         <label for="filter-end-date">End Date:</label>
-        <input id="filter-end-date" type="date">
+        <input id="filter-end-date" type="date" />
         <button id="filter-photos-btn">Filter Photos</button>
         <button id="clear-filter-btn">Clear Filter</button>
       </div>
@@ -119,8 +121,8 @@
          <button id="tt-update">Update Comparison</button>
       </div>
       <div id="twentytwenty-container" class="twentytwenty-container">
-        <img src="https://placehold.co/300x400?text=Before" alt="Before">
-        <img src="https://placehold.co/300x400?text=After" alt="After">
+        <img src="https://placehold.co/300x400?text=Before" alt="Before" />
+        <img src="https://placehold.co/300x400?text=After" alt="After" />
       </div>
       <button id="export-twentytwenty-btn">Export Comparison</button>
       <button id="export-instagram-tt-btn">Export Instagram Image</button>
