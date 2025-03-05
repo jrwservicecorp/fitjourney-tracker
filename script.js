@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Initialize TwentyTwenty plugin
+  // Initialize TwentyTwenty plugin once the document is ready
   $(document).ready(function () {
     if ($.fn.twentytwenty) {
       $("#twentytwenty-container").twentytwenty();
