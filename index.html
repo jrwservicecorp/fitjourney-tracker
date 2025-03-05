@@ -8,6 +8,8 @@
   
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js Date Adapter (using date-fns in this example) -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
   
   <!-- Fabric.js (for overlays and customization) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js" crossorigin="anonymous"></script>
@@ -16,11 +18,11 @@
   <link rel="stylesheet" href="libs/juxtapose/juxtapose.css">
   <script src="libs/juxtapose/juxtapose.min.js"></script>
   
-  <!-- jQuery (load first to avoid dependency issues) -->
+  <!-- jQuery (load first) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" crossorigin="anonymous"></script>
   
-  <!-- jQuery Event Move (via CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/jquery.event.move@1.3.6/js/jquery.event.move.min.js"></script>
+  <!-- jQuery Event Move (local copy) -->
+  <script src="libs/jquery/jquery.event.move.min.js"></script>
   
   <!-- TwentyTwenty (local copy) -->
   <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
@@ -33,7 +35,7 @@
   <script src="script.js" defer></script>
   
   <style>
-    /* Optional inline style to constrain the TwentyTwenty container */
+    /* Inline style to constrain the TwentyTwenty container */
     .twentytwenty-container {
       width: 100%;
       max-width: 600px;
@@ -131,6 +133,41 @@
           `);
         };
         reader.readAsDataURL(fileInput);
+      });
+
+      // Example Chart.js initialization (adjust configuration as needed)
+      const ctx = document.getElementById('weightChart').getContext('2d');
+      const weightChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [{
+            label: 'Weight',
+            data: [], // Initially empty; add logged weight data here
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.3,
+          }]
+        },
+        options: {
+          scales: {
+            x: {
+              type: 'time',  // Use time scale for dates
+              time: {
+                unit: 'day'
+              },
+              title: {
+                display: true,
+                text: 'Date'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Weight (lbs)'
+              }
+            }
+          }
+        }
       });
     });
   </script>
