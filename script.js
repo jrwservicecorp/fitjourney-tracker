@@ -1,56 +1,56 @@
-// Wait for the DOM content to load before accessing elements
 document.addEventListener("DOMContentLoaded", function () {
-  var appVersionElem = document.getElementById("app-version");
-  if (appVersionElem) {
-    appVersionElem.textContent = "v1.4.3-local";
-  } else {
-    console.error("App version element not found.");
-  }
-});
+    // Set the app version
+    document.getElementById("app-version").textContent = "v1.4.3-local";
 
-$(document).ready(function () {
-  // Initialize TwentyTwenty if plugin loaded
-  if ($.fn.twentytwenty) {
-    $("#twentytwenty-container").twentytwenty();
-  } else {
-    console.error("TwentyTwenty plugin failed to load.");
-  }
-  
-  // Initialize Juxtapose if available (adjust or remove if not used)
-  try {
-    if (typeof juxtapose !== "undefined") {
-      // Example initialization (uncomment and adjust paths if needed):
-      // juxtapose([
-      //   { src: 'path/to/before.jpg', label: 'Before' },
-      //   { src: 'path/to/after.jpg', label: 'After' }
-      // ], '#juxtapose-container', { animate: true });
+    // Initialize TwentyTwenty if available
+    if ($.fn.twentytwenty) {
+        $("#twentytwenty-container").twentytwenty();
     } else {
-      console.error("Juxtapose plugin failed to load.");
+        console.error("TwentyTwenty plugin failed to load.");
     }
-  } catch (e) {
-    console.error("Error initializing Juxtapose:", e);
-  }
-  
-  // Photo Upload Handling
-  $("#photo-upload-form").on("submit", function (event) {
-    event.preventDefault();
-    var fileInput = $("#photo-upload")[0].files[0];
-    var dateInput = $("#photo-date").val();
-    
-    if (!fileInput || !dateInput) {
-      alert("Please select a photo and date.");
-      return;
+
+    // Photo upload functionality
+    $("#photo-upload-form").on("submit", function (event) {
+        event.preventDefault();
+        var fileInput = $("#photo-upload")[0].files[0];
+        var dateInput = $("#photo-date").val();
+
+        if (!fileInput || !dateInput) {
+            alert("Please select a photo and date.");
+            return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            $("#photo-gallery").append(
+                '<div class="photo-entry"><img src="' + e.target.result + 
+                '" alt="Uploaded Progress Photo"><p>Date: ' + dateInput + '</p></div>'
+            );
+        };
+        reader.readAsDataURL(fileInput);
+    });
+
+    // Initialize Chart.js with a simple demo chart
+    var ctx = document.getElementById('weightChart');
+    if (ctx) {
+        var weightChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May'],
+                datasets: [{
+                    label: 'Weight',
+                    data: [180, 178, 177, 175, 174],
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0,123,255,0.2)',
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+            }
+        });
+    } else {
+        console.error("Chart element not found.");
     }
-    
-    var reader = new FileReader();
-    reader.onload = function (e) {
-      $("#photo-gallery").append(
-        '<div class="photo-entry">' +
-          '<img src="' + e.target.result + '" alt="Uploaded Progress Photo">' +
-          '<p>Date: ' + dateInput + '</p>' +
-        '</div>'
-      );
-    };
-    reader.readAsDataURL(fileInput);
-  });
 });
