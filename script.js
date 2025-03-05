@@ -1,128 +1,228 @@
+/* script.js - FitJourney Tracker - Tesla Edition */
+
 document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById("app-version").textContent = "v1.4.3-local";
-});
+  // Set app version
+  document.getElementById("app-version").textContent = "v2.0";
 
-$(document).ready(function () {
-  /***********************
-   * Chart.js Integration
-   ***********************/
-  var weightData = {
-    labels: [],
-    datasets: [{
-      label: 'Weight (lbs)',
-      data: [],
-      borderColor: '#007bff',
-      backgroundColor: 'rgba(0,123,255,0.1)',
-      fill: false,
-      tension: 0.1
-    }]
-  };
+  // Global arrays to store logs
+  let dataLogs = [];
+  let photoLogs = [];
 
-  var ctx = document.getElementById('weightChart').getContext('2d');
-  var weightChart = new Chart(ctx, {
+  // Initialize Chart.js (with a time scale)
+  const ctx = document.getElementById('weightChart').getContext('2d');
+  const weightChart = new Chart(ctx, {
     type: 'line',
-    data: weightData,
+    data: {
+      datasets: [{
+        label: 'Weight (lbs)',
+        data: [],
+        borderColor: '#007bff',
+        fill: false,
+        tension: 0.2,
+      }]
+    },
     options: {
       responsive: true,
       scales: {
         x: {
           type: 'time',
-          time: {
-            unit: 'day',
-            tooltipFormat: 'MMM DD, YYYY'
-          },
-          title: {
-            display: true,
-            text: 'Date'
-          }
+          time: { unit: 'day' },
+          title: { display: true, text: 'Date' }
         },
         y: {
-          title: {
-            display: true,
-            text: 'Weight (lbs)'
-          }
+          title: { display: true, text: 'Weight (lbs)' }
         }
       }
     }
   });
 
-  // Handle weight form submission
-  $("#weight-form").off("submit").on("submit", function (e) {
-    e.preventDefault();
-    var weight = parseFloat($("#weight-input").val());
-    var date = $("#date-input").val();
-    if (!isNaN(weight) && date) {
-      weightData.labels.push(date);
-      weightData.datasets[0].data.push(weight);
-      weightChart.update();
-
-      // Update Weight Summary & Recent Weigh-ins
-      $("#weight-summary").html(`<p>Latest Weight: ${weight} lbs on ${date}</p>`);
-      $("#recent-weighins").append(`<p>${date}: ${weight} lbs</p>`);
-    }
-  });
-
-  /**************************
-   * Initialize TwentyTwenty
-   **************************/
-  if ($.fn.twentytwenty) {
-    $("#twentytwenty-container").twentytwenty();
-  } else {
-    console.error("TwentyTwenty plugin failed to load.");
+  // Toggle demo data if none exists
+  const toggleDemo = document.getElementById("toggle-demo-data");
+  if (toggleDemo.checked && dataLogs.length === 0) {
+    const demoData = [
+      { date: '2023-01-01', weight: 200, waist: 34, hips: 36, chest: 40 },
+      { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39 },
+      { date: '2023-03-01', weight: 190, waist: 33, hips: 35, chest: 38 }
+    ];
+    demoData.forEach(log => addDataLog(log));
+    updateChart();
+    updateSummary();
+    updateRecentWeighIns();
   }
 
-  /**************************
-   * Photo Upload Handler
-   **************************/
-  $("#photo-upload-form").off("submit").on("submit", function (event) {
+  // Data log form submission
+  document.getElementById("data-log-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const weight = parseFloat(document.getElementById("weight-input").value);
+    const date = document.getElementById("date-input").value;
+    const waist = parseFloat(document.getElementById("waist-input").value) || null;
+    const hips = parseFloat(document.getElementById("hips-input").value) || null;
+    const chest = parseFloat(document.getElementById("chest-input").value) || null;
+    if (!weight || !date) {
+      alert("Please enter both weight and date.");
+      return;
+    }
+    addDataLog({ date, weight, waist, hips, chest });
+    updateChart();
+    updateSummary();
+    updateRecentWeighIns();
+    this.reset();
+  });
+
+  function addDataLog(log) {
+    dataLogs.push(log);
+    dataLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
+  }
+
+  function updateChart() {
+    weightChart.data.datasets[0].data = dataLogs.map(log => ({ x: log.date, y: log.weight }));
+    weightChart.update();
+  }
+
+  function updateSummary() {
+    const summaryDiv = document.getElementById("weight-summary");
+    if (dataLogs.length === 0) {
+      summaryDiv.innerHTML = '<p class="placeholder">No data available for summary.</p>';
+      return;
+    }
+    const latest = dataLogs[dataLogs.length - 1];
+    let html = `<p>Latest Weight: ${latest.weight} lbs on ${latest.date}</p>`;
+    if (latest.waist) html += `<p>Waist: ${latest.waist} in</p>`;
+    if (latest.hips) html += `<p>Hips: ${latest.hips} in</p>`;
+    if (latest.chest) html += `<p>Chest: ${latest.chest} in</p>`;
+    summaryDiv.innerHTML = html;
+  }
+
+  function updateRecentWeighIns() {
+    const recentDiv = document.getElementById("recent-weighins");
+    if (dataLogs.length === 0) {
+      recentDiv.innerHTML = '<p class="placeholder">No weigh-ins recorded yet.</p>';
+      return;
+    }
+    recentDiv.innerHTML = "";
+    const recent = dataLogs.slice(-5).reverse();
+    recent.forEach(log => {
+      const p = document.createElement("p");
+      p.textContent = `${log.date}: ${log.weight} lbs`;
+      recentDiv.appendChild(p);
+    });
+  }
+
+  // Photo upload form submission
+  $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
     const dateInput = $("#photo-date").val();
-
     if (!fileInput || !dateInput) {
       alert("Please select a photo and date.");
       return;
     }
-
     const reader = new FileReader();
     reader.onload = function (e) {
-      // Remove placeholder if present
-      $("#photo-gallery .placeholder").remove();
-      // Append the uploaded photo once
-      $("#photo-gallery").append(`
-        <div class="photo-entry">
-          <img src="${e.target.result}" alt="Uploaded Progress Photo">
-          <p>Date: ${dateInput}</p>
-        </div>
-      `);
-      // Update dropdowns for comparison (using the image data URL as value)
-      var optionHTML = `<option value="${e.target.result}">${dateInput}</option>`;
-      $("#tt-before").append(optionHTML);
-      $("#tt-after").append(optionHTML);
+      photoLogs.push({ src: e.target.result, date: dateInput });
+      updatePhotoGallery();
+      updatePhotoSelectors();
     };
     reader.readAsDataURL(fileInput);
-    
-    $(this).trigger('reset');
+    this.reset();
   });
 
-  /*************************************
-   * TwentyTwenty Comparison Update
-   *************************************/
-  $("#tt-update").on("click", function () {
-    var beforeSrc = $("#tt-before").val();
-    var afterSrc = $("#tt-after").val();
-    if (beforeSrc && afterSrc) {
-      $("#twentytwenty-container").empty().append(`
-        <img src="${beforeSrc}" alt="Before">
-        <img src="${afterSrc}" alt="After">
+  function updatePhotoGallery() {
+    const gallery = $("#photo-gallery");
+    gallery.empty();
+    if (photoLogs.length === 0) {
+      gallery.html('<p class="placeholder">No photos uploaded yet.</p>');
+      return;
+    }
+    photoLogs.forEach(photo => {
+      gallery.append(`
+        <div class="photo-entry">
+          <img src="${photo.src}" alt="Progress Photo">
+          <p>Date: ${photo.date}</p>
+        </div>
       `);
-      if ($.fn.twentytwenty) {
-        $("#twentytwenty-container").twentytwenty();
-      }
+    });
+  }
+
+  // Filter photos by date range
+  $("#filter-photos-btn").on("click", function() {
+    const startDate = $("#filter-start-date").val();
+    const endDate = $("#filter-end-date").val();
+    const gallery = $("#photo-gallery");
+    gallery.empty();
+    let filtered = photoLogs;
+    if (startDate) filtered = filtered.filter(photo => new Date(photo.date) >= new Date(startDate));
+    if (endDate) filtered = filtered.filter(photo => new Date(photo.date) <= new Date(endDate));
+    if (filtered.length === 0) {
+      gallery.html('<p class="placeholder">No photos match the selected date range.</p>');
     } else {
-      alert("Please select both before and after images from the dropdowns.");
+      filtered.forEach(photo => {
+        gallery.append(`
+          <div class="photo-entry">
+            <img src="${photo.src}" alt="Progress Photo">
+            <p>Date: ${photo.date}</p>
+          </div>
+        `);
+      });
     }
   });
 
-  // (Optional) Additional export or interaction functions can be added here.
+  $("#clear-filter-btn").on("click", function() {
+    $("#filter-start-date, #filter-end-date").val("");
+    updatePhotoGallery();
+  });
+
+  // Update photo selectors for comparison
+  function updatePhotoSelectors() {
+    const beforeSelect = $("#tt-before");
+    const afterSelect = $("#tt-after");
+    beforeSelect.empty();
+    afterSelect.empty();
+    photoLogs.forEach((photo, index) => {
+      beforeSelect.append(`<option value="${index}">${photo.date}</option>`);
+      afterSelect.append(`<option value="${index}">${photo.date}</option>`);
+    });
+  }
+
+  // Initialize TwentyTwenty plugin
+  $(document).ready(function () {
+    if ($.fn.twentytwenty) {
+      $("#twentytwenty-container").twentytwenty();
+    } else {
+      console.error("TwentyTwenty plugin failed to load.");
+    }
+  });
+
+  // Update comparison panel with selected photos
+  $("#tt-update").on("click", function() {
+    const beforeIndex = parseInt($("#tt-before").val());
+    const afterIndex = parseInt($("#tt-after").val());
+    if (isNaN(beforeIndex) || isNaN(afterIndex)) {
+      alert("Please select both before and after photos.");
+      return;
+    }
+    const beforePhoto = photoLogs[beforeIndex];
+    const afterPhoto = photoLogs[afterIndex];
+    const container = $("#twentytwenty-container");
+    container.empty();
+    container.append(`<img src="${beforePhoto.src}" alt="Before">`);
+    container.append(`<img src="${afterPhoto.src}" alt="After">`);
+    container.twentytwenty();
+  });
+
+  // Export Report as Image using html2canvas
+  $("#export-report-btn").on("click", function() {
+    html2canvas(document.getElementById("main-app")).then(canvas => {
+      let link = document.createElement("a");
+      link.download = "fitjourney_report.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  });
+
+  // Social share buttons (dummy implementation)
+  $(".share-btn").on("click", function() {
+    const platform = $(this).data("platform");
+    alert(`Sharing to ${platform} (functionality to be implemented).`);
+  });
 });
