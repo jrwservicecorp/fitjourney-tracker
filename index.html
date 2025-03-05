@@ -10,17 +10,17 @@
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <!-- Fabric.js CDN (v5.2.4) -->
+  <!-- Fabric.js (for overlays and customization) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js" crossorigin="anonymous"></script>
   
   <!-- JuxtaposeJS (LOCAL) -->
   <link rel="stylesheet" href="libs/juxtapose/juxtapose.css">
   <script src="libs/juxtapose/juxtapose.min.js"></script>
   
-  <!-- jQuery for Plugins (Ensure jQuery loads first) -->
+  <!-- jQuery (Load first to avoid dependency issues) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" crossorigin="anonymous"></script>
 
-  <!-- ✅ Fixed jQuery Event Move & TwentyTwenty URLs -->
+  <!-- jQuery Event Move & TwentyTwenty (Fixed URLs) -->
   <script src="https://cdn.jsdelivr.net/npm/jquery.event.move@1.3.6/js/jquery.event.move.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jquery.twentytwenty@1.0.0/js/jquery.twentytwenty.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.twentytwenty@1.0.0/css/twentytwenty.css">
@@ -59,31 +59,21 @@
       <p id="trend-analysis">Trend: No data yet.</p>
     </div>
 
-    <!-- Dashboard Section -->
-    <section id="dashboard-section">
-      <div class="card weight-summary">
-        <h3>Weight Summary</h3>
-        <div id="weight-summary">
-          <p class="placeholder">No data available for summary.</p>
-        </div>
+    <!-- Photo Upload Section (Restored) -->
+    <div class="card upload-photo">
+      <h3>Upload Progress Photo</h3>
+      <form id="photo-upload-form">
+        <label for="photo-upload">Select Photo:</label>
+        <input id="photo-upload" type="file" accept="image/*">
+        <label for="photo-date">Photo Date:</label>
+        <input id="photo-date" type="date">
+        <button id="upload-photo-btn" type="submit">Upload Photo</button>
+      </form>
+      <div id="photo-gallery" class="gallery">
+        <p class="placeholder">No photos uploaded yet.</p>
       </div>
-      <div class="card recent-weighins">
-        <h3>Recent Weigh-Ins</h3>
-        <div id="recent-weighins">
-          <p class="placeholder">No weigh-ins recorded yet.</p>
-        </div>
-      </div>
-      <div class="card weight-checkin">
-        <h3>Log Your Weight</h3>
-        <form id="weight-form">
-          <label for="weight-input">Weight:</label>
-          <input id="weight-input" type="number" step="0.1" placeholder="lbs" required>
-          <label for="date-input">Date:</label>
-          <input id="date-input" type="date" required>
-          <button type="submit">Log Weight</button>
-        </form>
-      </div>
-    </section>
+      <div id="clear-photos-btn" style="display: none;"></div>
+    </div>
 
     <!-- Side by Side Comparison - TwentyTwenty -->
     <div class="card">
@@ -105,16 +95,41 @@
   </main>
 
   <script>
-    // ✅ Ensures the Version Number Updates Correctly
-    document.getElementById("app-version").textContent = "v1.4.3-local";
+    // ✅ Ensure version number updates properly
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("app-version").textContent = "v1.4.3-local";
+    });
 
     $(document).ready(function () {
-        // ✅ Ensures TwentyTwenty Loads Properly
+        // ✅ Ensure TwentyTwenty initializes only if it's loaded
         if ($.fn.twentytwenty) {
             $("#twentytwenty-container").twentytwenty();
         } else {
             console.error("TwentyTwenty plugin failed to load.");
         }
+
+        // ✅ Ensure Photo Upload Works
+        $("#photo-upload-form").on("submit", function (event) {
+            event.preventDefault();
+            const fileInput = $("#photo-upload")[0].files[0];
+            const dateInput = $("#photo-date").val();
+
+            if (!fileInput || !dateInput) {
+                alert("Please select a photo and date.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                $("#photo-gallery").append(`
+                    <div class="photo-entry">
+                        <img src="${e.target.result}" alt="Uploaded Progress Photo">
+                        <p>Date: ${dateInput}</p>
+                    </div>
+                `);
+            };
+            reader.readAsDataURL(fileInput);
+        });
     });
   </script>
 
