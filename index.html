@@ -6,25 +6,14 @@
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Chart.js CDN -->
+  <!-- Chart.js (using CDN; you could also host it locally if desired) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Chart.js Date Adapter (using date-fns in this example) -->
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
   
-  <!-- Fabric.js (for overlays and customization) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js" crossorigin="anonymous"></script>
-  
-  <!-- JuxtaposeJS (local copy) -->
-  <link rel="stylesheet" href="libs/juxtapose/juxtapose.css">
-  <script src="libs/juxtapose/juxtapose.min.js"></script>
-  
-  <!-- jQuery (load first) -->
+  <!-- jQuery from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" crossorigin="anonymous"></script>
   
-  <!-- jQuery Event Move (local copy) -->
+  <!-- Local copies of plugins -->
   <script src="libs/jquery/jquery.event.move.min.js"></script>
-  
-  <!-- TwentyTwenty (local copy) -->
   <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
   
@@ -35,7 +24,7 @@
   <script src="script.js" defer></script>
   
   <style>
-    /* Inline style to constrain the TwentyTwenty container */
+    /* Inline minor styling for the TwentyTwenty container */
     .twentytwenty-container {
       width: 100%;
       max-width: 600px;
@@ -48,7 +37,7 @@
     <h1>FitJourney Tracker</h1>
     <p>App Version: <span id="app-version">v1.4.3-local</span></p>
   </header>
-
+  
   <main id="main-app">
     <!-- Chart Section -->
     <div class="card prominent chart-container">
@@ -62,8 +51,8 @@
       </div>
       <p id="trend-analysis">Trend: No data yet.</p>
     </div>
-
-    <!-- Dashboard Section: Weight Summary, Recent Weigh-Ins, Log Your Weight -->
+    
+    <!-- Dashboard Section -->
     <section id="dashboard-section">
       <div class="card weight-summary">
         <h3>Weight Summary</h3>
@@ -88,7 +77,7 @@
         </form>
       </div>
     </section>
-
+    
     <!-- Photo Upload Section -->
     <div class="card upload-photo">
       <h3>Upload Progress Photo</h3>
@@ -104,7 +93,7 @@
       </div>
       <div id="clear-photos-btn" style="display: none;"></div>
     </div>
-
+    
     <!-- Side by Side Comparison - TwentyTwenty -->
     <div class="card">
       <h3>Side by Side Comparison - TwentyTwenty</h3>
@@ -123,274 +112,60 @@
       <button id="export-instagram-tt-btn">Export Instagram Image (TwentyTwenty)</button>
     </div>
   </main>
-
+  
   <script>
-    // Update app version text once the document is loaded
-    document.addEventListener("DOMContentLoaded", function () {
+    // Ensure DOM is loaded before executing scripts
+    document.addEventListener("DOMContentLoaded", function() {
+      // Update app version text if needed
       document.getElementById("app-version").textContent = "v1.4.3-local";
-    });
-
-    $(document).ready(function () {
-      // Initialize TwentyTwenty plugin if loaded
+      
+      // Initialize TwentyTwenty from the local copy
       if ($.fn.twentytwenty) {
         $("#twentytwenty-container").twentytwenty();
       } else {
         console.error("TwentyTwenty plugin failed to load.");
       }
-
-      // Photo Upload functionality
-      $("#photo-upload-form").on("submit", function (event) {
-        event.preventDefault();
-        const fileInput = $("#photo-upload")[0].files[0];
-        const dateInput = $("#photo-date").val();
-
-        if (!fileInput || !dateInput) {
-          alert("Please select a photo and date.");
-          return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          $("#photo-gallery").append(`
-            <div class="photo-entry">
-              <img src="${e.target.result}" alt="Uploaded Progress Photo">
-              <p>Date: ${dateInput}</p>
-            </div>
-          `);
-        };
-        reader.readAsDataURL(fileInput);
-      });
-
-      // Initialize Chart.js for Weight Chart
-      const ctx = document.getElementById('weightChart').getContext('2d');
-      const weightChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          datasets: [{
-            label: 'Weight',
-            data: [], // Data will be added via weight log
-            borderColor: 'rgba(75, 192, 192, 1)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            tension: 0.3,
-          }]
-        },
-        options: {
-          scales: {
-            x: {
-              type: 'time',  // Use time scale for dates
-              time: {
-                unit: 'day'
-              },
-              title: {
-                display: true,
-                text: 'Date'
-              }
-            },
-            y: {
-              title: {
-                display: true,
-                text: 'Weight (lbs)'
-              }
-            }
-          }
-        }
-      });
-
-      // Weight logging form submission
-      $("#weight-form").on("submit", function (event) {
-        event.preventDefault();
-        const weight = parseFloat($("#weight-input").val());
-        const date = $("#date-input").val();
-        if (isNaN(weight) || !date) {
-          alert("Please enter a valid weight and date.");
-          return;
-        }
-        // Add new data point to the chart (x: date, y: weight)
-        weightChart.data.datasets[0].data.push({x: new Date(date), y: weight});
-        weightChart.update();
-
-        // Update recent weigh-ins list
-        $("#recent-weighins").append(`<p>${date}: ${weight} lbs</p>`);
-        // Update weight summary (displaying the last logged weight)
-        $("#weight-summary").html(`<p>Last logged weight: ${weight} lbs on ${date}</p>`);
-        // Clear the form
-        $("#weight-form")[0].reset();
-      });
-    });
-  </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FitJourney Tracker</title>
-  <link rel="stylesheet" href="style.css">
-  
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Chart.js Date Adapter (using date-fns in this example) -->
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-  
-  <!-- Fabric.js (for overlays and customization) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js" crossorigin="anonymous"></script>
-  
-  <!-- JuxtaposeJS (local copy) -->
-  <link rel="stylesheet" href="libs/juxtapose/juxtapose.css">
-  <script src="libs/juxtapose/juxtapose.min.js"></script>
-  
-  <!-- jQuery (load first) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" crossorigin="anonymous"></script>
-  
-  <!-- jQuery Event Move (local copy) -->
-  <script src="libs/jquery/jquery.event.move.min.js"></script>
-  
-  <!-- TwentyTwenty (local copy) -->
-  <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
-  <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
-  
-  <!-- html2canvas for export functionality -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
-  
-  <!-- Main Script File -->
-  <script src="script.js" defer></script>
-  
-  <style>
-    /* Inline style to constrain the TwentyTwenty container */
-    .twentytwenty-container {
-      width: 100%;
-      max-width: 600px;
-      margin: auto;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v1.4.3-local</span></p>
-  </header>
-
-  <main id="main-app">
-    <!-- Chart Section -->
-    <div class="card prominent chart-container">
-      <canvas id="weightChart"></canvas>
-      <p id="chart-placeholder">Start logging weight to see trends!</p>
-      <div class="chart-options">
-        <label>
-          <input type="checkbox" id="toggle-demo-data" checked>
-          Show Demo Data
-        </label>
-      </div>
-      <p id="trend-analysis">Trend: No data yet.</p>
-    </div>
-
-    <!-- Photo Upload Section -->
-    <div class="card upload-photo">
-      <h3>Upload Progress Photo</h3>
-      <form id="photo-upload-form">
-        <label for="photo-upload">Select Photo:</label>
-        <input id="photo-upload" type="file" accept="image/*">
-        <label for="photo-date">Photo Date:</label>
-        <input id="photo-date" type="date">
-        <button id="upload-photo-btn" type="submit">Upload Photo</button>
-      </form>
-      <div id="photo-gallery" class="gallery">
-        <p class="placeholder">No photos uploaded yet.</p>
-      </div>
-      <div id="clear-photos-btn" style="display: none;"></div>
-    </div>
-
-    <!-- Side by Side Comparison - TwentyTwenty -->
-    <div class="card">
-      <h3>Side by Side Comparison - TwentyTwenty</h3>
-      <div class="photo-selectors">
-         <label for="tt-before">Before:</label>
-         <select id="tt-before"></select>
-         <label for="tt-after">After:</label>
-         <select id="tt-after"></select>
-         <button id="tt-update">Update Comparison</button>
-      </div>
-      <div id="twentytwenty-container" class="twentytwenty-container">
-        <img src="https://placehold.co/300x400?text=Before" alt="Before">
-        <img src="https://placehold.co/300x400?text=After" alt="After">
-      </div>
-      <button id="export-twentytwenty-btn">Export Comparison</button>
-      <button id="export-instagram-tt-btn">Export Instagram Image (TwentyTwenty)</button>
-    </div>
-  </main>
-
-  <script>
-    // Update app version text once the document is loaded
-    document.addEventListener("DOMContentLoaded", function () {
-      document.getElementById("app-version").textContent = "v1.4.3-local";
-    });
-
-    $(document).ready(function () {
-      // Initialize TwentyTwenty plugin if loaded
-      if ($.fn.twentytwenty) {
-        $("#twentytwenty-container").twentytwenty();
-      } else {
-        console.error("TwentyTwenty plugin failed to load.");
+      
+      // Example Chart.js initialization with a check for an existing instance
+      var ctx = document.getElementById("weightChart").getContext("2d");
+      // Use a global variable to track your chart instance
+      if (window.weightChartInstance) {
+        window.weightChartInstance.destroy();
       }
-
-      // Photo Upload functionality
-      $("#photo-upload-form").on("submit", function (event) {
-        event.preventDefault();
-        const fileInput = $("#photo-upload")[0].files[0];
-        const dateInput = $("#photo-date").val();
-
-        if (!fileInput || !dateInput) {
-          alert("Please select a photo and date.");
-          return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          $("#photo-gallery").append(`
-            <div class="photo-entry">
-              <img src="${e.target.result}" alt="Uploaded Progress Photo">
-              <p>Date: ${dateInput}</p>
-            </div>
-          `);
-        };
-        reader.readAsDataURL(fileInput);
-      });
-
-      // Example Chart.js initialization (adjust configuration as needed)
-      const ctx = document.getElementById('weightChart').getContext('2d');
-      const weightChart = new Chart(ctx, {
+      // A simple demo chart; replace with your chart configuration as needed
+      window.weightChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
+          labels: ["January", "February", "March", "April", "May"],
           datasets: [{
-            label: 'Weight',
-            data: [], // Initially empty; add logged weight data here
-            borderColor: 'rgba(75, 192, 192, 1)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            tension: 0.3,
+            label: "Weight",
+            data: [200, 195, 190, 185, 180],
+            backgroundColor: "rgba(0, 123, 255, 0.5)",
+            borderColor: "rgba(0, 123, 255, 1)",
+            fill: false
           }]
         },
         options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: true
+            }
+          },
           scales: {
             x: {
-              type: 'time',  // Use time scale for dates
-              time: {
-                unit: 'day'
-              },
-              title: {
-                display: true,
-                text: 'Date'
-              }
+              // If you use dates, be sure to include a date adapter
+              type: 'category'
             },
             y: {
-              title: {
-                display: true,
-                text: 'Weight (lbs)'
-              }
+              beginAtZero: true
             }
           }
         }
       });
+      
+      // Additional initialization for weight logging, photo upload, etc.
+      // (Your script.js should handle these; ensure that elements exist before being used.)
     });
   </script>
 </body>
