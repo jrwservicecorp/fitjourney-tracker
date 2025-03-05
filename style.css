@@ -30,6 +30,7 @@ header {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
     color: #e0e0e0;
     max-width: 900px;
+    text-align: left;
 }
 
 /* Chart Container */
@@ -39,10 +40,22 @@ header {
     height: 400px;
     position: relative;
 }
-
-/* Dashboard & General Layout */
-#main-app {
+#chart-text {
     padding: 10px;
+}
+
+/* Dashboard Section */
+#dashboard-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 20px;
+    margin: 20px auto;
+    max-width: 900px;
+}
+#dashboard-section .card {
+    flex: 1 1 30%;
+    min-width: 280px;
 }
 
 /* Buttons */
@@ -80,6 +93,21 @@ button:hover {
     font-size: 1em;
 }
 
+/* Weight Check-In Form */
+#weight-form label {
+    display: block;
+    margin: 8px 0 4px;
+}
+#weight-form input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #333;
+    background: #0d0d0d;
+    color: #e0e0e0;
+}
+
 /* Responsive Styles */
 @media only screen and (max-width: 600px) {
     .card {
@@ -93,5 +121,9 @@ button:hover {
     button {
         font-size: 0.9em;
         padding: 10px 16px;
+    }
+    #dashboard-section {
+        flex-direction: column;
+        align-items: center;
     }
 }
