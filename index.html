@@ -6,13 +6,14 @@
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Chart.js (using CDN; you could also host it locally if desired) -->
+  <!-- Chart.js (you can also host locally if desired) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <!-- jQuery from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" crossorigin="anonymous"></script>
   
   <!-- Local copies of plugins -->
+  <!-- Make sure these files exist in the following folders -->
   <script src="libs/jquery/jquery.event.move.min.js"></script>
   <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
@@ -24,7 +25,7 @@
   <script src="script.js" defer></script>
   
   <style>
-    /* Inline minor styling for the TwentyTwenty container */
+    /* Inline styling for the TwentyTwenty container */
     .twentytwenty-container {
       width: 100%;
       max-width: 600px;
@@ -114,58 +115,60 @@
   </main>
   
   <script>
-    // Ensure DOM is loaded before executing scripts
+    // Wait for the DOM to fully load
     document.addEventListener("DOMContentLoaded", function() {
-      // Update app version text if needed
+      // Update app version text
       document.getElementById("app-version").textContent = "v1.4.3-local";
       
-      // Initialize TwentyTwenty from the local copy
+      // Initialize TwentyTwenty slider from the local copy
       if ($.fn.twentytwenty) {
         $("#twentytwenty-container").twentytwenty();
       } else {
         console.error("TwentyTwenty plugin failed to load.");
       }
       
-      // Example Chart.js initialization with a check for an existing instance
-      var ctx = document.getElementById("weightChart").getContext("2d");
-      // Use a global variable to track your chart instance
-      if (window.weightChartInstance) {
-        window.weightChartInstance.destroy();
-      }
-      // A simple demo chart; replace with your chart configuration as needed
-      window.weightChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ["January", "February", "March", "April", "May"],
-          datasets: [{
-            label: "Weight",
-            data: [200, 195, 190, 185, 180],
-            backgroundColor: "rgba(0, 123, 255, 0.5)",
-            borderColor: "rgba(0, 123, 255, 1)",
-            fill: false
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: true
-            }
+      // Chart.js initialization with a check for an existing chart instance
+      var chartCanvas = document.getElementById("weightChart");
+      if (!chartCanvas) {
+        console.error("Canvas element with ID 'weightChart' not found.");
+      } else {
+        // Destroy existing chart instance if it exists
+        if (window.weightChartInstance) {
+          window.weightChartInstance.destroy();
+        }
+        var ctx = chartCanvas.getContext("2d");
+        window.weightChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ["January", "February", "March", "April", "May"],
+            datasets: [{
+              label: "Weight",
+              data: [200, 195, 190, 185, 180],
+              backgroundColor: "rgba(0, 123, 255, 0.5)",
+              borderColor: "rgba(0, 123, 255, 1)",
+              fill: false
+            }]
           },
-          scales: {
-            x: {
-              // If you use dates, be sure to include a date adapter
-              type: 'category'
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true
+              }
             },
-            y: {
-              beginAtZero: true
+            scales: {
+              x: {
+                type: 'category'
+              },
+              y: {
+                beginAtZero: true
+              }
             }
           }
-        }
-      });
+        });
+      }
       
-      // Additional initialization for weight logging, photo upload, etc.
-      // (Your script.js should handle these; ensure that elements exist before being used.)
+      // (Your additional initialization code for weight logging, photo upload, etc., goes here)
     });
   </script>
 </body>
