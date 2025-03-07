@@ -6,14 +6,13 @@
   <title>FitJourney Tracker</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Chart.js (you can also host locally if desired) -->
+  <!-- Chart.js (from CDN or local, as you prefer) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <!-- jQuery from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" crossorigin="anonymous"></script>
   
   <!-- Local copies of plugins -->
-  <!-- Make sure these files exist in the following folders -->
   <script src="libs/jquery/jquery.event.move.min.js"></script>
   <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
@@ -25,7 +24,7 @@
   <script src="script.js" defer></script>
   
   <style>
-    /* Inline styling for the TwentyTwenty container */
+    /* Inline styling for TwentyTwenty container */
     .twentytwenty-container {
       width: 100%;
       max-width: 600px;
@@ -115,24 +114,22 @@
   </main>
   
   <script>
-    // Wait for the DOM to fully load
     document.addEventListener("DOMContentLoaded", function() {
       // Update app version text
       document.getElementById("app-version").textContent = "v1.4.3-local";
       
-      // Initialize TwentyTwenty slider from the local copy
+      // Initialize TwentyTwenty slider using the local copy
       if ($.fn.twentytwenty) {
         $("#twentytwenty-container").twentytwenty();
       } else {
         console.error("TwentyTwenty plugin failed to load.");
       }
       
-      // Chart.js initialization with a check for an existing chart instance
+      // Chart.js initialization with check to destroy any existing chart instance
       var chartCanvas = document.getElementById("weightChart");
       if (!chartCanvas) {
         console.error("Canvas element with ID 'weightChart' not found.");
       } else {
-        // Destroy existing chart instance if it exists
         if (window.weightChartInstance) {
           window.weightChartInstance.destroy();
         }
@@ -144,8 +141,8 @@
             datasets: [{
               label: "Weight",
               data: [200, 195, 190, 185, 180],
-              backgroundColor: "rgba(0, 123, 255, 0.5)",
-              borderColor: "rgba(0, 123, 255, 1)",
+              backgroundColor: "rgba(0,123,255,0.5)",
+              borderColor: "rgba(0,123,255,1)",
               fill: false
             }]
           },
@@ -168,7 +165,7 @@
         });
       }
       
-      // (Your additional initialization code for weight logging, photo upload, etc., goes here)
+      // (Additional initialization code for weight logging, photo upload, etc.)
     });
   </script>
 </body>
