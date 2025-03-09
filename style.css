@@ -11,41 +11,51 @@ body {
   padding: 0;
 }
 
+/* Optionally, add a textured background if you have an image */
+/* Uncomment and update the URL if you have a local texture image */
+/*
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('images/texture.png');
+  opacity: 0.05;
+  pointer-events: none;
+}
+*/
+
 /* Header */
-.site-header,
-header {
+header, .site-header {
   background: #ffffff;
   border-bottom: 2px solid #ddd;
   padding: 20px 0;
 }
-.site-title,
-header h1 {
+header h1, .site-title {
   font-size: 2.5rem;
   font-weight: 700;
   color: #222;
   margin: 0;
 }
-.site-version,
-header p {
+header p, .site-version {
   font-size: 1rem;
   color: #666;
 }
 
 /* Navigation Menu */
-.main-nav,
 .navbar {
   background: #ffffff;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-bottom: 20px;
 }
-.nav-list,
 .btn-group {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.nav-link,
-.btn {
+.nav-btn {
   text-decoration: none;
   color: #555;
   font-size: 1.1rem;
@@ -53,10 +63,7 @@ header p {
   border-radius: 30px;
   transition: background 0.3s, color 0.3s;
 }
-.nav-link:hover,
-.nav-link.active,
-.btn:hover,
-.btn.active {
+.nav-btn:hover, .nav-btn.active {
   background: #222;
   color: #fff;
 }
@@ -135,32 +142,16 @@ header p {
   position: relative;
 }
 
-/* Peloton-inspired Texture Background */
-/* Update the URL to point to your texture image, or remove if not desired */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('images/texture.png');
-  opacity: 0.05;
-  pointer-events: none;
-}
-
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-  .site-title,
-  header h1 {
+  header h1, .site-title {
     font-size: 2rem;
   }
-  .btn-group,
-  .nav-list {
+  .btn-group {
     flex-direction: column;
     align-items: center;
   }
-  .nav-item {
+  .nav-btn {
     margin: 10px 0;
   }
 }
