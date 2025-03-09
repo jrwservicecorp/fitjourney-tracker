@@ -8,43 +8,44 @@
   <!-- Main CSS file -->
   <link rel="stylesheet" href="style.css">
   
-  <!-- Include Moment.js and Chart.js adapter for time scales -->
-  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
-  
-  <!-- Chart.js -->
+  <!-- Chart.js (load first) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Moment.js for date handling -->
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+  <!-- Chart.js adapter for Moment (load after Chart.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
   
   <!-- jQuery -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
   
   <!-- Local libraries (adjust paths as needed) -->
+  <!-- Note: Ensure that your local copy is used instead of any CDN version -->
   <script src="libs/jquery-event-move/jquery.event.move.min.js"></script>
-  <!-- Use your local copy now instead of the CDN -->
   <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
   
   <!-- Main JavaScript -->
   <script defer>
     document.addEventListener("DOMContentLoaded", function() {
-      // Global variables for weight data and Chart.js instance
+      // Global variables for weight data and Chart instance
       let weightData = [];
       let weightChart = null;
       
-      // Function to update the weight chart (destroys existing chart first)
+      // Function to update the weight chart.
+      // It sorts the data by date, destroys an existing chart (if any),
+      // and creates a new Chart.js line chart.
       function updateChart() {
         const ctx = document.getElementById("weightChart").getContext("2d");
         
-        // Sort data by date
+        // Sort weightData by date
         weightData.sort((a, b) => new Date(a.date) - new Date(b.date));
         const labels = weightData.map(item => item.date);
         const data = weightData.map(item => item.weight);
         
-        // Destroy previous chart instance if exists
+        // Destroy previous chart instance if it exists
         if (weightChart) {
           weightChart.destroy();
         }
         
-        // Create new chart
         weightChart = new Chart(ctx, {
           type: 'line',
           data: {
@@ -84,7 +85,7 @@
         });
       }
       
-      // Weight logging form handler
+      // Weight Logging Form Handler
       const weightForm = document.getElementById("weight-form");
       weightForm.addEventListener("submit", function(e) {
         e.preventDefault();
@@ -100,7 +101,7 @@
         }
       });
       
-      // Photo upload form handler
+      // Photo Upload Form Handler
       const photoForm = document.getElementById("photo-upload-form");
       photoForm.addEventListener("submit", function(e) {
         e.preventDefault();
@@ -119,28 +120,59 @@
           entry.className = "photo-entry";
           entry.innerHTML = `<img src="${e.target.result}" alt="Progress Photo">
                              <p>Date: ${photoDate}</p>`;
-          // Remove placeholder text if it exists
+          // Remove placeholder if it exists
           const placeholder = gallery.querySelector(".placeholder");
           if (placeholder) {
             placeholder.remove();
           }
           gallery.appendChild(entry);
           photoForm.reset();
+          // Update the photo comparison dropdowns after a slight delay
+          setTimeout(updatePhotoComparisonOptions, 500);
         };
         reader.readAsDataURL(file);
       });
       
-      // Initialize TwentyTwenty (if used elsewhere on the page)
+      // Initialize TwentyTwenty plugin for the photo comparison section
       if ($.fn.twentytwenty) {
         $("#twentytwenty-container").twentytwenty();
       } else {
         console.error("TwentyTwenty plugin failed to load.");
       }
+      
+      // Populate photo comparison dropdowns from the gallery images
+      function updatePhotoComparisonOptions() {
+        const entries = document.querySelectorAll("#photo-gallery .photo-entry img");
+        const beforeSelect = document.getElementById("tt-before");
+        const afterSelect = document.getElementById("tt-after");
+        beforeSelect.innerHTML = "";
+        afterSelect.innerHTML = "";
+        entries.forEach((img, index) => {
+          const option = document.createElement("option");
+          option.value = img.src;
+          option.textContent = `Photo ${index+1}`;
+          beforeSelect.appendChild(option.cloneNode(true));
+          afterSelect.appendChild(option.cloneNode(true));
+        });
+      }
+      
+      // Handle photo comparison update button click
+      const ttUpdateBtn = document.getElementById("tt-update");
+      ttUpdateBtn.addEventListener("click", function() {
+        const beforeSrc = document.getElementById("tt-before").value;
+        const afterSrc = document.getElementById("tt-after").value;
+        const container = document.getElementById("twentytwenty-container");
+        container.innerHTML = `<img src="${beforeSrc}" alt="Before">
+                               <img src="${afterSrc}" alt="After">`;
+        if ($.fn.twentytwenty) {
+          $("#twentytwenty-container").twentytwenty();
+        }
+      });
     });
   </script>
   
   <style>
-    /* Basic styling with a modern, Tesla-inspired look and mobile optimization */
+    /* Tesla-inspired, modern, and mobile-optimized styling */
     body {
       font-family: 'Roboto', sans-serif;
       background-color: #121212;
@@ -174,7 +206,7 @@
       display: block;
       margin: 5px 0 2px;
     }
-    form input, form button {
+    form input, form select, form button {
       width: 100%;
       padding: 8px;
       margin-bottom: 10px;
@@ -205,6 +237,22 @@
       border-radius: 10px;
       margin: 15px 0;
     }
+    /* Photo Comparison Section Styling */
+    #photo-comparison {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #photo-comparison .selectors {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    #twentytwenty-container {
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
+    }
     
     /* Mobile optimization */
     @media only screen and (max-width: 600px) {
@@ -215,7 +263,7 @@
         margin: 10px;
         padding: 15px;
       }
-      form input, form button {
+      form input, form select, form button {
         font-size: 0.9em;
         padding: 6px;
       }
@@ -242,7 +290,7 @@
       </div>
     </div>
     
-    <!-- Chart Section -->
+    <!-- Chart Section (displayed at the top) -->
     <div class="card">
       <h2>Weight Trend</h2>
       <canvas id="weightChart"></canvas>
@@ -260,6 +308,22 @@
       </form>
       <div id="photo-gallery" class="gallery">
         <p class="placeholder">No photos uploaded yet.</p>
+      </div>
+    </div>
+    
+    <!-- Photo Comparison Section -->
+    <div class="card" id="photo-comparison">
+      <h2>Side by Side Comparison - TwentyTwenty</h2>
+      <div class="selectors">
+        <label for="tt-before">Before:</label>
+        <select id="tt-before"></select>
+        <label for="tt-after">After:</label>
+        <select id="tt-after"></select>
+        <button id="tt-update" type="button">Update Comparison</button>
+      </div>
+      <div id="twentytwenty-container">
+        <img src="https://placehold.co/300x400?text=Before" alt="Before">
+        <img src="https://placehold.co/300x400?text=After" alt="After">
       </div>
     </div>
   </main>
