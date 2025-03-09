@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let nutritionLogs = [];
   let photoLogs = [];
   let editorCanvas; // Fabric.js canvas for advanced editor
-  let currentFoodPage = 1; // For paginated results
+  let currentFoodPage = 1; // For paginated food search results
 
   // Initialize Weight Chart (Chart.js with Luxon)
   const weightCtx = document.getElementById('weightChart').getContext('2d');
@@ -72,9 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // (No demo data loaded by default)
-
-  // Body Weight Log Form Submission
+  // -- Body Weight Log Form Submission --
   document.getElementById("data-log-form").addEventListener("submit", function(e) {
     e.preventDefault();
     const weight = parseFloat(document.getElementById("weight-input").value);
@@ -146,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
     calorieDiv.innerHTML = `<p>Average Calories: ${Math.round(avg)} kcal</p>`;
   }
 
-  // Nutrition Log Form Submission
+  // -- Nutrition Log Form Submission --
   document.getElementById("nutrition-log-form").addEventListener("submit", function(e) {
     e.preventDefault();
     const food = document.getElementById("food-name").value;
@@ -211,12 +209,12 @@ document.addEventListener("DOMContentLoaded", function () {
     displayDiv.innerHTML = html;
   }
 
-  // --- USDA Food Search Triggered by Typing into Food Name Input ---
+  // --- USDA Food Search Triggered by Typing in "Food Name" Field ---
   const $foodName = $("#food-name");
   const $foodSearchResults = $("#food-search-results");
   const $moreFoodBtn = $("#more-food-btn");
 
-  // Debounced function for food search
+  // Debounced function for live food search
   $foodName.on("input", debounce(function() {
     const query = $foodName.val().trim();
     if (!query) {
@@ -224,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
       $moreFoodBtn.hide();
       return;
     }
-    currentFoodPage = 1; // reset to first page on new query
+    currentFoodPage = 1; // reset page for new query
     searchFood(query, currentFoodPage);
   }, 500));
 
@@ -237,7 +235,6 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("USDA response:", data);
         if (data.foods && data.foods.length > 0) {
           displayFoodResults(data.foods.slice(0, 5));
-          // If there are more than 5 results, show "More Results" button
           if (data.foods.length > 5) {
             $moreFoodBtn.show().off("click").on("click", function() {
               currentFoodPage++;
@@ -257,12 +254,12 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  // Display search results in the food-search-results container
+  // Display live search results
   function displayFoodResults(foods) {
     let resultsHtml = "";
     foods.forEach(food => {
-      // Use optional chaining in case foodNutrients is missing
-      const energy = food.foodNutrients?.find(n => n.nutrientName === "Energy")?.value ?? "N/A";
+      const nutrients = food.foodNutrients || [];
+      const energy = nutrients.find(n => n.nutrientName === "Energy")?.value ?? "N/A";
       resultsHtml += `<button type="button" class="list-group-item list-group-item-action food-item" data-food='${JSON.stringify(food)}'>
         ${food.description} - ${energy} kcal
       </button>`;
@@ -270,32 +267,31 @@ document.addEventListener("DOMContentLoaded", function () {
     $foodSearchResults.html(resultsHtml);
   }
 
-  // When a food item is clicked, populate the form fields
+  // When a food item is clicked, populate the nutrition form fields
   $foodSearchResults.on("click", ".food-item", function() {
     const foodData = $(this).data("food");
     console.log("Food selected:", foodData);
     $foodName.val(foodData.description);
-    const energyNutrient = foodData.foodNutrients?.find(n => n.nutrientName === "Energy")?.value ?? "";
-    $("#food-calories").val(energyNutrient);
-    const proteinNutrient = foodData.foodNutrients?.find(n => n.nutrientName === "Protein")?.value ?? "";
-    const fatNutrient = foodData.foodNutrients?.find(n => n.nutrientName === "Total lipid (fat)")?.value ?? "";
-    const carbNutrient = foodData.foodNutrients?.find(n => n.nutrientName === "Carbohydrate, by difference")?.value ?? "";
-    $("#food-protein").val(proteinNutrient);
-    $("#food-fat").val(fatNutrient);
-    $("#food-carbs").val(carbNutrient);
-    // Clear search results after selection
+    const nutrients = foodData.foodNutrients || [];
+    const energy = nutrients.find(n => n.nutrientName === "Energy")?.value ?? "";
+    $("#food-calories").val(energy);
+    const protein = nutrients.find(n => n.nutrientName === "Protein")?.value ?? "";
+    const fat = nutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value ?? "";
+    const carbs = nutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value ?? "";
+    $("#food-protein").val(protein);
+    $("#food-fat").val(fat);
+    $("#food-carbs").val(carbs);
+    // Clear the live search results
     $foodSearchResults.empty();
     $moreFoodBtn.hide();
   });
 
-  // "Add Custom Food" button remains (if needed)
+  // "Add Custom Food" button (if user chooses not to pick from search)
   $("#add-custom-food-btn").on("click", function() {
     alert("No food found. Please fill in the food information manually.");
   });
 
-  // (Optional) Add Frequent Foods functionality here...
-
-  // Photo Upload Form Submission
+  // -- Photo Upload Form Submission --
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
