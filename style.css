@@ -1,107 +1,44 @@
-/* style.css - FitJourney Tracker - Modern Edition - CSS v3.0 */
-/* Modern, clean, fitness app design with light backgrounds and vibrant accents */
+/* style.css - FitJourney Tracker - Modern Edition - CSS v3.1 */
 
+/* Base */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-
 body {
-  font-family: 'Roboto', Arial, sans-serif;
-  background: #f0f2f5;
+  font-family: 'Roboto', sans-serif;
+  background: #f8f9fa;
   color: #333;
   margin: 0;
   padding: 0;
-  text-align: center;
 }
 
+/* Header */
 header {
-  background: #007bff;
+  background: #343a40;
   color: #fff;
-  padding: 20px 0;
-  font-size: 2em;
-  border-bottom: 2px solid #0056b3;
 }
 
-nav#main-nav {
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 10px 0;
+/* Navigation Menu Buttons */
+.nav-btn.active {
+  background-color: #007bff;
+  color: #fff;
 }
 
-nav#main-nav ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-}
-
-nav#main-nav ul li {
-  margin: 0 15px;
-}
-
-nav#main-nav ul li a {
-  color: #007bff;
-  text-decoration: none;
-  font-size: 1.1em;
-  padding: 8px 12px;
-  border-radius: 4px;
-  transition: background 0.3s;
-}
-
-nav#main-nav ul li a.active,
-nav#main-nav ul li a:hover {
-  background: #e6f0ff;
-}
-
+/* Cards */
 .card {
-  background: #fff;
-  padding: 20px;
-  margin: 20px auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  color: #333;
-  max-width: 900px;
-  transition: transform 0.3s;
+  border: none;
+  border-radius: 10px;
 }
-.card:hover {
-  transform: translateY(-3px);
+.card .card-body {
+  padding: 1.5rem;
 }
 
+/* Charts */
 .chart-container {
-  max-width: 900px;
-  margin: 0 auto;
-  height: 400px;
   position: relative;
+  margin: auto;
+  height: 400px;
 }
 
-#dashboard-section,
-#nutrition-section,
-#weight-section,
-#media-section {
-  display: none;
-  padding-bottom: 30px;
-}
-
-#dashboard-section.active,
-#nutrition-section.active,
-#weight-section.active,
-#media-section.active {
-  display: block;
-}
-
-#summary-section {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  gap: 20px;
-}
-
-.upload-photo,
-.comparison-display,
-#photo-gallery {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
+/* TwentyTwenty Container */
 .twentytwenty-container {
   width: 100%;
   max-width: 600px;
@@ -112,60 +49,11 @@ nav#main-nav ul li a:hover {
   border-radius: 8px;
   padding: 5px;
 }
-
 .twentytwenty-container img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-canvas {
-  width: 100% !important;
-  max-width: 900px;
-  height: auto !important;
-}
-
-button {
-  background: #007bff;
-  color: #fff;
-  border: none;
-  padding: 12px 24px;
-  margin-top: 10px;
-  cursor: pointer;
-  border-radius: 6px;
-  font-size: 1em;
-  transition: background 0.3s;
-}
-button:hover {
-  background: #0056b3;
-}
-
-/* Input Fields */
-input[type="number"],
-input[type="date"],
-input[type="file"],
-input[type="text"],
-select {
-  padding: 8px;
-  margin: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background: #fff;
-  color: #333;
-}
-
-/* Table for Nutrition Log */
-table {
   width: 100%;
-  border-collapse: collapse;
-}
-table th, table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-table th {
-  background: #f7f7f7;
-  color: #333;
+  display: block;
+  object-fit: cover;
+  max-height: 400px;
 }
 
 /* Gallery */
@@ -181,38 +69,6 @@ table th {
   transform: scale(1.05);
 }
 
-/* Photo Timeline Filter */
-#photo-filter-card {
-  margin-top: 15px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-}
-
-/* Photo selectors */
-.photo-selectors {
-  margin-bottom: 10px;
-}
-.photo-selectors label {
-  margin-right: 5px;
-}
-.photo-selectors select {
-  margin-right: 10px;
-  padding: 4px 8px;
-}
-
-/* Social share */
-.social-share {
-  margin-top: 15px;
-}
-.social-share .share-btn {
-  background: #eee;
-  margin: 5px;
-  padding: 10px 15px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
 /* Advanced Comparison Editor Modal */
 #comparison-editor-modal {
   position: fixed;
@@ -222,7 +78,7 @@ table th {
   height: 100%;
   background: rgba(0,0,0,0.6);
   display: none;
-  z-index: 1000;
+  z-index: 1050;
 }
 #comparison-editor-modal .modal-content {
   background: #fff;
@@ -233,20 +89,9 @@ table th {
   margin: 50px auto;
   position: relative;
 }
-#comparison-editor-modal .modal-content button {
-  margin: 5px;
-}
 
 /* Responsive */
-@media only screen and (max-width: 600px) {
-  .card {
-    max-width: 95%;
-    margin: 10px auto;
-    padding: 15px;
-  }
-  nav#main-nav ul {
-    flex-direction: column;
-  }
+@media (max-width: 600px) {
   #comparison-editor-modal .modal-content {
     width: 90%;
     margin: 20px auto;
