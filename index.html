@@ -142,6 +142,7 @@
           <label for="tt-after">After:</label>
           <select id="tt-after"></select>
           <button id="tt-update">Update Comparison</button>
+          <button id="open-editor-btn">Open Advanced Editor</button>
         </div>
         <div id="twentytwenty-container" class="twentytwenty-container">
           <!-- Default placeholder images -->
@@ -168,12 +169,14 @@
   
   <!-- Advanced Comparison Editor Modal -->
   <div id="comparison-editor-modal">
-    <div>
+    <div class="modal-content">
       <button id="close-comparison-editor">Close</button>
       <h3>Advanced Comparison Editor</h3>
       <canvas id="comparisonCanvas" width="600" height="400" style="border: 2px solid #007bff; border-radius: 8px;"></canvas>
-      <br>
-      <button id="export-comparison-btn">Export for Instagram</button>
+      <div class="editor-controls">
+        <button id="add-text-btn">Add Text Overlay</button>
+        <button id="export-comparison-btn">Export for Instagram</button>
+      </div>
     </div>
   </div>
   
