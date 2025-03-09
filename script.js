@@ -1,6 +1,5 @@
-/* script.js - FitJourney Tracker - Tesla Edition (v2.1) */
-
-document.addEventListener("DOMContentLoaded", function () {
+/* script.js - FitJourney Tracker - Tesla Edition - v2.1 */
+document.addEventListener("DOMContentLoaded", function() {
   // Set app version
   document.getElementById("app-version").textContent = "v2.1";
 
@@ -8,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let dataLogs = [];
   let photoLogs = [];
 
-  // Initialize Chart.js – note: make sure you load a complete date adapter (e.g. chartjs-adapter-luxon)
+  // Initialize Chart.js (with a time scale)
   const ctx = document.getElementById('weightChart').getContext('2d');
   const weightChart = new Chart(ctx, {
     type: 'line',
@@ -40,14 +39,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const toggleDemo = document.getElementById("toggle-demo-data");
   if (toggleDemo.checked && dataLogs.length === 0) {
     const demoData = [
-      { date: '2023-01-01', weight: 200, waist: 34, hips: 36, chest: 40 },
-      { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39 },
-      { date: '2023-03-01', weight: 190, waist: 33, hips: 35, chest: 38 }
+      { date: '2023-01-01', weight: 200, waist: 34, hips: 36, chest: 40, calories: 2500 },
+      { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39, calories: 2400 },
+      { date: '2023-03-01', weight: 190, waist: 33, hips: 35, chest: 38, calories: 2300 }
     ];
     demoData.forEach(log => addDataLog(log));
     updateChart();
     updateSummary();
     updateRecentWeighIns();
+    updateCalorieSummary();
   }
 
   // Data log form submission
@@ -58,14 +58,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const waist = parseFloat(document.getElementById("waist-input").value) || null;
     const hips = parseFloat(document.getElementById("hips-input").value) || null;
     const chest = parseFloat(document.getElementById("chest-input").value) || null;
+    const calories = parseFloat(document.getElementById("calories-input").value) || null;
     if (!weight || !date) {
       alert("Please enter both weight and date.");
       return;
     }
-    addDataLog({ date, weight, waist, hips, chest });
+    addDataLog({ date, weight, waist, hips, chest, calories });
     updateChart();
     updateSummary();
     updateRecentWeighIns();
+    updateCalorieSummary();
     this.reset();
   });
 
@@ -108,6 +110,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function updateCalorieSummary() {
+    const calorieDiv = document.getElementById("calorie-summary");
+    if (dataLogs.length === 0) {
+      calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>';
+      return;
+    }
+    const totalCalories = dataLogs.reduce((sum, log) => sum + (log.calories || 0), 0);
+    const avgCalories = (totalCalories / dataLogs.length).toFixed(0);
+    calorieDiv.innerHTML = `<p>Average Daily Calories: ${avgCalories} kcal</p>`;
+  }
+
   // Photo upload form submission
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
@@ -145,7 +158,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Filter photos by date range
-  $("#filter-photos-btn").on("click", function () {
+  $("#filter-photos-btn").on("click", function() {
     const startDate = $("#filter-start-date").val();
     const endDate = $("#filter-end-date").val();
     const gallery = $("#photo-gallery");
@@ -167,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  $("#clear-filter-btn").on("click", function () {
+  $("#clear-filter-btn").on("click", function() {
     $("#filter-start-date, #filter-end-date").val("");
     updatePhotoGallery();
   });
@@ -184,7 +197,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Initialize TwentyTwenty plugin for simple side-by-side comparison
+  // Initialize TwentyTwenty plugin once the document is ready
   $(document).ready(function () {
     if ($.fn.twentytwenty) {
       $("#twentytwenty-container").twentytwenty();
@@ -193,8 +206,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Advanced Comparison Editor – when the user clicks "Update Comparison"
-  $("#tt-update").on("click", function () {
+  // Update comparison panel with selected photos
+  $("#tt-update").on("click", function() {
     const beforeIndex = parseInt($("#tt-before").val());
     const afterIndex = parseInt($("#tt-after").val());
     if (isNaN(beforeIndex) || isNaN(afterIndex)) {
@@ -203,81 +216,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     const beforePhoto = photoLogs[beforeIndex];
     const afterPhoto = photoLogs[afterIndex];
-    openComparisonEditor(beforePhoto, afterPhoto);
+    const container = $("#twentytwenty-container");
+    container.empty();
+    container.append(`<img src="${beforePhoto.src}" alt="Before">`);
+    container.append(`<img src="${afterPhoto.src}" alt="After">`);
+    container.twentytwenty();
   });
 
-  // Advanced Comparison Editor using Fabric.js
-  function openComparisonEditor(beforePhoto, afterPhoto) {
-    // Show the modal (ensure this element exists in your HTML)
-    $("#comparison-editor-modal").show();
-    // Initialize Fabric.js canvas inside the modal
-    const canvas = new fabric.Canvas('comparisonCanvas', { width: 600, height: 400 });
-    canvas.clear();
-
-    // Load the before image as the base layer
-    fabric.Image.fromURL(beforePhoto.src, function (img1) {
-      img1.set({
-        left: 0,
-        top: 0,
-        selectable: false,
-        scaleX: 600 / img1.width,
-        scaleY: 400 / img1.height
-      });
-      canvas.add(img1);
-
-      // Load the after image on top with adjustable opacity for a blended effect
-      fabric.Image.fromURL(afterPhoto.src, function (img2) {
-        img2.set({
-          left: 0,
-          top: 0,
-          selectable: false,
-          opacity: 0.5,
-          scaleX: 600 / img2.width,
-          scaleY: 400 / img2.height
-        });
-        canvas.add(img2);
-
-        // Example: add a draggable text overlay (editable)
-        const overlayText = new fabric.Text(`Before: ${beforePhoto.date}\nAfter: ${afterPhoto.date}`, {
-          left: 10,
-          top: 10,
-          fill: '#fff',
-          fontSize: 20,
-          fontFamily: 'Roboto',
-          editable: true
-        });
-        canvas.add(overlayText);
-
-        // Example: add a sticker image (change the URL to a branded sticker as needed)
-        fabric.Image.fromURL('https://via.placeholder.com/50x50.png?text=Sticker', function (sticker) {
-          sticker.set({
-            left: 500,
-            top: 350,
-            selectable: true,
-            scaleX: 1,
-            scaleY: 1
-          });
-          canvas.add(sticker);
-        });
-      });
-    });
-
-    // Set up Export button for the advanced editor
-    $("#export-comparison-btn").off("click").on("click", function () {
-      const dataURL = canvas.toDataURL({ format: 'png' });
-      // Open the exported image in a new window/tab for sharing
-      window.open(dataURL, '_blank');
-    });
-
-    // Set up Close button for the editor modal
-    $("#close-comparison-editor").off("click").on("click", function () {
-      $("#comparison-editor-modal").hide();
-      canvas.dispose();
-    });
-  }
-
   // Export Report as Image using html2canvas
-  $("#export-report-btn").on("click", function () {
+  $("#export-report-btn").on("click", function() {
     html2canvas(document.getElementById("main-app")).then(canvas => {
       let link = document.createElement("a");
       link.download = "fitjourney_report.png";
@@ -287,8 +234,43 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Social share buttons (dummy implementation)
-  $(".share-btn").on("click", function () {
+  $(".share-btn").on("click", function() {
     const platform = $(this).data("platform");
     alert(`Sharing to ${platform} (functionality to be implemented).`);
+  });
+
+  // Advanced Comparison Editor using Fabric.js
+  // When the export-comparison-btn is clicked, open the editor and add a sticker
+  $("#export-comparison-btn").on("click", function() {
+    $("#comparison-editor-modal").css("display", "flex");
+    // Initialize Fabric.js canvas
+    const compCanvas = new fabric.Canvas('comparisonCanvas');
+    // Load comparison images from the TwentyTwenty container
+    const container = $("#twentytwenty-container");
+    const imgs = container.find("img");
+    if (imgs.length >= 2) {
+      // Set the before image as background
+      fabric.Image.fromURL($(imgs[0]).attr("src"), function(img) {
+        compCanvas.setBackgroundImage(img, compCanvas.renderAll.bind(compCanvas), {
+          scaleX: compCanvas.width / img.width,
+          scaleY: compCanvas.height / img.height
+        });
+      });
+      // Add the after image on top
+      fabric.Image.fromURL($(imgs[1]).attr("src"), function(img) {
+        img.set({ left: 50, top: 50 });
+        compCanvas.add(img);
+      });
+    }
+    // Add a sticker using the corrected URL (note: removed ".png")
+    fabric.Image.fromURL("https://via.placeholder.com/50x50?text=Sticker", function(img) {
+      img.set({ left: 10, top: 10 });
+      compCanvas.add(img);
+    });
+  });
+
+  // Close comparison editor modal
+  $("#close-comparison-editor").on("click", function() {
+    $("#comparison-editor-modal").css("display", "none");
   });
 });
