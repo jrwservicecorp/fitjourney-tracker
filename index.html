@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FitJourney Tracker - Modern Fitness Edition</title>
-  <!-- Bootstrap CSS from CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-cuP+Rb3F58yGrW8PLP5k+axIWKFoQpUSdAPuC5VJcCr1E5ZD59wM9xAj8QcOc3h8" crossorigin="anonymous">
+  
+  <!-- Local Bootstrap CSS -->
+  <link href="libs/bootstrap/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
   
@@ -104,23 +104,23 @@
             </div>
             <div class="col-md-2">
               <label for="food-weight" class="form-label">Weight (g)</label>
-              <input id="food-weight" type="number" step="1" class="form-control" placeholder="grams" required>
+              <input id="food-weight" type="number" step="any" class="form-control" placeholder="grams" required>
             </div>
             <div class="col-md-2">
               <label for="food-calories" class="form-label">Calories (kcal)</label>
-              <input id="food-calories" type="number" step="1" class="form-control" placeholder="kcal" required>
+              <input id="food-calories" type="number" step="any" class="form-control" placeholder="kcal" required>
             </div>
             <div class="col-md-2">
               <label for="food-protein" class="form-label">Protein (g)</label>
-              <input id="food-protein" type="number" step="0.1" class="form-control" placeholder="g">
+              <input id="food-protein" type="number" step="any" class="form-control" placeholder="g">
             </div>
             <div class="col-md-2">
               <label for="food-fat" class="form-label">Fat (g)</label>
-              <input id="food-fat" type="number" step="0.1" class="form-control" placeholder="g">
+              <input id="food-fat" type="number" step="any" class="form-control" placeholder="g">
             </div>
             <div class="col-md-2">
               <label for="food-carbs" class="form-label">Carbs (g)</label>
-              <input id="food-carbs" type="number" step="0.1" class="form-control" placeholder="g">
+              <input id="food-carbs" type="number" step="any" class="form-control" placeholder="g">
             </div>
             <div class="col-md-3">
               <label for="nutrition-date" class="form-label">Date</label>
@@ -175,7 +175,7 @@
             </div>
             <div class="col-md-2">
               <label for="calories-input" class="form-label">Calories (kcal)</label>
-              <input id="calories-input" type="number" step="1" class="form-control" placeholder="kcal">
+              <input id="calories-input" type="number" step="any" class="form-control" placeholder="kcal">
             </div>
             <div class="col-md-3 d-flex align-items-end">
               <button type="submit" class="btn btn-primary w-100">Log Data</button>
@@ -300,10 +300,8 @@
     </div>
   </footer>
   
-  <!-- Bootstrap Bundle with Popper -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-          integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+0F0kKrx3vYF5LGhB9f5q6D+P4ni1"
-          crossorigin="anonymous"></script>
+  <!-- Local Bootstrap Bundle with Popper -->
+  <script src="libs/bootstrap/bootstrap.bundle.min.js"></script>
   
   <!-- Inline Script for Basic Navigation -->
   <script>
