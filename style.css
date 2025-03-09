@@ -12,39 +12,40 @@ body {
 }
 
 /* Header */
-.site-header {
+.site-header,
+header {
   background: #ffffff;
   border-bottom: 2px solid #ddd;
   padding: 20px 0;
 }
-.site-title {
+.site-title,
+header h1 {
   font-size: 2.5rem;
   font-weight: 700;
   color: #222;
   margin: 0;
 }
-.site-version {
+.site-version,
+header p {
   font-size: 1rem;
   color: #666;
 }
 
 /* Navigation Menu */
-.main-nav {
+.main-nav,
+.navbar {
   background: #ffffff;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-bottom: 20px;
 }
-.nav-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.nav-list,
+.btn-group {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
-.nav-item {
-  margin: 0 15px;
-}
-.nav-link {
+.nav-link,
+.btn {
   text-decoration: none;
   color: #555;
   font-size: 1.1rem;
@@ -53,7 +54,9 @@ body {
   transition: background 0.3s, color 0.3s;
 }
 .nav-link:hover,
-.nav-link.active {
+.nav-link.active,
+.btn:hover,
+.btn.active {
   background: #222;
   color: #fff;
 }
@@ -132,7 +135,8 @@ body {
   position: relative;
 }
 
-/* Peloton-inspired texture background (update URL to your texture image) */
+/* Peloton-inspired Texture Background */
+/* Update the URL to point to your texture image, or remove if not desired */
 body::before {
   content: "";
   position: fixed;
@@ -140,16 +144,18 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('path/to/texture.png');
+  background-image: url('images/texture.png');
   opacity: 0.05;
   pointer-events: none;
 }
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-  .site-title {
+  .site-title,
+  header h1 {
     font-size: 2rem;
   }
+  .btn-group,
   .nav-list {
     flex-direction: column;
     align-items: center;
