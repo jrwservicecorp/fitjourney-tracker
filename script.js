@@ -1,15 +1,19 @@
-/* script.js - FitJourney Tracker - Tesla Edition - v2.1 */
-document.addEventListener("DOMContentLoaded", function() {
+/* script.js - FitJourney Tracker - Tesla Edition */
+
+/* Global arrays for data and photos */
+let dataLogs = [];
+let photoLogs = [];
+
+/* Chart instance */
+let weightChart = null;
+
+document.addEventListener("DOMContentLoaded", function () {
   // Set app version
   document.getElementById("app-version").textContent = "v2.1";
 
-  // Global arrays to store logs
-  let dataLogs = [];
-  let photoLogs = [];
-
-  // Initialize Chart.js (with a time scale)
+  // Initialize Chart.js with time scale (using Luxon adapter)
   const ctx = document.getElementById('weightChart').getContext('2d');
-  const weightChart = new Chart(ctx, {
+  weightChart = new Chart(ctx, {
     type: 'line',
     data: {
       datasets: [{
@@ -35,13 +39,13 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
-  // Toggle demo data if none exists
+  // Load demo data if toggled on and no logs exist
   const toggleDemo = document.getElementById("toggle-demo-data");
   if (toggleDemo.checked && dataLogs.length === 0) {
     const demoData = [
       { date: '2023-01-01', weight: 200, waist: 34, hips: 36, chest: 40, calories: 2500 },
-      { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39, calories: 2400 },
-      { date: '2023-03-01', weight: 190, waist: 33, hips: 35, chest: 38, calories: 2300 }
+      { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39, calories: 2450 },
+      { date: '2023-03-01', weight: 190, waist: 33, hips: 35, chest: 38, calories: 2400 }
     ];
     demoData.forEach(log => addDataLog(log));
     updateChart();
@@ -112,16 +116,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function updateCalorieSummary() {
     const calorieDiv = document.getElementById("calorie-summary");
-    if (dataLogs.length === 0) {
+    const total = dataLogs.reduce((sum, log) => sum + (log.calories || 0), 0);
+    if (dataLogs.length === 0 || total === 0) {
       calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>';
       return;
     }
-    const totalCalories = dataLogs.reduce((sum, log) => sum + (log.calories || 0), 0);
-    const avgCalories = (totalCalories / dataLogs.length).toFixed(0);
-    calorieDiv.innerHTML = `<p>Average Daily Calories: ${avgCalories} kcal</p>`;
+    const avg = (total / dataLogs.length).toFixed(0);
+    calorieDiv.innerHTML = `<p>Average Daily Calories: ${avg} kcal</p>`;
   }
 
-  // Photo upload form submission
+  // Photo upload form submission using jQuery
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
@@ -197,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  // Initialize TwentyTwenty plugin once the document is ready
+  // Initialize TwentyTwenty plugin for side-by-side comparison
   $(document).ready(function () {
     if ($.fn.twentytwenty) {
       $("#twentytwenty-container").twentytwenty();
@@ -206,7 +210,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
-  // Update comparison panel with selected photos
+  // Update comparison panel with selected photos for TwentyTwenty
   $("#tt-update").on("click", function() {
     const beforeIndex = parseInt($("#tt-before").val());
     const afterIndex = parseInt($("#tt-after").val());
@@ -223,7 +227,69 @@ document.addEventListener("DOMContentLoaded", function() {
     container.twentytwenty();
   });
 
-  // Export Report as Image using html2canvas
+  // Advanced Comparison Editor using Fabric.js
+  let comparisonCanvas = new fabric.Canvas('comparisonCanvas');
+  
+  // Open advanced comparison editor modal
+  $("#open-comparison-editor").on("click", function() {
+    $("#comparison-editor-modal").show();
+    const beforeIndex = parseInt($("#tt-before").val());
+    const afterIndex = parseInt($("#tt-after").val());
+    if (isNaN(beforeIndex) || isNaN(afterIndex)) {
+      alert("Please select both before and after photos for editing.");
+      return;
+    }
+    const beforePhoto = photoLogs[beforeIndex];
+    const afterPhoto = photoLogs[afterIndex];
+    // Clear canvas and load the before image as background
+    comparisonCanvas.clear();
+    fabric.Image.fromURL(beforePhoto.src, function(img) {
+      img.set({
+        selectable: false,
+        evented: false,
+        scaleX: comparisonCanvas.width / img.width,
+        scaleY: comparisonCanvas.height / img.height
+      });
+      comparisonCanvas.setBackgroundImage(img, comparisonCanvas.renderAll.bind(comparisonCanvas));
+    });
+    // Load the after image as an overlay (semi-transparent)
+    fabric.Image.fromURL(afterPhoto.src, function(img) {
+      img.set({
+        opacity: 0.5,
+        selectable: false,
+        evented: false,
+        scaleX: comparisonCanvas.width / img.width,
+        scaleY: comparisonCanvas.height / img.height
+      });
+      comparisonCanvas.add(img);
+    });
+  });
+  
+  // Close advanced comparison editor modal
+  $("#close-comparison-editor").on("click", function() {
+    $("#comparison-editor-modal").hide();
+  });
+  
+  // Sticker functionality: add sticker to comparison canvas
+  $(".sticker-btn").on("click", function() {
+    const stickerUrl = $(this).data("sticker");
+    fabric.Image.fromURL(stickerUrl, function(img) {
+      img.set({ left: 50, top: 50, scaleX: 0.5, scaleY: 0.5 });
+      comparisonCanvas.add(img);
+    });
+  });
+  
+  // Export advanced comparison as image
+  $("#export-comparison-btn").on("click", function() {
+    html2canvas(document.getElementById("comparisonCanvas")).then(canvas => {
+      let link = document.createElement("a");
+      link.download = "comparison_export.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  });
+  
+  // Export report as image
   $("#export-report-btn").on("click", function() {
     html2canvas(document.getElementById("main-app")).then(canvas => {
       let link = document.createElement("a");
@@ -232,45 +298,10 @@ document.addEventListener("DOMContentLoaded", function() {
       link.click();
     });
   });
-
+  
   // Social share buttons (dummy implementation)
   $(".share-btn").on("click", function() {
     const platform = $(this).data("platform");
     alert(`Sharing to ${platform} (functionality to be implemented).`);
-  });
-
-  // Advanced Comparison Editor using Fabric.js
-  // When the export-comparison-btn is clicked, open the editor and add a sticker
-  $("#export-comparison-btn").on("click", function() {
-    $("#comparison-editor-modal").css("display", "flex");
-    // Initialize Fabric.js canvas
-    const compCanvas = new fabric.Canvas('comparisonCanvas');
-    // Load comparison images from the TwentyTwenty container
-    const container = $("#twentytwenty-container");
-    const imgs = container.find("img");
-    if (imgs.length >= 2) {
-      // Set the before image as background
-      fabric.Image.fromURL($(imgs[0]).attr("src"), function(img) {
-        compCanvas.setBackgroundImage(img, compCanvas.renderAll.bind(compCanvas), {
-          scaleX: compCanvas.width / img.width,
-          scaleY: compCanvas.height / img.height
-        });
-      });
-      // Add the after image on top
-      fabric.Image.fromURL($(imgs[1]).attr("src"), function(img) {
-        img.set({ left: 50, top: 50 });
-        compCanvas.add(img);
-      });
-    }
-    // Add a sticker using the corrected URL (note: removed ".png")
-    fabric.Image.fromURL("https://via.placeholder.com/50x50?text=Sticker", function(img) {
-      img.set({ left: 10, top: 10 });
-      compCanvas.add(img);
-    });
-  });
-
-  // Close comparison editor modal
-  $("#close-comparison-editor").on("click", function() {
-    $("#comparison-editor-modal").css("display", "none");
   });
 });
