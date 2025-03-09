@@ -1,6 +1,7 @@
 /* script.js - FitJourney Tracker - Tesla Edition */
 
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("DOM fully loaded");
   // Set app version
   document.getElementById("app-version").textContent = "v2.1";
 
@@ -8,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let dataLogs = [];
   let photoLogs = [];
 
-  // Initialize Chart.js (with a time scale)
+  // Initialize Chart.js with a time scale using Luxon adapter
   const ctx = document.getElementById('weightChart').getContext('2d');
   const weightChart = new Chart(ctx, {
     type: 'line',
@@ -41,8 +42,8 @@ document.addEventListener("DOMContentLoaded", function () {
   if (toggleDemo.checked && dataLogs.length === 0) {
     const demoData = [
       { date: '2023-01-01', weight: 200, waist: 34, hips: 36, chest: 40, calories: 2500 },
-      { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39, calories: 2400 },
-      { date: '2023-03-01', weight: 190, waist: 33, hips: 35, chest: 38, calories: 2300 }
+      { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39, calories: 2450 },
+      { date: '2023-03-01', weight: 190, waist: 33, hips: 35, chest: 38, calories: 2400 }
     ];
     demoData.forEach(log => addDataLog(log));
     updateChart();
@@ -51,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
     updateCalorieSummary();
   }
 
-  // Data log form submission
+  // Data log form submission (weight & calorie logging)
   document.getElementById("data-log-form").addEventListener("submit", function(e) {
     e.preventDefault();
     const weight = parseFloat(document.getElementById("weight-input").value);
@@ -75,6 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function addDataLog(log) {
     dataLogs.push(log);
     dataLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
+    console.log("Data logs:", dataLogs);
   }
 
   function updateChart() {
@@ -117,8 +119,10 @@ document.addEventListener("DOMContentLoaded", function () {
       calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>';
       return;
     }
-    const latest = dataLogs[dataLogs.length - 1];
-    calorieDiv.innerHTML = `<p>Latest Calorie Intake: ${latest.calories || "N/A"} kcal on ${latest.date}</p>`;
+    // For demo, show average calories of latest 3 entries if available
+    const recent = dataLogs.slice(-3);
+    const avg = recent.reduce((sum, log) => sum + (log.calories || 0), 0) / recent.length;
+    calorieDiv.innerHTML = `<p>Average Calories: ${Math.round(avg)} kcal</p>`;
   }
 
   // Photo upload form submission
@@ -187,6 +191,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Update photo selectors for comparison
   function updatePhotoSelectors() {
+    console.log("Updating photo selectors", photoLogs);
     const beforeSelect = $("#tt-before");
     const afterSelect = $("#tt-after");
     beforeSelect.empty();
@@ -197,7 +202,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Initialize TwentyTwenty plugin on page load
+  // Initialize TwentyTwenty plugin once the document is ready
   $(document).ready(function () {
     if ($.fn.twentytwenty) {
       $("#twentytwenty-container").twentytwenty();
@@ -208,25 +213,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Update comparison panel with selected photos
   $("#tt-update").on("click", function() {
+    console.log("Update comparison button clicked");
     const beforeIndex = parseInt($("#tt-before").val());
     const afterIndex = parseInt($("#tt-after").val());
+    console.log("Before index:", beforeIndex, "After index:", afterIndex);
     if (isNaN(beforeIndex) || isNaN(afterIndex)) {
       alert("Please select both before and after photos.");
+      return;
+    }
+    if (photoLogs.length === 0) {
+      alert("No photos available");
       return;
     }
     const beforePhoto = photoLogs[beforeIndex];
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    // Create new images and add a class if needed
-    const imgBefore = $(`<img src="${beforePhoto.src}" alt="Before">`);
-    const imgAfter = $(`<img src="${afterPhoto.src}" alt="After">`);
-    container.append(imgBefore);
-    container.append(imgAfter);
-    // Wait a short time to let images load then initialize TwentyTwenty
-    setTimeout(function() {
-      container.twentytwenty();
-    }, 300);
+    container.append(`<img src="${beforePhoto.src}" alt="Before">`);
+    container.append(`<img src="${afterPhoto.src}" alt="After">`);
+    // Constrain images to container dimensions
+    container.find("img").css({
+      "max-width": "100%",
+      "height": "auto"
+    });
+    container.twentytwenty();
+    console.log("Comparison updated with before and after photos");
   });
 
   // Export Report as Image using html2canvas
@@ -243,5 +254,18 @@ document.addEventListener("DOMContentLoaded", function () {
   $(".share-btn").on("click", function() {
     const platform = $(this).data("platform");
     alert(`Sharing to ${platform} (functionality to be implemented).`);
+  });
+
+  // Advanced Comparison Editor - Dummy Implementation
+  $("#close-comparison-editor").on("click", function() {
+    $("#comparison-editor-modal").hide();
+  });
+  $("#export-comparison-btn").on("click", function() {
+    html2canvas(document.getElementById("comparison-editor-modal")).then(canvas => {
+      let link = document.createElement("a");
+      link.download = "comparison_for_instagram.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    });
   });
 });
