@@ -3,7 +3,7 @@
 // USDA FoodData Central API Key
 const USDA_API_KEY = "DBS7VaqKcIKES5QY36b8Cw8bdk80CHzoufoxjeh8";
 
-// Debounce timer variable
+// Debounce timer variable for food search
 let foodSearchTimer = null;
 
 // Global arrays
@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // If demo checkbox is checked, load demo data
+  // Load Demo Data if the demo checkbox is checked
   const toggleDemo = document.getElementById("toggle-demo-data");
   if (toggleDemo.checked && dataLogs.length === 0) {
     const demoData = [
@@ -228,9 +228,8 @@ document.addEventListener("DOMContentLoaded", function () {
     displayDiv.innerHTML = html;
   }
 
-  // --- USDA Food Search Integrated with "Food Name" Input ---
-
-  // When user types in the food name field, debounce the search
+  // --- USDA Food Search Integrated into "Food Name" Field ---
+  // When user types in the food name field, debounce the search and display top 5 results.
   $("#food-name").on("keyup", function () {
     const query = $(this).val().trim();
     clearTimeout(foodSearchTimer);
@@ -253,14 +252,14 @@ document.addEventListener("DOMContentLoaded", function () {
         if (data.foods && data.foods.length > 0) {
           const topResults = data.foods.slice(0, 5);
           topResults.forEach(food => {
-            // For mobile, only show food description and calories
-            const energy = food.foodNutrients.find(n => n.nutrientName === "Energy");
+            // Use a safe default for foodNutrients in case it's undefined
+            const nutrients = food.foodNutrients || [];
+            const energy = nutrients.find(n => n.nutrientName === "Energy");
             resultsHtml += `<button type="button" class="list-group-item list-group-item-action food-result" data-food='${JSON.stringify(food)}'>
               <strong>${food.description}</strong>
               <br><small>Calories: ${energy ? energy.value : "N/A"} kcal</small>
             </button>`;
           });
-          // If more than 5 results, show a "More Results" option
           if (data.foods.length > 5) {
             resultsHtml += `<button type="button" class="list-group-item list-group-item-action text-center" id="more-results-btn">More Results</button>`;
           }
@@ -279,21 +278,20 @@ document.addEventListener("DOMContentLoaded", function () {
   $("#food-search-results").on("click", ".food-result", function() {
     const foodData = $(this).data("food");
     $("#food-name").val(foodData.description);
-    const energy = foodData.foodNutrients.find(n => n.nutrientName === "Energy");
+    const nutrients = foodData.foodNutrients || [];
+    const energy = nutrients.find(n => n.nutrientName === "Energy");
     $("#food-calories").val(energy ? energy.value : "");
-    const protein = foodData.foodNutrients.find(n => n.nutrientName === "Protein");
+    const protein = nutrients.find(n => n.nutrientName === "Protein");
     $("#food-protein").val(protein ? protein.value : "");
-    const fat = foodData.foodNutrients.find(n => n.nutrientName === "Total lipid (fat)");
+    const fat = nutrients.find(n => n.nutrientName === "Total lipid (fat)");
     $("#food-fat").val(fat ? fat.value : "");
-    const carbs = foodData.foodNutrients.find(n => n.nutrientName === "Carbohydrate, by difference");
+    const carbs = nutrients.find(n => n.nutrientName === "Carbohydrate, by difference");
     $("#food-carbs").val(carbs ? carbs.value : "");
-    // Clear search results after selection
     $("#food-search-results").empty();
   });
 
   // "More Results" button click
   $("#food-search-results").on("click", "#more-results-btn", function() {
-    // For now simply alert; you might choose to open a modal with full results.
     alert("Displaying more results is not implemented yet.");
   });
 
@@ -304,7 +302,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Frequent Foods: add selected food to frequent list if not already present
   function addFrequentFood(foodObj) {
-    // Check if food already exists (by name)
     if (!frequentFoods.find(f => f.food === foodObj.food)) {
       frequentFoods.push(foodObj);
       updateFrequentFoods();
@@ -319,7 +316,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // When a frequent food is clicked, populate the nutrition form fields
   $("#frequent-foods").on("click", ".frequent-food", function() {
     const foodData = $(this).data("food");
     $("#food-name").val(foodData.food);
