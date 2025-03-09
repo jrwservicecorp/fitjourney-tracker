@@ -1,18 +1,19 @@
-/* script.js - FitJourney Tracker - Tesla Edition */
+/* script.js - FitJourney Tracker - Modern Edition */
 
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM fully loaded");
   // Set app version
-  document.getElementById("app-version").textContent = "v2.1";
+  document.getElementById("app-version").textContent = "v3.0";
 
   // Global arrays to store logs
   let dataLogs = [];
+  let nutritionLogs = [];
   let photoLogs = [];
   let editorCanvas; // Fabric.js canvas for advanced editor
 
-  // Initialize Chart.js with a time scale using Luxon adapter
-  const ctx = document.getElementById('weightChart').getContext('2d');
-  const weightChart = new Chart(ctx, {
+  // Initialize Weight Chart (using Chart.js with Luxon adapter)
+  const weightCtx = document.getElementById('weightChart').getContext('2d');
+  const weightChart = new Chart(weightCtx, {
     type: 'line',
     data: {
       datasets: [{
@@ -38,6 +39,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Initialize Nutrition Chart (placeholder, can be expanded)
+  const nutritionCtx = document.getElementById('nutritionChart').getContext('2d');
+  const nutritionChart = new Chart(nutritionCtx, {
+    type: 'bar',
+    data: {
+      labels: [], // dates
+      datasets: [{
+        label: 'Calories (kcal)',
+        data: [],
+        backgroundColor: '#28a745'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { title: { display: true, text: 'Date' } },
+        y: { title: { display: true, text: 'Calories (kcal)' } }
+      }
+    }
+  });
+
   // Toggle demo data if none exists
   const toggleDemo = document.getElementById("toggle-demo-data");
   if (toggleDemo.checked && dataLogs.length === 0) {
@@ -46,14 +68,21 @@ document.addEventListener("DOMContentLoaded", function () {
       { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39, calories: 2450 },
       { date: '2023-03-01', weight: 190, waist: 33, hips: 35, chest: 38, calories: 2400 }
     ];
+    const demoNutrition = [
+      { date: '2023-01-01', food: 'Chicken Breast', weight: 150, calories: 250, protein: 40, fat: 3, carbs: 0 },
+      { date: '2023-01-02', food: 'Oatmeal', weight: 50, calories: 180, protein: 6, fat: 3, carbs: 32 }
+    ];
     demoData.forEach(log => addDataLog(log));
-    updateChart();
+    demoNutrition.forEach(log => addNutritionLog(log));
+    updateWeightChart();
+    updateNutritionChart();
     updateSummary();
     updateRecentWeighIns();
     updateCalorieSummary();
+    updateNutritionDisplay();
   }
 
-  // Data log form submission (weight & calorie logging)
+  // Data Log form submission (Body Weight)
   document.getElementById("data-log-form").addEventListener("submit", function(e) {
     e.preventDefault();
     const weight = parseFloat(document.getElementById("weight-input").value);
@@ -67,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     addDataLog({ date, weight, waist, hips, chest, calories });
-    updateChart();
+    updateWeightChart();
     updateSummary();
     updateRecentWeighIns();
     updateCalorieSummary();
@@ -80,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Data logs:", dataLogs);
   }
 
-  function updateChart() {
+  function updateWeightChart() {
     weightChart.data.datasets[0].data = dataLogs.map(log => ({ x: log.date, y: log.weight }));
     weightChart.update();
   }
@@ -88,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function updateSummary() {
     const summaryDiv = document.getElementById("weight-summary");
     if (dataLogs.length === 0) {
-      summaryDiv.innerHTML = '<p class="placeholder">No data available for summary.</p>';
+      summaryDiv.innerHTML = '<p class="placeholder">No weight data available.</p>';
       return;
     }
     const latest = dataLogs[dataLogs.length - 1];
@@ -120,9 +149,76 @@ document.addEventListener("DOMContentLoaded", function () {
       calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>';
       return;
     }
+    // Use last 3 records for average calculation
     const recent = dataLogs.slice(-3);
     const avg = recent.reduce((sum, log) => sum + (log.calories || 0), 0) / recent.length;
     calorieDiv.innerHTML = `<p>Average Calories: ${Math.round(avg)} kcal</p>`;
+  }
+
+  // Nutrition Log form submission
+  document.getElementById("nutrition-log-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const food = document.getElementById("food-name").value;
+    const weight = parseFloat(document.getElementById("food-weight").value);
+    const calories = parseFloat(document.getElementById("food-calories").value);
+    const protein = parseFloat(document.getElementById("food-protein").value) || 0;
+    const fat = parseFloat(document.getElementById("food-fat").value) || 0;
+    const carbs = parseFloat(document.getElementById("food-carbs").value) || 0;
+    const date = document.getElementById("nutrition-date").value;
+    if (!food || !weight || !calories || !date) {
+      alert("Please complete all required fields.");
+      return;
+    }
+    addNutritionLog({ food, weight, calories, protein, fat, carbs, date });
+    updateNutritionChart();
+    updateNutritionDisplay();
+    this.reset();
+  });
+
+  function addNutritionLog(log) {
+    nutritionLogs.push(log);
+    nutritionLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
+    console.log("Nutrition logs:", nutritionLogs);
+  }
+
+  function updateNutritionChart() {
+    // For demo: aggregate calories per date
+    let dates = [];
+    let calValues = [];
+    nutritionLogs.forEach(log => {
+      if (!dates.includes(log.date)) {
+        dates.push(log.date);
+        calValues.push(log.calories);
+      } else {
+        const idx = dates.indexOf(log.date);
+        calValues[idx] += log.calories;
+      }
+    });
+    nutritionChart.data.labels = dates;
+    nutritionChart.data.datasets[0].data = calValues;
+    nutritionChart.update();
+  }
+
+  function updateNutritionDisplay() {
+    const displayDiv = document.getElementById("nutrition-log-display");
+    if (nutritionLogs.length === 0) {
+      displayDiv.innerHTML = '<p class="placeholder">No nutrition logs recorded yet.</p>';
+      return;
+    }
+    let html = '<table><thead><tr><th>Date</th><th>Food</th><th>Weight (g)</th><th>Calories</th><th>Protein</th><th>Fat</th><th>Carbs</th></tr></thead><tbody>';
+    nutritionLogs.forEach(log => {
+      html += `<tr>
+        <td>${log.date}</td>
+        <td>${log.food}</td>
+        <td>${log.weight}</td>
+        <td>${log.calories}</td>
+        <td>${log.protein}</td>
+        <td>${log.fat}</td>
+        <td>${log.carbs}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    displayDiv.innerHTML = html;
   }
 
   // Photo upload form submission
@@ -229,7 +325,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    // Append images with necessary classes
+    // Append images with TwentyTwenty classes
     const $beforeImg = $(`<img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before">`);
     const $afterImg = $(`<img class="twentytwenty-after" src="${afterPhoto.src}" alt="After">`);
     container.append($beforeImg, $afterImg);
@@ -251,12 +347,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Open Advanced Comparison Editor
+  // Advanced Comparison Editor functions
   $("#open-editor-btn").on("click", function() {
     openComparisonEditor();
   });
 
-  // Advanced Comparison Editor functions
   function openComparisonEditor() {
     if (photoLogs.length < 2) {
       alert("Please upload at least two photos and select them for comparison.");
@@ -271,10 +366,9 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#comparison-editor-modal").show();
     // Initialize Fabric.js canvas
     editorCanvas = new fabric.Canvas('comparisonCanvas', {
-      backgroundColor: '#fff',
+      backgroundColor: '#f7f7f7',
       selection: true
     });
-    // Clear canvas if not empty
     editorCanvas.clear();
     // Load before image onto left half of canvas
     fabric.Image.fromURL(beforePhoto.src, function(img) {
@@ -290,7 +384,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Load after image onto right half of canvas
     fabric.Image.fromURL(afterPhoto.src, function(img) {
       img.set({
-        left: 300, // adjust as needed for side-by-side
+        left: 300,
         top: 0,
         scaleX: 0.5,
         scaleY: 0.5,
@@ -306,7 +400,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const text = new fabric.IText('New Overlay', {
         left: 50,
         top: 50,
-        fill: '#fff',
+        fill: '#333',
         fontSize: 20,
         selectable: true
       });
@@ -315,7 +409,29 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Close Advanced Editor Modal
+  // Save Changes from Advanced Editor to main comparison area
+  $("#save-editor-btn").on("click", function() {
+    if (editorCanvas) {
+      // Export the current canvas as an image data URL
+      const dataURL = editorCanvas.toDataURL({
+        format: 'png'
+      });
+      // Update the main comparison container with the edited image on both sides
+      const container = $("#twentytwenty-container");
+      container.empty();
+      // We use the same edited image for both sides for demo purposes.
+      // In a full implementation you might allow different editing for before/after.
+      const $editedImg = $(`<img src="${dataURL}" alt="Edited Comparison">`);
+      container.append($editedImg);
+      // Reinitialize TwentyTwenty (if needed) or simply show the edited image.
+      $("#comparison-editor-modal").hide();
+      editorCanvas.dispose();
+      editorCanvas = null;
+      console.log("Advanced editor changes saved to main comparison area");
+    }
+  });
+
+  // Close Advanced Editor Modal (changes not saved)
   $("#close-comparison-editor").on("click", function() {
     $("#comparison-editor-modal").hide();
     if (editorCanvas) {
@@ -327,9 +443,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Export Comparison from Advanced Editor
   $("#export-comparison-btn").on("click", function() {
     if (editorCanvas) {
-      const dataURL = editorCanvas.toDataURL({
-        format: 'png'
-      });
+      const dataURL = editorCanvas.toDataURL({ format: 'png' });
       let link = document.createElement("a");
       link.download = "comparison_for_instagram.png";
       link.href = dataURL;
