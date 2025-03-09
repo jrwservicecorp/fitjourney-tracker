@@ -1,19 +1,16 @@
-/* script.js - FitJourney Tracker - Tesla Edition */
-
-/* Global arrays for data and photos */
-let dataLogs = [];
-let photoLogs = [];
-
-/* Chart instance */
-let weightChart = null;
+/* script.js - FitJourney Tracker - Tesla Edition v2.2 */
 
 document.addEventListener("DOMContentLoaded", function () {
   // Set app version
-  document.getElementById("app-version").textContent = "v2.1";
+  document.getElementById("app-version").textContent = "v2.2";
 
-  // Initialize Chart.js with time scale (using Luxon adapter)
+  // Global arrays to store logs
+  let dataLogs = [];
+  let photoLogs = [];
+
+  // Initialize Chart.js (with a time scale)
   const ctx = document.getElementById('weightChart').getContext('2d');
-  weightChart = new Chart(ctx, {
+  const weightChart = new Chart(ctx, {
     type: 'line',
     data: {
       datasets: [{
@@ -39,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Load demo data if toggled on and no logs exist
+  // Toggle demo data if none exists
   const toggleDemo = document.getElementById("toggle-demo-data");
   if (toggleDemo.checked && dataLogs.length === 0) {
     const demoData = [
@@ -116,16 +113,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function updateCalorieSummary() {
     const calorieDiv = document.getElementById("calorie-summary");
-    const total = dataLogs.reduce((sum, log) => sum + (log.calories || 0), 0);
-    if (dataLogs.length === 0 || total === 0) {
+    if (dataLogs.length === 0) {
       calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>';
       return;
     }
-    const avg = (total / dataLogs.length).toFixed(0);
-    calorieDiv.innerHTML = `<p>Average Daily Calories: ${avg} kcal</p>`;
+    const latest = dataLogs[dataLogs.length - 1];
+    if (!latest.calories) {
+      calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>';
+      return;
+    }
+    calorieDiv.innerHTML = `<p>Latest Calories: ${latest.calories} kcal on ${latest.date}</p>`;
   }
 
-  // Photo upload form submission using jQuery
+  // Photo upload form submission
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
@@ -201,16 +201,20 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Initialize TwentyTwenty plugin for side-by-side comparison
+  // Initialize TwentyTwenty plugin once the document is ready
   $(document).ready(function () {
     if ($.fn.twentytwenty) {
-      $("#twentytwenty-container").twentytwenty();
+      $("#twentytwenty-container").twentytwenty({
+        afterSliderLoad: function() {
+          $("#twentytwenty-container").css("visibility", "visible");
+        }
+      });
     } else {
       console.error("TwentyTwenty plugin failed to load.");
     }
   });
 
-  // Update comparison panel with selected photos for TwentyTwenty
+  // Update comparison panel with selected photos
   $("#tt-update").on("click", function() {
     const beforeIndex = parseInt($("#tt-before").val());
     const afterIndex = parseInt($("#tt-after").val());
@@ -224,72 +228,15 @@ document.addEventListener("DOMContentLoaded", function () {
     container.empty();
     container.append(`<img src="${beforePhoto.src}" alt="Before">`);
     container.append(`<img src="${afterPhoto.src}" alt="After">`);
-    container.twentytwenty();
+    // Re-initialize TwentyTwenty after updating images
+    container.twentytwenty({
+      afterSliderLoad: function() {
+        container.css("visibility", "visible");
+      }
+    });
   });
 
-  // Advanced Comparison Editor using Fabric.js
-  let comparisonCanvas = new fabric.Canvas('comparisonCanvas');
-  
-  // Open advanced comparison editor modal
-  $("#open-comparison-editor").on("click", function() {
-    $("#comparison-editor-modal").show();
-    const beforeIndex = parseInt($("#tt-before").val());
-    const afterIndex = parseInt($("#tt-after").val());
-    if (isNaN(beforeIndex) || isNaN(afterIndex)) {
-      alert("Please select both before and after photos for editing.");
-      return;
-    }
-    const beforePhoto = photoLogs[beforeIndex];
-    const afterPhoto = photoLogs[afterIndex];
-    // Clear canvas and load the before image as background
-    comparisonCanvas.clear();
-    fabric.Image.fromURL(beforePhoto.src, function(img) {
-      img.set({
-        selectable: false,
-        evented: false,
-        scaleX: comparisonCanvas.width / img.width,
-        scaleY: comparisonCanvas.height / img.height
-      });
-      comparisonCanvas.setBackgroundImage(img, comparisonCanvas.renderAll.bind(comparisonCanvas));
-    });
-    // Load the after image as an overlay (semi-transparent)
-    fabric.Image.fromURL(afterPhoto.src, function(img) {
-      img.set({
-        opacity: 0.5,
-        selectable: false,
-        evented: false,
-        scaleX: comparisonCanvas.width / img.width,
-        scaleY: comparisonCanvas.height / img.height
-      });
-      comparisonCanvas.add(img);
-    });
-  });
-  
-  // Close advanced comparison editor modal
-  $("#close-comparison-editor").on("click", function() {
-    $("#comparison-editor-modal").hide();
-  });
-  
-  // Sticker functionality: add sticker to comparison canvas
-  $(".sticker-btn").on("click", function() {
-    const stickerUrl = $(this).data("sticker");
-    fabric.Image.fromURL(stickerUrl, function(img) {
-      img.set({ left: 50, top: 50, scaleX: 0.5, scaleY: 0.5 });
-      comparisonCanvas.add(img);
-    });
-  });
-  
-  // Export advanced comparison as image
-  $("#export-comparison-btn").on("click", function() {
-    html2canvas(document.getElementById("comparisonCanvas")).then(canvas => {
-      let link = document.createElement("a");
-      link.download = "comparison_export.png";
-      link.href = canvas.toDataURL();
-      link.click();
-    });
-  });
-  
-  // Export report as image
+  // Export Report as Image using html2canvas
   $("#export-report-btn").on("click", function() {
     html2canvas(document.getElementById("main-app")).then(canvas => {
       let link = document.createElement("a");
@@ -298,7 +245,7 @@ document.addEventListener("DOMContentLoaded", function () {
       link.click();
     });
   });
-  
+
   // Social share buttons (dummy implementation)
   $(".share-btn").on("click", function() {
     const platform = $(this).data("platform");
