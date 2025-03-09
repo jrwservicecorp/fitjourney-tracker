@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FitJourney Tracker - Modern Edition</title>
+  <!-- Bootstrap CSS from CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" 
+        integrity="sha384-cuP+Rb3F58yGrW8PLP5k+axIWKFoQpUSdAPuC5VJcCr1E5ZD59wM9xAj8QcOc3h8" crossorigin="anonymous">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
   
@@ -21,239 +24,203 @@
   <script src="script.js" defer></script>
 </head>
 <body>
-  <header>
-    <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v3.0</span></p>
+  <header class="bg-primary text-white py-3">
+    <div class="container">
+      <h1>FitJourney Tracker</h1>
+      <p>App Version: <span id="app-version">v3.0</span></p>
+    </div>
   </header>
   
   <!-- New Navigation Menu -->
-  <nav id="main-nav">
-    <ul>
-      <li><a href="#dashboard-section" class="nav-link active">Dashboard</a></li>
-      <li><a href="#nutrition-section" class="nav-link">Nutrition Log</a></li>
-      <li><a href="#weight-section" class="nav-link">Body Weight Log</a></li>
-      <li><a href="#media-section" class="nav-link">Media & Exports</a></li>
-    </ul>
+  <nav id="main-nav" class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="#">Tracker</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a href="#dashboard-section" class="nav-link active">Dashboard</a></li>
+          <li class="nav-item"><a href="#nutrition-section" class="nav-link">Nutrition Log</a></li>
+          <li class="nav-item"><a href="#weight-section" class="nav-link">Body Weight Log</a></li>
+          <li class="nav-item"><a href="#media-section" class="nav-link">Media & Exports</a></li>
+        </ul>
+      </div>
+    </div>
   </nav>
   
-  <main id="main-app">
-    <!-- Dashboard Section: Summaries & Charts -->
-    <section id="dashboard-section">
-      <h2>Dashboard</h2>
-      <!-- Weight Chart -->
-      <div class="card chart-container">
-        <canvas id="weightChart"></canvas>
-        <p id="chart-placeholder">Start logging weight to see trends!</p>
-        <div class="chart-options">
-          <label>
-            <input type="checkbox" id="toggle-demo-data" checked>
-            Show Demo Data
-          </label>
+  <main id="main-app" class="container my-4">
+    <!-- Dashboard Section -->
+    <section id="dashboard-section" class="mb-5">
+      <h2 class="mb-4">Dashboard</h2>
+      <div class="row">
+        <!-- Weight Chart -->
+        <div class="col-md-6 mb-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <canvas id="weightChart"></canvas>
+              <p id="chart-placeholder" class="text-muted mt-2">Start logging weight to see trends!</p>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="toggle-demo-data" checked>
+                <label class="form-check-label" for="toggle-demo-data">Show Demo Data</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Nutrition Chart -->
+        <div class="col-md-6 mb-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <canvas id="nutritionChart"></canvas>
+              <p id="nutrition-chart-placeholder" class="text-muted mt-2">Nutrition trends will appear here.</p>
+            </div>
+          </div>
         </div>
       </div>
-      <!-- Nutrition Chart (placeholder) -->
-      <div class="card chart-container">
-        <canvas id="nutritionChart"></canvas>
-        <p id="nutrition-chart-placeholder">Nutrition trends will appear here.</p>
-      </div>
-      <!-- Summaries -->
-      <div id="summary-section" class="card">
-        <div id="weight-summary">
-          <h3>Weight Summary</h3>
-          <p class="placeholder">No weight data available.</p>
+      <!-- Summary Panels -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="card shadow-sm" id="weight-summary">
+            <div class="card-body">
+              <h3 class="card-title">Weight Summary</h3>
+              <p class="placeholder">No weight data available.</p>
+            </div>
+          </div>
         </div>
-        <div id="calorie-summary">
-          <h3>Calorie Summary</h3>
-          <p class="placeholder">No calorie data available.</p>
+        <div class="col-md-6 mb-3">
+          <div class="card shadow-sm" id="calorie-summary">
+            <div class="card-body">
+              <h3 class="card-title">Calorie Summary</h3>
+              <p class="placeholder">No calorie data available.</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
     
     <!-- Nutrition Log Section -->
-    <section id="nutrition-section">
-      <h2>Nutrition Log</h2>
-      <div class="card" id="nutrition-log-section">
-        <form id="nutrition-log-form">
-          <div>
-            <label for="food-name">Food Name:</label>
-            <input id="food-name" type="text" placeholder="e.g., Chicken Breast" required>
+    <section id="nutrition-section" class="mb-5" style="display:none;">
+      <h2 class="mb-4">Nutrition Log</h2>
+      <div class="card shadow-sm mb-4" id="nutrition-log-section">
+        <div class="card-body">
+          <form id="nutrition-log-form" class="row g-3">
+            <div class="col-md-4">
+              <label for="food-name" class="form-label">Food Name</label>
+              <input id="food-name" type="text" class="form-control" placeholder="e.g., Chicken Breast" required>
+            </div>
+            <div class="col-md-2">
+              <label for="food-weight" class="form-label">Weight (g)</label>
+              <input id="food-weight" type="number" step="1" class="form-control" placeholder="grams" required>
+            </div>
+            <div class="col-md-2">
+              <label for="food-calories" class="form-label">Calories (kcal)</label>
+              <input id="food-calories" type="number" step="1" class="form-control" placeholder="kcal" required>
+            </div>
+            <div class="col-md-2">
+              <label for="food-protein" class="form-label">Protein (g)</label>
+              <input id="food-protein" type="number" step="0.1" class="form-control" placeholder="g">
+            </div>
+            <div class="col-md-2">
+              <label for="food-fat" class="form-label">Fat (g)</label>
+              <input id="food-fat" type="number" step="0.1" class="form-control" placeholder="g">
+            </div>
+            <div class="col-md-2">
+              <label for="food-carbs" class="form-label">Carbs (g)</label>
+              <input id="food-carbs" type="number" step="0.1" class="form-control" placeholder="g">
+            </div>
+            <div class="col-md-3">
+              <label for="nutrition-date" class="form-label">Date</label>
+              <input id="nutrition-date" type="date" class="form-control" required>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary w-100">Log Nutrition</button>
+            </div>
+          </form>
+          <div class="mt-4" id="nutrition-log-display">
+            <p class="placeholder">No nutrition logs recorded yet.</p>
           </div>
-          <div>
-            <label for="food-weight">Weight (g):</label>
-            <input id="food-weight" type="number" step="1" placeholder="grams" required>
+          <!-- Food Search Section -->
+          <div class="mt-4">
+            <h5>Search for Food Data</h5>
+            <div class="input-group mb-3">
+              <input type="text" id="food-search" class="form-control" placeholder="Enter food name...">
+              <button class="btn btn-outline-secondary" type="button" id="search-food-btn">Search</button>
+            </div>
+            <div id="food-search-results"></div>
           </div>
-          <div>
-            <label for="food-calories">Calories (kcal):</label>
-            <input id="food-calories" type="number" step="1" placeholder="kcal" required>
-          </div>
-          <div>
-            <label for="food-protein">Protein (g):</label>
-            <input id="food-protein" type="number" step="0.1" placeholder="g">
-          </div>
-          <div>
-            <label for="food-fat">Fat (g):</label>
-            <input id="food-fat" type="number" step="0.1" placeholder="g">
-          </div>
-          <div>
-            <label for="food-carbs">Carbs (g):</label>
-            <input id="food-carbs" type="number" step="0.1" placeholder="g">
-          </div>
-          <div>
-            <label for="nutrition-date">Date:</label>
-            <input id="nutrition-date" type="date" required>
-          </div>
-          <button type="submit">Log Nutrition</button>
-        </form>
-        <div id="nutrition-log-display">
-          <p class="placeholder">No nutrition logs recorded yet.</p>
         </div>
       </div>
     </section>
     
     <!-- Body Weight Log Section -->
-    <section id="weight-section">
-      <h2>Body Weight Log</h2>
-      <div class="card" id="data-log-section">
-        <form id="data-log-form">
-          <div>
-            <label for="weight-input">Weight (lbs):</label>
-            <input id="weight-input" type="number" step="0.1" placeholder="lbs" required>
-          </div>
-          <div>
-            <label for="date-input">Date:</label>
-            <input id="date-input" type="date" required>
-          </div>
-          <div>
-            <label for="waist-input">Waist (in):</label>
-            <input id="waist-input" type="number" step="0.1" placeholder="in">
-          </div>
-          <div>
-            <label for="hips-input">Hips (in):</label>
-            <input id="hips-input" type="number" step="0.1" placeholder="in">
-          </div>
-          <div>
-            <label for="chest-input">Chest (in):</label>
-            <input id="chest-input" type="number" step="0.1" placeholder="in">
-          </div>
-          <div>
-            <label for="calories-input">Calories (kcal):</label>
-            <input id="calories-input" type="number" step="1" placeholder="kcal">
-          </div>
-          <button type="submit">Log Data</button>
-        </form>
+    <section id="weight-section" class="mb-5" style="display:none;">
+      <h2 class="mb-4">Body Weight Log</h2>
+      <div class="card shadow-sm mb-4" id="data-log-section">
+        <div class="card-body">
+          <form id="data-log-form" class="row g-3">
+            <div class="col-md-3">
+              <label for="weight-input" class="form-label">Weight (lbs)</label>
+              <input id="weight-input" type="number" step="0.1" class="form-control" placeholder="lbs" required>
+            </div>
+            <div class="col-md-3">
+              <label for="date-input" class="form-label">Date</label>
+              <input id="date-input" type="date" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+              <label for="waist-input" class="form-label">Waist (in)</label>
+              <input id="waist-input" type="number" step="0.1" class="form-control" placeholder="in">
+            </div>
+            <div class="col-md-2">
+              <label for="hips-input" class="form-label">Hips (in)</label>
+              <input id="hips-input" type="number" step="0.1" class="form-control" placeholder="in">
+            </div>
+            <div class="col-md-2">
+              <label for="chest-input" class="form-label">Chest (in)</label>
+              <input id="chest-input" type="number" step="0.1" class="form-control" placeholder="in">
+            </div>
+            <div class="col-md-2">
+              <label for="calories-input" class="form-label">Calories (kcal)</label>
+              <input id="calories-input" type="number" step="1" class="form-control" placeholder="kcal">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary w-100">Log Data</button>
+            </div>
+          </form>
+        </div>
       </div>
-      <div id="weight-log-display" class="card">
-        <h3>Recent Weigh-Ins</h3>
-        <div id="recent-weighins">
-          <p class="placeholder">No weigh-ins recorded yet.</p>
+      <div class="card shadow-sm" id="weight-log-display">
+        <div class="card-body">
+          <h3 class="card-title">Recent Weigh-Ins</h3>
+          <div id="recent-weighins">
+            <p class="placeholder">No weigh-ins recorded yet.</p>
+          </div>
         </div>
       </div>
     </section>
     
     <!-- Media & Exports Section -->
-    <section id="media-section">
-      <h2>Media & Exports</h2>
+    <section id="media-section" class="mb-5" style="display:none;">
+      <h2 class="mb-4">Media & Exports</h2>
       <!-- Photo Upload -->
-      <div class="card upload-photo">
-        <h3>Upload Progress Photo</h3>
-        <form id="photo-upload-form">
-          <div>
-            <label for="photo-upload">Select Photo:</label>
-            <input id="photo-upload" type="file" accept="image/*">
+      <div class="card shadow-sm mb-4 upload-photo">
+        <div class="card-body">
+          <h3>Upload Progress Photo</h3>
+          <form id="photo-upload-form" class="row g-3">
+            <div class="col-md-4">
+              <label for="photo-upload" class="form-label">Select Photo</label>
+              <input id="photo-upload" type="file" accept="image/*" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label for="photo-date" class="form-label">Photo Date</label>
+              <input id="photo-date" type="date" class="form-control">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <button id="upload-photo-btn" type="submit" class="btn btn-primary w-100">Upload Photo</button>
+            </div>
+          </form>
+          <div id="photo-gallery" class="gallery mt-3">
+            <p class="placeholder">No photos uploaded yet.</p>
           </div>
-          <div>
-            <label for="photo-date">Photo Date:</label>
-            <input id="photo-date" type="date">
-          </div>
-          <button id="upload-photo-btn" type="submit">Upload Photo</button>
-        </form>
-        <div id="photo-gallery" class="gallery">
-          <p class="placeholder">No photos uploaded yet.</p>
+          <button id="clear-photos-btn" class="btn btn-link" style="display:none;">Clear All Photos</button>
         </div>
-        <div id="clear-photos-btn" style="display: none;"></div>
-      </div>
-      
-      <!-- Photo Filter -->
-      <div class="card" id="photo-filter-card">
-        <h3>Filter Gallery by Date Range</h3>
-        <div>
-          <label for="filter-start-date">Start Date:</label>
-          <input id="filter-start-date" type="date">
-          <label for="filter-end-date">End Date:</label>
-          <input id="filter-end-date" type="date">
-          <button id="filter-photos-btn">Filter Photos</button>
-          <button id="clear-filter-btn">Clear Filter</button>
-        </div>
-      </div>
-      
-      <!-- Side by Side Comparison -->
-      <div class="card">
-        <h3>Side by Side Comparison</h3>
-        <div class="photo-selectors">
-          <label for="tt-before">Before:</label>
-          <select id="tt-before"></select>
-          <label for="tt-after">After:</label>
-          <select id="tt-after"></select>
-          <button id="tt-update">Update Comparison</button>
-          <button id="open-editor-btn">Open Advanced Editor</button>
-        </div>
-        <div id="twentytwenty-container" class="twentytwenty-container">
-          <img class="twentytwenty-before" src="https://placehold.co/300x400?text=Before" alt="Before">
-          <img class="twentytwenty-after" src="https://placehold.co/300x400?text=After" alt="After">
-        </div>
-      </div>
-      
-      <!-- Export Report -->
-      <div class="card" id="export-section">
-        <h3>Export Options</h3>
-        <button id="export-report-btn">Export Report as Image</button>
-      </div>
-      
-      <!-- Social Share -->
-      <div class="card social-share">
-        <h3>Share Your Progress</h3>
-        <button class="share-btn" data-platform="Facebook">Share on Facebook</button>
-        <button class="share-btn" data-platform="Twitter">Share on Twitter</button>
-        <button class="share-btn" data-platform="Instagram">Share on Instagram</button>
-      </div>
-    </section>
-    
-    <!-- Advanced Comparison Editor Modal -->
-    <div id="comparison-editor-modal">
-      <div class="modal-content">
-        <button id="close-comparison-editor">Close</button>
-        <h3>Advanced Comparison Editor</h3>
-        <canvas id="comparisonCanvas" width="600" height="400"></canvas>
-        <div class="editor-controls">
-          <button id="add-text-btn">Add Text Overlay</button>
-          <button id="save-editor-btn">Save Changes</button>
-          <button id="export-comparison-btn">Export for Instagram</button>
-        </div>
-      </div>
-    </div>
-  </main>
-  
-  <footer>
-    <p>&copy; 2025 FitJourney Tracker</p>
-  </footer>
-  
-  <!-- Inline Script for Basic Navigation -->
-  <script>
-    document.querySelectorAll(".nav-link").forEach(link => {
-      link.addEventListener("click", function(e) {
-        e.preventDefault();
-        document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
-        this.classList.add("active");
-        const target = this.getAttribute("href");
-        document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
-        document.querySelector(target).style.display = "block";
-      });
-    });
-    // Show Dashboard section by default
-    document.querySelector("#dashboard-section").style.display = "block";
-    document.querySelector("#nutrition-section").style.display = "none";
-    document.querySelector("#weight-section").style.display = "none";
-    document.querySelector("#media-section").style.display = "none";
-  </script>
-</body>
-</html>
