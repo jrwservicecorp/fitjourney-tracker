@@ -229,8 +229,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    container.append(`<img src="${beforePhoto.src}" alt="Before">`);
-    container.append(`<img src="${afterPhoto.src}" alt="After">`);
+    // Append images with appropriate classes for the TwentyTwenty plugin
+    container.append(`<img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before">`);
+    container.append(`<img class="twentytwenty-after" src="${afterPhoto.src}" alt="After">`);
     // Constrain images to container dimensions
     container.find("img").css({
       "max-width": "100%",
