@@ -1,4 +1,7 @@
-/* script.js - FitJourney Tracker - Modern Edition - JS v3.1 with USDA API Integration */
+/* script.js - FitJourney Tracker - Modern Edition - JS v3.1 */
+
+// USDA FoodData Central API Key
+const USDA_API_KEY = "DBS7VaqKcIKES5QY36b8Cw8bdk80CHzoufoxjeh8";
 
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM fully loaded");
@@ -218,43 +221,60 @@ document.addEventListener("DOMContentLoaded", function () {
     displayDiv.innerHTML = html;
   }
 
-  /* ----------------- USDA FoodData Central API Integration ----------------- */
-  // Replace the Nutritionix code with USDA API lookup
+  // USDA Food Search using FoodData Central API
   $("#search-food-btn").on("click", function() {
     const query = $("#food-search").val().trim();
     if (!query) {
       alert("Please enter a food name to search.");
       return;
     }
-    const USDA_API_KEY = "DBS7VaqKcIKES5QY36b8Cw8bdk80CHzoufoxjeh8";
-    const apiUrl = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}`;
-    fetch(apiUrl)
+    const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}`;
+    fetch(url)
       .then(response => response.json())
       .then(data => {
-        console.log("USDA API response:", data);
+        console.log("USDA response:", data);
+        let resultsHtml = "";
         if (data.foods && data.foods.length > 0) {
-          const food = data.foods[0];
-          $("#food-name").val(food.description);
-          // Find common nutrients – using case-insensitive search
-          const energyObj = food.foodNutrients.find(n => n.nutrientName.toLowerCase().includes("energy"));
-          const proteinObj = food.foodNutrients.find(n => n.nutrientName.toLowerCase().includes("protein"));
-          const fatObj = food.foodNutrients.find(n => n.nutrientName.toLowerCase().includes("total lipid"));
-          const carbObj = food.foodNutrients.find(n => n.nutrientName.toLowerCase().includes("carbohydrate"));
-          $("#food-calories").val(energyObj ? energyObj.value : "");
-          $("#food-protein").val(proteinObj ? proteinObj.value : "");
-          $("#food-fat").val(fatObj ? fatObj.value : "");
-          $("#food-carbs").val(carbObj ? carbObj.value : "");
+          data.foods.forEach(food => {
+            resultsHtml += `<div class="food-item" data-food='${JSON.stringify(food)}'>
+              <strong>${food.description}</strong>
+              <br>Calories: ${food.foodNutrients.find(n => n.nutrientName === "Energy")?.value || "N/A"} kcal
+            </div>`;
+          });
+          $("#food-search-results").html(resultsHtml);
+          $("#add-custom-food-btn").hide();
         } else {
-          alert("No food data found.");
+          $("#food-search-results").html("<p>No foods found. Please add custom food.</p>");
+          $("#add-custom-food-btn").show();
         }
       })
       .catch(error => {
         console.error("Error fetching USDA food data:", error);
-        alert("Error fetching food data. Check the console for details.");
+        alert("Error fetching food data. Check console for details.");
       });
   });
 
-  /* ----------------- Photo Upload & Comparison ----------------- */
+  // When a food item is clicked from the search results, fill in the form fields
+  $("#food-search-results").on("click", ".food-item", function() {
+    const foodData = $(this).data("food");
+    $("#food-name").val(foodData.description);
+    // Look for Energy nutrient (calories) – units may vary, so adjust as needed
+    const energyNutrient = foodData.foodNutrients.find(n => n.nutrientName === "Energy");
+    $("#food-calories").val(energyNutrient ? energyNutrient.value : "");
+    // Optionally fill protein, fat, carbs if available (search by common names)
+    const proteinNutrient = foodData.foodNutrients.find(n => n.nutrientName === "Protein");
+    const fatNutrient = foodData.foodNutrients.find(n => n.nutrientName === "Total lipid (fat)");
+    const carbNutrient = foodData.foodNutrients.find(n => n.nutrientName === "Carbohydrate, by difference");
+    $("#food-protein").val(proteinNutrient ? proteinNutrient.value : "");
+    $("#food-fat").val(fatNutrient ? fatNutrient.value : "");
+    $("#food-carbs").val(carbNutrient ? carbNutrient.value : "");
+  });
+
+  // "Add Custom Food" button
+  $("#add-custom-food-btn").on("click", function() {
+    alert("No food found. Please fill in the food information manually.");
+  });
+
   // Photo Upload Form Submission
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
@@ -374,7 +394,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  /* ----------------- Advanced Comparison Editor ----------------- */
+  // Advanced Comparison Editor Functions
   $("#open-editor-btn").on("click", function() {
     openComparisonEditor();
   });
@@ -391,70 +411,4 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#comparison-editor-modal").show();
     editorCanvas = new fabric.Canvas('comparisonCanvas', {
       backgroundColor: '#f7f7f7',
-      selection: true
-    });
-    editorCanvas.clear();
-    fabric.Image.fromURL(beforePhoto.src, function(img) {
-      img.set({ left: 0, top: 0, scaleX: 0.5, scaleY: 0.5, selectable: true });
-      editorCanvas.add(img);
-    });
-    fabric.Image.fromURL(afterPhoto.src, function(img) {
-      img.set({ left: 300, top: 0, scaleX: 0.5, scaleY: 0.5, selectable: true });
-      editorCanvas.add(img);
-    });
-  }
-
-  $("#add-text-btn").on("click", function() {
-    if (editorCanvas) {
-      const text = new fabric.IText('New Overlay', { left: 50, top: 50, fill: '#333', fontSize: 20 });
-      editorCanvas.add(text);
-      editorCanvas.setActiveObject(text);
-    }
-  });
-
-  $("#save-editor-btn").on("click", function() {
-    if (editorCanvas) {
-      const dataURL = editorCanvas.toDataURL({ format: 'png' });
-      const container = $("#twentytwenty-container");
-      container.empty();
-      const $editedImg = $(`<img src="${dataURL}" alt="Edited Comparison">`);
-      container.append($editedImg);
-      $("#comparison-editor-modal").hide();
-      editorCanvas.dispose();
-      editorCanvas = null;
-      console.log("Advanced editor changes saved to main comparison area");
-    }
-  });
-
-  $("#close-comparison-editor").on("click", function() {
-    $("#comparison-editor-modal").hide();
-    if (editorCanvas) {
-      editorCanvas.dispose();
-      editorCanvas = null;
-    }
-  });
-
-  $("#export-comparison-btn").on("click", function() {
-    if (editorCanvas) {
-      const dataURL = editorCanvas.toDataURL({ format: 'png' });
-      let link = document.createElement("a");
-      link.download = "comparison_for_instagram.png";
-      link.href = dataURL;
-      link.click();
-    }
-  });
-
-  $("#export-report-btn").on("click", function() {
-    html2canvas(document.getElementById("main-app")).then(canvas => {
-      let link = document.createElement("a");
-      link.download = "fitjourney_report.png";
-      link.href = canvas.toDataURL();
-      link.click();
-    });
-  });
-
-  $(".share-btn").on("click", function() {
-    const platform = $(this).data("platform");
-    alert(`Sharing to ${platform} (functionality to be implemented).`);
-  });
-});
+     
