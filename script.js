@@ -1,17 +1,16 @@
-/* script.js - FitJourney Tracker - Modern Edition */
+/* script.js - FitJourney Tracker - Modern Edition - JS v3.1 */
 
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM fully loaded");
-  // Set app version
-  document.getElementById("app-version").textContent = "v3.0";
+  document.getElementById("app-version").textContent = "v3.1";
 
-  // Global arrays to store logs
+  // Global arrays
   let dataLogs = [];
   let nutritionLogs = [];
   let photoLogs = [];
   let editorCanvas; // Fabric.js canvas for advanced editor
 
-  // Initialize Weight Chart (using Chart.js with Luxon adapter)
+  // Initialize Weight Chart (Chart.js with Luxon)
   const weightCtx = document.getElementById('weightChart').getContext('2d');
   const weightChart = new Chart(weightCtx, {
     type: 'line',
@@ -39,12 +38,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Initialize Nutrition Chart (placeholder, can be expanded)
+  // Initialize Nutrition Chart (Bar chart for calories)
   const nutritionCtx = document.getElementById('nutritionChart').getContext('2d');
   const nutritionChart = new Chart(nutritionCtx, {
     type: 'bar',
     data: {
-      labels: [], // dates
+      labels: [],
       datasets: [{
         label: 'Calories (kcal)',
         data: [],
@@ -60,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Toggle demo data if none exists
+  // Demo Data if demo checkbox is checked
   const toggleDemo = document.getElementById("toggle-demo-data");
   if (toggleDemo.checked && dataLogs.length === 0) {
     const demoData = [
@@ -82,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
     updateNutritionDisplay();
   }
 
-  // Data Log form submission (Body Weight)
+  // Body Weight Log Form Submission
   document.getElementById("data-log-form").addEventListener("submit", function(e) {
     e.preventDefault();
     const weight = parseFloat(document.getElementById("weight-input").value);
@@ -149,13 +148,12 @@ document.addEventListener("DOMContentLoaded", function () {
       calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>';
       return;
     }
-    // Use last 3 records for average calculation
     const recent = dataLogs.slice(-3);
     const avg = recent.reduce((sum, log) => sum + (log.calories || 0), 0) / recent.length;
     calorieDiv.innerHTML = `<p>Average Calories: ${Math.round(avg)} kcal</p>`;
   }
 
-  // Nutrition Log form submission
+  // Nutrition Log Form Submission
   document.getElementById("nutrition-log-form").addEventListener("submit", function(e) {
     e.preventDefault();
     const food = document.getElementById("food-name").value;
@@ -182,7 +180,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updateNutritionChart() {
-    // For demo: aggregate calories per date
     let dates = [];
     let calValues = [];
     nutritionLogs.forEach(log => {
@@ -205,7 +202,7 @@ document.addEventListener("DOMContentLoaded", function () {
       displayDiv.innerHTML = '<p class="placeholder">No nutrition logs recorded yet.</p>';
       return;
     }
-    let html = '<table><thead><tr><th>Date</th><th>Food</th><th>Weight (g)</th><th>Calories</th><th>Protein</th><th>Fat</th><th>Carbs</th></tr></thead><tbody>';
+    let html = '<table class="table table-striped"><thead><tr><th>Date</th><th>Food</th><th>Weight (g)</th><th>Calories</th><th>Protein</th><th>Fat</th><th>Carbs</th></tr></thead><tbody>';
     nutritionLogs.forEach(log => {
       html += `<tr>
         <td>${log.date}</td>
@@ -221,7 +218,47 @@ document.addEventListener("DOMContentLoaded", function () {
     displayDiv.innerHTML = html;
   }
 
-  // Photo upload form submission
+  // Nutrition Food Search using Nutritionix API (requires your API keys)
+  $("#search-food-btn").on("click", function() {
+    const query = $("#food-search").val().trim();
+    if (!query) {
+      alert("Please enter a food name to search.");
+      return;
+    }
+    const appId = "YOUR_APP_ID";  // Replace with your Nutritionix App ID
+    const appKey = "YOUR_APP_KEY"; // Replace with your Nutritionix App Key
+    const url = `https://trackapi.nutritionix.com/v2/natural/nutrients`;
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-app-id": appId,
+        "x-app-key": appKey
+      },
+      body: JSON.stringify({ query: query })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Nutritionix response:", data);
+      if (data.foods && data.foods.length > 0) {
+        const foodData = data.foods[0];
+        $("#food-name").val(foodData.food_name);
+        $("#food-weight").val(foodData.serving_weight_grams);
+        $("#food-calories").val(foodData.nf_calories);
+        $("#food-protein").val(foodData.nf_protein);
+        $("#food-fat").val(foodData.nf_total_fat);
+        $("#food-carbs").val(foodData.nf_total_carbohydrate);
+      } else {
+        alert("No food data found.");
+      }
+    })
+    .catch(error => {
+      console.error("Error fetching food data:", error);
+      alert("Error fetching food data. Check the console for details.");
+    });
+  });
+
+  // Photo Upload Form Submission
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
@@ -250,14 +287,13 @@ document.addEventListener("DOMContentLoaded", function () {
     photoLogs.forEach(photo => {
       gallery.append(`
         <div class="photo-entry">
-          <img src="${photo.src}" alt="Progress Photo">
+          <img src="${photo.src}" alt="Progress Photo" class="img-fluid">
           <p>Date: ${photo.date}</p>
         </div>
       `);
     });
   }
 
-  // Filter photos by date range
   $("#filter-photos-btn").on("click", function() {
     const startDate = $("#filter-start-date").val();
     const endDate = $("#filter-end-date").val();
@@ -272,7 +308,7 @@ document.addEventListener("DOMContentLoaded", function () {
       filtered.forEach(photo => {
         gallery.append(`
           <div class="photo-entry">
-            <img src="${photo.src}" alt="Progress Photo">
+            <img src="${photo.src}" alt="Progress Photo" class="img-fluid">
             <p>Date: ${photo.date}</p>
           </div>
         `);
@@ -285,7 +321,7 @@ document.addEventListener("DOMContentLoaded", function () {
     updatePhotoGallery();
   });
 
-  // Update photo selectors for comparison
+  // Update Photo Selectors for Comparison
   function updatePhotoSelectors() {
     console.log("Updating photo selectors", photoLogs);
     const beforeSelect = $("#tt-before");
@@ -298,7 +334,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Initialize TwentyTwenty plugin once the document is ready
+  // Initialize TwentyTwenty plugin when ready
   $(document).ready(function () {
     if ($.fn.twentytwenty) {
       $("#twentytwenty-container").twentytwenty();
@@ -307,7 +343,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Update comparison panel with selected photos
+  // Update Comparison Panel with Selected Photos
   $("#tt-update").on("click", function() {
     console.log("Update comparison button clicked");
     const beforeIndex = parseInt($("#tt-before").val());
@@ -325,16 +361,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    // Append images with TwentyTwenty classes
     const $beforeImg = $(`<img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before">`);
     const $afterImg = $(`<img class="twentytwenty-after" src="${afterPhoto.src}" alt="After">`);
     container.append($beforeImg, $afterImg);
-    // Constrain images to container dimensions
-    container.find("img").css({
-      "max-width": "100%",
-      "height": "auto"
-    });
-    // Wait for both images to load before initializing TwentyTwenty
+    container.find("img").css({ "max-width": "100%", "height": "auto" });
     let loadedCount = 0;
     container.find("img").each(function() {
       $(this).on("load", function() {
@@ -347,7 +377,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Advanced Comparison Editor functions
+  // Advanced Comparison Editor Functions
   $("#open-editor-btn").on("click", function() {
     openComparisonEditor();
   });
@@ -357,73 +387,41 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Please upload at least two photos and select them for comparison.");
       return;
     }
-    // Get selected photos (default to first two if not selected)
     const beforeIndex = parseInt($("#tt-before").val()) || 0;
     const afterIndex = parseInt($("#tt-after").val()) || 1;
     const beforePhoto = photoLogs[beforeIndex];
     const afterPhoto = photoLogs[afterIndex];
-    // Show modal
     $("#comparison-editor-modal").show();
-    // Initialize Fabric.js canvas
     editorCanvas = new fabric.Canvas('comparisonCanvas', {
       backgroundColor: '#f7f7f7',
       selection: true
     });
     editorCanvas.clear();
-    // Load before image onto left half of canvas
     fabric.Image.fromURL(beforePhoto.src, function(img) {
-      img.set({
-        left: 0,
-        top: 0,
-        scaleX: 0.5,
-        scaleY: 0.5,
-        selectable: true
-      });
+      img.set({ left: 0, top: 0, scaleX: 0.5, scaleY: 0.5, selectable: true });
       editorCanvas.add(img);
     });
-    // Load after image onto right half of canvas
     fabric.Image.fromURL(afterPhoto.src, function(img) {
-      img.set({
-        left: 300,
-        top: 0,
-        scaleX: 0.5,
-        scaleY: 0.5,
-        selectable: true
-      });
+      img.set({ left: 300, top: 0, scaleX: 0.5, scaleY: 0.5, selectable: true });
       editorCanvas.add(img);
     });
   }
 
-  // Add Text Overlay in Advanced Editor
   $("#add-text-btn").on("click", function() {
     if (editorCanvas) {
-      const text = new fabric.IText('New Overlay', {
-        left: 50,
-        top: 50,
-        fill: '#333',
-        fontSize: 20,
-        selectable: true
-      });
+      const text = new fabric.IText('New Overlay', { left: 50, top: 50, fill: '#333', fontSize: 20 });
       editorCanvas.add(text);
       editorCanvas.setActiveObject(text);
     }
   });
 
-  // Save Changes from Advanced Editor to main comparison area
   $("#save-editor-btn").on("click", function() {
     if (editorCanvas) {
-      // Export the current canvas as an image data URL
-      const dataURL = editorCanvas.toDataURL({
-        format: 'png'
-      });
-      // Update the main comparison container with the edited image on both sides
+      const dataURL = editorCanvas.toDataURL({ format: 'png' });
       const container = $("#twentytwenty-container");
       container.empty();
-      // We use the same edited image for both sides for demo purposes.
-      // In a full implementation you might allow different editing for before/after.
       const $editedImg = $(`<img src="${dataURL}" alt="Edited Comparison">`);
       container.append($editedImg);
-      // Reinitialize TwentyTwenty (if needed) or simply show the edited image.
       $("#comparison-editor-modal").hide();
       editorCanvas.dispose();
       editorCanvas = null;
@@ -431,7 +429,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Close Advanced Editor Modal (changes not saved)
   $("#close-comparison-editor").on("click", function() {
     $("#comparison-editor-modal").hide();
     if (editorCanvas) {
@@ -440,7 +437,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Export Comparison from Advanced Editor
   $("#export-comparison-btn").on("click", function() {
     if (editorCanvas) {
       const dataURL = editorCanvas.toDataURL({ format: 'png' });
@@ -451,7 +447,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Export Report as Image using html2canvas
   $("#export-report-btn").on("click", function() {
     html2canvas(document.getElementById("main-app")).then(canvas => {
       let link = document.createElement("a");
@@ -461,7 +456,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Social share buttons (dummy implementation)
   $(".share-btn").on("click", function() {
     const platform = $(this).data("platform");
     alert(`Sharing to ${platform} (functionality to be implemented).`);
