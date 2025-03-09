@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FitJourney Tracker - Modern Fitness Edition</title>
-  <!-- Bootstrap CSS (local or via CDN without integrity attributes if causing issues) -->
+  <!-- Bootstrap CSS (local copy or CDN without integrity attribute issues) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
@@ -23,49 +23,51 @@
   <script src="script.js" defer></script>
 </head>
 <body>
-  <header class="bg-secondary text-white py-3">
+  <header class="site-header">
     <div class="container text-center">
-      <h1>FitJourney Tracker</h1>
-      <p>App Version: <span id="app-version">v3.1</span></p>
+      <h1 class="site-title">FitJourney Tracker</h1>
+      <p class="site-version">App Version: <span id="app-version">v3.1</span></p>
     </div>
   </header>
   
-  <!-- Updated Navigation Menu with Buttons -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+  <!-- Updated Navigation Menu -->
+  <nav class="main-nav">
     <div class="container">
-      <div class="btn-group" role="group" aria-label="Main Navigation">
-        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#dashboard-section">Dashboard</button>
-        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#nutrition-section">Nutrition Log</button>
-        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#weight-section">Body Weight Log</button>
-        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#media-section">Media & Exports</button>
-      </div>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="#dashboard-section" class="nav-link active" data-target="#dashboard-section">Dashboard</a></li>
+        <li class="nav-item"><a href="#nutrition-section" class="nav-link" data-target="#nutrition-section">Nutrition Log</a></li>
+        <li class="nav-item"><a href="#weight-section" class="nav-link" data-target="#weight-section">Body Weight Log</a></li>
+        <li class="nav-item"><a href="#media-section" class="nav-link" data-target="#media-section">Media & Exports</a></li>
+      </ul>
     </div>
   </nav>
   
   <main id="main-app" class="container my-4">
     <!-- Dashboard Section -->
     <section id="dashboard-section">
-      <h2 class="mb-4">Dashboard</h2>
+      <h2 class="section-title">Dashboard</h2>
       <div class="row">
-        <!-- Weight Chart -->
+        <!-- Weight Chart Tile -->
         <div class="col-md-6 mb-4">
-          <div class="card shadow-sm">
+          <div class="card tile">
+            <div class="card-header tile-header">Weight Chart</div>
             <div class="card-body">
               <canvas id="weightChart"></canvas>
-              <p id="chart-placeholder" class="text-muted mt-2">Start logging weight to see trends!</p>
+              <p id="chart-placeholder" class="text-muted">Start logging weight to see trends!</p>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="toggle-demo-data" checked>
+                <input class="form-check-input" type="checkbox" id="toggle-demo-data">
                 <label class="form-check-label" for="toggle-demo-data">Show Demo Data</label>
               </div>
             </div>
           </div>
         </div>
-        <!-- Nutrition Chart -->
+        <!-- Nutrition Chart Tile -->
         <div class="col-md-6 mb-4">
-          <div class="card shadow-sm">
+          <div class="card tile">
+            <div class="card-header tile-header">Nutrition Chart</div>
             <div class="card-body">
               <canvas id="nutritionChart"></canvas>
-              <p id="nutrition-chart-placeholder" class="text-muted mt-2">Nutrition trends will appear here.</p>
+              <p id="nutrition-chart-placeholder" class="text-muted">Nutrition trends will appear here.</p>
             </div>
           </div>
         </div>
@@ -73,17 +75,17 @@
       <!-- Summary Panels -->
       <div class="row">
         <div class="col-md-6 mb-3">
-          <div class="card shadow-sm" id="weight-summary">
+          <div class="card tile" id="weight-summary">
+            <div class="card-header tile-header">Weight Summary</div>
             <div class="card-body">
-              <h3 class="card-title">Weight Summary</h3>
               <p class="placeholder">No weight data available.</p>
             </div>
           </div>
         </div>
         <div class="col-md-6 mb-3">
-          <div class="card shadow-sm" id="calorie-summary">
+          <div class="card tile" id="calorie-summary">
+            <div class="card-header tile-header">Calorie Summary</div>
             <div class="card-body">
-              <h3 class="card-title">Calorie Summary</h3>
               <p class="placeholder">No calorie data available.</p>
             </div>
           </div>
@@ -93,38 +95,37 @@
     
     <!-- Nutrition Log Section -->
     <section id="nutrition-section" style="display:none;">
-      <h2 class="mb-4">Nutrition Log</h2>
-      <div class="card shadow-sm mb-4" id="nutrition-log-section">
+      <h2 class="section-title">Nutrition Log</h2>
+      <div class="card tile mb-4" id="nutrition-log-section">
+        <div class="card-header tile-header">Log Nutrition</div>
         <div class="card-body">
           <form id="nutrition-log-form" class="row g-3">
             <div class="col-md-4">
-              <label for="food-name" class="form-label">Food Name</label>
+              <label for="food-name" class="form-label tile-label">Food Name</label>
               <input id="food-name" type="text" class="form-control" placeholder="e.g., Chicken Breast" required>
-              <!-- Dynamic search results container -->
-              <div id="food-search-results" class="list-group mt-2"></div>
             </div>
             <div class="col-md-2">
-              <label for="food-weight" class="form-label">Weight (g)</label>
+              <label for="food-weight" class="form-label tile-label">Weight (g)</label>
               <input id="food-weight" type="number" step="any" class="form-control" placeholder="grams" required>
             </div>
             <div class="col-md-2">
-              <label for="food-calories" class="form-label">Calories (kcal)</label>
+              <label for="food-calories" class="form-label tile-label">Calories (kcal)</label>
               <input id="food-calories" type="number" step="any" class="form-control" placeholder="kcal" required>
             </div>
             <div class="col-md-2">
-              <label for="food-protein" class="form-label">Protein (g)</label>
+              <label for="food-protein" class="form-label tile-label">Protein (g)</label>
               <input id="food-protein" type="number" step="any" class="form-control" placeholder="g">
             </div>
             <div class="col-md-2">
-              <label for="food-fat" class="form-label">Fat (g)</label>
+              <label for="food-fat" class="form-label tile-label">Fat (g)</label>
               <input id="food-fat" type="number" step="any" class="form-control" placeholder="g">
             </div>
             <div class="col-md-2">
-              <label for="food-carbs" class="form-label">Carbs (g)</label>
+              <label for="food-carbs" class="form-label tile-label">Carbs (g)</label>
               <input id="food-carbs" type="number" step="any" class="form-control" placeholder="g">
             </div>
             <div class="col-md-3">
-              <label for="nutrition-date" class="form-label">Date</label>
+              <label for="nutrition-date" class="form-label tile-label">Date</label>
               <input id="nutrition-date" type="date" class="form-control" required>
             </div>
             <div class="col-md-3 d-flex align-items-end">
@@ -134,9 +135,19 @@
           <div class="mt-4" id="nutrition-log-display">
             <p class="placeholder">No nutrition logs recorded yet.</p>
           </div>
+          <!-- Food Search Section -->
+          <div class="mt-4">
+            <h5 class="tile-subtitle">Search for Food Data</h5>
+            <div class="input-group mb-3">
+              <input type="text" id="food-search" class="form-control" placeholder="Enter food name...">
+              <button class="btn btn-outline-secondary" type="button" id="search-food-btn">Search</button>
+            </div>
+            <div id="food-search-results" class="list-group"></div>
+            <button id="add-custom-food-btn" class="btn btn-link" style="display:none;">Add Custom Food</button>
+          </div>
           <!-- Frequent Foods Section -->
           <div class="mt-4">
-            <h5>Frequent Foods</h5>
+            <h5 class="tile-subtitle">Frequent Foods</h5>
             <div id="frequent-foods" class="list-group"></div>
           </div>
         </div>
@@ -145,32 +156,33 @@
     
     <!-- Body Weight Log Section -->
     <section id="weight-section" style="display:none;">
-      <h2 class="mb-4">Body Weight Log</h2>
-      <div class="card shadow-sm mb-4" id="data-log-section">
+      <h2 class="section-title">Body Weight Log</h2>
+      <div class="card tile mb-4" id="data-log-section">
+        <div class="card-header tile-header">Log Weight & Measurements</div>
         <div class="card-body">
           <form id="data-log-form" class="row g-3">
             <div class="col-md-3">
-              <label for="weight-input" class="form-label">Weight (lbs)</label>
+              <label for="weight-input" class="form-label tile-label">Weight (lbs)</label>
               <input id="weight-input" type="number" step="0.1" class="form-control" placeholder="lbs" required>
             </div>
             <div class="col-md-3">
-              <label for="date-input" class="form-label">Date</label>
+              <label for="date-input" class="form-label tile-label">Date</label>
               <input id="date-input" type="date" class="form-control" required>
             </div>
             <div class="col-md-2">
-              <label for="waist-input" class="form-label">Waist (in)</label>
+              <label for="waist-input" class="form-label tile-label">Waist (in)</label>
               <input id="waist-input" type="number" step="0.1" class="form-control" placeholder="in">
             </div>
             <div class="col-md-2">
-              <label for="hips-input" class="form-label">Hips (in)</label>
+              <label for="hips-input" class="form-label tile-label">Hips (in)</label>
               <input id="hips-input" type="number" step="0.1" class="form-control" placeholder="in">
             </div>
             <div class="col-md-2">
-              <label for="chest-input" class="form-label">Chest (in)</label>
+              <label for="chest-input" class="form-label tile-label">Chest (in)</label>
               <input id="chest-input" type="number" step="0.1" class="form-control" placeholder="in">
             </div>
             <div class="col-md-2">
-              <label for="calories-input" class="form-label">Calories (kcal)</label>
+              <label for="calories-input" class="form-label tile-label">Calories (kcal)</label>
               <input id="calories-input" type="number" step="1" class="form-control" placeholder="kcal">
             </div>
             <div class="col-md-3 d-flex align-items-end">
@@ -179,7 +191,7 @@
           </form>
         </div>
       </div>
-      <div class="card shadow-sm" id="weight-log-display">
+      <div class="card tile" id="weight-log-display">
         <div class="card-body">
           <h3 class="card-title">Recent Weigh-Ins</h3>
           <div id="recent-weighins">
@@ -191,18 +203,18 @@
     
     <!-- Media & Exports Section -->
     <section id="media-section" style="display:none;">
-      <h2 class="mb-4">Media & Exports</h2>
-      <!-- Photo Upload -->
-      <div class="card shadow-sm mb-4 upload-photo">
+      <h2 class="section-title">Media & Exports</h2>
+      <!-- Photo Upload Tile -->
+      <div class="card tile mb-4 upload-photo">
+        <div class="card-header tile-header">Upload Progress Photo</div>
         <div class="card-body">
-          <h3>Upload Progress Photo</h3>
           <form id="photo-upload-form" class="row g-3">
             <div class="col-md-4">
-              <label for="photo-upload" class="form-label">Select Photo</label>
+              <label for="photo-upload" class="form-label tile-label">Select Photo</label>
               <input id="photo-upload" type="file" accept="image/*" class="form-control">
             </div>
             <div class="col-md-4">
-              <label for="photo-date" class="form-label">Photo Date</label>
+              <label for="photo-date" class="form-label tile-label">Photo Date</label>
               <input id="photo-date" type="date" class="form-control">
             </div>
             <div class="col-md-4 d-flex align-items-end">
@@ -215,18 +227,17 @@
           <button id="clear-photos-btn" class="btn btn-link" style="display:none;">Clear All Photos</button>
         </div>
       </div>
-      
-      <!-- Photo Filter -->
-      <div class="card shadow-sm mb-4" id="photo-filter-card">
+      <!-- Photo Filter Tile -->
+      <div class="card tile mb-4" id="photo-filter-card">
+        <div class="card-header tile-header">Filter Gallery by Date Range</div>
         <div class="card-body">
-          <h3>Filter Gallery by Date Range</h3>
           <div class="row g-3">
             <div class="col-md-4">
-              <label for="filter-start-date" class="form-label">Start Date</label>
+              <label for="filter-start-date" class="form-label tile-label">Start Date</label>
               <input id="filter-start-date" type="date" class="form-control">
             </div>
             <div class="col-md-4">
-              <label for="filter-end-date" class="form-label">End Date</label>
+              <label for="filter-end-date" class="form-label tile-label">End Date</label>
               <input id="filter-end-date" type="date" class="form-control">
             </div>
             <div class="col-md-4 d-flex align-items-end">
@@ -236,15 +247,14 @@
           <button id="clear-filter-btn" class="btn btn-link mt-2">Clear Filter</button>
         </div>
       </div>
-      
-      <!-- Side by Side Comparison -->
-      <div class="card shadow-sm mb-4">
+      <!-- Side by Side Comparison Tile -->
+      <div class="card tile mb-4">
+        <div class="card-header tile-header">Side by Side Comparison</div>
         <div class="card-body">
-          <h3>Side by Side Comparison</h3>
           <div class="photo-selectors mb-3">
-            <label for="tt-before" class="form-label">Before</label>
+            <label for="tt-before" class="form-label tile-label">Before</label>
             <select id="tt-before" class="form-select d-inline-block w-auto me-3"></select>
-            <label for="tt-after" class="form-label">After</label>
+            <label for="tt-after" class="form-label tile-label">After</label>
             <select id="tt-after" class="form-select d-inline-block w-auto me-3"></select>
             <button id="tt-update" class="btn btn-primary">Update Comparison</button>
             <button id="open-editor-btn" class="btn btn-outline-secondary ms-2">Open Advanced Editor</button>
@@ -255,19 +265,17 @@
           </div>
         </div>
       </div>
-      
-      <!-- Export Report -->
-      <div class="card shadow-sm mb-4" id="export-section">
+      <!-- Export Report Tile -->
+      <div class="card tile mb-4" id="export-section">
+        <div class="card-header tile-header">Export Options</div>
         <div class="card-body">
-          <h3>Export Options</h3>
           <button id="export-report-btn" class="btn btn-success">Export Report as Image</button>
         </div>
       </div>
-      
-      <!-- Social Share -->
-      <div class="card shadow-sm">
+      <!-- Social Share Tile -->
+      <div class="card tile">
+        <div class="card-header tile-header">Share Your Progress</div>
         <div class="card-body">
-          <h3>Share Your Progress</h3>
           <button class="share-btn btn btn-outline-primary me-2" data-platform="Facebook">Share on Facebook</button>
           <button class="share-btn btn btn-outline-info me-2" data-platform="Twitter">Share on Twitter</button>
           <button class="share-btn btn btn-outline-danger" data-platform="Instagram">Share on Instagram</button>
@@ -296,17 +304,18 @@
     </div>
   </footer>
   
-  <!-- Bootstrap Bundle with Popper -->
+  <!-- Bootstrap Bundle with Popper (without integrity attribute to avoid digest issues) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
   
-  <!-- Inline Script for Basic Navigation -->
+  <!-- Inline Script for Navigation -->
   <script>
-    document.querySelectorAll(".nav-btn").forEach(btn => {
-      btn.addEventListener("click", function () {
+    document.querySelectorAll(".nav-link").forEach(link => {
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
         const target = this.getAttribute("data-target");
         document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
         document.querySelector(target).style.display = "block";
-        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
         this.classList.add("active");
       });
     });
