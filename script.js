@@ -229,16 +229,26 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    // Append images with appropriate classes for the TwentyTwenty plugin
-    container.append(`<img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before">`);
-    container.append(`<img class="twentytwenty-after" src="${afterPhoto.src}" alt="After">`);
+    // Append images with the necessary classes
+    const $beforeImg = $(`<img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before">`);
+    const $afterImg = $(`<img class="twentytwenty-after" src="${afterPhoto.src}" alt="After">`);
+    container.append($beforeImg, $afterImg);
     // Constrain images to container dimensions
     container.find("img").css({
       "max-width": "100%",
       "height": "auto"
     });
-    container.twentytwenty();
-    console.log("Comparison updated with before and after photos");
+    // Wait for both images to load before initializing TwentyTwenty
+    let loadedCount = 0;
+    container.find("img").each(function() {
+      $(this).on("load", function() {
+        loadedCount++;
+        if (loadedCount === 2) {
+          container.twentytwenty();
+          console.log("Comparison updated with before and after photos");
+        }
+      });
+    });
   });
 
   // Export Report as Image using html2canvas
