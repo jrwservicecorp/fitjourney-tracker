@@ -2,21 +2,25 @@
 
 document.addEventListener("DOMContentLoaded", function () {
   // Set app version
-  document.getElementById("app-version").textContent = "v2.0";
+  const appVersionElem = document.getElementById("app-version");
+  if (appVersionElem) {
+    appVersionElem.textContent = "v2.0";
+  }
 
   // Global arrays to store logs
   let dataLogs = [];
   let photoLogs = [];
 
-  // Initialize Chart.js (with a time scale)
+  // Create the Chart.js instance only once
   const ctx = document.getElementById('weightChart').getContext('2d');
-  const weightChart = new Chart(ctx, {
+  let weightChart = new Chart(ctx, {
     type: 'line',
     data: {
       datasets: [{
         label: 'Weight (lbs)',
         data: [],
         borderColor: '#007bff',
+        backgroundColor: 'rgba(0,123,255,0.2)',
         fill: false,
         tension: 0.2,
       }]
@@ -36,51 +40,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Toggle demo data if none exists
-  const toggleDemo = document.getElementById("toggle-demo-data");
-  if (toggleDemo.checked && dataLogs.length === 0) {
-    const demoData = [
-      { date: '2023-01-01', weight: 200, waist: 34, hips: 36, chest: 40 },
-      { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39 },
-      { date: '2023-03-01', weight: 190, waist: 33, hips: 35, chest: 38 }
-    ];
-    demoData.forEach(log => addDataLog(log));
-    updateChart();
-    updateSummary();
-    updateRecentWeighIns();
-  }
-
-  // Data log form submission
-  document.getElementById("data-log-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const weight = parseFloat(document.getElementById("weight-input").value);
-    const date = document.getElementById("date-input").value;
-    const waist = parseFloat(document.getElementById("waist-input").value) || null;
-    const hips = parseFloat(document.getElementById("hips-input").value) || null;
-    const chest = parseFloat(document.getElementById("chest-input").value) || null;
-    if (!weight || !date) {
-      alert("Please enter both weight and date.");
-      return;
-    }
-    addDataLog({ date, weight, waist, hips, chest });
-    updateChart();
-    updateSummary();
-    updateRecentWeighIns();
-    this.reset();
-  });
-
-  function addDataLog(log) {
-    dataLogs.push(log);
-    dataLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
-  }
-
+  // Function to update the chart with current dataLogs
   function updateChart() {
+    // Update the dataset for the chart
     weightChart.data.datasets[0].data = dataLogs.map(log => ({ x: log.date, y: log.weight }));
     weightChart.update();
   }
 
+  // Function to update the weight summary section
   function updateSummary() {
     const summaryDiv = document.getElementById("weight-summary");
+    if (!summaryDiv) return;
     if (dataLogs.length === 0) {
       summaryDiv.innerHTML = '<p class="placeholder">No data available for summary.</p>';
       return;
@@ -93,19 +63,64 @@ document.addEventListener("DOMContentLoaded", function () {
     summaryDiv.innerHTML = html;
   }
 
+  // Function to update recent weigh-ins section
   function updateRecentWeighIns() {
     const recentDiv = document.getElementById("recent-weighins");
+    if (!recentDiv) return;
     if (dataLogs.length === 0) {
       recentDiv.innerHTML = '<p class="placeholder">No weigh-ins recorded yet.</p>';
       return;
     }
     recentDiv.innerHTML = "";
+    // Show the five most recent logs (reverse sorted)
     const recent = dataLogs.slice(-5).reverse();
     recent.forEach(log => {
       const p = document.createElement("p");
       p.textContent = `${log.date}: ${log.weight} lbs`;
       recentDiv.appendChild(p);
     });
+  }
+
+  // If demo data toggle is enabled and there are no logs, add demo data
+  const toggleDemo = document.getElementById("toggle-demo-data");
+  if (toggleDemo && toggleDemo.checked && dataLogs.length === 0) {
+    const demoData = [
+      { date: '2023-01-01', weight: 200, waist: 34, hips: 36, chest: 40 },
+      { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39 },
+      { date: '2023-03-01', weight: 190, waist: 33, hips: 35, chest: 38 }
+    ];
+    demoData.forEach(log => addDataLog(log));
+    updateChart();
+    updateSummary();
+    updateRecentWeighIns();
+  }
+
+  // Data log form submission
+  const dataLogForm = document.getElementById("data-log-form");
+  if (dataLogForm) {
+    dataLogForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const weight = parseFloat(document.getElementById("weight-input").value);
+      const date = document.getElementById("date-input").value;
+      const waist = parseFloat(document.getElementById("waist-input").value) || null;
+      const hips = parseFloat(document.getElementById("hips-input").value) || null;
+      const chest = parseFloat(document.getElementById("chest-input").value) || null;
+      if (!weight || !date) {
+        alert("Please enter both weight and date.");
+        return;
+      }
+      addDataLog({ date, weight, waist, hips, chest });
+      updateChart();
+      updateSummary();
+      updateRecentWeighIns();
+      dataLogForm.reset();
+    });
+  }
+
+  // Helper function to add a data log and sort by date
+  function addDataLog(log) {
+    dataLogs.push(log);
+    dataLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
   }
 
   // Photo upload form submission
@@ -127,6 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
     this.reset();
   });
 
+  // Function to update the photo gallery
   function updatePhotoGallery() {
     const gallery = $("#photo-gallery");
     gallery.empty();
@@ -184,7 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Initialize TwentyTwenty plugin once the document is ready
+  // Initialize TwentyTwenty plugin using your local file
   $(document).ready(function () {
     if ($.fn.twentytwenty) {
       $("#twentytwenty-container").twentytwenty();
@@ -210,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function () {
     container.twentytwenty();
   });
 
-  // Export Report as Image using html2canvas
+  // Export report as image using html2canvas
   $("#export-report-btn").on("click", function() {
     html2canvas(document.getElementById("main-app")).then(canvas => {
       let link = document.createElement("a");
