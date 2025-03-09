@@ -5,6 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FitJourney Tracker - Tesla Edition</title>
   <link rel="stylesheet" href="style.css">
+  
+  <!-- Load local jQuery -->
+  <script src="libs/jquery/jquery.min.js"></script>
+  
+  <!-- Local jQuery Event Move -->
+  <script src="libs/jquery-event-move/jquery.event.move.min.js"></script>
+  
+  <!-- Local TwentyTwenty -->
+  <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
+  
+  <!-- Local Luxon for date handling -->
+  <script src="libs/luxon/luxon.min.js"></script>
+  
+  <!-- Local Chart.js -->
+  <script src="libs/chartjs/chart.min.js"></script>
+  
+  <!-- Local Chart.js Adapter for Luxon -->
+  <script src="libs/chartjs-adapter-luxon/chartjs-adapter-luxon.min.js"></script>
+  
+  <!-- Local Fabric.js -->
+  <script src="libs/fabric/fabric.min.js"></script>
+  
+  <!-- Local html2canvas -->
+  <script src="libs/html2canvas/html2canvas.min.js"></script>
+  
+  <!-- Main Script File -->
+  <script src="script.js" defer></script>
 </head>
 <body>
   <header>
@@ -12,18 +39,17 @@
     <p>App Version: <span id="app-version">v2.1</span></p>
   </header>
   
-  <!-- Modern Navigation Menu -->
+  <!-- Navigation Menu -->
   <nav id="main-nav">
     <ul>
-      <li><a href="#dashboard-section" class="nav-link active">Dashboard</a></li>
-      <li><a href="#tracking-section" class="nav-link">Tracking</a></li>
+      <li><a href="#progress-section" class="nav-link active">Progress</a></li>
       <li><a href="#photos-section" class="nav-link">Photos</a></li>
     </ul>
   </nav>
   
   <main id="main-app">
-    <!-- Dashboard Section -->
-    <section id="dashboard-section">
+    <!-- Progress Section: Weight & Calorie Tracking -->
+    <section id="progress-section">
       <!-- Chart Section -->
       <div class="card prominent chart-container">
         <canvas id="weightChart"></canvas>
@@ -35,24 +61,8 @@
           </label>
         </div>
       </div>
-      <div class="card" id="summary-section">
-        <div class="weight-summary" id="weight-summary">
-          <h3>Weight Summary</h3>
-          <p class="placeholder">No data available for summary.</p>
-        </div>
-        <div class="recent-weighins" id="recent-weighins">
-          <h3>Recent Weigh-Ins</h3>
-          <p class="placeholder">No weigh-ins recorded yet.</p>
-        </div>
-        <div class="calorie-summary" id="calorie-summary">
-          <h3>Calorie Summary</h3>
-          <p class="placeholder">No calorie data available.</p>
-        </div>
-      </div>
-    </section>
-    
-    <!-- Tracking Section -->
-    <section id="tracking-section">
+      
+      <!-- Data Log Section (Weight & Calorie Logging) -->
       <div class="card" id="data-log-section">
         <h3>Weight & Calorie Logging</h3>
         <form id="data-log-form">
@@ -83,10 +93,27 @@
           <button type="submit">Log Data</button>
         </form>
       </div>
+      
+      <!-- Dashboard Section -->
+      <div class="card" id="dashboard-section">
+        <div class="card weight-summary" id="weight-summary">
+          <h3>Weight Summary</h3>
+          <p class="placeholder">No data available for summary.</p>
+        </div>
+        <div class="card recent-weighins" id="recent-weighins">
+          <h3>Recent Weigh-Ins</h3>
+          <p class="placeholder">No weigh-ins recorded yet.</p>
+        </div>
+        <div class="card calorie-summary" id="calorie-summary">
+          <h3>Calorie Summary</h3>
+          <p class="placeholder">No calorie data available.</p>
+        </div>
+      </div>
     </section>
     
     <!-- Photos Section -->
     <section id="photos-section">
+      <!-- Photo Upload Section -->
       <div class="card upload-photo">
         <h3>Upload Progress Photo</h3>
         <form id="photo-upload-form">
@@ -153,7 +180,7 @@
   
   <!-- Advanced Comparison Editor Modal -->
   <div id="comparison-editor-modal">
-    <div class="modal-content">
+    <div>
       <button id="close-comparison-editor">Close</button>
       <h3>Advanced Comparison Editor</h3>
       <canvas id="comparisonCanvas" width="600" height="400" style="border: 2px solid #007bff; border-radius: 8px;"></canvas>
@@ -178,30 +205,9 @@
         document.querySelector(target).style.display = "block";
       });
     });
-    // Show Dashboard section by default
-    document.querySelector("#dashboard-section").style.display = "block";
-    document.querySelector("#tracking-section").style.display = "none";
+    // Show Progress section by default
+    document.querySelector("#progress-section").style.display = "block";
     document.querySelector("#photos-section").style.display = "none";
   </script>
-  
-  <!-- Script Inclusions – Order is important -->
-  <!-- Local jQuery (make sure this file exists at the given path) -->
-  <script src="libs/jquery/jquery-3.6.4.min.js"></script>
-  <!-- Local jQuery Event Move -->
-  <script src="libs/jquery-event-move/jquery.event.move.min.js"></script>
-  <!-- Local TwentyTwenty -->
-  <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
-  <!-- Luxon for date handling -->
-  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Chart.js Adapter for Luxon -->
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
-  <!-- Fabric.js for advanced image editing -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
-  <!-- html2canvas for export functionality -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <!-- Main Script File (ensure this file reflects your full functionality) -->
-  <script src="script.js" defer></script>
 </body>
 </html>
