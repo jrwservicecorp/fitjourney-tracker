@@ -12,7 +12,7 @@
   <!-- jQuery from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" crossorigin="anonymous"></script>
   
-  <!-- Local plugins (updated paths) -->
+  <!-- Local plugins (update paths as needed) -->
   <script src="libs/jquery-event-move/jquery.event.move.min.js"></script>
   <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css" />
@@ -115,58 +115,144 @@
   
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      // Update the app version text.
+      // Update app version text.
       document.getElementById("app-version").textContent = "v1.4.3-local";
       
-      // Initialize the TwentyTwenty slider.
+      // -------------------------------
+      // Chart Initialization and Update
+      // -------------------------------
+      var chartCanvas = document.getElementById("weightChart");
+      if (!chartCanvas) {
+        console.error("Canvas element with ID 'weightChart' not found.");
+      } else {
+        // Create a global weightData object to store chart data.
+        window.weightData = {
+          labels: [],
+          datasets: [{
+            label: "Weight",
+            data: [],
+            backgroundColor: "rgba(0,123,255,0.5)",
+            borderColor: "rgba(0,123,255,1)",
+            fill: false
+          }]
+        };
+
+        // Function to create/update the chart.
+        function createOrUpdateChart() {
+          // If a chart instance already exists, destroy it.
+          if (window.weightChartInstance) {
+            window.weightChartInstance.destroy();
+          }
+          var ctx = chartCanvas.getContext("2d");
+          window.weightChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: window.weightData,
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: true }
+              },
+              scales: {
+                x: {
+                  type: 'category',
+                  title: { display: true, text: 'Date' }
+                },
+                y: {
+                  title: { display: true, text: 'Weight (lbs)' }
+                }
+              }
+            }
+          });
+        }
+        
+        // Initialize the chart.
+        createOrUpdateChart();
+      }
+      
+      // -------------------------------
+      // Weight Logging Form
+      // -------------------------------
+      var weightForm = document.getElementById("weight-form");
+      if (weightForm) {
+        weightForm.addEventListener("submit", function(e) {
+          e.preventDefault();  // Prevent page reload
+          
+          var weightInput = document.getElementById("weight-input").value;
+          var dateInput = document.getElementById("date-input").value;
+          
+          if (!weightInput || !dateInput) {
+            alert("Please enter both weight and date.");
+            return;
+          }
+          
+          // Retrieve the existing weight log from localStorage (or initialize as empty array)
+          var weightLog = JSON.parse(localStorage.getItem("weightLog") || "[]");
+          weightLog.push({ weight: parseFloat(weightInput), date: dateInput });
+          
+          // Optional: sort by date ascending
+          weightLog.sort(function(a, b) {
+            return new Date(a.date) - new Date(b.date);
+          });
+          localStorage.setItem("weightLog", JSON.stringify(weightLog));
+          
+          // Update the summary and chart.
+          updateSummary();
+          updateChart();
+          
+          // Reset the form.
+          weightForm.reset();
+        });
+      }
+      
+      // Function to update the Weight Summary and Recent Weigh-Ins UI.
+      function updateSummary() {
+        var weightLog = JSON.parse(localStorage.getItem("weightLog") || "[]");
+        var summaryDiv = document.getElementById("weight-summary");
+        var recentDiv = document.getElementById("recent-weighins");
+        
+        if (weightLog.length === 0) {
+          summaryDiv.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
+          recentDiv.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
+          return;
+        }
+        
+        var latestEntry = weightLog[weightLog.length - 1];
+        var total = weightLog.reduce(function(sum, entry) { return sum + entry.weight; }, 0);
+        var avgWeight = (total / weightLog.length).toFixed(1);
+        
+        summaryDiv.innerHTML = "<p>Latest Weight: " + latestEntry.weight + " lbs on " + latestEntry.date + "</p>" +
+                               "<p>Average Weight: " + avgWeight + " lbs</p>";
+        
+        // Show the five most recent entries.
+        var recentEntries = weightLog.slice(-5).reverse();
+        var recentHtml = recentEntries.map(function(entry) {
+          return "<p>" + entry.date + ": " + entry.weight + " lbs</p>";
+        }).join("");
+        recentDiv.innerHTML = recentHtml;
+      }
+      
+      // Function to update the chart data.
+      function updateChart() {
+        var weightLog = JSON.parse(localStorage.getItem("weightLog") || "[]");
+        window.weightData.labels = weightLog.map(function(entry) { return entry.date; });
+        window.weightData.datasets[0].data = weightLog.map(function(entry) { return entry.weight; });
+        createOrUpdateChart();
+      }
+      
+      // On page load, update summary and chart if data exists.
+      updateSummary();
+      updateChart();
+      
+      // -------------------------------
+      // Initialize TwentyTwenty Slider
+      // -------------------------------
       if ($.fn.twentytwenty) {
         $("#twentytwenty-container").twentytwenty();
       } else {
         console.error("TwentyTwenty plugin failed to load.");
       }
       
-      // Initialize Chart.js
-      var chartCanvas = document.getElementById("weightChart");
-      if (!chartCanvas) {
-        console.error("Canvas element with ID 'weightChart' not found.");
-      } else {
-        // Destroy any existing chart instance to avoid "Canvas is already in use" errors.
-        if (window.weightChartInstance) {
-          window.weightChartInstance.destroy();
-        }
-        var ctx = chartCanvas.getContext("2d");
-        window.weightChartInstance = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: ["January", "February", "March", "April", "May"],
-            datasets: [{
-              label: "Weight",
-              data: [200, 195, 190, 185, 180],
-              backgroundColor: "rgba(0,123,255,0.5)",
-              borderColor: "rgba(0,123,255,1)",
-              fill: false
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: {
-                display: true
-              }
-            },
-            scales: {
-              x: {
-                type: 'category'
-              },
-              y: {
-                beginAtZero: true
-              }
-            }
-          }
-        });
-      }
-      
-      // (Additional initialization code for weight logging, photo upload, etc. would go here.)
+      // (Additional code for photo upload and side-by-side comparisons can be added here.)
     });
   </script>
 </body>
