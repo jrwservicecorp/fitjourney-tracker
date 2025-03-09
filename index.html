@@ -6,24 +6,31 @@
   <title>FitJourney Tracker - Tesla Edition</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Local jQuery -->
-  <script src="libs/jquery/jquery.min.js"></script>
+  <!-- Load jQuery locally -->
+  <script src="libs/jquery/jquery-3.6.4.min.js"></script>
+  
   <!-- Local jQuery Event Move -->
   <script src="libs/jquery-event-move/jquery.event.move.min.js"></script>
+  
   <!-- Local TwentyTwenty -->
   <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
-  <!-- Local Luxon -->
+  
+  <!-- Luxon for date handling -->
   <script src="libs/luxon/luxon.min.js"></script>
-  <!-- Local Chart.js -->
+  
+  <!-- Chart.js -->
   <script src="libs/chartjs/chart.min.js"></script>
-  <!-- Local Chart.js Adapter for Luxon -->
+  
+  <!-- Chart.js Adapter for Luxon -->
   <script src="libs/chartjs-adapter-luxon/chartjs-adapter-luxon.min.js"></script>
-  <!-- Local Fabric.js -->
+  
+  <!-- Fabric.js for advanced image editing -->
   <script src="libs/fabric/fabric.min.js"></script>
-  <!-- Local html2canvas -->
+  
+  <!-- html2canvas for export functionality -->
   <script src="libs/html2canvas/html2canvas.min.js"></script>
   
-  <!-- Main Script -->
+  <!-- Main Script File -->
   <script src="script.js" defer></script>
 </head>
 <body>
@@ -35,15 +42,15 @@
   <!-- Navigation Menu -->
   <nav id="main-nav">
     <ul>
-      <li><a href="#dashboard-section" class="nav-link active">Dashboard</a></li>
-      <li><a href="#tracking-section" class="nav-link">Tracking</a></li>
+      <li><a href="#progress-section" class="nav-link active">Progress</a></li>
       <li><a href="#photos-section" class="nav-link">Photos</a></li>
     </ul>
   </nav>
   
   <main id="main-app">
-    <!-- Dashboard Section -->
-    <section id="dashboard-section">
+    <!-- Progress Section: Weight & Calorie Tracking -->
+    <section id="progress-section">
+      <!-- Chart Section -->
       <div class="card prominent chart-container">
         <canvas id="weightChart"></canvas>
         <p id="chart-placeholder">Start logging weight to see trends!</p>
@@ -54,26 +61,10 @@
           </label>
         </div>
       </div>
-      <div class="card" id="summary-section">
-        <div class="card weight-summary" id="weight-summary">
-          <h3>Weight Summary</h3>
-          <p class="placeholder">No data available for summary.</p>
-        </div>
-        <div class="card recent-weighins" id="recent-weighins">
-          <h3>Recent Weigh-Ins</h3>
-          <p class="placeholder">No weigh-ins recorded yet.</p>
-        </div>
-        <div class="card calorie-summary" id="calorie-summary">
-          <h3>Calorie Summary</h3>
-          <p class="placeholder">No calorie data available.</p>
-        </div>
-      </div>
-    </section>
-    
-    <!-- Tracking Section -->
-    <section id="tracking-section">
+      
+      <!-- Data Log Section (Weight & Calorie Logging) -->
       <div class="card" id="data-log-section">
-        <h3>Weight &amp; Calorie Logging</h3>
+        <h3>Weight & Calorie Logging</h3>
         <form id="data-log-form">
           <div>
             <label for="weight-input">Weight (lbs):</label>
@@ -102,10 +93,27 @@
           <button type="submit">Log Data</button>
         </form>
       </div>
+      
+      <!-- Dashboard Section -->
+      <div class="card" id="dashboard-section">
+        <div class="card weight-summary" id="weight-summary">
+          <h3>Weight Summary</h3>
+          <p class="placeholder">No data available for summary.</p>
+        </div>
+        <div class="card recent-weighins" id="recent-weighins">
+          <h3>Recent Weigh-Ins</h3>
+          <p class="placeholder">No weigh-ins recorded yet.</p>
+        </div>
+        <div class="card calorie-summary" id="calorie-summary">
+          <h3>Calorie Summary</h3>
+          <p class="placeholder">No calorie data available.</p>
+        </div>
+      </div>
     </section>
     
     <!-- Photos Section -->
     <section id="photos-section">
+      <!-- Photo Upload Section -->
       <div class="card upload-photo">
         <h3>Upload Progress Photo</h3>
         <form id="photo-upload-form">
@@ -122,6 +130,7 @@
         <div id="photo-gallery" class="gallery">
           <p class="placeholder">No photos uploaded yet.</p>
         </div>
+        <div id="clear-photos-btn" style="display: none;"></div>
       </div>
       
       <!-- Photo Timeline Filter -->
@@ -138,7 +147,7 @@
       </div>
       
       <!-- Side by Side Comparison - TwentyTwenty -->
-      <div class="card" id="comparison-section">
+      <div class="card">
         <h3>Side by Side Comparison - TwentyTwenty</h3>
         <div class="photo-selectors">
           <label for="tt-before">Before:</label>
@@ -146,7 +155,6 @@
           <label for="tt-after">After:</label>
           <select id="tt-after"></select>
           <button id="tt-update">Update Comparison</button>
-          <button id="open-comparison-editor">Edit Comparison</button>
         </div>
         <div id="twentytwenty-container" class="twentytwenty-container">
           <img src="https://placehold.co/300x400?text=Before" alt="Before">
@@ -155,32 +163,27 @@
       </div>
     </section>
     
-    <!-- Export and Social Share Section -->
-    <section id="export-social-section">
-      <div class="card" id="export-section">
-        <h3>Export Options</h3>
-        <button id="export-report-btn">Export Report as Image</button>
-      </div>
-      <div class="card social-share">
-        <h3>Share Your Progress</h3>
-        <button class="share-btn" data-platform="Facebook">Share on Facebook</button>
-        <button class="share-btn" data-platform="Twitter">Share on Twitter</button>
-        <button class="share-btn" data-platform="Instagram">Share on Instagram</button>
-      </div>
-    </section>
+    <!-- Export Report Section -->
+    <div class="card" id="export-section">
+      <h3>Export Options</h3>
+      <button id="export-report-btn">Export Report as Image</button>
+    </div>
+    
+    <!-- Social Share Section -->
+    <div class="card social-share">
+      <h3>Share Your Progress</h3>
+      <button class="share-btn" data-platform="Facebook">Share on Facebook</button>
+      <button class="share-btn" data-platform="Twitter">Share on Twitter</button>
+      <button class="share-btn" data-platform="Instagram">Share on Instagram</button>
+    </div>
   </main>
   
   <!-- Advanced Comparison Editor Modal -->
-  <div id="comparison-editor-modal" class="modal">
-    <div class="modal-content">
-      <button id="close-comparison-editor" class="close-btn">Close</button>
+  <div id="comparison-editor-modal">
+    <div>
+      <button id="close-comparison-editor">Close</button>
       <h3>Advanced Comparison Editor</h3>
-      <div class="editor-toolbar">
-        <button class="sticker-btn" data-sticker="libs/stickers/sticker1.png">Sticker 1</button>
-        <button class="sticker-btn" data-sticker="libs/stickers/sticker2.png">Sticker 2</button>
-        <!-- Add more sticker buttons as needed -->
-      </div>
-      <canvas id="comparisonCanvas" width="600" height="400"></canvas>
+      <canvas id="comparisonCanvas" width="600" height="400" style="border: 2px solid #007bff; border-radius: 8px;"></canvas>
       <br>
       <button id="export-comparison-btn">Export for Instagram</button>
     </div>
@@ -202,9 +205,8 @@
         document.querySelector(target).style.display = "block";
       });
     });
-    // Show Dashboard section by default
-    document.querySelector("#dashboard-section").style.display = "block";
-    document.querySelector("#tracking-section").style.display = "none";
+    // Show Progress section by default
+    document.querySelector("#progress-section").style.display = "block";
     document.querySelector("#photos-section").style.display = "none";
   </script>
 </body>
