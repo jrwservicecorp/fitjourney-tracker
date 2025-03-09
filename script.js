@@ -1,4 +1,4 @@
-/* script.js - FitJourney Tracker - Modern Edition - JS v3.1 */
+/* script.js - FitJourney Tracker - Modern Edition - JS v3.1 with USDA API Integration */
 
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM fully loaded");
@@ -218,46 +218,43 @@ document.addEventListener("DOMContentLoaded", function () {
     displayDiv.innerHTML = html;
   }
 
-  // Nutrition Food Search using Nutritionix API (requires your API keys)
+  /* ----------------- USDA FoodData Central API Integration ----------------- */
+  // Replace the Nutritionix code with USDA API lookup
   $("#search-food-btn").on("click", function() {
     const query = $("#food-search").val().trim();
     if (!query) {
       alert("Please enter a food name to search.");
       return;
     }
-    const appId = "YOUR_APP_ID";  // Replace with your Nutritionix App ID
-    const appKey = "YOUR_APP_KEY"; // Replace with your Nutritionix App Key
-    const url = `https://trackapi.nutritionix.com/v2/natural/nutrients`;
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-app-id": appId,
-        "x-app-key": appKey
-      },
-      body: JSON.stringify({ query: query })
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log("Nutritionix response:", data);
-      if (data.foods && data.foods.length > 0) {
-        const foodData = data.foods[0];
-        $("#food-name").val(foodData.food_name);
-        $("#food-weight").val(foodData.serving_weight_grams);
-        $("#food-calories").val(foodData.nf_calories);
-        $("#food-protein").val(foodData.nf_protein);
-        $("#food-fat").val(foodData.nf_total_fat);
-        $("#food-carbs").val(foodData.nf_total_carbohydrate);
-      } else {
-        alert("No food data found.");
-      }
-    })
-    .catch(error => {
-      console.error("Error fetching food data:", error);
-      alert("Error fetching food data. Check the console for details.");
-    });
+    const USDA_API_KEY = "DBS7VaqKcIKES5QY36b8Cw8bdk80CHzoufoxjeh8";
+    const apiUrl = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}`;
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        console.log("USDA API response:", data);
+        if (data.foods && data.foods.length > 0) {
+          const food = data.foods[0];
+          $("#food-name").val(food.description);
+          // Find common nutrients – using case-insensitive search
+          const energyObj = food.foodNutrients.find(n => n.nutrientName.toLowerCase().includes("energy"));
+          const proteinObj = food.foodNutrients.find(n => n.nutrientName.toLowerCase().includes("protein"));
+          const fatObj = food.foodNutrients.find(n => n.nutrientName.toLowerCase().includes("total lipid"));
+          const carbObj = food.foodNutrients.find(n => n.nutrientName.toLowerCase().includes("carbohydrate"));
+          $("#food-calories").val(energyObj ? energyObj.value : "");
+          $("#food-protein").val(proteinObj ? proteinObj.value : "");
+          $("#food-fat").val(fatObj ? fatObj.value : "");
+          $("#food-carbs").val(carbObj ? carbObj.value : "");
+        } else {
+          alert("No food data found.");
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching USDA food data:", error);
+        alert("Error fetching food data. Check the console for details.");
+      });
   });
 
+  /* ----------------- Photo Upload & Comparison ----------------- */
   // Photo Upload Form Submission
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
@@ -377,7 +374,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Advanced Comparison Editor Functions
+  /* ----------------- Advanced Comparison Editor ----------------- */
   $("#open-editor-btn").on("click", function() {
     openComparisonEditor();
   });
