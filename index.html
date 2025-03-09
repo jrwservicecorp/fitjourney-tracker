@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FitJourney Tracker - Modern Edition</title>
+  <title>FitJourney Tracker - Modern Fitness Edition</title>
   <!-- Bootstrap CSS from CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" 
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-cuP+Rb3F58yGrW8PLP5k+axIWKFoQpUSdAPuC5VJcCr1E5ZD59wM9xAj8QcOc3h8" crossorigin="anonymous">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
@@ -24,35 +24,28 @@
   <script src="script.js" defer></script>
 </head>
 <body>
-  <header class="bg-primary text-white py-3">
-    <div class="container">
+  <header class="bg-secondary text-white py-3">
+    <div class="container text-center">
       <h1>FitJourney Tracker</h1>
-      <p>App Version: <span id="app-version">v3.0</span></p>
+      <p>App Version: <span id="app-version">v3.1</span></p>
     </div>
   </header>
   
-  <!-- New Navigation Menu -->
-  <nav id="main-nav" class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+  <!-- Updated Navigation Menu with Buttons -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container">
-      <a class="navbar-brand" href="#">Tracker</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a href="#dashboard-section" class="nav-link active">Dashboard</a></li>
-          <li class="nav-item"><a href="#nutrition-section" class="nav-link">Nutrition Log</a></li>
-          <li class="nav-item"><a href="#weight-section" class="nav-link">Body Weight Log</a></li>
-          <li class="nav-item"><a href="#media-section" class="nav-link">Media & Exports</a></li>
-        </ul>
+      <div class="btn-group" role="group" aria-label="Main Navigation">
+        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#dashboard-section">Dashboard</button>
+        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#nutrition-section">Nutrition Log</button>
+        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#weight-section">Body Weight Log</button>
+        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#media-section">Media & Exports</button>
       </div>
     </div>
   </nav>
   
   <main id="main-app" class="container my-4">
     <!-- Dashboard Section -->
-    <section id="dashboard-section" class="mb-5">
+    <section id="dashboard-section">
       <h2 class="mb-4">Dashboard</h2>
       <div class="row">
         <!-- Weight Chart -->
@@ -100,7 +93,7 @@
     </section>
     
     <!-- Nutrition Log Section -->
-    <section id="nutrition-section" class="mb-5" style="display:none;">
+    <section id="nutrition-section" style="display:none;">
       <h2 class="mb-4">Nutrition Log</h2>
       <div class="card shadow-sm mb-4" id="nutrition-log-section">
         <div class="card-body">
@@ -154,7 +147,7 @@
     </section>
     
     <!-- Body Weight Log Section -->
-    <section id="weight-section" class="mb-5" style="display:none;">
+    <section id="weight-section" style="display:none;">
       <h2 class="mb-4">Body Weight Log</h2>
       <div class="card shadow-sm mb-4" id="data-log-section">
         <div class="card-body">
@@ -200,7 +193,7 @@
     </section>
     
     <!-- Media & Exports Section -->
-    <section id="media-section" class="mb-5" style="display:none;">
+    <section id="media-section" style="display:none;">
       <h2 class="mb-4">Media & Exports</h2>
       <!-- Photo Upload -->
       <div class="card shadow-sm mb-4 upload-photo">
@@ -224,3 +217,107 @@
           </div>
           <button id="clear-photos-btn" class="btn btn-link" style="display:none;">Clear All Photos</button>
         </div>
+      </div>
+      
+      <!-- Photo Filter -->
+      <div class="card shadow-sm mb-4" id="photo-filter-card">
+        <div class="card-body">
+          <h3>Filter Gallery by Date Range</h3>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="filter-start-date" class="form-label">Start Date</label>
+              <input id="filter-start-date" type="date" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label for="filter-end-date" class="form-label">End Date</label>
+              <input id="filter-end-date" type="date" class="form-control">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <button id="filter-photos-btn" class="btn btn-secondary w-100">Filter Photos</button>
+            </div>
+          </div>
+          <button id="clear-filter-btn" class="btn btn-link mt-2">Clear Filter</button>
+        </div>
+      </div>
+      
+      <!-- Side by Side Comparison -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h3>Side by Side Comparison</h3>
+          <div class="photo-selectors mb-3">
+            <label for="tt-before" class="form-label">Before</label>
+            <select id="tt-before" class="form-select d-inline-block w-auto me-3"></select>
+            <label for="tt-after" class="form-label">After</label>
+            <select id="tt-after" class="form-select d-inline-block w-auto me-3"></select>
+            <button id="tt-update" class="btn btn-primary">Update Comparison</button>
+            <button id="open-editor-btn" class="btn btn-outline-secondary ms-2">Open Advanced Editor</button>
+          </div>
+          <div id="twentytwenty-container" class="twentytwenty-container">
+            <img class="twentytwenty-before" src="https://placehold.co/300x400?text=Before" alt="Before">
+            <img class="twentytwenty-after" src="https://placehold.co/300x400?text=After" alt="After">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Export Report -->
+      <div class="card shadow-sm mb-4" id="export-section">
+        <div class="card-body">
+          <h3>Export Options</h3>
+          <button id="export-report-btn" class="btn btn-success">Export Report as Image</button>
+        </div>
+      </div>
+      
+      <!-- Social Share -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3>Share Your Progress</h3>
+          <button class="share-btn btn btn-outline-primary me-2" data-platform="Facebook">Share on Facebook</button>
+          <button class="share-btn btn btn-outline-info me-2" data-platform="Twitter">Share on Twitter</button>
+          <button class="share-btn btn btn-outline-danger" data-platform="Instagram">Share on Instagram</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Advanced Comparison Editor Modal -->
+    <div id="comparison-editor-modal">
+      <div class="modal-content">
+        <button id="close-comparison-editor" class="btn btn-sm btn-danger float-end">Close</button>
+        <h3>Advanced Comparison Editor</h3>
+        <canvas id="comparisonCanvas" width="600" height="400"></canvas>
+        <div class="editor-controls mt-3">
+          <button id="add-text-btn" class="btn btn-secondary me-2">Add Text Overlay</button>
+          <button id="save-editor-btn" class="btn btn-primary me-2">Save Changes</button>
+          <button id="export-comparison-btn" class="btn btn-success">Export for Instagram</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="bg-light py-3">
+    <div class="container text-center">
+      <p class="mb-0">&copy; 2025 FitJourney Tracker</p>
+    </div>
+  </footer>
+  
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+0F0kKrx3vYF5LGhB9f5q6D+P4ni1"
+          crossorigin="anonymous"></script>
+  
+  <!-- Inline Script for Basic Navigation -->
+  <script>
+    // Use Bootstrap’s button event handling for navigation
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.addEventListener("click", function () {
+        const target = this.getAttribute("data-target");
+        document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
+        document.querySelector(target).style.display = "block";
+        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+      });
+    });
+    // Show Dashboard section by default
+    document.querySelector("#dashboard-section").style.display = "block";
+  </script>
+</body>
+</html>
