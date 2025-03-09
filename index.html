@@ -2,330 +2,207 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FitJourney Tracker</title>
-  
-  <!-- Main CSS file -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitJourney Tracker - Tesla Edition</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Chart.js (load first) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Moment.js for date handling -->
-  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-  <!-- Chart.js adapter for Moment (load after Chart.js) -->
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
-  
-  <!-- jQuery -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-  
-  <!-- Local libraries (adjust paths as needed) -->
-  <!-- Note: Ensure that your local copy is used instead of any CDN version -->
+  <!-- Local jQuery -->
+  <script src="libs/jquery/jquery.min.js"></script>
+  <!-- Local jQuery Event Move -->
   <script src="libs/jquery-event-move/jquery.event.move.min.js"></script>
+  <!-- Local TwentyTwenty -->
   <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
   
-  <!-- Main JavaScript -->
-  <script defer>
-    document.addEventListener("DOMContentLoaded", function() {
-      // Global variables for weight data and Chart instance
-      let weightData = [];
-      let weightChart = null;
-      
-      // Function to update the weight chart.
-      // It sorts the data by date, destroys an existing chart (if any),
-      // and creates a new Chart.js line chart.
-      function updateChart() {
-        const ctx = document.getElementById("weightChart").getContext("2d");
-        
-        // Sort weightData by date
-        weightData.sort((a, b) => new Date(a.date) - new Date(b.date));
-        const labels = weightData.map(item => item.date);
-        const data = weightData.map(item => item.weight);
-        
-        // Destroy previous chart instance if it exists
-        if (weightChart) {
-          weightChart.destroy();
-        }
-        
-        weightChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Weight (lbs)',
-              data: data,
-              borderColor: 'rgba(0, 123, 255, 1)',
-              backgroundColor: 'rgba(0, 123, 255, 0.2)',
-              fill: true,
-              tension: 0.3
-            }]
-          },
-          options: {
-            scales: {
-              x: {
-                type: 'time',
-                time: {
-                  unit: 'day'
-                },
-                title: {
-                  display: true,
-                  text: 'Date'
-                }
-              },
-              y: {
-                title: {
-                  display: true,
-                  text: 'Weight (lbs)'
-                }
-              }
-            },
-            plugins: {
-              legend: { display: true }
-            }
-          }
-        });
-      }
-      
-      // Weight Logging Form Handler
-      const weightForm = document.getElementById("weight-form");
-      weightForm.addEventListener("submit", function(e) {
-        e.preventDefault();
-        const weightValue = document.getElementById("weight-input").value;
-        const weightDate = document.getElementById("weight-date").value;
-        
-        if (weightValue && weightDate) {
-          weightData.push({ date: weightDate, weight: parseFloat(weightValue) });
-          document.getElementById("weight-summary").innerHTML =
-            `<p>Latest Weight: ${weightValue} lbs on ${weightDate}</p>`;
-          updateChart();
-          weightForm.reset();
-        }
-      });
-      
-      // Photo Upload Form Handler
-      const photoForm = document.getElementById("photo-upload-form");
-      photoForm.addEventListener("submit", function(e) {
-        e.preventDefault();
-        const file = document.getElementById("photo-upload").files[0];
-        const photoDate = document.getElementById("photo-date").value;
-        
-        if (!file || !photoDate) {
-          alert("Please select a photo and enter a date.");
-          return;
-        }
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const gallery = document.getElementById("photo-gallery");
-          const entry = document.createElement("div");
-          entry.className = "photo-entry";
-          entry.innerHTML = `<img src="${e.target.result}" alt="Progress Photo">
-                             <p>Date: ${photoDate}</p>`;
-          // Remove placeholder if it exists
-          const placeholder = gallery.querySelector(".placeholder");
-          if (placeholder) {
-            placeholder.remove();
-          }
-          gallery.appendChild(entry);
-          photoForm.reset();
-          // Update the photo comparison dropdowns after a slight delay
-          setTimeout(updatePhotoComparisonOptions, 500);
-        };
-        reader.readAsDataURL(file);
-      });
-      
-      // Initialize TwentyTwenty plugin for the photo comparison section
-      if ($.fn.twentytwenty) {
-        $("#twentytwenty-container").twentytwenty();
-      } else {
-        console.error("TwentyTwenty plugin failed to load.");
-      }
-      
-      // Populate photo comparison dropdowns from the gallery images
-      function updatePhotoComparisonOptions() {
-        const entries = document.querySelectorAll("#photo-gallery .photo-entry img");
-        const beforeSelect = document.getElementById("tt-before");
-        const afterSelect = document.getElementById("tt-after");
-        beforeSelect.innerHTML = "";
-        afterSelect.innerHTML = "";
-        entries.forEach((img, index) => {
-          const option = document.createElement("option");
-          option.value = img.src;
-          option.textContent = `Photo ${index+1}`;
-          beforeSelect.appendChild(option.cloneNode(true));
-          afterSelect.appendChild(option.cloneNode(true));
-        });
-      }
-      
-      // Handle photo comparison update button click
-      const ttUpdateBtn = document.getElementById("tt-update");
-      ttUpdateBtn.addEventListener("click", function() {
-        const beforeSrc = document.getElementById("tt-before").value;
-        const afterSrc = document.getElementById("tt-after").value;
-        const container = document.getElementById("twentytwenty-container");
-        container.innerHTML = `<img src="${beforeSrc}" alt="Before">
-                               <img src="${afterSrc}" alt="After">`;
-        if ($.fn.twentytwenty) {
-          $("#twentytwenty-container").twentytwenty();
-        }
-      });
-    });
-  </script>
+  <!-- Chart.js and Date Adapter (Luxon) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
   
-  <style>
-    /* Tesla-inspired, modern, and mobile-optimized styling */
-    body {
-      font-family: 'Roboto', sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #000;
-      padding: 15px;
-      text-align: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 2em;
-      letter-spacing: 1px;
-    }
-    main {
-      padding: 20px;
-      max-width: 1000px;
-      margin: auto;
-    }
-    .card {
-      background: #1e1e1e;
-      padding: 20px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
-    }
-    form label {
-      display: block;
-      margin: 5px 0 2px;
-    }
-    form input, form select, form button {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: none;
-      box-sizing: border-box;
-    }
-    form button {
-      background: #007bff;
-      color: #fff;
-      cursor: pointer;
-      width: auto;
-      transition: background 0.3s;
-    }
-    form button:hover {
-      background: #0056b3;
-    }
-    .gallery .photo-entry {
-      margin-bottom: 15px;
-    }
-    .gallery img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 5px;
-    }
-    canvas {
-      background: #fff;
-      border-radius: 10px;
-      margin: 15px 0;
-    }
-    /* Photo Comparison Section Styling */
-    #photo-comparison {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    #photo-comparison .selectors {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    #twentytwenty-container {
-      width: 100%;
-      max-width: 600px;
-      margin: auto;
-    }
-    
-    /* Mobile optimization */
-    @media only screen and (max-width: 600px) {
-      header h1 {
-        font-size: 1.6em;
-      }
-      .card {
-        margin: 10px;
-        padding: 15px;
-      }
-      form input, form select, form button {
-        font-size: 0.9em;
-        padding: 6px;
-      }
-    }
-  </style>
+  <!-- Fabric.js for advanced image editing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+  
+  <!-- html2canvas for export functionality -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
+  <!-- Main Script File -->
+  <script src="script.js" defer></script>
 </head>
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
+    <p>App Version: <span id="app-version">v2.1</span></p>
   </header>
-  <main>
-    <!-- Weight Logging Section -->
-    <div class="card">
-      <h2>Log Your Weight</h2>
-      <form id="weight-form">
-        <label for="weight-input">Weight (lbs):</label>
-        <input id="weight-input" type="number" step="0.1" placeholder="e.g. 150" required>
-        <label for="weight-date">Date:</label>
-        <input id="weight-date" type="date" required>
-        <button type="submit">Log Weight</button>
-      </form>
-      <div id="weight-summary">
-        <p>No weight data yet.</p>
+  
+  <!-- Navigation Menu -->
+  <nav id="main-nav">
+    <ul>
+      <li><a href="#progress-section" class="nav-link active">Progress</a></li>
+      <li><a href="#photos-section" class="nav-link">Photos</a></li>
+    </ul>
+  </nav>
+  
+  <main id="main-app">
+    <!-- Progress Section: Weight & Calorie Tracking -->
+    <section id="progress-section">
+      <!-- Chart Section -->
+      <div class="card prominent chart-container">
+        <canvas id="weightChart"></canvas>
+        <p id="chart-placeholder">Start logging weight to see trends!</p>
+        <div class="chart-options">
+          <label>
+            <input type="checkbox" id="toggle-demo-data" checked>
+            Show Demo Data
+          </label>
+        </div>
       </div>
+      
+      <!-- Data Log Section (Weight and Calorie Tracking) -->
+      <div class="card" id="data-log-section">
+        <h3>Weight & Calorie Logging</h3>
+        <form id="data-log-form">
+          <div>
+            <label for="weight-input">Weight (lbs):</label>
+            <input id="weight-input" type="number" step="0.1" placeholder="lbs" required>
+          </div>
+          <div>
+            <label for="date-input">Date:</label>
+            <input id="date-input" type="date" required>
+          </div>
+          <div>
+            <label for="waist-input">Waist (in):</label>
+            <input id="waist-input" type="number" step="0.1" placeholder="in">
+          </div>
+          <div>
+            <label for="hips-input">Hips (in):</label>
+            <input id="hips-input" type="number" step="0.1" placeholder="in">
+          </div>
+          <div>
+            <label for="chest-input">Chest (in):</label>
+            <input id="chest-input" type="number" step="0.1" placeholder="in">
+          </div>
+          <div>
+            <label for="calories-input">Calories (kcal):</label>
+            <input id="calories-input" type="number" step="1" placeholder="kcal">
+          </div>
+          <button type="submit">Log Data</button>
+        </form>
+      </div>
+      
+      <!-- Dashboard Section -->
+      <div class="card" id="dashboard-section">
+        <div class="card weight-summary" id="weight-summary">
+          <h3>Weight Summary</h3>
+          <p class="placeholder">No data available for summary.</p>
+        </div>
+        <div class="card recent-weighins" id="recent-weighins">
+          <h3>Recent Weigh-Ins</h3>
+          <p class="placeholder">No weigh-ins recorded yet.</p>
+        </div>
+        <!-- Calorie Tracking Summary (Placeholder) -->
+        <div class="card calorie-summary" id="calorie-summary">
+          <h3>Calorie Summary</h3>
+          <p class="placeholder">No calorie data available.</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Photos Section -->
+    <section id="photos-section">
+      <!-- Photo Upload Section -->
+      <div class="card upload-photo">
+        <h3>Upload Progress Photo</h3>
+        <form id="photo-upload-form">
+          <div>
+            <label for="photo-upload">Select Photo:</label>
+            <input id="photo-upload" type="file" accept="image/*">
+          </div>
+          <div>
+            <label for="photo-date">Photo Date:</label>
+            <input id="photo-date" type="date">
+          </div>
+          <button id="upload-photo-btn" type="submit">Upload Photo</button>
+        </form>
+        <div id="photo-gallery" class="gallery">
+          <p class="placeholder">No photos uploaded yet.</p>
+        </div>
+        <div id="clear-photos-btn" style="display: none;"></div>
+      </div>
+      
+      <!-- Photo Timeline Filter -->
+      <div class="card" id="photo-filter-card">
+        <h3>Filter Gallery by Date Range</h3>
+        <div>
+          <label for="filter-start-date">Start Date:</label>
+          <input id="filter-start-date" type="date">
+          <label for="filter-end-date">End Date:</label>
+          <input id="filter-end-date" type="date">
+          <button id="filter-photos-btn">Filter Photos</button>
+          <button id="clear-filter-btn">Clear Filter</button>
+        </div>
+      </div>
+      
+      <!-- Side by Side Comparison - TwentyTwenty -->
+      <div class="card">
+        <h3>Side by Side Comparison - TwentyTwenty</h3>
+        <div class="photo-selectors">
+          <label for="tt-before">Before:</label>
+          <select id="tt-before"></select>
+          <label for="tt-after">After:</label>
+          <select id="tt-after"></select>
+          <button id="tt-update">Update Comparison</button>
+        </div>
+        <div id="twentytwenty-container" class="twentytwenty-container">
+          <img src="https://placehold.co/300x400?text=Before" alt="Before">
+          <img src="https://placehold.co/300x400?text=After" alt="After">
+        </div>
+      </div>
+    </section>
+    
+    <!-- Export Report Section -->
+    <div class="card" id="export-section">
+      <h3>Export Options</h3>
+      <button id="export-report-btn">Export Report as Image</button>
     </div>
     
-    <!-- Chart Section (displayed at the top) -->
-    <div class="card">
-      <h2>Weight Trend</h2>
-      <canvas id="weightChart"></canvas>
+    <!-- Social Share Section -->
+    <div class="card social-share">
+      <h3>Share Your Progress</h3>
+      <button class="share-btn" data-platform="Facebook">Share on Facebook</button>
+      <button class="share-btn" data-platform="Twitter">Share on Twitter</button>
+      <button class="share-btn" data-platform="Instagram">Share on Instagram</button>
     </div>
     
-    <!-- Photo Upload Section -->
-    <div class="card">
-      <h2>Upload Progress Photo</h2>
-      <form id="photo-upload-form">
-        <label for="photo-upload">Select Photo:</label>
-        <input id="photo-upload" type="file" accept="image/*">
-        <label for="photo-date">Photo Date:</label>
-        <input id="photo-date" type="date" required>
-        <button type="submit">Upload Photo</button>
-      </form>
-      <div id="photo-gallery" class="gallery">
-        <p class="placeholder">No photos uploaded yet.</p>
-      </div>
-    </div>
-    
-    <!-- Photo Comparison Section -->
-    <div class="card" id="photo-comparison">
-      <h2>Side by Side Comparison - TwentyTwenty</h2>
-      <div class="selectors">
-        <label for="tt-before">Before:</label>
-        <select id="tt-before"></select>
-        <label for="tt-after">After:</label>
-        <select id="tt-after"></select>
-        <button id="tt-update" type="button">Update Comparison</button>
-      </div>
-      <div id="twentytwenty-container">
-        <img src="https://placehold.co/300x400?text=Before" alt="Before">
-        <img src="https://placehold.co/300x400?text=After" alt="After">
-      </div>
-    </div>
   </main>
+  
+  <!-- Advanced Comparison Editor Modal -->
+  <div id="comparison-editor-modal">
+    <div>
+      <button id="close-comparison-editor">Close</button>
+      <h3>Advanced Comparison Editor</h3>
+      <canvas id="comparisonCanvas" width="600" height="400" style="border: 2px solid var(--primary-color); border-radius: 8px;"></canvas>
+      <br>
+      <button id="export-comparison-btn">Export for Instagram</button>
+    </div>
+  </div>
+  
+  <footer>
+    <p>&copy; 2025 FitJourney Tracker</p>
+  </footer>
+  
+  <!-- Optional Inline Script for Basic Navigation -->
+  <script>
+    document.querySelectorAll(".nav-link").forEach(link => {
+      link.addEventListener("click", function(e) {
+        e.preventDefault();
+        document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+        this.classList.add("active");
+        const target = this.getAttribute("href");
+        document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
+        document.querySelector(target).style.display = "block";
+      });
+    });
+    // Show Progress section by default
+    document.querySelector("#progress-section").style.display = "block";
+    document.querySelector("#photos-section").style.display = "none";
+  </script>
 </body>
 </html>
