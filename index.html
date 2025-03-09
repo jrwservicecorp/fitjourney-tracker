@@ -6,20 +6,22 @@
   <title>FitJourney Tracker - Tesla Edition</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Local jQuery -->
+  <!-- Local jQuery (ensure the file exists at libs/jquery/jquery.min.js) -->
   <script src="libs/jquery/jquery.min.js"></script>
   <!-- Local jQuery Event Move -->
   <script src="libs/jquery-event-move/jquery.event.move.min.js"></script>
   <!-- Local TwentyTwenty -->
   <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
   
-  <!-- Chart.js and Date Adapter (Luxon) -->
+  <!-- Luxon for date handling -->
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js Adapter for Luxon -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
   
   <!-- Fabric.js for advanced image editing -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
-  
   <!-- html2canvas for export functionality -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   
@@ -55,7 +57,7 @@
         </div>
       </div>
       
-      <!-- Data Log Section (Weight and Calorie Tracking) -->
+      <!-- Data Log Section (Weight & Calorie Logging) -->
       <div class="card" id="data-log-section">
         <h3>Weight & Calorie Logging</h3>
         <form id="data-log-form">
@@ -97,7 +99,6 @@
           <h3>Recent Weigh-Ins</h3>
           <p class="placeholder">No weigh-ins recorded yet.</p>
         </div>
-        <!-- Calorie Tracking Summary (Placeholder) -->
         <div class="card calorie-summary" id="calorie-summary">
           <h3>Calorie Summary</h3>
           <p class="placeholder">No calorie data available.</p>
@@ -170,7 +171,6 @@
       <button class="share-btn" data-platform="Twitter">Share on Twitter</button>
       <button class="share-btn" data-platform="Instagram">Share on Instagram</button>
     </div>
-    
   </main>
   
   <!-- Advanced Comparison Editor Modal -->
@@ -178,7 +178,7 @@
     <div>
       <button id="close-comparison-editor">Close</button>
       <h3>Advanced Comparison Editor</h3>
-      <canvas id="comparisonCanvas" width="600" height="400" style="border: 2px solid var(--primary-color); border-radius: 8px;"></canvas>
+      <canvas id="comparisonCanvas" width="600" height="400" style="border: 2px solid #007bff; border-radius: 8px;"></canvas>
       <br>
       <button id="export-comparison-btn">Export for Instagram</button>
     </div>
@@ -188,7 +188,7 @@
     <p>&copy; 2025 FitJourney Tracker</p>
   </footer>
   
-  <!-- Optional Inline Script for Basic Navigation -->
+  <!-- Inline Script for Basic Navigation -->
   <script>
     document.querySelectorAll(".nav-link").forEach(link => {
       link.addEventListener("click", function(e) {
