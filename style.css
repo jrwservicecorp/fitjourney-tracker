@@ -1,5 +1,5 @@
 /* FitJourney Tracker - Modern Fitness Edition CSS v3.1 */
-/* Peloton-inspired Grey & White theme with dotted texture background */
+/* Peloton-inspired Grey & White theme with subtle dotted texture */
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
@@ -7,7 +7,6 @@
 body {
   font-family: 'Roboto', Arial, sans-serif;
   background: linear-gradient(135deg, #f8f8f8, #eaeaea);
-  /* Subtle dotted texture */
   background-image: radial-gradient(#ccc 1px, transparent 1px);
   background-size: 20px 20px;
   color: #333;
@@ -41,7 +40,7 @@ header {
   transform: translateY(-5px);
 }
 
-/* Chart & Container */
+/* Charts & Container */
 .chart-container {
   max-width: 900px;
   margin: 0 auto;
@@ -125,18 +124,7 @@ select {
   padding: 4px 8px;
 }
 
-/* Social Share Buttons */
-.social-share {
-  margin-top: 15px;
-}
-.social-share .share-btn {
-  background: #ccc;
-  margin: 5px;
-  padding: 10px 15px;
-  border-radius: 4px;
-}
-
-/* USDA Food Search Results (for Nutrition API lookup) */
+/* USDA Food Search Results */
 #food-search-results {
   margin-top: 1rem;
   padding: 1rem;
@@ -168,7 +156,7 @@ footer {
 
 /* Advanced Comparison Editor Modal */
 #comparison-editor-modal {
-  display: none; /* hidden by default */
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -188,7 +176,7 @@ footer {
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-/* Media & Responsive */
+/* Responsive */
 @media only screen and (max-width: 600px) {
   .card {
     max-width: 95%;
