@@ -1,59 +1,69 @@
-/* FitJourney Tracker - Tesla Edition - CSS v2.1 */
-/* Tesla-inspired dark, sleek, modern design with enhanced advanced editor styles */
-
+/* style.css - FitJourney Tracker - Tesla Edition - CSS v2.1 */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-/* Theme Variables */
-:root {
-  --primary-color: #007bff;
-  --primary-dark: #0056b3;
-  --bg-gradient: linear-gradient(135deg, #0d0d0d, #1a1a1a);
-  --card-bg: #1e1e1e;
-  --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-  --border-color: #333;
-  --input-bg: #2a2a2a;
-  --input-border: #444;
-  --text-color: #e0e0e0;
-  --header-bg: #000;
-  --header-text: #fff;
-  --transition-speed: 0.3s;
-}
-
-/* Global Styles */
 body {
   font-family: 'Roboto', Arial, sans-serif;
-  background: var(--bg-gradient);
-  color: var(--text-color);
+  background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+  color: #e0e0e0;
   margin: 0;
   padding: 0;
   text-align: center;
-  line-height: 1.6;
 }
 
 header {
-  background: var(--header-bg);
-  color: var(--header-text);
+  background: #000;
+  color: #fff;
   padding: 20px 0;
   font-size: 1.8em;
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 2px solid #333;
 }
 
-/* Card Component */
+nav#main-nav {
+  background: #1a1a1a;
+  padding: 10px 0;
+}
+
+nav#main-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+nav#main-nav ul li {
+  margin: 0 15px;
+}
+
+nav#main-nav ul li a {
+  color: #e0e0e0;
+  text-decoration: none;
+  font-size: 1.1em;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+nav#main-nav ul li a:hover,
+nav#main-nav ul li a.active {
+  background: #007bff;
+}
+
 .card {
-  background: var(--card-bg);
+  background: #1e1e1e;
   padding: 20px;
   margin: 20px auto;
   border-radius: 12px;
-  box-shadow: var(--card-shadow);
-  color: var(--text-color);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+  color: #e0e0e0;
   max-width: 900px;
-  transition: transform var(--transition-speed);
+  transition: transform 0.3s;
 }
+
 .card:hover {
   transform: translateY(-5px);
 }
 
-/* Chart Container */
 .chart-container {
   max-width: 900px;
   margin: 0 auto;
@@ -61,7 +71,6 @@ header {
   position: relative;
 }
 
-/* Dashboard Section */
 #dashboard-section {
   display: flex;
   flex-wrap: wrap;
@@ -70,12 +79,12 @@ header {
   max-width: 900px;
   margin: 20px auto;
 }
+
 #dashboard-section .card {
   flex: 1 1 30%;
   min-width: 280px;
 }
 
-/* Photo Upload and Comparison */
 .upload-photo,
 .comparison-display,
 #photo-gallery {
@@ -83,16 +92,14 @@ header {
   margin: 0 auto;
 }
 
-/* Canvas Styling */
 canvas {
   width: 100% !important;
   max-width: 900px;
   height: auto !important;
 }
 
-/* Buttons */
 button {
-  background: var(--primary-color);
+  background: #007bff;
   color: #fff;
   border: none;
   padding: 12px 24px;
@@ -100,106 +107,90 @@ button {
   cursor: pointer;
   border-radius: 6px;
   font-size: 1em;
-  transition: background var(--transition-speed);
-}
-button:hover {
-  background: var(--primary-dark);
+  transition: background 0.3s;
 }
 
-/* Input Fields */
+button:hover {
+  background: #0056b3;
+}
+
 input[type="number"],
 input[type="date"],
 input[type="file"],
 select {
   padding: 8px;
   margin: 5px;
-  border: 1px solid var(--input-border);
+  border: 1px solid #333;
   border-radius: 4px;
-  background: var(--input-bg);
+  background: #2a2a2a;
   color: #fff;
 }
 
-/* Gallery */
 .gallery img {
   max-width: 150px;
   max-height: 150px;
   margin: 5px;
   border-radius: 8px;
   cursor: pointer;
-  transition: transform var(--transition-speed);
+  transition: transform 0.3s;
 }
+
 .gallery img:hover {
   transform: scale(1.05);
 }
 
-/* Photo Timeline Filter */
 #photo-filter-card {
   margin-top: 15px;
   padding: 10px;
-  border: 1px solid var(--input-border);
+  border: 1px solid #444;
   border-radius: 6px;
 }
 
-/* Photo selectors */
 .photo-selectors {
   margin-bottom: 10px;
 }
+
 .photo-selectors label {
   margin-right: 5px;
 }
+
 .photo-selectors select {
   margin-right: 10px;
   padding: 4px 8px;
 }
 
-/* Social Share */
 .social-share {
   margin-top: 15px;
 }
+
 .social-share .share-btn {
   background: #333;
   margin: 5px;
   padding: 10px 15px;
   border-radius: 4px;
-  transition: background var(--transition-speed);
-}
-.social-share .share-btn:hover {
-  background: #555;
 }
 
 /* Advanced Comparison Editor Modal */
 #comparison-editor-modal {
-  display: none;
+  display: none; /* hidden by default */
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.8);
-  z-index: 1000;
-  align-items: center;
   justify-content: center;
-}
-#comparison-editor-modal > div {
-  background: var(--card-bg);
-  padding: 20px;
-  border-radius: 12px;
-  position: relative;
-  max-width: 650px;
-  margin: auto;
-}
-#comparison-editor-modal button#close-comparison-editor {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: var(--primary-color);
-  border: none;
-  padding: 5px 10px;
-  color: #fff;
-  cursor: pointer;
+  align-items: center;
+  z-index: 1000;
 }
 
-/* Responsive Styles */
+#comparison-editor-modal > div {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
 @media only screen and (max-width: 600px) {
   .card {
     max-width: 95%;
