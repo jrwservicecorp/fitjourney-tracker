@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Global arrays to store logs
   let dataLogs = [];
   let photoLogs = [];
+  let editorCanvas; // Fabric.js canvas for advanced editor
 
   // Initialize Chart.js with a time scale using Luxon adapter
   const ctx = document.getElementById('weightChart').getContext('2d');
@@ -119,7 +120,6 @@ document.addEventListener("DOMContentLoaded", function () {
       calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>';
       return;
     }
-    // For demo, show average calories of latest 3 entries if available
     const recent = dataLogs.slice(-3);
     const avg = recent.reduce((sum, log) => sum + (log.calories || 0), 0) / recent.length;
     calorieDiv.innerHTML = `<p>Average Calories: ${Math.round(avg)} kcal</p>`;
@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    // Append images with the necessary classes
+    // Append images with necessary classes
     const $beforeImg = $(`<img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before">`);
     const $afterImg = $(`<img class="twentytwenty-after" src="${afterPhoto.src}" alt="After">`);
     container.append($beforeImg, $afterImg);
@@ -251,6 +251,92 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // Open Advanced Comparison Editor
+  $("#open-editor-btn").on("click", function() {
+    openComparisonEditor();
+  });
+
+  // Advanced Comparison Editor functions
+  function openComparisonEditor() {
+    if (photoLogs.length < 2) {
+      alert("Please upload at least two photos and select them for comparison.");
+      return;
+    }
+    // Get selected photos (default to first two if not selected)
+    const beforeIndex = parseInt($("#tt-before").val()) || 0;
+    const afterIndex = parseInt($("#tt-after").val()) || 1;
+    const beforePhoto = photoLogs[beforeIndex];
+    const afterPhoto = photoLogs[afterIndex];
+    // Show modal
+    $("#comparison-editor-modal").show();
+    // Initialize Fabric.js canvas
+    editorCanvas = new fabric.Canvas('comparisonCanvas', {
+      backgroundColor: '#fff',
+      selection: true
+    });
+    // Clear canvas if not empty
+    editorCanvas.clear();
+    // Load before image onto left half of canvas
+    fabric.Image.fromURL(beforePhoto.src, function(img) {
+      img.set({
+        left: 0,
+        top: 0,
+        scaleX: 0.5,
+        scaleY: 0.5,
+        selectable: true
+      });
+      editorCanvas.add(img);
+    });
+    // Load after image onto right half of canvas
+    fabric.Image.fromURL(afterPhoto.src, function(img) {
+      img.set({
+        left: 300, // adjust as needed for side-by-side
+        top: 0,
+        scaleX: 0.5,
+        scaleY: 0.5,
+        selectable: true
+      });
+      editorCanvas.add(img);
+    });
+  }
+
+  // Add Text Overlay in Advanced Editor
+  $("#add-text-btn").on("click", function() {
+    if (editorCanvas) {
+      const text = new fabric.IText('New Overlay', {
+        left: 50,
+        top: 50,
+        fill: '#fff',
+        fontSize: 20,
+        selectable: true
+      });
+      editorCanvas.add(text);
+      editorCanvas.setActiveObject(text);
+    }
+  });
+
+  // Close Advanced Editor Modal
+  $("#close-comparison-editor").on("click", function() {
+    $("#comparison-editor-modal").hide();
+    if (editorCanvas) {
+      editorCanvas.dispose();
+      editorCanvas = null;
+    }
+  });
+
+  // Export Comparison from Advanced Editor
+  $("#export-comparison-btn").on("click", function() {
+    if (editorCanvas) {
+      const dataURL = editorCanvas.toDataURL({
+        format: 'png'
+      });
+      let link = document.createElement("a");
+      link.download = "comparison_for_instagram.png";
+      link.href = dataURL;
+      link.click();
+    }
+  });
+
   // Export Report as Image using html2canvas
   $("#export-report-btn").on("click", function() {
     html2canvas(document.getElementById("main-app")).then(canvas => {
@@ -265,18 +351,5 @@ document.addEventListener("DOMContentLoaded", function () {
   $(".share-btn").on("click", function() {
     const platform = $(this).data("platform");
     alert(`Sharing to ${platform} (functionality to be implemented).`);
-  });
-
-  // Advanced Comparison Editor - Dummy Implementation
-  $("#close-comparison-editor").on("click", function() {
-    $("#comparison-editor-modal").hide();
-  });
-  $("#export-comparison-btn").on("click", function() {
-    html2canvas(document.getElementById("comparison-editor-modal")).then(canvas => {
-      let link = document.createElement("a");
-      link.download = "comparison_for_instagram.png";
-      link.href = canvas.toDataURL();
-      link.click();
-    });
   });
 });
