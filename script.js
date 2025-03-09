@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Remove any demo data; start with empty logs
+  // Start with empty logs (remove any demo data)
 
   // Body Weight Log Form Submission
   document.getElementById("data-log-form").addEventListener("submit", function(e) {
@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (data.foods && data.foods.length > 0) {
           // Show top 5 results
           data.foods.slice(0, 5).forEach(food => {
-            resultsHtml += `<button class="list-group-item list-group-item-action food-item" data-food='${JSON.stringify(food)}'>${food.description} - ${food.foodNutrients.find(n => n.nutrientName === "Energy")?.value || "N/A"} kcal</button>`;
+            resultsHtml += `<button type="button" class="list-group-item list-group-item-action food-item" data-food='${JSON.stringify(food)}'>${food.description} - ${food.foodNutrients.find(n => n.nutrientName === "Energy")?.value || "N/A"} kcal</button>`;
           });
           $("#food-search-results").html(resultsHtml);
           $("#add-custom-food-btn").hide();
@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Get Energy nutrient (calories)
     const energyNutrient = foodData.foodNutrients.find(n => n.nutrientName === "Energy");
     $("#food-calories").val(energyNutrient ? energyNutrient.value : "");
-    // Get common nutrients; allow any number of decimals
+    // Get common nutrients (allow any number of decimals)
     const proteinNutrient = foodData.foodNutrients.find(n => n.nutrientName === "Protein");
     const fatNutrient = foodData.foodNutrients.find(n => n.nutrientName === "Total lipid (fat)");
     const carbNutrient = foodData.foodNutrients.find(n => n.nutrientName === "Carbohydrate, by difference");
