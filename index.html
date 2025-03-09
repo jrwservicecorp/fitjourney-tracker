@@ -1,259 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FitJourney Tracker</title>
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- Chart.js from CDN -->
+  
+  <!-- Local CSS file (update as needed) -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Moment.js and its Chart.js adapter (for time scale support) -->
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
+  
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <!-- jQuery from CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" crossorigin="anonymous"></script>
+  <!-- jQuery -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
   
-  <!-- Local plugins (update paths as needed) -->
+  <!-- Local copies of plugins (update paths if necessary) -->
   <script src="libs/jquery-event-move/jquery.event.move.min.js"></script>
   <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
-  <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css" />
-
-  <!-- html2canvas for export functionality -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
   
-  <!-- Main Script File -->
-  <script src="script.js" defer></script>
+  <!-- Main JavaScript file – we’re including inline script below for clarity -->
+  <script defer>
+    document.addEventListener("DOMContentLoaded", function(){
+      // Global variables for weight data and chart instance
+      let weightData = [];  // Array of objects: { date: "YYYY-MM-DD", weight: number }
+      let weightChart = null;
+      
+      // Update (or create) the weight chart
+      function updateChart(){
+        const ctx = document.getElementById("weightChart").getContext("2d");
+        
+        // Sort weightData by date
+        weightData.sort((a, b) => new Date(a.date) - new Date(b.date));
+        const labels = weightData.map(item => item.date);
+        const data = weightData.map(item => item.weight);
+        
+        // If a chart already exists, destroy it before re-creating
+        if(weightChart !== null){
+          weightChart.destroy();
+        }
+        
+        weightChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Weight (lbs)',
+              data: data,
+              borderColor: 'rgba(0, 123, 255, 1)',
+              backgroundColor: 'rgba(0, 123, 255, 0.2)',
+              fill: true,
+              tension: 0.3
+            }]
+          },
+          options: {
+            scales: {
+              x: {
+                type: 'time',
+                time: {
+                  unit: 'day'
+                },
+                title: {
+                  display: true,
+                  text: 'Date'
+                }
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: 'Weight (lbs)'
+                }
+              }
+            },
+            plugins: {
+              legend: { display: true }
+            }
+          }
+        });
+      }
+      
+      // Handle weight form submission
+      const weightForm = document.getElementById("weight-form");
+      weightForm.addEventListener("submit", function(e){
+        e.preventDefault();
+        const weightInput = document.getElementById("weight-input").value;
+        const weightDate = document.getElementById("weight-date").value;
+        
+        if(weightInput && weightDate){
+          weightData.push({ date: weightDate, weight: parseFloat(weightInput) });
+          // Update summary info
+          document.getElementById("weight-summary").innerHTML =
+            `<p>Latest Weight: ${weightInput} lbs on ${weightDate}</p>`;
+          // Update the chart with new data
+          updateChart();
+          weightForm.reset();
+        }
+      });
+      
+      // Handle photo upload form submission
+      const photoForm = document.getElementById("photo-upload-form");
+      photoForm.addEventListener("submit", function(e){
+        e.preventDefault();
+        const fileInput = document.getElementById("photo-upload").files[0];
+        const photoDate = document.getElementById("photo-date").value;
+        
+        if(!fileInput || !photoDate){
+          alert("Please select a photo and date.");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e){
+          // Append the new photo to the gallery
+          const gallery = document.getElementById("photo-gallery");
+          const newEntry = document.createElement("div");
+          newEntry.className = "photo-entry";
+          newEntry.innerHTML = `<img src="${e.target.result}" alt="Progress Photo">
+                                <p>Date: ${photoDate}</p>`;
+          // Remove placeholder text if present
+          const placeholder = gallery.querySelector(".placeholder");
+          if (placeholder) { placeholder.remove(); }
+          gallery.appendChild(newEntry);
+          photoForm.reset();
+        };
+        reader.readAsDataURL(fileInput);
+      });
+      
+      // (Other functionality – such as initializing TwentyTwenty – can be added below)
+    });
+  </script>
   
   <style>
-    /* Inline styling for TwentyTwenty container */
-    .twentytwenty-container {
-      width: 100%;
-      max-width: 600px;
+    /* Basic styling; feel free to adjust for your Tesla-inspired look and mobile responsiveness */
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #000;
+      padding: 15px;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2em;
+    }
+    main {
+      padding: 20px;
+      max-width: 1000px;
       margin: auto;
+    }
+    .card {
+      background: #1e1e1e;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 10px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+    }
+    form label {
+      display: block;
+      margin: 5px 0 2px;
+    }
+    form input, form button {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: none;
+      box-sizing: border-box;
+    }
+    form button {
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+      width: auto;
+    }
+    .gallery .photo-entry {
+      margin-bottom: 15px;
+    }
+    .gallery img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 5px;
+    }
+    canvas {
+      background: #fff;
+      border-radius: 10px;
+      margin: 15px 0;
     }
   </style>
 </head>
 <body>
   <header>
     <h1>FitJourney Tracker</h1>
-    <p>App Version: <span id="app-version">v1.4.3-local</span></p>
   </header>
-  
-  <main id="main-app">
-    <!-- Chart Section -->
-    <div class="card prominent chart-container">
-      <canvas id="weightChart"></canvas>
-      <p id="chart-placeholder">Start logging weight to see trends!</p>
-      <div class="chart-options">
-        <label>
-          <input type="checkbox" id="toggle-demo-data" checked />
-          Show Demo Data
-        </label>
+  <main>
+    <!-- Weight Logging Section -->
+    <div class="card">
+      <h2>Log Your Weight</h2>
+      <form id="weight-form">
+        <label for="weight-input">Weight (lbs):</label>
+        <input id="weight-input" type="number" step="0.1" placeholder="e.g. 150" required>
+        <label for="weight-date">Date:</label>
+        <input id="weight-date" type="date" required>
+        <button type="submit">Log Weight</button>
+      </form>
+      <div id="weight-summary">
+        <p>No weight data yet.</p>
       </div>
-      <p id="trend-analysis">Trend: No data yet.</p>
     </div>
     
-    <!-- Dashboard Section -->
-    <section id="dashboard-section">
-      <div class="card weight-summary">
-        <h3>Weight Summary</h3>
-        <div id="weight-summary">
-          <p class="placeholder">No data available for summary.</p>
-        </div>
-      </div>
-      <div class="card recent-weighins">
-        <h3>Recent Weigh-Ins</h3>
-        <div id="recent-weighins">
-          <p class="placeholder">No weigh-ins recorded yet.</p>
-        </div>
-      </div>
-      <div class="card weight-checkin">
-        <h3>Log Your Weight</h3>
-        <form id="weight-form">
-          <label for="weight-input">Weight:</label>
-          <input id="weight-input" type="number" step="0.1" placeholder="lbs" required />
-          <label for="date-input">Date:</label>
-          <input id="date-input" type="date" required />
-          <button type="submit">Log Weight</button>
-        </form>
-      </div>
-    </section>
+    <!-- Chart Section -->
+    <div class="card">
+      <h2>Weight Trend</h2>
+      <canvas id="weightChart"></canvas>
+    </div>
     
     <!-- Photo Upload Section -->
-    <div class="card upload-photo">
-      <h3>Upload Progress Photo</h3>
+    <div class="card">
+      <h2>Upload Progress Photo</h2>
       <form id="photo-upload-form">
         <label for="photo-upload">Select Photo:</label>
-        <input id="photo-upload" type="file" accept="image/*" />
+        <input id="photo-upload" type="file" accept="image/*">
         <label for="photo-date">Photo Date:</label>
-        <input id="photo-date" type="date" />
-        <button id="upload-photo-btn" type="submit">Upload Photo</button>
+        <input id="photo-date" type="date" required>
+        <button type="submit">Upload Photo</button>
       </form>
       <div id="photo-gallery" class="gallery">
         <p class="placeholder">No photos uploaded yet.</p>
       </div>
-      <div id="clear-photos-btn" style="display: none;"></div>
-    </div>
-    
-    <!-- Side by Side Comparison - TwentyTwenty -->
-    <div class="card">
-      <h3>Side by Side Comparison - TwentyTwenty</h3>
-      <div class="photo-selectors">
-         <label for="tt-before">Before:</label>
-         <select id="tt-before"></select>
-         <label for="tt-after">After:</label>
-         <select id="tt-after"></select>
-         <button id="tt-update">Update Comparison</button>
-      </div>
-      <div id="twentytwenty-container" class="twentytwenty-container">
-        <img src="https://placehold.co/300x400?text=Before" alt="Before" />
-        <img src="https://placehold.co/300x400?text=After" alt="After" />
-      </div>
-      <button id="export-twentytwenty-btn">Export Comparison</button>
-      <button id="export-instagram-tt-btn">Export Instagram Image (TwentyTwenty)</button>
     </div>
   </main>
-  
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      // Update app version text.
-      document.getElementById("app-version").textContent = "v1.4.3-local";
-      
-      // -------------------------------
-      // Chart Initialization and Update
-      // -------------------------------
-      var chartCanvas = document.getElementById("weightChart");
-      if (!chartCanvas) {
-        console.error("Canvas element with ID 'weightChart' not found.");
-      } else {
-        // Create a global weightData object to store chart data.
-        window.weightData = {
-          labels: [],
-          datasets: [{
-            label: "Weight",
-            data: [],
-            backgroundColor: "rgba(0,123,255,0.5)",
-            borderColor: "rgba(0,123,255,1)",
-            fill: false
-          }]
-        };
-
-        // Function to create/update the chart.
-        function createOrUpdateChart() {
-          // If a chart instance already exists, destroy it.
-          if (window.weightChartInstance) {
-            window.weightChartInstance.destroy();
-          }
-          var ctx = chartCanvas.getContext("2d");
-          window.weightChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: window.weightData,
-            options: {
-              responsive: true,
-              plugins: {
-                legend: { display: true }
-              },
-              scales: {
-                x: {
-                  type: 'category',
-                  title: { display: true, text: 'Date' }
-                },
-                y: {
-                  title: { display: true, text: 'Weight (lbs)' }
-                }
-              }
-            }
-          });
-        }
-        
-        // Initialize the chart.
-        createOrUpdateChart();
-      }
-      
-      // -------------------------------
-      // Weight Logging Form
-      // -------------------------------
-      var weightForm = document.getElementById("weight-form");
-      if (weightForm) {
-        weightForm.addEventListener("submit", function(e) {
-          e.preventDefault();  // Prevent page reload
-          
-          var weightInput = document.getElementById("weight-input").value;
-          var dateInput = document.getElementById("date-input").value;
-          
-          if (!weightInput || !dateInput) {
-            alert("Please enter both weight and date.");
-            return;
-          }
-          
-          // Retrieve the existing weight log from localStorage (or initialize as empty array)
-          var weightLog = JSON.parse(localStorage.getItem("weightLog") || "[]");
-          weightLog.push({ weight: parseFloat(weightInput), date: dateInput });
-          
-          // Optional: sort by date ascending
-          weightLog.sort(function(a, b) {
-            return new Date(a.date) - new Date(b.date);
-          });
-          localStorage.setItem("weightLog", JSON.stringify(weightLog));
-          
-          // Update the summary and chart.
-          updateSummary();
-          updateChart();
-          
-          // Reset the form.
-          weightForm.reset();
-        });
-      }
-      
-      // Function to update the Weight Summary and Recent Weigh-Ins UI.
-      function updateSummary() {
-        var weightLog = JSON.parse(localStorage.getItem("weightLog") || "[]");
-        var summaryDiv = document.getElementById("weight-summary");
-        var recentDiv = document.getElementById("recent-weighins");
-        
-        if (weightLog.length === 0) {
-          summaryDiv.innerHTML = "<p class='placeholder'>No data available for summary.</p>";
-          recentDiv.innerHTML = "<p class='placeholder'>No weigh-ins recorded yet.</p>";
-          return;
-        }
-        
-        var latestEntry = weightLog[weightLog.length - 1];
-        var total = weightLog.reduce(function(sum, entry) { return sum + entry.weight; }, 0);
-        var avgWeight = (total / weightLog.length).toFixed(1);
-        
-        summaryDiv.innerHTML = "<p>Latest Weight: " + latestEntry.weight + " lbs on " + latestEntry.date + "</p>" +
-                               "<p>Average Weight: " + avgWeight + " lbs</p>";
-        
-        // Show the five most recent entries.
-        var recentEntries = weightLog.slice(-5).reverse();
-        var recentHtml = recentEntries.map(function(entry) {
-          return "<p>" + entry.date + ": " + entry.weight + " lbs</p>";
-        }).join("");
-        recentDiv.innerHTML = recentHtml;
-      }
-      
-      // Function to update the chart data.
-      function updateChart() {
-        var weightLog = JSON.parse(localStorage.getItem("weightLog") || "[]");
-        window.weightData.labels = weightLog.map(function(entry) { return entry.date; });
-        window.weightData.datasets[0].data = weightLog.map(function(entry) { return entry.weight; });
-        createOrUpdateChart();
-      }
-      
-      // On page load, update summary and chart if data exists.
-      updateSummary();
-      updateChart();
-      
-      // -------------------------------
-      // Initialize TwentyTwenty Slider
-      // -------------------------------
-      if ($.fn.twentytwenty) {
-        $("#twentytwenty-container").twentytwenty();
-      } else {
-        console.error("TwentyTwenty plugin failed to load.");
-      }
-      
-      // (Additional code for photo upload and side-by-side comparisons can be added here.)
-    });
-  </script>
 </body>
 </html>
