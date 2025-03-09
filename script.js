@@ -1,8 +1,8 @@
-/* script.js - FitJourney Tracker - Tesla Edition v2.2 */
+/* script.js - FitJourney Tracker - Tesla Edition */
 
 document.addEventListener("DOMContentLoaded", function () {
   // Set app version
-  document.getElementById("app-version").textContent = "v2.2";
+  document.getElementById("app-version").textContent = "v2.1";
 
   // Global arrays to store logs
   let dataLogs = [];
@@ -41,8 +41,8 @@ document.addEventListener("DOMContentLoaded", function () {
   if (toggleDemo.checked && dataLogs.length === 0) {
     const demoData = [
       { date: '2023-01-01', weight: 200, waist: 34, hips: 36, chest: 40, calories: 2500 },
-      { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39, calories: 2450 },
-      { date: '2023-03-01', weight: 190, waist: 33, hips: 35, chest: 38, calories: 2400 }
+      { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39, calories: 2400 },
+      { date: '2023-03-01', weight: 190, waist: 33, hips: 35, chest: 38, calories: 2300 }
     ];
     demoData.forEach(log => addDataLog(log));
     updateChart();
@@ -118,11 +118,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     const latest = dataLogs[dataLogs.length - 1];
-    if (!latest.calories) {
-      calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>';
-      return;
-    }
-    calorieDiv.innerHTML = `<p>Latest Calories: ${latest.calories} kcal on ${latest.date}</p>`;
+    calorieDiv.innerHTML = `<p>Latest Calorie Intake: ${latest.calories || "N/A"} kcal on ${latest.date}</p>`;
   }
 
   // Photo upload form submission
@@ -201,14 +197,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Initialize TwentyTwenty plugin once the document is ready
+  // Initialize TwentyTwenty plugin on page load
   $(document).ready(function () {
     if ($.fn.twentytwenty) {
-      $("#twentytwenty-container").twentytwenty({
-        afterSliderLoad: function() {
-          $("#twentytwenty-container").css("visibility", "visible");
-        }
-      });
+      $("#twentytwenty-container").twentytwenty();
     } else {
       console.error("TwentyTwenty plugin failed to load.");
     }
@@ -226,14 +218,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    container.append(`<img src="${beforePhoto.src}" alt="Before">`);
-    container.append(`<img src="${afterPhoto.src}" alt="After">`);
-    // Re-initialize TwentyTwenty after updating images
-    container.twentytwenty({
-      afterSliderLoad: function() {
-        container.css("visibility", "visible");
-      }
-    });
+    // Create new images and add a class if needed
+    const imgBefore = $(`<img src="${beforePhoto.src}" alt="Before">`);
+    const imgAfter = $(`<img src="${afterPhoto.src}" alt="After">`);
+    container.append(imgBefore);
+    container.append(imgAfter);
+    // Wait a short time to let images load then initialize TwentyTwenty
+    setTimeout(function() {
+      container.twentytwenty();
+    }, 300);
   });
 
   // Export Report as Image using html2canvas
