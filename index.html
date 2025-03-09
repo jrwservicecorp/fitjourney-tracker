@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FitJourney Tracker</title>
   
-  <!-- Local CSS file (update as needed) -->
+  <!-- Main CSS file -->
   <link rel="stylesheet" href="style.css">
   
-  <!-- Moment.js and its Chart.js adapter (for time scale support) -->
+  <!-- Include Moment.js and Chart.js adapter for time scales -->
   <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
   
@@ -18,31 +18,33 @@
   <!-- jQuery -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
   
-  <!-- Local copies of plugins (update paths if necessary) -->
+  <!-- Local libraries (adjust paths as needed) -->
   <script src="libs/jquery-event-move/jquery.event.move.min.js"></script>
+  <!-- Use your local copy now instead of the CDN -->
   <script src="libs/twentytwenty/jquery.twentytwenty.min.js"></script>
   
-  <!-- Main JavaScript file – we’re including inline script below for clarity -->
+  <!-- Main JavaScript -->
   <script defer>
-    document.addEventListener("DOMContentLoaded", function(){
-      // Global variables for weight data and chart instance
-      let weightData = [];  // Array of objects: { date: "YYYY-MM-DD", weight: number }
+    document.addEventListener("DOMContentLoaded", function() {
+      // Global variables for weight data and Chart.js instance
+      let weightData = [];
       let weightChart = null;
       
-      // Update (or create) the weight chart
-      function updateChart(){
+      // Function to update the weight chart (destroys existing chart first)
+      function updateChart() {
         const ctx = document.getElementById("weightChart").getContext("2d");
         
-        // Sort weightData by date
+        // Sort data by date
         weightData.sort((a, b) => new Date(a.date) - new Date(b.date));
         const labels = weightData.map(item => item.date);
         const data = weightData.map(item => item.weight);
         
-        // If a chart already exists, destroy it before re-creating
-        if(weightChart !== null){
+        // Destroy previous chart instance if exists
+        if (weightChart) {
           weightChart.destroy();
         }
         
+        // Create new chart
         weightChart = new Chart(ctx, {
           type: 'line',
           data: {
@@ -82,58 +84,63 @@
         });
       }
       
-      // Handle weight form submission
+      // Weight logging form handler
       const weightForm = document.getElementById("weight-form");
-      weightForm.addEventListener("submit", function(e){
+      weightForm.addEventListener("submit", function(e) {
         e.preventDefault();
-        const weightInput = document.getElementById("weight-input").value;
+        const weightValue = document.getElementById("weight-input").value;
         const weightDate = document.getElementById("weight-date").value;
         
-        if(weightInput && weightDate){
-          weightData.push({ date: weightDate, weight: parseFloat(weightInput) });
-          // Update summary info
+        if (weightValue && weightDate) {
+          weightData.push({ date: weightDate, weight: parseFloat(weightValue) });
           document.getElementById("weight-summary").innerHTML =
-            `<p>Latest Weight: ${weightInput} lbs on ${weightDate}</p>`;
-          // Update the chart with new data
+            `<p>Latest Weight: ${weightValue} lbs on ${weightDate}</p>`;
           updateChart();
           weightForm.reset();
         }
       });
       
-      // Handle photo upload form submission
+      // Photo upload form handler
       const photoForm = document.getElementById("photo-upload-form");
-      photoForm.addEventListener("submit", function(e){
+      photoForm.addEventListener("submit", function(e) {
         e.preventDefault();
-        const fileInput = document.getElementById("photo-upload").files[0];
+        const file = document.getElementById("photo-upload").files[0];
         const photoDate = document.getElementById("photo-date").value;
         
-        if(!fileInput || !photoDate){
-          alert("Please select a photo and date.");
+        if (!file || !photoDate) {
+          alert("Please select a photo and enter a date.");
           return;
         }
+        
         const reader = new FileReader();
-        reader.onload = function(e){
-          // Append the new photo to the gallery
+        reader.onload = function(e) {
           const gallery = document.getElementById("photo-gallery");
-          const newEntry = document.createElement("div");
-          newEntry.className = "photo-entry";
-          newEntry.innerHTML = `<img src="${e.target.result}" alt="Progress Photo">
-                                <p>Date: ${photoDate}</p>`;
-          // Remove placeholder text if present
+          const entry = document.createElement("div");
+          entry.className = "photo-entry";
+          entry.innerHTML = `<img src="${e.target.result}" alt="Progress Photo">
+                             <p>Date: ${photoDate}</p>`;
+          // Remove placeholder text if it exists
           const placeholder = gallery.querySelector(".placeholder");
-          if (placeholder) { placeholder.remove(); }
-          gallery.appendChild(newEntry);
+          if (placeholder) {
+            placeholder.remove();
+          }
+          gallery.appendChild(entry);
           photoForm.reset();
         };
-        reader.readAsDataURL(fileInput);
+        reader.readAsDataURL(file);
       });
       
-      // (Other functionality – such as initializing TwentyTwenty – can be added below)
+      // Initialize TwentyTwenty (if used elsewhere on the page)
+      if ($.fn.twentytwenty) {
+        $("#twentytwenty-container").twentytwenty();
+      } else {
+        console.error("TwentyTwenty plugin failed to load.");
+      }
     });
   </script>
   
   <style>
-    /* Basic styling; feel free to adjust for your Tesla-inspired look and mobile responsiveness */
+    /* Basic styling with a modern, Tesla-inspired look and mobile optimization */
     body {
       font-family: 'Roboto', sans-serif;
       background-color: #121212;
@@ -149,6 +156,7 @@
     header h1 {
       margin: 0;
       font-size: 2em;
+      letter-spacing: 1px;
     }
     main {
       padding: 20px;
@@ -158,9 +166,9 @@
     .card {
       background: #1e1e1e;
       padding: 20px;
-      margin: 15px 0;
+      margin-bottom: 15px;
       border-radius: 10px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
     }
     form label {
       display: block;
@@ -179,6 +187,10 @@
       color: #fff;
       cursor: pointer;
       width: auto;
+      transition: background 0.3s;
+    }
+    form button:hover {
+      background: #0056b3;
     }
     .gallery .photo-entry {
       margin-bottom: 15px;
@@ -192,6 +204,21 @@
       background: #fff;
       border-radius: 10px;
       margin: 15px 0;
+    }
+    
+    /* Mobile optimization */
+    @media only screen and (max-width: 600px) {
+      header h1 {
+        font-size: 1.6em;
+      }
+      .card {
+        margin: 10px;
+        padding: 15px;
+      }
+      form input, form button {
+        font-size: 0.9em;
+        padding: 6px;
+      }
     }
   </style>
 </head>
