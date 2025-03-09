@@ -1,39 +1,57 @@
-/* FitJourney Tracker - Tesla Edition - CSS v2.0 */
-/* Tesla-inspired dark, sleek, modern design */
+/* FitJourney Tracker - Tesla Edition - CSS v2.1 */
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+/* Define theme variables for easy adjustments */
+:root {
+  --primary-color: #007bff;
+  --primary-dark: #0056b3;
+  --bg-gradient: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+  --card-bg: #1e1e1e;
+  --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+  --border-color: #333;
+  --input-bg: #2a2a2a;
+  --input-border: #444;
+  --text-color: #e0e0e0;
+  --header-bg: #000;
+  --header-text: #fff;
+  --font-family: 'Roboto', Arial, sans-serif;
+  --transition-speed: 0.3s;
+}
 
+/* Global Styles */
 body {
-  font-family: 'Roboto', Arial, sans-serif;
-  background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
-  color: #e0e0e0;
+  font-family: var(--font-family);
+  background: var(--bg-gradient);
+  color: var(--text-color);
   margin: 0;
   padding: 0;
   text-align: center;
+  line-height: 1.6;
 }
 
 header {
-  background: #000;
-  color: #fff;
+  background: var(--header-bg);
+  color: var(--header-text);
   padding: 20px 0;
   font-size: 1.8em;
-  border-bottom: 2px solid #333;
+  border-bottom: 2px solid var(--border-color);
 }
 
+/* Card Component */
 .card {
-  background: #1e1e1e;
+  background: var(--card-bg);
   padding: 20px;
   margin: 20px auto;
   border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.6);
-  color: #e0e0e0;
+  box-shadow: var(--card-shadow);
+  color: var(--text-color);
   max-width: 900px;
-  transition: transform 0.3s;
+  transition: transform var(--transition-speed);
 }
 .card:hover {
   transform: translateY(-5px);
 }
 
+/* Chart Container */
 .chart-container {
   max-width: 900px;
   margin: 0 auto;
@@ -41,6 +59,7 @@ header {
   position: relative;
 }
 
+/* Dashboard Section */
 #dashboard-section {
   display: flex;
   flex-wrap: wrap;
@@ -54,19 +73,24 @@ header {
   min-width: 280px;
 }
 
-.upload-photo, .comparison-display, #photo-gallery {
+/* Photo Upload and Comparison */
+.upload-photo,
+.comparison-display,
+#photo-gallery {
   max-width: 600px;
   margin: 0 auto;
 }
 
+/* Canvas Styling */
 canvas {
   width: 100% !important;
   max-width: 900px;
   height: auto !important;
 }
 
+/* Buttons */
 button {
-  background: #007bff;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   padding: 12px 24px;
@@ -74,10 +98,10 @@ button {
   cursor: pointer;
   border-radius: 6px;
   font-size: 1em;
-  transition: background 0.3s;
+  transition: background var(--transition-speed);
 }
 button:hover {
-  background: #0056b3;
+  background: var(--primary-dark);
 }
 
 /* Input Fields */
@@ -87,9 +111,9 @@ input[type="file"],
 select {
   padding: 8px;
   margin: 5px;
-  border: 1px solid #333;
+  border: 1px solid var(--input-border);
   border-radius: 4px;
-  background: #2a2a2a;
+  background: var(--input-bg);
   color: #fff;
 }
 
@@ -100,7 +124,7 @@ select {
   margin: 5px;
   border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.3s;
+  transition: transform var(--transition-speed);
 }
 .gallery img:hover {
   transform: scale(1.05);
@@ -110,7 +134,7 @@ select {
 #photo-filter-card {
   margin-top: 15px;
   padding: 10px;
-  border: 1px solid #444;
+  border: 1px solid var(--input-border);
   border-radius: 6px;
 }
 
@@ -126,7 +150,7 @@ select {
   padding: 4px 8px;
 }
 
-/* Social share */
+/* Social Share Buttons */
 .social-share {
   margin-top: 15px;
 }
@@ -135,9 +159,13 @@ select {
   margin: 5px;
   padding: 10px 15px;
   border-radius: 4px;
+  transition: background var(--transition-speed);
+}
+.social-share .share-btn:hover {
+  background: #555;
 }
 
-/* Responsive */
+/* Responsive Styles */
 @media only screen and (max-width: 600px) {
   .card {
     max-width: 95%;
