@@ -23,22 +23,22 @@
   <script src="script.js" defer></script>
 </head>
 <body>
-  <header class="site-header">
+  <header class="bg-secondary text-white py-3">
     <div class="container text-center">
-      <h1 class="site-title">FitJourney Tracker</h1>
-      <p class="site-version">App Version: <span id="app-version">v3.1</span></p>
+      <h1>FitJourney Tracker</h1>
+      <p>App Version: <span id="app-version">v3.1</span></p>
     </div>
   </header>
   
-  <!-- Updated Navigation Menu -->
-  <nav class="main-nav">
+  <!-- Updated Navigation Menu with Buttons -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container">
-      <ul class="nav-list">
-        <li class="nav-item"><a href="#dashboard-section" class="nav-link active" data-target="#dashboard-section">Dashboard</a></li>
-        <li class="nav-item"><a href="#nutrition-section" class="nav-link" data-target="#nutrition-section">Nutrition Log</a></li>
-        <li class="nav-item"><a href="#weight-section" class="nav-link" data-target="#weight-section">Body Weight Log</a></li>
-        <li class="nav-item"><a href="#media-section" class="nav-link" data-target="#media-section">Media & Exports</a></li>
-      </ul>
+      <div class="btn-group" role="group" aria-label="Main Navigation">
+        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#dashboard-section">Dashboard</button>
+        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#nutrition-section">Nutrition Log</button>
+        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#weight-section">Body Weight Log</button>
+        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#media-section">Media & Exports</button>
+      </div>
     </div>
   </nav>
   
@@ -49,7 +49,7 @@
       <div class="row">
         <!-- Weight Chart Tile -->
         <div class="col-md-6 mb-4">
-          <div class="card tile">
+          <div class="card tile shadow-sm">
             <div class="card-header tile-header">Weight Chart</div>
             <div class="card-body">
               <canvas id="weightChart"></canvas>
@@ -63,7 +63,7 @@
         </div>
         <!-- Nutrition Chart Tile -->
         <div class="col-md-6 mb-4">
-          <div class="card tile">
+          <div class="card tile shadow-sm">
             <div class="card-header tile-header">Nutrition Chart</div>
             <div class="card-body">
               <canvas id="nutritionChart"></canvas>
@@ -75,7 +75,7 @@
       <!-- Summary Panels -->
       <div class="row">
         <div class="col-md-6 mb-3">
-          <div class="card tile" id="weight-summary">
+          <div class="card tile shadow-sm" id="weight-summary">
             <div class="card-header tile-header">Weight Summary</div>
             <div class="card-body">
               <p class="placeholder">No weight data available.</p>
@@ -83,7 +83,7 @@
           </div>
         </div>
         <div class="col-md-6 mb-3">
-          <div class="card tile" id="calorie-summary">
+          <div class="card tile shadow-sm" id="calorie-summary">
             <div class="card-header tile-header">Calorie Summary</div>
             <div class="card-body">
               <p class="placeholder">No calorie data available.</p>
@@ -96,7 +96,7 @@
     <!-- Nutrition Log Section -->
     <section id="nutrition-section" style="display:none;">
       <h2 class="section-title">Nutrition Log</h2>
-      <div class="card tile mb-4" id="nutrition-log-section">
+      <div class="card tile shadow-sm mb-4" id="nutrition-log-section">
         <div class="card-header tile-header">Log Nutrition</div>
         <div class="card-body">
           <form id="nutrition-log-form" class="row g-3">
@@ -135,7 +135,7 @@
           <div class="mt-4" id="nutrition-log-display">
             <p class="placeholder">No nutrition logs recorded yet.</p>
           </div>
-          <!-- Food Search Section -->
+          <!-- Food Search Section (Triggered by typing in Food Name) -->
           <div class="mt-4">
             <h5 class="tile-subtitle">Search for Food Data</h5>
             <div class="input-group mb-3">
@@ -157,7 +157,7 @@
     <!-- Body Weight Log Section -->
     <section id="weight-section" style="display:none;">
       <h2 class="section-title">Body Weight Log</h2>
-      <div class="card tile mb-4" id="data-log-section">
+      <div class="card tile shadow-sm mb-4" id="data-log-section">
         <div class="card-header tile-header">Log Weight & Measurements</div>
         <div class="card-body">
           <form id="data-log-form" class="row g-3">
@@ -191,7 +191,7 @@
           </form>
         </div>
       </div>
-      <div class="card tile" id="weight-log-display">
+      <div class="card tile shadow-sm" id="weight-log-display">
         <div class="card-body">
           <h3 class="card-title">Recent Weigh-Ins</h3>
           <div id="recent-weighins">
@@ -205,7 +205,7 @@
     <section id="media-section" style="display:none;">
       <h2 class="section-title">Media & Exports</h2>
       <!-- Photo Upload Tile -->
-      <div class="card tile mb-4 upload-photo">
+      <div class="card tile shadow-sm mb-4 upload-photo">
         <div class="card-header tile-header">Upload Progress Photo</div>
         <div class="card-body">
           <form id="photo-upload-form" class="row g-3">
@@ -228,7 +228,7 @@
         </div>
       </div>
       <!-- Photo Filter Tile -->
-      <div class="card tile mb-4" id="photo-filter-card">
+      <div class="card tile shadow-sm mb-4" id="photo-filter-card">
         <div class="card-header tile-header">Filter Gallery by Date Range</div>
         <div class="card-body">
           <div class="row g-3">
@@ -248,7 +248,7 @@
         </div>
       </div>
       <!-- Side by Side Comparison Tile -->
-      <div class="card tile mb-4">
+      <div class="card tile shadow-sm mb-4">
         <div class="card-header tile-header">Side by Side Comparison</div>
         <div class="card-body">
           <div class="photo-selectors mb-3">
@@ -266,14 +266,14 @@
         </div>
       </div>
       <!-- Export Report Tile -->
-      <div class="card tile mb-4" id="export-section">
+      <div class="card tile shadow-sm mb-4" id="export-section">
         <div class="card-header tile-header">Export Options</div>
         <div class="card-body">
           <button id="export-report-btn" class="btn btn-success">Export Report as Image</button>
         </div>
       </div>
       <!-- Social Share Tile -->
-      <div class="card tile">
+      <div class="card tile shadow-sm">
         <div class="card-header tile-header">Share Your Progress</div>
         <div class="card-body">
           <button class="share-btn btn btn-outline-primary me-2" data-platform="Facebook">Share on Facebook</button>
