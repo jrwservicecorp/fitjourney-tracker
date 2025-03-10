@@ -214,7 +214,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const $foodSearchResults = $("#food-search-results");
   const $moreFoodBtn = $("#more-food-btn");
 
-  // Debounced function for live food search
+  // Debounced function for live food search on input event
   $foodName.on("input", debounce(function() {
     const query = $foodName.val().trim();
     if (!query) {
@@ -254,14 +254,12 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  // Display live search results
+  // Display live search results as buttons
   function displayFoodResults(foods) {
     let resultsHtml = "";
     foods.forEach(food => {
-      const nutrients = food.foodNutrients || [];
-      const energy = nutrients.find(n => n.nutrientName === "Energy")?.value ?? "N/A";
       resultsHtml += `<button type="button" class="list-group-item list-group-item-action food-item" data-food='${JSON.stringify(food)}'>
-        ${food.description} - ${energy} kcal
+        ${food.description} - ${(food.foodNutrients || []).find(n => n.nutrientName === "Energy")?.value || "N/A"} kcal
       </button>`;
     });
     $foodSearchResults.html(resultsHtml);
@@ -273,25 +271,25 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Food selected:", foodData);
     $foodName.val(foodData.description);
     const nutrients = foodData.foodNutrients || [];
-    const energy = nutrients.find(n => n.nutrientName === "Energy")?.value ?? "";
+    const energy = nutrients.find(n => n.nutrientName === "Energy")?.value || "";
     $("#food-calories").val(energy);
-    const protein = nutrients.find(n => n.nutrientName === "Protein")?.value ?? "";
-    const fat = nutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value ?? "";
-    const carbs = nutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value ?? "";
+    const protein = nutrients.find(n => n.nutrientName === "Protein")?.value || "";
+    const fat = nutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value || "";
+    const carbs = nutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value || "";
     $("#food-protein").val(protein);
     $("#food-fat").val(fat);
     $("#food-carbs").val(carbs);
-    // Clear the live search results
+    // Clear live search results
     $foodSearchResults.empty();
     $moreFoodBtn.hide();
   });
 
-  // "Add Custom Food" button (if user chooses not to pick from search)
+  // "Add Custom Food" button
   $("#add-custom-food-btn").on("click", function() {
     alert("No food found. Please fill in the food information manually.");
   });
 
-  // -- Photo Upload Form Submission --
+  // --- Photo Upload Form Submission ---
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
