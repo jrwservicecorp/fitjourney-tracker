@@ -62,8 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Remove any demo data (start with empty arrays)
-  // Data logs and nutrition logs are empty initially.
+  // --- Remove demo data so charts start empty ---
 
   // Body Weight Log Form Submission
   document.getElementById("data-log-form").addEventListener("submit", function(e) {
@@ -202,7 +201,8 @@ document.addEventListener("DOMContentLoaded", function () {
     displayDiv.innerHTML = html;
   }
 
-  // USDA FoodData Central API search triggered when typing in the "food-name" field
+  // USDA FoodData Central API search triggered when typing in the "food-name" field.
+  // We attach the food object directly via jQuery .data() instead of encoding JSON.
   let searchTimeout;
   $("#food-name").on("keyup", function () {
     const query = $(this).val().trim();
@@ -220,12 +220,16 @@ document.addEventListener("DOMContentLoaded", function () {
           let suggestionsHtml = "";
           if (data.foods && data.foods.length > 0) {
             data.foods.forEach(food => {
-              // Encode JSON so special characters are safe
-              suggestionsHtml += `<button type="button" class="list-group-item list-group-item-action food-item" data-food='${encodeURIComponent(JSON.stringify(food))}'>
+              // Create a button and store the food object directly using jQuery .data()
+              suggestionsHtml += `<button type="button" class="list-group-item list-group-item-action food-item">
                 ${food.description} - ${food.foodNutrients.find(n => n.nutrientName === "Energy")?.value || "N/A"} kcal
               </button>`;
             });
             $("#food-suggestions").html(suggestionsHtml);
+            // After rendering, attach the food objects to each button:
+            $("#food-suggestions .food-item").each(function(index) {
+              $(this).data("food", data.foods[index]);
+            });
           } else {
             $("#food-suggestions").html("<p class='text-muted p-2'>No foods found. <button id='more-results-btn' class='btn btn-link'>More</button> or <button id='add-custom-food-btn' class='btn btn-link'>Add Custom Food</button></p>");
           }
@@ -236,10 +240,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 500);
   });
 
-  // When a suggestion is clicked, fill in the form fields
+  // When a suggestion is clicked, fill in the form fields using the stored food object.
   $("#food-suggestions").on("click", ".food-item", function () {
     try {
-      const foodData = JSON.parse(decodeURIComponent($(this).attr("data-food")));
+      const foodData = $(this).data("food");
       console.log("Food selected:", foodData);
       $("#food-name").val(foodData.description);
       // Set calories from nutrient (look for Energy)
@@ -255,7 +259,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Clear suggestions after selection
       $("#food-suggestions").empty();
     } catch (err) {
-      console.error("Error parsing selected food:", err);
+      console.error("Error processing selected food:", err);
     }
   });
 
