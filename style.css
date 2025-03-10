@@ -1,131 +1,127 @@
-/* FitJourney Tracker - Modern Fitness Edition - CSS v3.1 */
-/* Peloton-inspired minimalistic design with a grey/white palette, subtle texture, and modern typography */
+/* style.css - FitJourney Tracker - Peloton Inspired */
 
+/* Import a modern font */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
+/* Global Styles */
 body {
   font-family: 'Roboto', Arial, sans-serif;
-  background: #f4f4f4 url("path/to/texture.png") repeat; /* Update "path/to/texture.png" to your local texture file path */
+  background: #f6f6f6;
   color: #333;
   margin: 0;
   padding: 0;
 }
 
+/* Header */
 header {
   background: #222;
   color: #fff;
   padding: 20px 0;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
-
-.header-text h1 {
-  font-size: 2.5rem;
+header h1 {
+  font-size: 2.5em;
+  margin: 0;
   letter-spacing: 1px;
 }
 
-.section-title {
-  font-weight: 700;
-  color: #222;
-  margin-bottom: 1rem;
-  border-bottom: 2px solid #222;
-  padding-bottom: 0.5rem;
-}
-
-.tile-title {
-  font-weight: 600;
-  color: #222;
-  margin-bottom: 1rem;
-}
-
+/* Navigation Menu */
 .navbar {
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
 }
-
-.nav-btn {
+.navbar .btn-group .nav-btn {
   font-weight: 500;
-  font-size: 1.1rem;
-  padding: 0.5rem 1.5rem;
-  transition: background 0.3s;
-  color: #007bff;
+  border-radius: 30px;
+  padding: 10px 20px;
+  transition: background 0.3s, color 0.3s;
 }
-.nav-btn.active,
-.nav-btn:hover {
+.navbar .btn-group .nav-btn.active,
+.navbar .btn-group .nav-btn:hover {
   background: #007bff;
   color: #fff;
 }
 
+/* Dashboard Titles */
+.dashboard-title {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: #007bff;
+  margin-bottom: 20px;
+}
+
+/* Cards */
 .card {
-  border: none;
-  border-radius: 0.75rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.card-body {
-  padding: 1.5rem;
-}
-
-.form-control {
-  border-radius: 0.5rem;
-  border: 1px solid #ccc;
-}
-
-.btn {
-  border-radius: 0.5rem;
-}
-
-.list-group-item {
-  cursor: pointer;
-}
-
-#food-suggestions {
-  position: absolute;
-  z-index: 1000;
-  width: 100%;
-  max-height: 200px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  border-top: none;
   background: #fff;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+.card .card-title {
+  font-size: 1.4em;
+  font-weight: 700;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
 }
 
-#food-suggestions .list-group-item {
-  padding: 0.5rem 1rem;
+/* Form Labels */
+.form-label.form-header {
+  font-weight: 600;
+  color: #555;
 }
 
-#food-suggestions .list-group-item:hover {
-  background: #f0f0f0;
+/* Texture Background for certain elements (optional) */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('images/texture.png') repeat;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Advanced Editor Modal */
 #comparison-editor-modal {
   display: none;
   position: fixed;
-  top: 10%;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  z-index: 1050;
+  width: 650px;
+  transform: translate(-50%, -50%);
   background: #fff;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  width: 90%;
-  max-width: 700px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  z-index: 1000;
+  padding: 20px;
 }
-
-.modal-content {
+#comparison-editor-modal .modal-content {
   position: relative;
 }
-
-.editor-controls button {
-  margin-right: 0.5rem;
+#comparison-editor-modal .modal-title {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: #007bff;
+  margin-bottom: 10px;
 }
 
-/* Footer */
-footer {
-  background: #eee;
-  padding: 1rem 0;
-  font-size: 0.9rem;
-  color: #666;
+/* Responsive */
+@media only screen and (max-width: 600px) {
+  .card {
+    margin: 10px auto;
+    padding: 15px;
+  }
+  header h1 {
+    font-size: 2em;
+  }
+  .navbar .btn-group .nav-btn {
+    padding: 8px 12px;
+    font-size: 0.9em;
+  }
+  #comparison-editor-modal {
+    width: 90%;
+  }
 }
