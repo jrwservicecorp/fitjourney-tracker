@@ -1,81 +1,104 @@
 /* FitJourney Tracker - Modern Fitness Edition - CSS v3.1 */
-/* Peloton-inspired minimalistic design with subtle gradients and textured background */
+/* Peloton-inspired minimalistic look with a light grey/white theme and subtle texture */
 
-/* Import Google Font */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-/* Global Styles */
 body {
   font-family: 'Roboto', Arial, sans-serif;
-  background: #f4f4f4 url("path/to/texture.png") repeat;
+  background: #f4f4f4 url("path/to/texture.png") repeat; /* Ensure you add your local texture.png file */
   color: #333;
   margin: 0;
   padding: 0;
 }
 
+header {
+  background: #222;
+  color: #fff;
+  padding: 20px 0;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
 .header-text h1 {
   font-size: 2.5rem;
+  letter-spacing: 1px;
+}
+
+.section-title {
   font-weight: 700;
+  color: #222;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #222;
+  padding-bottom: 0.5rem;
 }
 
-.header-text p {
-  font-size: 1rem;
+.tile-title {
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 1rem;
 }
 
-/* Navigation Menu */
 .navbar {
   margin-bottom: 1rem;
 }
-.nav-btn.active {
-  background-color: #007bff;
+
+.nav-btn {
+  font-weight: 500;
+  font-size: 1.1rem;
+  padding: 0.5rem 1.5rem;
+  transition: background 0.3s;
+}
+
+.nav-btn.active,
+.nav-btn:hover {
+  background: #007bff;
   color: #fff;
 }
 
-/* Section Titles */
-.section-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  border-bottom: 2px solid #007bff;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
-}
-
-/* Card Tiles */
 .card {
   border: none;
-  border-radius: 10px;
-  overflow: hidden;
-}
-.card-header {
-  background: #fff;
-  font-size: 1.25rem;
-  font-weight: 700;
-  border-bottom: 1px solid #ddd;
-  padding: 0.75rem 1rem;
-}
-.card-body {
-  background: #fff;
-  padding: 1rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Forms and Inputs */
-.form-label {
-  font-weight: 500;
+.card-body {
+  padding: 1.5rem;
 }
+
 .form-control {
-  border-radius: 5px;
+  border-radius: 0.5rem;
   border: 1px solid #ccc;
 }
 
-/* List Group for Food Search Results */
+.btn {
+  border-radius: 0.5rem;
+}
+
 .list-group-item {
   cursor: pointer;
 }
-.list-group-item:hover {
-  background-color: #f0f8ff;
+
+#food-suggestions {
+  position: absolute;
+  z-index: 1000;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-top: none;
+  background: #fff;
 }
 
-/* Advanced Comparison Editor Modal */
+#food-suggestions .list-group-item {
+  padding: 0.5rem 1rem;
+}
+
+#food-suggestions .list-group-item:hover {
+  background: #f0f0f0;
+}
+
+/* Advanced Editor Modal */
 #comparison-editor-modal {
   display: none;
   position: fixed;
@@ -84,30 +107,25 @@ body {
   transform: translateX(-50%);
   z-index: 1050;
   background: #fff;
-  padding: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  width: 90%;
+  max-width: 700px;
 }
-#comparison-editor-modal .modal-content {
+
+.modal-content {
   position: relative;
 }
-#comparison-editor-modal button {
-  margin-bottom: 1rem;
+
+.editor-controls button {
+  margin-right: 0.5rem;
 }
 
-/* Gallery Images */
-.gallery img {
-  max-width: 100%;
-  border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-/* Responsive Adjustments */
-@media only screen and (max-width: 600px) {
-  .header-text h1 {
-    font-size: 2rem;
-  }
-  .section-title {
-    font-size: 1.5rem;
-  }
+/* Footer */
+footer {
+  background: #eee;
+  padding: 1rem 0;
+  font-size: 0.9rem;
+  color: #666;
 }
