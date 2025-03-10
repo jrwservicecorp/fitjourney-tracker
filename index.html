@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FitJourney Tracker - Modern Fitness Edition</title>
-  <!-- Bootstrap CSS from CDN (integrity attributes removed to avoid digest errors) -->
+  <!-- Bootstrap CSS (without integrity attribute to avoid digest errors) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
@@ -23,21 +23,21 @@
   <script src="script.js" defer></script>
 </head>
 <body>
-  <header class="bg-secondary text-white py-3">
+  <header class="bg-secondary text-white py-3 header-text">
     <div class="container text-center">
       <h1>FitJourney Tracker</h1>
       <p>App Version: <span id="app-version">v3.1</span></p>
     </div>
   </header>
   
-  <!-- Updated Navigation Menu with Buttons -->
+  <!-- Updated Navigation Menu with Attractive Button Layout -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container">
-      <div class="btn-group" role="group" aria-label="Main Navigation">
-        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#dashboard-section">Dashboard</button>
-        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#nutrition-section">Nutrition Log</button>
-        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#weight-section">Body Weight Log</button>
-        <button type="button" class="btn btn-outline-primary nav-btn" data-target="#media-section">Media & Exports</button>
+      <div class="d-flex justify-content-center w-100">
+        <button type="button" class="btn btn-outline-primary nav-btn mx-2" data-target="#dashboard-section">Dashboard</button>
+        <button type="button" class="btn btn-outline-primary nav-btn mx-2" data-target="#nutrition-section">Nutrition Log</button>
+        <button type="button" class="btn btn-outline-primary nav-btn mx-2" data-target="#weight-section">Body Weight Log</button>
+        <button type="button" class="btn btn-outline-primary nav-btn mx-2" data-target="#media-section">Media & Exports</button>
       </div>
     </div>
   </nav>
@@ -45,12 +45,12 @@
   <main id="main-app" class="container my-4">
     <!-- Dashboard Section -->
     <section id="dashboard-section">
-      <h2 class="mb-4 dashboard-title">Dashboard</h2>
+      <h2 class="mb-4 section-title">Dashboard</h2>
       <div class="row">
-        <!-- Weight Chart -->
+        <!-- Weight Chart Tile -->
         <div class="col-md-6 mb-4">
           <div class="card shadow-sm">
-            <div class="card-header">Weight Chart</div>
+            <div class="card-header tile-header">Weight Chart</div>
             <div class="card-body">
               <canvas id="weightChart"></canvas>
               <p id="chart-placeholder" class="text-muted mt-2">Start logging weight to see trends!</p>
@@ -61,10 +61,10 @@
             </div>
           </div>
         </div>
-        <!-- Nutrition Chart -->
+        <!-- Nutrition Chart Tile -->
         <div class="col-md-6 mb-4">
           <div class="card shadow-sm">
-            <div class="card-header">Nutrition Chart</div>
+            <div class="card-header tile-header">Nutrition Chart</div>
             <div class="card-body">
               <canvas id="nutritionChart"></canvas>
               <p id="nutrition-chart-placeholder" class="text-muted mt-2">Nutrition trends will appear here.</p>
@@ -76,7 +76,7 @@
       <div class="row">
         <div class="col-md-6 mb-3">
           <div class="card shadow-sm" id="weight-summary">
-            <div class="card-header">Weight Summary</div>
+            <div class="card-header tile-header">Weight Summary</div>
             <div class="card-body">
               <p class="placeholder">No weight data available.</p>
             </div>
@@ -84,7 +84,7 @@
         </div>
         <div class="col-md-6 mb-3">
           <div class="card shadow-sm" id="calorie-summary">
-            <div class="card-header">Calorie Summary</div>
+            <div class="card-header tile-header">Calorie Summary</div>
             <div class="card-body">
               <p class="placeholder">No calorie data available.</p>
             </div>
@@ -95,21 +95,17 @@
     
     <!-- Nutrition Log Section -->
     <section id="nutrition-section" style="display:none;">
-      <h2 class="mb-4 dashboard-title">Nutrition Log</h2>
+      <h2 class="mb-4 section-title">Nutrition Log</h2>
       <div class="card shadow-sm mb-4" id="nutrition-log-section">
-        <div class="card-header">Enter Nutrition Data</div>
         <div class="card-body">
           <form id="nutrition-log-form" class="row g-3">
             <div class="col-md-4">
               <label for="food-name" class="form-label">Food Name</label>
-              <!-- When the user types here, live search will trigger -->
               <input id="food-name" type="text" class="form-control" placeholder="e.g., Chicken Breast" required>
-              <div id="food-search-results" class="list-group mt-1"></div>
-              <button id="more-food-btn" class="btn btn-link" style="display:none;">More Results</button>
             </div>
             <div class="col-md-2">
               <label for="food-weight" class="form-label">Weight (g)</label>
-              <input id="food-weight" type="number" step="1" class="form-control" placeholder="grams" required>
+              <input id="food-weight" type="number" step="any" class="form-control" placeholder="grams" required>
             </div>
             <div class="col-md-2">
               <label for="food-calories" class="form-label">Calories (kcal)</label>
@@ -138,15 +134,21 @@
           <div class="mt-4" id="nutrition-log-display">
             <p class="placeholder">No nutrition logs recorded yet.</p>
           </div>
+          <!-- Live Food Search (results appear as the user types) -->
+          <div class="mt-4">
+            <h5>Food Search Results</h5>
+            <div id="food-search-results" class="list-group"></div>
+            <button id="more-food-btn" class="btn btn-link" style="display:none;">More Results</button>
+            <button id="add-custom-food-btn" class="btn btn-link" style="display:none;">Add Custom Food</button>
+          </div>
         </div>
       </div>
     </section>
     
     <!-- Body Weight Log Section -->
     <section id="weight-section" style="display:none;">
-      <h2 class="mb-4 dashboard-title">Body Weight Log</h2>
+      <h2 class="mb-4 section-title">Body Weight Log</h2>
       <div class="card shadow-sm mb-4" id="data-log-section">
-        <div class="card-header">Enter Weight Data</div>
         <div class="card-body">
           <form id="data-log-form" class="row g-3">
             <div class="col-md-3">
@@ -180,7 +182,6 @@
         </div>
       </div>
       <div class="card shadow-sm" id="weight-log-display">
-        <div class="card-header">Recent Weigh-Ins</div>
         <div class="card-body">
           <h3 class="card-title">Recent Weigh-Ins</h3>
           <div id="recent-weighins">
@@ -192,11 +193,11 @@
     
     <!-- Media & Exports Section -->
     <section id="media-section" style="display:none;">
-      <h2 class="mb-4 dashboard-title">Media & Exports</h2>
+      <h2 class="mb-4 section-title">Media & Exports</h2>
       <!-- Photo Upload -->
       <div class="card shadow-sm mb-4 upload-photo">
-        <div class="card-header">Upload Photo</div>
         <div class="card-body">
+          <h3 class="tile-header">Upload Progress Photo</h3>
           <form id="photo-upload-form" class="row g-3">
             <div class="col-md-4">
               <label for="photo-upload" class="form-label">Select Photo</label>
@@ -219,8 +220,8 @@
       
       <!-- Photo Filter -->
       <div class="card shadow-sm mb-4" id="photo-filter-card">
-        <div class="card-header">Filter Photos</div>
         <div class="card-body">
+          <h3 class="tile-header">Filter Gallery by Date Range</h3>
           <div class="row g-3">
             <div class="col-md-4">
               <label for="filter-start-date" class="form-label">Start Date</label>
@@ -240,8 +241,8 @@
       
       <!-- Side by Side Comparison -->
       <div class="card shadow-sm mb-4">
-        <div class="card-header">Photo Comparison</div>
         <div class="card-body">
+          <h3 class="tile-header">Side by Side Comparison</h3>
           <div class="photo-selectors mb-3">
             <label for="tt-before" class="form-label">Before</label>
             <select id="tt-before" class="form-select d-inline-block w-auto me-3"></select>
@@ -259,16 +260,16 @@
       
       <!-- Export Report -->
       <div class="card shadow-sm mb-4" id="export-section">
-        <div class="card-header">Export Report</div>
         <div class="card-body">
+          <h3 class="tile-header">Export Options</h3>
           <button id="export-report-btn" class="btn btn-success">Export Report as Image</button>
         </div>
       </div>
       
       <!-- Social Share -->
       <div class="card shadow-sm">
-        <div class="card-header">Share Your Progress</div>
         <div class="card-body">
+          <h3 class="tile-header">Share Your Progress</h3>
           <button class="share-btn btn btn-outline-primary me-2" data-platform="Facebook">Share on Facebook</button>
           <button class="share-btn btn btn-outline-info me-2" data-platform="Twitter">Share on Twitter</button>
           <button class="share-btn btn btn-outline-danger" data-platform="Instagram">Share on Instagram</button>
@@ -297,12 +298,11 @@
     </div>
   </footer>
   
-  <!-- Bootstrap Bundle with Popper (integrity attributes removed) -->
+  <!-- Bootstrap Bundle with Popper (without integrity attribute) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
   
   <!-- Inline Script for Basic Navigation -->
   <script>
-    // Use Bootstrap’s button event handling for navigation
     document.querySelectorAll(".nav-btn").forEach(btn => {
       btn.addEventListener("click", function () {
         const target = this.getAttribute("data-target");
