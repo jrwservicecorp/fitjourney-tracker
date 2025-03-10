@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FitJourney Tracker - Modern Fitness Edition</title>
-  <!-- Bootstrap CSS (local copy or via CDN if you prefer; here we remove integrity to avoid digest issues) -->
-  <link href="libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap CSS from local files -->
+  <link href="libs/bootstrap/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
   
@@ -107,7 +107,7 @@
       <div class="card shadow-sm mb-4" id="nutrition-log-section">
         <div class="card-body">
           <form id="nutrition-log-form" class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-4 position-relative">
               <label for="food-name" class="form-label">Food Name</label>
               <input id="food-name" type="text" class="form-control" placeholder="Type food name..." required>
               <div id="food-suggestions" class="list-group"></div>
@@ -145,7 +145,7 @@
           </div>
           <div class="mt-4">
             <h5>Search for Food Data</h5>
-            <!-- Note: The search here is now integrated into the food-name input -->
+            <!-- Integrated search: typing in the Food Name field triggers search suggestions -->
             <button id="add-custom-food-btn" class="btn btn-link" style="display:none;">Add Custom Food</button>
           </div>
         </div>
@@ -305,8 +305,8 @@
     </div>
   </footer>
   
-  <!-- Bootstrap Bundle with Popper (local copy; remove integrity if needed) -->
-  <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap Bundle with Popper from local files -->
+  <script src="libs/bootstrap/bootstrap.bundle.min.js"></script>
   
   <!-- Inline Script for Basic Navigation -->
   <script>
