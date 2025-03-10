@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FitJourney Tracker - Modern Fitness Edition</title>
-  <!-- Bootstrap CSS (without integrity attribute to avoid digest errors) -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <!-- Bootstrap CSS (local copy or via CDN if you prefer; here we remove integrity to avoid digest issues) -->
+  <link href="libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
   
@@ -30,15 +30,23 @@
     </div>
   </header>
   
-  <!-- Updated Navigation Menu with Attractive Button Layout -->
+  <!-- Updated Navigation Menu with Modern Buttons -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container">
-      <div class="d-flex justify-content-center w-100">
-        <button type="button" class="btn btn-outline-primary nav-btn mx-2" data-target="#dashboard-section">Dashboard</button>
-        <button type="button" class="btn btn-outline-primary nav-btn mx-2" data-target="#nutrition-section">Nutrition Log</button>
-        <button type="button" class="btn btn-outline-primary nav-btn mx-2" data-target="#weight-section">Body Weight Log</button>
-        <button type="button" class="btn btn-outline-primary nav-btn mx-2" data-target="#media-section">Media & Exports</button>
-      </div>
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item">
+          <button type="button" class="nav-link btn btn-link nav-btn" data-target="#dashboard-section">Dashboard</button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link btn btn-link nav-btn" data-target="#nutrition-section">Nutrition Log</button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link btn btn-link nav-btn" data-target="#weight-section">Body Weight Log</button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link btn btn-link nav-btn" data-target="#media-section">Media & Exports</button>
+        </li>
+      </ul>
     </div>
   </nav>
   
@@ -47,11 +55,11 @@
     <section id="dashboard-section">
       <h2 class="mb-4 section-title">Dashboard</h2>
       <div class="row">
-        <!-- Weight Chart Tile -->
+        <!-- Weight Chart -->
         <div class="col-md-6 mb-4">
           <div class="card shadow-sm">
-            <div class="card-header tile-header">Weight Chart</div>
             <div class="card-body">
+              <h3 class="card-title tile-title">Weight Chart</h3>
               <canvas id="weightChart"></canvas>
               <p id="chart-placeholder" class="text-muted mt-2">Start logging weight to see trends!</p>
               <div class="form-check">
@@ -61,11 +69,11 @@
             </div>
           </div>
         </div>
-        <!-- Nutrition Chart Tile -->
+        <!-- Nutrition Chart -->
         <div class="col-md-6 mb-4">
           <div class="card shadow-sm">
-            <div class="card-header tile-header">Nutrition Chart</div>
             <div class="card-body">
+              <h3 class="card-title tile-title">Nutrition Chart</h3>
               <canvas id="nutritionChart"></canvas>
               <p id="nutrition-chart-placeholder" class="text-muted mt-2">Nutrition trends will appear here.</p>
             </div>
@@ -76,16 +84,16 @@
       <div class="row">
         <div class="col-md-6 mb-3">
           <div class="card shadow-sm" id="weight-summary">
-            <div class="card-header tile-header">Weight Summary</div>
             <div class="card-body">
+              <h3 class="card-title tile-title">Weight Summary</h3>
               <p class="placeholder">No weight data available.</p>
             </div>
           </div>
         </div>
         <div class="col-md-6 mb-3">
           <div class="card shadow-sm" id="calorie-summary">
-            <div class="card-header tile-header">Calorie Summary</div>
             <div class="card-body">
+              <h3 class="card-title tile-title">Calorie Summary</h3>
               <p class="placeholder">No calorie data available.</p>
             </div>
           </div>
@@ -101,7 +109,8 @@
           <form id="nutrition-log-form" class="row g-3">
             <div class="col-md-4">
               <label for="food-name" class="form-label">Food Name</label>
-              <input id="food-name" type="text" class="form-control" placeholder="e.g., Chicken Breast" required>
+              <input id="food-name" type="text" class="form-control" placeholder="Type food name..." required>
+              <div id="food-suggestions" class="list-group"></div>
             </div>
             <div class="col-md-2">
               <label for="food-weight" class="form-label">Weight (g)</label>
@@ -134,11 +143,9 @@
           <div class="mt-4" id="nutrition-log-display">
             <p class="placeholder">No nutrition logs recorded yet.</p>
           </div>
-          <!-- Live Food Search (results appear as the user types) -->
           <div class="mt-4">
-            <h5>Food Search Results</h5>
-            <div id="food-search-results" class="list-group"></div>
-            <button id="more-food-btn" class="btn btn-link" style="display:none;">More Results</button>
+            <h5>Search for Food Data</h5>
+            <!-- Note: The search here is now integrated into the food-name input -->
             <button id="add-custom-food-btn" class="btn btn-link" style="display:none;">Add Custom Food</button>
           </div>
         </div>
@@ -183,7 +190,7 @@
       </div>
       <div class="card shadow-sm" id="weight-log-display">
         <div class="card-body">
-          <h3 class="card-title">Recent Weigh-Ins</h3>
+          <h3 class="card-title tile-title">Recent Weigh-Ins</h3>
           <div id="recent-weighins">
             <p class="placeholder">No weigh-ins recorded yet.</p>
           </div>
@@ -197,7 +204,7 @@
       <!-- Photo Upload -->
       <div class="card shadow-sm mb-4 upload-photo">
         <div class="card-body">
-          <h3 class="tile-header">Upload Progress Photo</h3>
+          <h3 class="card-title tile-title">Upload Progress Photo</h3>
           <form id="photo-upload-form" class="row g-3">
             <div class="col-md-4">
               <label for="photo-upload" class="form-label">Select Photo</label>
@@ -221,7 +228,7 @@
       <!-- Photo Filter -->
       <div class="card shadow-sm mb-4" id="photo-filter-card">
         <div class="card-body">
-          <h3 class="tile-header">Filter Gallery by Date Range</h3>
+          <h3 class="card-title tile-title">Filter Gallery by Date Range</h3>
           <div class="row g-3">
             <div class="col-md-4">
               <label for="filter-start-date" class="form-label">Start Date</label>
@@ -242,7 +249,7 @@
       <!-- Side by Side Comparison -->
       <div class="card shadow-sm mb-4">
         <div class="card-body">
-          <h3 class="tile-header">Side by Side Comparison</h3>
+          <h3 class="card-title tile-title">Side by Side Comparison</h3>
           <div class="photo-selectors mb-3">
             <label for="tt-before" class="form-label">Before</label>
             <select id="tt-before" class="form-select d-inline-block w-auto me-3"></select>
@@ -261,7 +268,7 @@
       <!-- Export Report -->
       <div class="card shadow-sm mb-4" id="export-section">
         <div class="card-body">
-          <h3 class="tile-header">Export Options</h3>
+          <h3 class="card-title tile-title">Export Options</h3>
           <button id="export-report-btn" class="btn btn-success">Export Report as Image</button>
         </div>
       </div>
@@ -269,7 +276,7 @@
       <!-- Social Share -->
       <div class="card shadow-sm">
         <div class="card-body">
-          <h3 class="tile-header">Share Your Progress</h3>
+          <h3 class="card-title tile-title">Share Your Progress</h3>
           <button class="share-btn btn btn-outline-primary me-2" data-platform="Facebook">Share on Facebook</button>
           <button class="share-btn btn btn-outline-info me-2" data-platform="Twitter">Share on Twitter</button>
           <button class="share-btn btn btn-outline-danger" data-platform="Instagram">Share on Instagram</button>
@@ -298,11 +305,12 @@
     </div>
   </footer>
   
-  <!-- Bootstrap Bundle with Popper (without integrity attribute) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <!-- Bootstrap Bundle with Popper (local copy; remove integrity if needed) -->
+  <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
   
   <!-- Inline Script for Basic Navigation -->
   <script>
+    // Navigation using Bootstrap's event handling
     document.querySelectorAll(".nav-btn").forEach(btn => {
       btn.addEventListener("click", function () {
         const target = this.getAttribute("data-target");
