@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FitJourney Tracker - Modern Fitness Edition</title>
-  <!-- Bootstrap CSS from local files -->
+  <!-- Bootstrap CSS from your local folder -->
   <link href="libs/bootstrap/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
@@ -144,8 +144,11 @@
             <p class="placeholder">No nutrition logs recorded yet.</p>
           </div>
           <div class="mt-4">
-            <h5>Search for Food Data</h5>
-            <!-- Integrated search: typing in the Food Name field triggers search suggestions -->
+            <h5>Frequent Foods</h5>
+            <div id="frequent-foods" class="list-group mb-2"></div>
+            <small class="text-muted">Start typing in the Food Name field for search results.</small>
+          </div>
+          <div class="mt-2">
             <button id="add-custom-food-btn" class="btn btn-link" style="display:none;">Add Custom Food</button>
           </div>
         </div>
@@ -305,7 +308,7 @@
     </div>
   </footer>
   
-  <!-- Bootstrap Bundle with Popper from local files -->
+  <!-- Bootstrap Bundle with Popper from your local folder -->
   <script src="libs/bootstrap/bootstrap.bundle.min.js"></script>
   
   <!-- Inline Script for Basic Navigation -->
