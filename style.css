@@ -1,11 +1,11 @@
 /* FitJourney Tracker - Modern Fitness Edition - CSS v3.1 */
-/* Peloton-inspired minimalistic design with light grey/white theme, subtle texture, and refined typography */
+/* Peloton-inspired minimalistic design with a grey/white palette, subtle texture, and modern typography */
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 body {
   font-family: 'Roboto', Arial, sans-serif;
-  background: #f7f7f7 url("path/to/texture.png") repeat; /* Update the path if needed */
+  background: #f4f4f4 url("path/to/texture.png") repeat; /* Update "path/to/texture.png" to your local texture file path */
   color: #333;
   margin: 0;
   padding: 0;
@@ -47,8 +47,8 @@ header {
   font-size: 1.1rem;
   padding: 0.5rem 1.5rem;
   transition: background 0.3s;
+  color: #007bff;
 }
-
 .nav-btn.active,
 .nav-btn:hover {
   background: #007bff;
