@@ -3,12 +3,12 @@
 // USDA FoodData Central API Key
 const USDA_API_KEY = "DBS7VaqKcIKES5QY36b8Cw8bdk80CHzoufoxjeh8";
 
-// Debounce helper function
+// Debounce function to limit API calls
 function debounce(func, delay) {
-  let debounceTimer;
-  return function(...args) {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => func.apply(this, args), delay);
+  let timeout;
+  return function () {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, arguments), delay);
   };
 }
 
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let nutritionLogs = [];
   let photoLogs = [];
   let editorCanvas; // Fabric.js canvas for advanced editor
-  let currentFoodPage = 1; // For paginated food search results
+  let currentFoodPage = 1; // For USDA paging
 
   // Initialize Weight Chart (Chart.js with Luxon)
   const weightCtx = document.getElementById('weightChart').getContext('2d');
@@ -72,7 +72,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // -- Body Weight Log Form Submission --
+  // Remove all demo data on load – start with empty arrays
+  console.log("Starting with empty data arrays");
+
+  // Body Weight Log Form Submission
   document.getElementById("data-log-form").addEventListener("submit", function(e) {
     e.preventDefault();
     const weight = parseFloat(document.getElementById("weight-input").value);
@@ -144,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
     calorieDiv.innerHTML = `<p>Average Calories: ${Math.round(avg)} kcal</p>`;
   }
 
-  // -- Nutrition Log Form Submission --
+  // Nutrition Log Form Submission
   document.getElementById("nutrition-log-form").addEventListener("submit", function(e) {
     e.preventDefault();
     const food = document.getElementById("food-name").value;
@@ -209,10 +212,11 @@ document.addEventListener("DOMContentLoaded", function () {
     displayDiv.innerHTML = html;
   }
 
-  // --- USDA Food Search Triggered by Typing in "Food Name" Field ---
+  // USDA Food Search Triggered by Typing in "Food Name" Field
   const $foodName = $("#food-name");
   const $foodSearchResults = $("#food-search-results");
   const $moreFoodBtn = $("#more-food-btn");
+  const $addCustomFoodBtn = $("#add-custom-food-btn");
 
   // Debounced function for live food search on input event
   $foodName.on("input", debounce(function() {
@@ -243,9 +247,11 @@ document.addEventListener("DOMContentLoaded", function () {
           } else {
             $moreFoodBtn.hide();
           }
+          $addCustomFoodBtn.hide();
         } else {
           $foodSearchResults.html("<p class='list-group-item'>No foods found. Please add custom food.</p>");
           $moreFoodBtn.hide();
+          $addCustomFoodBtn.show();
         }
       })
       .catch(error => {
@@ -258,8 +264,8 @@ document.addEventListener("DOMContentLoaded", function () {
   function displayFoodResults(foods) {
     let resultsHtml = "";
     foods.forEach(food => {
-      resultsHtml += `<button type="button" class="list-group-item list-group-item-action food-item" data-food='${JSON.stringify(food)}'>
-        ${food.description} - ${(food.foodNutrients || []).find(n => n.nutrientName === "Energy")?.value || "N/A"} kcal
+      resultsHtml += `<button type="button" class="list-group-item food-item" data-food='${encodeURIComponent(JSON.stringify(food))}'>
+        ${food.description} - ${(Array.isArray(food.foodNutrients) ? food.foodNutrients.find(n => n.nutrientName === "Energy")?.value : "N/A")} kcal
       </button>`;
     });
     $foodSearchResults.html(resultsHtml);
@@ -267,10 +273,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // When a food item is clicked, populate the nutrition form fields
   $foodSearchResults.on("click", ".food-item", function() {
-    const foodData = $(this).data("food");
+    const foodData = JSON.parse(decodeURIComponent($(this).attr("data-food")));
     console.log("Food selected:", foodData);
     $foodName.val(foodData.description);
-    const nutrients = foodData.foodNutrients || [];
+    const nutrients = Array.isArray(foodData.foodNutrients) ? foodData.foodNutrients : [];
     const energy = nutrients.find(n => n.nutrientName === "Energy")?.value || "";
     $("#food-calories").val(energy);
     const protein = nutrients.find(n => n.nutrientName === "Protein")?.value || "";
@@ -279,17 +285,17 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#food-protein").val(protein);
     $("#food-fat").val(fat);
     $("#food-carbs").val(carbs);
-    // Clear live search results
     $foodSearchResults.empty();
     $moreFoodBtn.hide();
+    $addCustomFoodBtn.hide();
   });
 
   // "Add Custom Food" button
-  $("#add-custom-food-btn").on("click", function() {
+  $addCustomFoodBtn.on("click", function() {
     alert("No food found. Please fill in the food information manually.");
   });
 
-  // --- Photo Upload Form Submission ---
+  // Photo Upload Form Submission
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
