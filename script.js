@@ -251,48 +251,53 @@ document.addEventListener("DOMContentLoaded", function () {
   // ------------------------------
   // USDA Search & Food Selection
   // ------------------------------
+  // Use debouncing so that only one search query fires after the user stops typing
+  let searchTimeout;
   $("#food-name").on("input", function() {
+    clearTimeout(searchTimeout);
     const query = $(this).val().trim();
     if (!query) {
       $("#usda-search-results").empty();
       return;
     }
-    const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5`;
-    console.log("USDA search query:", query);
-    fetch(url)
-      .then(function(response) { return response.json(); })
-      .then(function(data) {
-        console.log("USDA response:", data);
-        let resultsHtml = "";
-        if (data.foods && data.foods.length > 0) {
-          // Sort foods: generic foods first, fast-food items later.
-          data.foods.sort(function(a, b) {
-              let aRank = (a.foodCategory && a.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
-              let bRank = (b.foodCategory && b.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
-              return aRank - bRank;
-          });
-          data.foods.forEach(function(food, idx) {
-            resultsHtml += `<div class="food-item" data-food='${JSON.stringify(food)}'>
-              <strong>${food.description}</strong>
-              <br>Calories: ${food.foodNutrients && Array.isArray(food.foodNutrients) ? (function(){
-                var nutrient = food.foodNutrients.find(function(n) { return n.nutrientName === "Energy"; });
-                return nutrient ? nutrient.value : "N/A";
-              })() : "N/A"} kcal
-            </div>`;
-          });
-          resultsHtml += `<div class="food-item more-options">
-              <button id="more-results-btn" class="btn btn-sm btn-outline-secondary">More Results</button>
-              <button id="add-custom-food-btn" class="btn btn-sm btn-link">Add Custom Food</button>
-            </div>`;
-          $("#usda-search-results").html(resultsHtml);
-        } else {
-          $("#usda-search-results").html("<p>No foods found. Please add custom food.</p>");
-        }
-      })
-      .catch(function(error) {
-        console.error("Error fetching USDA food data:", error);
-        alert("Error fetching food data. Check the console for details.");
-      });
+    searchTimeout = setTimeout(function() {
+      const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5`;
+      console.log("USDA search query:", query);
+      fetch(url)
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+          console.log("USDA response:", data);
+          let resultsHtml = "";
+          if (data.foods && data.foods.length > 0) {
+            // Sort foods: generic foods first, fast-food items later.
+            data.foods.sort(function(a, b) {
+                let aRank = (a.foodCategory && a.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
+                let bRank = (b.foodCategory && b.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
+                return aRank - bRank;
+            });
+            data.foods.forEach(function(food, idx) {
+              resultsHtml += `<div class="food-item" data-food='${JSON.stringify(food)}'>
+                <strong>${food.description}</strong>
+                <br>Calories: ${food.foodNutrients && Array.isArray(food.foodNutrients) ? (function(){
+                  var nutrient = food.foodNutrients.find(function(n) { return n.nutrientName === "Energy"; });
+                  return nutrient ? nutrient.value : "N/A";
+                })() : "N/A"} kcal
+              </div>`;
+            });
+            resultsHtml += `<div class="food-item more-options">
+                <button id="more-results-btn" class="btn btn-sm btn-outline-secondary">More Results</button>
+                <button id="add-custom-food-btn" class="btn btn-sm btn-link">Add Custom Food</button>
+              </div>`;
+            $("#usda-search-results").html(resultsHtml);
+          } else {
+            $("#usda-search-results").html("<p>No foods found. Please add custom food.</p>");
+          }
+        })
+        .catch(function(error) {
+          console.error("Error fetching USDA food data:", error);
+          alert("Error fetching food data. Check the console for details.");
+        });
+    }, 300);
   });
 
   // Updated USDA food item click handler with safe-checks
@@ -317,7 +322,7 @@ document.addEventListener("DOMContentLoaded", function () {
       $("#food-protein").val(currentUSDAFood.protein);
       $("#food-fat").val(currentUSDAFood.fat);
       $("#food-carbs").val(currentUSDAFood.carbs);
-      // Clear the search results
+      // Clear the search results so the user sees their selection
       $("#usda-search-results").empty();
     } catch (error) {
       console.error("Error parsing selected food:", error);
