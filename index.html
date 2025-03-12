@@ -91,6 +91,63 @@
           </div>
         </div>
       </div>
+      <!-- Daily Goals & Progress Section -->
+      <div class="row">
+        <div class="col-md-12 mb-3">
+          <div class="card shadow-sm" id="daily-goals-card">
+            <div class="card-body">
+              <h3 class="card-title">Daily Goals & Progress</h3>
+              <form id="daily-goals-form" class="row g-3 mb-3">
+                <div class="col-md-3">
+                  <label for="goal-calories" class="form-label">Calories (kcal)</label>
+                  <input id="goal-calories" type="number" step="any" class="form-control" placeholder="e.g., 2000">
+                </div>
+                <div class="col-md-3">
+                  <label for="goal-protein" class="form-label">Protein (g)</label>
+                  <input id="goal-protein" type="number" step="any" class="form-control" placeholder="e.g., 150">
+                </div>
+                <div class="col-md-3">
+                  <label for="goal-fat" class="form-label">Fat (g)</label>
+                  <input id="goal-fat" type="number" step="any" class="form-control" placeholder="e.g., 70">
+                </div>
+                <div class="col-md-3">
+                  <label for="goal-carbs" class="form-label">Carbs (g)</label>
+                  <input id="goal-carbs" type="number" step="any" class="form-control" placeholder="e.g., 250">
+                </div>
+                <div class="col-md-12">
+                  <button type="submit" class="btn btn-primary w-100">Set Daily Goals</button>
+                </div>
+              </form>
+              <div id="daily-goals-progress">
+                <div class="mb-2">
+                  <label>Calories: <span id="progress-calories">0</span>/<span id="goal-calories-display">0</span> kcal</label>
+                  <div class="progress">
+                    <div id="progress-bar-calories" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label>Protein: <span id="progress-protein">0</span>/<span id="goal-protein-display">0</span> g</label>
+                  <div class="progress">
+                    <div id="progress-bar-protein" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label>Fat: <span id="progress-fat">0</span>/<span id="goal-fat-display">0</span> g</label>
+                  <div class="progress">
+                    <div id="progress-bar-fat" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label>Carbs: <span id="progress-carbs">0</span>/<span id="goal-carbs-display">0</span> g</label>
+                  <div class="progress">
+                    <div id="progress-bar-carbs" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
     
     <!-- Nutrition Log Section -->
