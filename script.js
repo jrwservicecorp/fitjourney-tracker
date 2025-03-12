@@ -249,15 +249,20 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ------------------------------
-  // USDA Search & Food Selection
+  // USDA Search & Food Selection with Debouncing
   // ------------------------------
-  // Use debouncing so that only one search query fires after the user stops typing
   let searchTimeout;
   $("#food-name").on("input", function() {
     clearTimeout(searchTimeout);
     const query = $(this).val().trim();
+    // If no query, clear search results and reset currentUSDAFood.
     if (!query) {
       $("#usda-search-results").empty();
+      currentUSDAFood = null;
+      return;
+    }
+    // If a food is already selected and the query exactly matches its description, do not fire a new search.
+    if (currentUSDAFood && query.toLowerCase() === currentUSDAFood.description.toLowerCase()) {
       return;
     }
     searchTimeout = setTimeout(function() {
@@ -300,15 +305,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 300);
   });
 
-  // Updated USDA food item click handler with safe-checks
+  // USDA food item click handler with safe-checks
   $("#usda-search-results").on("click", ".food-item", function() {
     try {
       const foodData = $(this).data("food");
       console.log("Food selected:", foodData);
       // Ensure foodNutrients is a valid array; fallback to an empty array if not present
       const nutrients = Array.isArray(foodData.foodNutrients) ? foodData.foodNutrients : [];
-      // Set the USDA base serving size and nutrient values for recalculation,
-      // using a fallback serving size of 100 if not provided
+      // Set USDA base serving size and nutrient values (fallback serving size of 100)
       currentUSDAFood = {
         servingSize: foodData.servingSize || 100,
         calories: parseFloat(getNutrientValue(nutrients, "Energy")) || 0,
@@ -322,7 +326,7 @@ document.addEventListener("DOMContentLoaded", function () {
       $("#food-protein").val(currentUSDAFood.protein);
       $("#food-fat").val(currentUSDAFood.fat);
       $("#food-carbs").val(currentUSDAFood.carbs);
-      // Clear the search results so the user sees their selection
+      // Clear the search results so the selection remains visible
       $("#usda-search-results").empty();
     } catch (error) {
       console.error("Error parsing selected food:", error);
