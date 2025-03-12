@@ -226,6 +226,10 @@ document.addEventListener("DOMContentLoaded", function () {
     displayDiv.innerHTML = html;
   }
 
+  // ------------------------------
+  // USDA Search & Food Selection
+  // ------------------------------
+
   // When the user types into "food-name", perform an immediate USDA search
   $("#food-name").on("input", function() {
     const query = $(this).val().trim();
@@ -242,6 +246,12 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("USDA response:", data);
         let resultsHtml = "";
         if (data.foods && data.foods.length > 0) {
+          // Sort foods: generic foods first, fast-food items later.
+          data.foods.sort((a, b) => {
+              let aRank = (a.foodCategory && a.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
+              let bRank = (b.foodCategory && b.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
+              return aRank - bRank;
+          });
           data.foods.forEach((food, idx) => {
             resultsHtml += `<div class="food-item" data-food='${JSON.stringify(food)}'>
               <strong>${food.description}</strong>
@@ -291,7 +301,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // When the user changes the "food-weight" input, recalc nutrient values
-  $("#food-weight").on("change", function() {
+  // Changed event from "change" to "input" for live updates.
+  $("#food-weight").on("input", function() {
     if (!currentUSDAFood) {
       console.log("No USDA food selected yet.");
       return;
@@ -315,7 +326,11 @@ document.addEventListener("DOMContentLoaded", function () {
     alert("No matching food found. Please enter custom food information.");
   });
 
-  // Photo Upload Form Submission
+  // ------------------------------
+  // Photo Upload & Comparison Code
+  // ------------------------------
+  // (Remaining code unchanged; handles photo uploads, comparisons, advanced editor, etc.)
+
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
@@ -378,7 +393,6 @@ document.addEventListener("DOMContentLoaded", function () {
     updatePhotoGallery();
   });
 
-  // Update Photo Selectors for Comparison
   function updatePhotoSelectors() {
     console.log("Updating photo selectors", photoLogs);
     const beforeSelect = $("#tt-before");
@@ -391,7 +405,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Initialize TwentyTwenty plugin when ready
   $(document).ready(function () {
     if ($.fn.twentytwenty) {
       $("#twentytwenty-container").twentytwenty();
@@ -400,7 +413,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Update Comparison Panel with Selected Photos
   $("#tt-update").on("click", function() {
     console.log("Update comparison button clicked");
     const beforeIndex = parseInt($("#tt-before").val());
@@ -434,7 +446,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Advanced Comparison Editor Functions
   $("#open-editor-btn").on("click", function() {
     openComparisonEditor();
   });
