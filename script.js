@@ -1,4 +1,7 @@
-/* script.js - FitJourney Tracker - Modern Edition - JS v3.1 */
+/* script.js - FitJourney Tracker - Modern Edition - JS v3.2 */
+
+// Set the app version here:
+const APP_VERSION = "v3.2";
 
 // USDA FoodData Central API Key
 const USDA_API_KEY = "DBS7VaqKcIKES5QY36b8Cw8bdk80CHzoufoxjeh8";
@@ -9,9 +12,21 @@ let currentUSDAFood = null;
 // Global daily goals object
 let dailyGoals = { calories: 0, protein: 0, fat: 0, carbs: 0 };
 
+/**
+ * Helper function to safely extract a nutrient value from an array.
+ * Returns the nutrient's value if found, otherwise returns "N/A".
+ */
+function getNutrientValue(nutrients, nutrientName) {
+  var nutrient = nutrients.find(function(n) {
+    return n.nutrientName === nutrientName;
+  });
+  return nutrient ? nutrient.value : "N/A";
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM fully loaded");
-  document.getElementById("app-version").textContent = "v3.1";
+  // Dynamically update the app version on page load
+  document.getElementById("app-version").textContent = APP_VERSION;
 
   // Global arrays
   let dataLogs = [];
@@ -80,8 +95,8 @@ document.addEventListener("DOMContentLoaded", function () {
       { date: '2023-01-01', food: 'Chicken Breast', weight: 150, calories: 250, protein: 40, fat: 3, carbs: 0 },
       { date: '2023-01-02', food: 'Oatmeal', weight: 50, calories: 180, protein: 6, fat: 3, carbs: 32 }
     ];
-    demoData.forEach(log => addDataLog(log));
-    demoNutrition.forEach(log => addNutritionLog(log));
+    demoData.forEach(function(log) { addDataLog(log); });
+    demoNutrition.forEach(function(log) { addNutritionLog(log); });
     updateWeightChart();
     updateNutritionChart();
     updateSummary();
@@ -104,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Please enter both weight and date.");
       return;
     }
-    addDataLog({ date, weight, waist, hips, chest, calories });
+    addDataLog({ date: date, weight: weight, waist: waist, hips: hips, chest: chest, calories: calories });
     updateWeightChart();
     updateSummary();
     updateRecentWeighIns();
@@ -114,12 +129,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function addDataLog(log) {
     dataLogs.push(log);
-    dataLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
+    dataLogs.sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
     console.log("Data logs:", dataLogs);
   }
 
   function updateWeightChart() {
-    weightChart.data.datasets[0].data = dataLogs.map(log => ({ x: log.date, y: log.weight }));
+    weightChart.data.datasets[0].data = dataLogs.map(function(log) {
+      return { x: log.date, y: log.weight };
+    });
     weightChart.update();
   }
 
@@ -145,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     recentDiv.innerHTML = "";
     const recent = dataLogs.slice(-5).reverse();
-    recent.forEach(log => {
+    recent.forEach(function(log) {
       const p = document.createElement("p");
       p.textContent = `${log.date}: ${log.weight} lbs`;
       recentDiv.appendChild(p);
@@ -159,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     const recent = dataLogs.slice(-3);
-    const avg = recent.reduce((sum, log) => sum + (log.calories || 0), 0) / recent.length;
+    const avg = recent.reduce(function(sum, log) { return sum + (log.calories || 0); }, 0) / recent.length;
     calorieDiv.innerHTML = `<p>Average Calories: ${Math.round(avg)} kcal</p>`;
   }
 
@@ -177,26 +194,26 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Please complete all required fields.");
       return;
     }
-    addNutritionLog({ food, weight, calories, protein, fat, carbs, date });
+    addNutritionLog({ food: food, weight: weight, calories: calories, protein: protein, fat: fat, carbs: carbs, date: date });
     updateNutritionChart();
     updateNutritionDisplay();
     updateDailyGoalsProgress();
     this.reset();
-    // Reset current USDA food (so next search will run anew)
+    // Reset current USDA food so the next search runs anew
     currentUSDAFood = null;
   });
 
   function addNutritionLog(log) {
     nutritionLogs.push(log);
-    nutritionLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
+    nutritionLogs.sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
     console.log("Nutrition logs:", nutritionLogs);
   }
 
   function updateNutritionChart() {
     let dates = [];
     let calValues = [];
-    nutritionLogs.forEach(log => {
-      if (!dates.includes(log.date)) {
+    nutritionLogs.forEach(function(log) {
+      if (dates.indexOf(log.date) === -1) {
         dates.push(log.date);
         calValues.push(log.calories);
       } else {
@@ -216,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     let html = '<table class="table table-striped"><thead><tr><th>Date</th><th>Food</th><th>Weight (g)</th><th>Calories</th><th>Protein</th><th>Fat</th><th>Carbs</th></tr></thead><tbody>';
-    nutritionLogs.forEach(log => {
+    nutritionLogs.forEach(function(log) {
       html += `<tr>
         <td>${log.date}</td>
         <td>${log.food}</td>
@@ -243,21 +260,24 @@ document.addEventListener("DOMContentLoaded", function () {
     const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5`;
     console.log("USDA search query:", query);
     fetch(url)
-      .then(response => response.json())
-      .then(data => {
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
         console.log("USDA response:", data);
         let resultsHtml = "";
         if (data.foods && data.foods.length > 0) {
           // Sort foods: generic foods first, fast-food items later.
-          data.foods.sort((a, b) => {
+          data.foods.sort(function(a, b) {
               let aRank = (a.foodCategory && a.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
               let bRank = (b.foodCategory && b.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
               return aRank - bRank;
           });
-          data.foods.forEach((food, idx) => {
+          data.foods.forEach(function(food, idx) {
             resultsHtml += `<div class="food-item" data-food='${JSON.stringify(food)}'>
               <strong>${food.description}</strong>
-              <br>Calories: ${food.foodNutrients && Array.isArray(food.foodNutrients) ? food.foodNutrients.find(n => n.nutrientName === "Energy")?.value || "N/A" : "N/A"} kcal
+              <br>Calories: ${food.foodNutrients && Array.isArray(food.foodNutrients) ? (function(){
+                var nutrient = food.foodNutrients.find(function(n) { return n.nutrientName === "Energy"; });
+                return nutrient ? nutrient.value : "N/A";
+              })() : "N/A"} kcal
             </div>`;
           });
           resultsHtml += `<div class="food-item more-options">
@@ -269,7 +289,7 @@ document.addEventListener("DOMContentLoaded", function () {
           $("#usda-search-results").html("<p>No foods found. Please add custom food.</p>");
         }
       })
-      .catch(error => {
+      .catch(function(error) {
         console.error("Error fetching USDA food data:", error);
         alert("Error fetching food data. Check the console for details.");
       });
@@ -286,10 +306,10 @@ document.addEventListener("DOMContentLoaded", function () {
       // using a fallback serving size of 100 if not provided
       currentUSDAFood = {
         servingSize: foodData.servingSize || 100,
-        calories: nutrients.find(n => n.nutrientName === "Energy")?.value || 0,
-        protein: nutrients.find(n => n.nutrientName === "Protein")?.value || 0,
-        fat: nutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value || 0,
-        carbs: nutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value || 0
+        calories: parseFloat(getNutrientValue(nutrients, "Energy")) || 0,
+        protein: parseFloat(getNutrientValue(nutrients, "Protein")) || 0,
+        fat: parseFloat(getNutrientValue(nutrients, "Total lipid (fat)")) || 0,
+        carbs: parseFloat(getNutrientValue(nutrients, "Carbohydrate, by difference")) || 0
       };
       // Populate the form fields with USDA data
       $("#food-name").val(foodData.description);
@@ -321,7 +341,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#food-protein").val(newProtein);
     $("#food-fat").val(newFat);
     $("#food-carbs").val(newCarbs);
-    console.log("Recalculated nutrients based on user weight:", { newCalories, newProtein, newFat, newCarbs });
+    console.log("Recalculated nutrients based on user weight:", { newCalories: newCalories, newProtein: newProtein, newFat: newFat, newCarbs: newCarbs });
   });
 
   $("#add-custom-food-btn").on("click", function() {
@@ -346,12 +366,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function updateDailyGoalsProgress() {
     const today = new Date().toISOString().split("T")[0];
-    const todaysLogs = nutritionLogs.filter(log => log.date === today);
+    const todaysLogs = nutritionLogs.filter(function(log) { return log.date === today; });
     const total = {
-      calories: todaysLogs.reduce((sum, log) => sum + log.calories, 0),
-      protein: todaysLogs.reduce((sum, log) => sum + log.protein, 0),
-      fat: todaysLogs.reduce((sum, log) => sum + log.fat, 0),
-      carbs: todaysLogs.reduce((sum, log) => sum + log.carbs, 0)
+      calories: todaysLogs.reduce(function(sum, log) { return sum + log.calories; }, 0),
+      protein: todaysLogs.reduce(function(sum, log) { return sum + log.protein; }, 0),
+      fat: todaysLogs.reduce(function(sum, log) { return sum + log.fat; }, 0),
+      carbs: todaysLogs.reduce(function(sum, log) { return sum + log.carbs; }, 0)
     };
     updateProgressBar("calories", total.calories, dailyGoals.calories);
     updateProgressBar("protein", total.protein, dailyGoals.protein);
@@ -360,18 +380,17 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updateProgressBar(nutrient, total, goal) {
-    const progressText = document.getElementById(`progress-${nutrient}`);
-    const progressBar = document.getElementById(`progress-bar-${nutrient}`);
+    const progressText = document.getElementById("progress-" + nutrient);
+    const progressBar = document.getElementById("progress-bar-" + nutrient);
     progressText.textContent = total.toFixed(0);
     let percentage = goal > 0 ? (total / goal) * 100 : 0;
     if (percentage > 100) percentage = 100;
-    progressBar.style.width = `${percentage}%`;
+    progressBar.style.width = percentage + "%";
     progressBar.setAttribute("aria-valuenow", percentage);
   }
 
   // ------------------------------
   // Photo Upload & Comparison Code
-  // (Remaining code unchanged)
   // ------------------------------
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
@@ -398,7 +417,7 @@ document.addEventListener("DOMContentLoaded", function () {
       gallery.html('<p class="placeholder">No photos uploaded yet.</p>');
       return;
     }
-    photoLogs.forEach(photo => {
+    photoLogs.forEach(function(photo) {
       gallery.append(`
         <div class="photo-entry">
           <img src="${photo.src}" alt="Progress Photo" class="img-fluid">
@@ -414,12 +433,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const gallery = $("#photo-gallery");
     gallery.empty();
     let filtered = photoLogs;
-    if (startDate) filtered = filtered.filter(photo => new Date(photo.date) >= new Date(startDate));
-    if (endDate) filtered = filtered.filter(photo => new Date(photo.date) <= new Date(endDate));
+    if (startDate) filtered = filtered.filter(function(photo) { return new Date(photo.date) >= new Date(startDate); });
+    if (endDate) filtered = filtered.filter(function(photo) { return new Date(photo.date) <= new Date(endDate); });
     if (filtered.length === 0) {
       gallery.html('<p class="placeholder">No photos match the selected date range.</p>');
     } else {
-      filtered.forEach(photo => {
+      filtered.forEach(function(photo) {
         gallery.append(`
           <div class="photo-entry">
             <img src="${photo.src}" alt="Progress Photo" class="img-fluid">
@@ -441,7 +460,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterSelect = $("#tt-after");
     beforeSelect.empty();
     afterSelect.empty();
-    photoLogs.forEach((photo, index) => {
+    photoLogs.forEach(function(photo, index) {
       beforeSelect.append(`<option value="${index}">${photo.date}</option>`);
       afterSelect.append(`<option value="${index}">${photo.date}</option>`);
     });
@@ -558,7 +577,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   $("#export-report-btn").on("click", function() {
-    html2canvas(document.getElementById("main-app")).then(canvas => {
+    html2canvas(document.getElementById("main-app")).then(function(canvas) {
       let link = document.createElement("a");
       link.download = "fitjourney_report.png";
       link.href = canvas.toDataURL();
@@ -568,6 +587,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   $(".share-btn").on("click", function() {
     const platform = $(this).data("platform");
-    alert(`Sharing to ${platform} (functionality to be implemented).`);
+    alert("Sharing to " + platform + " (functionality to be implemented).");
   });
 });
