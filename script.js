@@ -276,9 +276,9 @@ document.addEventListener("DOMContentLoaded", function () {
           if (data.foods && data.foods.length > 0) {
             // Sort foods: generic foods first, fast-food items later.
             data.foods.sort(function(a, b) {
-                let aRank = (a.foodCategory && a.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
-                let bRank = (b.foodCategory && b.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
-                return aRank - bRank;
+              let aRank = (a.foodCategory && a.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
+              let bRank = (b.foodCategory && b.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
+              return aRank - bRank;
             });
             data.foods.forEach(function(food, idx) {
               resultsHtml += `<div class="food-item" data-food='${JSON.stringify(food)}'>
@@ -305,11 +305,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 300);
   });
 
-  // USDA food item click handler with safe-checks
+  // USDA food item click handler with safe-checks and extra logging
   $("#usda-search-results").on("click", ".food-item", function() {
     try {
       const foodData = $(this).data("food");
       console.log("Food selected:", foodData);
+      // Log the nutrient array for debugging
+      console.log("Nutrients:", foodData.foodNutrients);
       // Ensure foodNutrients is a valid array; fallback to an empty array if not present
       const nutrients = Array.isArray(foodData.foodNutrients) ? foodData.foodNutrients : [];
       // Set USDA base serving size and nutrient values (fallback serving size of 100)
@@ -350,7 +352,12 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#food-protein").val(newProtein);
     $("#food-fat").val(newFat);
     $("#food-carbs").val(newCarbs);
-    console.log("Recalculated nutrients based on user weight:", { newCalories: newCalories, newProtein: newProtein, newFat: newFat, newCarbs: newCarbs });
+    console.log("Recalculated nutrients based on user weight:", {
+      newCalories: newCalories,
+      newProtein: newProtein,
+      newFat: newFat,
+      newCarbs: newCarbs
+    });
   });
 
   $("#add-custom-food-btn").on("click", function() {
