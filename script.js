@@ -249,7 +249,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ------------------------------
-  // USDA Search & Food Selection with Debouncing
+  // USDA Search & Food Selection with Debouncing and Filtering
   // ------------------------------
   let searchTimeout;
   $("#food-name").on("input", function() {
@@ -274,13 +274,21 @@ document.addEventListener("DOMContentLoaded", function () {
           console.log("USDA response:", data);
           let resultsHtml = "";
           if (data.foods && data.foods.length > 0) {
-            // Sort foods: generic foods first, fast-food items later.
-            data.foods.sort(function(a, b) {
+            // Filter results to only include foods that have an "Energy" nutrient
+            let validFoods = data.foods.filter(function(food) {
+              return food.foodNutrients && food.foodNutrients.some(function(n) { return n.nutrientName === "Energy"; });
+            });
+            if (validFoods.length === 0) {
+              $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
+              return;
+            }
+            // Sort valid foods: generic foods first, fast-food items later.
+            validFoods.sort(function(a, b) {
               let aRank = (a.foodCategory && a.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
               let bRank = (b.foodCategory && b.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
               return aRank - bRank;
             });
-            data.foods.forEach(function(food, idx) {
+            validFoods.forEach(function(food, idx) {
               resultsHtml += `<div class="food-item" data-food='${JSON.stringify(food)}'>
                 <strong>${food.description}</strong>
                 <br>Calories: ${food.foodNutrients && Array.isArray(food.foodNutrients) ? (function(){
@@ -305,12 +313,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 300);
   });
 
-  // USDA food item click handler with safe-checks and extra logging
+  // USDA food item click handler with safe-checks and debug logging
   $("#usda-search-results").on("click", ".food-item", function() {
     try {
       const foodData = $(this).data("food");
       console.log("Food selected:", foodData);
-      // Log the nutrient array for debugging
+      // Log nutrient data for debugging
       console.log("Nutrients:", foodData.foodNutrients);
       // Ensure foodNutrients is a valid array; fallback to an empty array if not present
       const nutrients = Array.isArray(foodData.foodNutrients) ? foodData.foodNutrients : [];
