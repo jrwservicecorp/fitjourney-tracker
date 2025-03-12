@@ -234,7 +234,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // ------------------------------
   // USDA Search & Food Selection
   // ------------------------------
-
   $("#food-name").on("input", function() {
     const query = $(this).val().trim();
     if (!query) {
@@ -249,6 +248,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("USDA response:", data);
         let resultsHtml = "";
         if (data.foods && data.foods.length > 0) {
+          // Sort foods: generic foods first, fast-food items later.
           data.foods.sort((a, b) => {
               let aRank = (a.foodCategory && a.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
               let bRank = (b.foodCategory && b.foodCategory.toLowerCase().includes("fast")) ? 1 : 0;
@@ -257,7 +257,7 @@ document.addEventListener("DOMContentLoaded", function () {
           data.foods.forEach((food, idx) => {
             resultsHtml += `<div class="food-item" data-food='${JSON.stringify(food)}'>
               <strong>${food.description}</strong>
-              <br>Calories: ${food.foodNutrients.find(n => n.nutrientName === "Energy")?.value || "N/A"} kcal
+              <br>Calories: ${food.foodNutrients && Array.isArray(food.foodNutrients) ? food.foodNutrients.find(n => n.nutrientName === "Energy")?.value || "N/A" : "N/A"} kcal
             </div>`;
           });
           resultsHtml += `<div class="food-item more-options">
@@ -275,22 +275,29 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 
+  // Updated USDA food item click handler with safe-checks
   $("#usda-search-results").on("click", ".food-item", function() {
     try {
       const foodData = $(this).data("food");
       console.log("Food selected:", foodData);
+      // Ensure foodNutrients is a valid array; fallback to an empty array if not present
+      const nutrients = Array.isArray(foodData.foodNutrients) ? foodData.foodNutrients : [];
+      // Set the USDA base serving size and nutrient values for recalculation,
+      // using a fallback serving size of 100 if not provided
       currentUSDAFood = {
-        servingSize: foodData.servingSize,
-        calories: foodData.foodNutrients.find(n => n.nutrientName === "Energy")?.value || 0,
-        protein: foodData.foodNutrients.find(n => n.nutrientName === "Protein")?.value || 0,
-        fat: foodData.foodNutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value || 0,
-        carbs: foodData.foodNutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value || 0
+        servingSize: foodData.servingSize || 100,
+        calories: nutrients.find(n => n.nutrientName === "Energy")?.value || 0,
+        protein: nutrients.find(n => n.nutrientName === "Protein")?.value || 0,
+        fat: nutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value || 0,
+        carbs: nutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value || 0
       };
+      // Populate the form fields with USDA data
       $("#food-name").val(foodData.description);
       $("#food-calories").val(currentUSDAFood.calories);
       $("#food-protein").val(currentUSDAFood.protein);
       $("#food-fat").val(currentUSDAFood.fat);
       $("#food-carbs").val(currentUSDAFood.carbs);
+      // Clear the search results
       $("#usda-search-results").empty();
     } catch (error) {
       console.error("Error parsing selected food:", error);
@@ -324,7 +331,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // ------------------------------
   // Daily Goals & Progress Functions
   // ------------------------------
-
   document.getElementById("daily-goals-form").addEventListener("submit", function(e) {
     e.preventDefault();
     dailyGoals.calories = parseFloat(document.getElementById("goal-calories").value) || 0;
@@ -342,4 +348,226 @@ document.addEventListener("DOMContentLoaded", function () {
     const today = new Date().toISOString().split("T")[0];
     const todaysLogs = nutritionLogs.filter(log => log.date === today);
     const total = {
-      calories: todaysLogs.reduce((sum, log) => sum + log.calor
+      calories: todaysLogs.reduce((sum, log) => sum + log.calories, 0),
+      protein: todaysLogs.reduce((sum, log) => sum + log.protein, 0),
+      fat: todaysLogs.reduce((sum, log) => sum + log.fat, 0),
+      carbs: todaysLogs.reduce((sum, log) => sum + log.carbs, 0)
+    };
+    updateProgressBar("calories", total.calories, dailyGoals.calories);
+    updateProgressBar("protein", total.protein, dailyGoals.protein);
+    updateProgressBar("fat", total.fat, dailyGoals.fat);
+    updateProgressBar("carbs", total.carbs, dailyGoals.carbs);
+  }
+
+  function updateProgressBar(nutrient, total, goal) {
+    const progressText = document.getElementById(`progress-${nutrient}`);
+    const progressBar = document.getElementById(`progress-bar-${nutrient}`);
+    progressText.textContent = total.toFixed(0);
+    let percentage = goal > 0 ? (total / goal) * 100 : 0;
+    if (percentage > 100) percentage = 100;
+    progressBar.style.width = `${percentage}%`;
+    progressBar.setAttribute("aria-valuenow", percentage);
+  }
+
+  // ------------------------------
+  // Photo Upload & Comparison Code
+  // (Remaining code unchanged)
+  // ------------------------------
+  $("#photo-upload-form").on("submit", function (event) {
+    event.preventDefault();
+    const fileInput = $("#photo-upload")[0].files[0];
+    const dateInput = $("#photo-date").val();
+    if (!fileInput || !dateInput) {
+      alert("Please select a photo and date.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      photoLogs.push({ src: e.target.result, date: dateInput });
+      updatePhotoGallery();
+      updatePhotoSelectors();
+    };
+    reader.readAsDataURL(fileInput);
+    this.reset();
+  });
+
+  function updatePhotoGallery() {
+    const gallery = $("#photo-gallery");
+    gallery.empty();
+    if (photoLogs.length === 0) {
+      gallery.html('<p class="placeholder">No photos uploaded yet.</p>');
+      return;
+    }
+    photoLogs.forEach(photo => {
+      gallery.append(`
+        <div class="photo-entry">
+          <img src="${photo.src}" alt="Progress Photo" class="img-fluid">
+          <p>Date: ${photo.date}</p>
+        </div>
+      `);
+    });
+  }
+
+  $("#filter-photos-btn").on("click", function() {
+    const startDate = $("#filter-start-date").val();
+    const endDate = $("#filter-end-date").val();
+    const gallery = $("#photo-gallery");
+    gallery.empty();
+    let filtered = photoLogs;
+    if (startDate) filtered = filtered.filter(photo => new Date(photo.date) >= new Date(startDate));
+    if (endDate) filtered = filtered.filter(photo => new Date(photo.date) <= new Date(endDate));
+    if (filtered.length === 0) {
+      gallery.html('<p class="placeholder">No photos match the selected date range.</p>');
+    } else {
+      filtered.forEach(photo => {
+        gallery.append(`
+          <div class="photo-entry">
+            <img src="${photo.src}" alt="Progress Photo" class="img-fluid">
+            <p>Date: ${photo.date}</p>
+          </div>
+        `);
+      });
+    }
+  });
+
+  $("#clear-filter-btn").on("click", function() {
+    $("#filter-start-date, #filter-end-date").val("");
+    updatePhotoGallery();
+  });
+
+  function updatePhotoSelectors() {
+    console.log("Updating photo selectors", photoLogs);
+    const beforeSelect = $("#tt-before");
+    const afterSelect = $("#tt-after");
+    beforeSelect.empty();
+    afterSelect.empty();
+    photoLogs.forEach((photo, index) => {
+      beforeSelect.append(`<option value="${index}">${photo.date}</option>`);
+      afterSelect.append(`<option value="${index}">${photo.date}</option>`);
+    });
+  }
+
+  $(document).ready(function () {
+    if ($.fn.twentytwenty) {
+      $("#twentytwenty-container").twentytwenty();
+    } else {
+      console.error("TwentyTwenty plugin failed to load.");
+    }
+  });
+
+  $("#tt-update").on("click", function() {
+    console.log("Update comparison button clicked");
+    const beforeIndex = parseInt($("#tt-before").val());
+    const afterIndex = parseInt($("#tt-after").val());
+    console.log("Before index:", beforeIndex, "After index:", afterIndex);
+    if (isNaN(beforeIndex) || isNaN(afterIndex)) {
+      alert("Please select both before and after photos.");
+      return;
+    }
+    if (photoLogs.length === 0) {
+      alert("No photos available");
+      return;
+    }
+    const beforePhoto = photoLogs[beforeIndex];
+    const afterPhoto = photoLogs[afterIndex];
+    const container = $("#twentytwenty-container");
+    container.empty();
+    const $beforeImg = $(`<img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before">`);
+    const $afterImg = $(`<img class="twentytwenty-after" src="${afterPhoto.src}" alt="After">`);
+    container.append($beforeImg, $afterImg);
+    container.find("img").css({ "max-width": "100%", "height": "auto" });
+    let loadedCount = 0;
+    container.find("img").each(function() {
+      $(this).on("load", function() {
+        loadedCount++;
+        if (loadedCount === 2) {
+          container.twentytwenty();
+          console.log("Comparison updated with before and after photos");
+        }
+      });
+    });
+  });
+
+  $("#open-editor-btn").on("click", function() {
+    openComparisonEditor();
+  });
+
+  function openComparisonEditor() {
+    if (photoLogs.length < 2) {
+      alert("Please upload at least two photos and select them for comparison.");
+      return;
+    }
+    const beforeIndex = parseInt($("#tt-before").val()) || 0;
+    const afterIndex = parseInt($("#tt-after").val()) || 1;
+    const beforePhoto = photoLogs[beforeIndex];
+    const afterPhoto = photoLogs[afterIndex];
+    $("#comparison-editor-modal").show();
+    editorCanvas = new fabric.Canvas('comparisonCanvas', {
+      backgroundColor: '#f7f7f7',
+      selection: true
+    });
+    editorCanvas.clear();
+    fabric.Image.fromURL(beforePhoto.src, function(img) {
+      img.set({ left: 0, top: 0, scaleX: 0.5, scaleY: 0.5, selectable: true });
+      editorCanvas.add(img);
+    });
+    fabric.Image.fromURL(afterPhoto.src, function(img) {
+      img.set({ left: 300, top: 0, scaleX: 0.5, scaleY: 0.5, selectable: true });
+      editorCanvas.add(img);
+    });
+  }
+
+  $("#add-text-btn").on("click", function() {
+    if (editorCanvas) {
+      const text = new fabric.IText('New Overlay', { left: 50, top: 50, fill: '#333', fontSize: 20 });
+      editorCanvas.add(text);
+      editorCanvas.setActiveObject(text);
+    }
+  });
+
+  $("#save-editor-btn").on("click", function() {
+    if (editorCanvas) {
+      const dataURL = editorCanvas.toDataURL({ format: 'png' });
+      const container = $("#twentytwenty-container");
+      container.empty();
+      const $editedImg = $(`<img src="${dataURL}" alt="Edited Comparison">`);
+      container.append($editedImg);
+      $("#comparison-editor-modal").hide();
+      editorCanvas.dispose();
+      editorCanvas = null;
+      console.log("Advanced editor changes saved to main comparison area");
+    }
+  });
+
+  $("#close-comparison-editor").on("click", function() {
+    $("#comparison-editor-modal").hide();
+    if (editorCanvas) {
+      editorCanvas.dispose();
+      editorCanvas = null;
+    }
+  });
+
+  $("#export-comparison-btn").on("click", function() {
+    if (editorCanvas) {
+      const dataURL = editorCanvas.toDataURL({ format: 'png' });
+      let link = document.createElement("a");
+      link.download = "comparison_for_instagram.png";
+      link.href = dataURL;
+      link.click();
+    }
+  });
+
+  $("#export-report-btn").on("click", function() {
+    html2canvas(document.getElementById("main-app")).then(canvas => {
+      let link = document.createElement("a");
+      link.download = "fitjourney_report.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  });
+
+  $(".share-btn").on("click", function() {
+    const platform = $(this).data("platform");
+    alert(`Sharing to ${platform} (functionality to be implemented).`);
+  });
+});
