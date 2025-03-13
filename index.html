@@ -162,9 +162,16 @@
               <label for="food-name" class="form-label form-header">Food Name</label>
               <input id="food-name" type="text" class="form-control" placeholder="e.g., Chicken Breast" required>
             </div>
+            <!-- New Quantity & Unit fields -->
             <div class="col-md-2">
-              <label for="food-weight" class="form-label form-header">Weight (g)</label>
-              <input id="food-weight" type="number" step="any" class="form-control" placeholder="grams" required>
+              <label for="food-quantity" class="form-label form-header">Quantity</label>
+              <input id="food-quantity" type="number" step="any" class="form-control" placeholder="e.g., 1" required>
+            </div>
+            <div class="col-md-2">
+              <label for="food-uom" class="form-label form-header">Unit</label>
+              <select id="food-uom" class="form-select" required>
+                <!-- Options will be populated after USDA selection -->
+              </select>
             </div>
             <div class="col-md-2">
               <label for="food-calories" class="form-label form-header">Calories (kcal)</label>
