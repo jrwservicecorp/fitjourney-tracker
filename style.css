@@ -83,7 +83,23 @@ header h1 {
   background-color: #f0f0f0;
 }
 
-/* Texture Background for certain elements (optional) */
+/* Meal Builder Styles */
+#meal-ingredients-list {
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 6px;
+  min-height: 50px;
+  margin-top: 10px;
+}
+.meal-ingredient {
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+}
+.meal-ingredient:last-child {
+  border-bottom: none;
+}
+
+/* Texture Background (optional) */
 body::after {
   content: "";
   position: fixed;
