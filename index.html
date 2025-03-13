@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FitJourney Tracker - Modern Fitness Edition</title>
-  <!-- Bootstrap CSS (local copy, update the path as needed) -->
+  <!-- Bootstrap CSS -->
   <link href="libs/bootstrap/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css">
@@ -26,12 +26,12 @@
   <header class="bg-secondary text-white py-3">
     <div class="container text-center">
       <h1>FitJourney Tracker</h1>
-      <!-- The app version is set dynamically -->
+      <!-- App version will be set dynamically -->
       <p>App Version: <span id="app-version"></span></p>
     </div>
   </header>
   
-  <!-- Navigation -->
+  <!-- Navigation Menu -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container">
       <div class="btn-group" role="group" aria-label="Main Navigation">
@@ -45,11 +45,111 @@
   </nav>
   
   <main id="main-app" class="container my-4">
-    <!-- Dashboard Section (unchanged content; copy your existing dashboard code here) -->
+    <!-- Dashboard Section -->
     <section id="dashboard-section">
       <h2 class="mb-4 dashboard-title">Dashboard</h2>
-      <!-- For brevity, include your current dashboard components (weight chart, nutrition chart, summaries, daily goals progress) -->
-      <!-- ... -->
+      <div class="row">
+        <!-- Weight Chart -->
+        <div class="col-md-6 mb-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h3 class="card-title">Weight Chart</h3>
+              <canvas id="weightChart"></canvas>
+              <p id="chart-placeholder" class="text-muted mt-2">Start logging weight to see trends!</p>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="toggle-demo-data" checked>
+                <label class="form-check-label" for="toggle-demo-data">Show Demo Data</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Nutrition Chart -->
+        <div class="col-md-6 mb-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h3 class="card-title">Nutrition Chart</h3>
+              <canvas id="nutritionChart"></canvas>
+              <p id="nutrition-chart-placeholder" class="text-muted mt-2">Nutrition trends will appear here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Summaries and Daily Goals -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="card shadow-sm" id="weight-summary">
+            <div class="card-body">
+              <h3 class="card-title">Weight Summary</h3>
+              <p class="placeholder">No weight data available.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="card shadow-sm" id="calorie-summary">
+            <div class="card-body">
+              <h3 class="card-title">Calorie Summary</h3>
+              <p class="placeholder">No calorie data available.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Daily Goals & Progress -->
+      <div class="row">
+        <div class="col-md-12 mb-3">
+          <div class="card shadow-sm" id="daily-goals-card">
+            <div class="card-body">
+              <h3 class="card-title">Daily Goals & Progress</h3>
+              <form id="daily-goals-form" class="row g-3 mb-3">
+                <div class="col-md-3">
+                  <label for="goal-calories" class="form-label">Calories (kcal)</label>
+                  <input id="goal-calories" type="number" step="any" class="form-control" placeholder="e.g., 2000">
+                </div>
+                <div class="col-md-3">
+                  <label for="goal-protein" class="form-label">Protein (g)</label>
+                  <input id="goal-protein" type="number" step="any" class="form-control" placeholder="e.g., 150">
+                </div>
+                <div class="col-md-3">
+                  <label for="goal-fat" class="form-label">Fat (g)</label>
+                  <input id="goal-fat" type="number" step="any" class="form-control" placeholder="e.g., 70">
+                </div>
+                <div class="col-md-3">
+                  <label for="goal-carbs" class="form-label">Carbs (g)</label>
+                  <input id="goal-carbs" type="number" step="any" class="form-control" placeholder="e.g., 250">
+                </div>
+                <div class="col-md-12">
+                  <button type="submit" class="btn btn-primary w-100">Set Daily Goals</button>
+                </div>
+              </form>
+              <div id="daily-goals-progress">
+                <div class="mb-2">
+                  <label>Calories: <span id="progress-calories">0</span>/<span id="goal-calories-display">0</span> kcal</label>
+                  <div class="progress">
+                    <div id="progress-bar-calories" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label>Protein: <span id="progress-protein">0</span>/<span id="goal-protein-display">0</span> g</label>
+                  <div class="progress">
+                    <div id="progress-bar-protein" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label>Fat: <span id="progress-fat">0</span>/<span id="goal-fat-display">0</span> g</label>
+                  <div class="progress">
+                    <div id="progress-bar-fat" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label>Carbs: <span id="progress-carbs">0</span>/<span id="goal-carbs-display">0</span> g</label>
+                  <div class="progress">
+                    <div id="progress-bar-carbs" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
     
     <!-- Nutrition Log Section -->
@@ -60,7 +160,6 @@
           <form id="nutrition-log-form" class="row g-3">
             <div class="col-md-4">
               <label for="food-name" class="form-label form-header">Food Name</label>
-              <!-- Typing here triggers USDA search -->
               <input id="food-name" type="text" class="form-control" placeholder="e.g., Chicken Breast" required>
             </div>
             <div class="col-md-2">
@@ -85,7 +184,6 @@
             </div>
             <div class="col-md-3">
               <label for="nutrition-date" class="form-label form-header">Date</label>
-              <!-- Not required; defaults to today in JS -->
               <input id="nutrition-date" type="date" class="form-control">
             </div>
             <div class="col-md-3">
@@ -103,9 +201,7 @@
               <button type="submit" class="btn btn-primary w-100">Log Nutrition</button>
             </div>
           </form>
-          <!-- USDA Search Results Container -->
           <div id="usda-search-results" class="mt-3"></div>
-          <!-- Nutrition Log Display -->
           <div class="mt-4" id="nutrition-log-display">
             <p class="placeholder">No nutrition logs recorded yet.</p>
           </div>
@@ -148,9 +244,8 @@
           </form>
         </div>
       </div>
-      <!-- Display saved meals -->
       <div id="meals-display">
-        <!-- User-created meals will be displayed here -->
+        <!-- Saved meals will be displayed here -->
       </div>
     </section>
     
@@ -203,7 +298,6 @@
     <!-- Media & Exports Section -->
     <section id="media-section" style="display:none;">
       <h2 class="mb-4 dashboard-title">Media & Exports</h2>
-      <!-- Photo Upload -->
       <div class="card shadow-sm mb-4 upload-photo">
         <div class="card-body">
           <h3 class="card-title">Upload Progress Photo</h3>
@@ -226,8 +320,6 @@
           <button id="clear-photos-btn" class="btn btn-link" style="display:none;">Clear All Photos</button>
         </div>
       </div>
-      
-      <!-- Photo Filter -->
       <div class="card shadow-sm mb-4" id="photo-filter-card">
         <div class="card-body">
           <h3 class="card-title">Filter Gallery by Date Range</h3>
@@ -247,8 +339,6 @@
           <button id="clear-filter-btn" class="btn btn-link mt-2">Clear Filter</button>
         </div>
       </div>
-      
-      <!-- Side by Side Comparison -->
       <div class="card shadow-sm mb-4">
         <div class="card-body">
           <h3 class="card-title">Side by Side Comparison</h3>
@@ -266,16 +356,12 @@
           </div>
         </div>
       </div>
-      
-      <!-- Export Report -->
       <div class="card shadow-sm mb-4" id="export-section">
         <div class="card-body">
           <h3 class="card-title">Export Options</h3>
           <button id="export-report-btn" class="btn btn-success">Export Report as Image</button>
         </div>
       </div>
-      
-      <!-- Social Share -->
       <div class="card shadow-sm">
         <div class="card-body">
           <h3 class="card-title">Share Your Progress</h3>
@@ -307,10 +393,10 @@
     </div>
   </footer>
   
-  <!-- Bootstrap Bundle with Popper (local copy) -->
+  <!-- Bootstrap Bundle with Popper -->
   <script src="libs/bootstrap/bootstrap.bundle.min.js"></script>
   
-  <!-- Inline Script for Navigation -->
+  <!-- Inline Navigation Script -->
   <script>
     document.querySelectorAll(".nav-btn").forEach(function(btn) {
       btn.addEventListener("click", function () {
@@ -321,7 +407,6 @@
         this.classList.add("active");
       });
     });
-    // Show Dashboard by default
     document.querySelector("#dashboard-section").style.display = "block";
   </script>
 </body>
