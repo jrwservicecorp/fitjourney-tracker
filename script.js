@@ -289,7 +289,9 @@ document.addEventListener("DOMContentLoaded", function () {
               return aRank - bRank;
             });
             validFoods.forEach(function(food, idx) {
-              resultsHtml += `<div class="food-item" data-food='${JSON.stringify(food)}'>
+              // Encode JSON string for safe insertion in HTML attribute
+              const foodEncoded = encodeURIComponent(JSON.stringify(food));
+              resultsHtml += `<div class="food-item" data-food="${foodEncoded}">
                 <strong>${food.description}</strong>
                 <br>Calories: ${food.foodNutrients && Array.isArray(food.foodNutrients) ? (function(){
                   var nutrient = food.foodNutrients.find(function(n) { return n.nutrientName === "Energy"; });
@@ -313,12 +315,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 300);
   });
 
-  // USDA food item click handler with explicit JSON parsing and .closest() fix
+  // USDA food item click handler with explicit JSON decoding and .closest() usage
   $("#usda-search-results").on("click", ".food-item", function() {
     try {
-      // Use .closest() to ensure we get the container with the data attribute
+      // Use .closest() to ensure we get the element with the data attribute
       const foodString = $(this).closest(".food-item").attr("data-food");
-      const foodData = JSON.parse(foodString);
+      const decoded = decodeURIComponent(foodString);
+      const foodData = JSON.parse(decoded);
       console.log("Food selected:", foodData);
       // Log nutrient data for debugging
       console.log("Nutrients:", foodData.foodNutrients);
