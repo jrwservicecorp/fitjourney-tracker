@@ -313,10 +313,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 300);
   });
 
-  // USDA food item click handler with safe-checks and debug logging
+  // USDA food item click handler with explicit JSON parsing and .closest() fix
   $("#usda-search-results").on("click", ".food-item", function() {
     try {
-      const foodData = $(this).data("food");
+      // Use .closest() to ensure we get the container with the data attribute
+      const foodString = $(this).closest(".food-item").attr("data-food");
+      const foodData = JSON.parse(foodString);
       console.log("Food selected:", foodData);
       // Log nutrient data for debugging
       console.log("Nutrients:", foodData.foodNutrients);
