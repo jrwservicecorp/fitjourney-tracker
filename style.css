@@ -80,7 +80,7 @@ header h1 {
   color: #555;
 }
 
-/* USDA Search Results Styles */
+/* USDA Search Results */
 #usda-search-results .food-item {
   padding: 10px;
   margin-bottom: 8px;
@@ -95,7 +95,7 @@ header h1 {
   transform: scale(1.02);
 }
 
-/* Tile Layout for Data Display Areas */
+/* Tile Layout */
 .tile {
   background: #fff;
   border: 1px solid #ddd;
@@ -107,15 +107,7 @@ header h1 {
 
 /* Responsive */
 @media only screen and (max-width: 600px) {
-  header h1 {
-    font-size: 2em;
-  }
-  .navbar .btn-group .nav-btn {
-    padding: 8px 12px;
-    font-size: 0.9em;
-  }
-  .card, .tile {
-    margin: 10px auto;
-    padding: 15px;
-  }
+  header h1 { font-size: 2em; }
+  .navbar .btn-group .nav-btn { padding: 8px 12px; font-size: 0.9em; }
+  .card, .tile { margin: 10px auto; padding: 15px; }
 }
