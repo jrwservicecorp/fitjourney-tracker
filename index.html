@@ -152,7 +152,7 @@
       </div>
     </section>
     
-    <!-- Nutrition Log Section with Unit of Measure -->
+    <!-- Nutrition Log Section with UOM Display -->
     <section id="nutrition-section" class="tile" style="display:none;">
       <h2 class="dashboard-title">Nutrition Log</h2>
       <div class="card" id="nutrition-log-section">
@@ -160,7 +160,7 @@
           <form id="nutrition-log-form" class="row g-3">
             <div class="col-md-4">
               <label for="food-name" class="form-label form-header">Food Name</label>
-              <input id="food-name" type="text" class="form-control" placeholder="e.g., Chicken Breast" required>
+              <input id="food-name" type="text" class="form-control" placeholder="e.g., Oatmeal" required>
             </div>
             <!-- Quantity & Unit fields -->
             <div class="col-md-2">
@@ -240,9 +240,7 @@
               <button type="button" id="add-ingredient-btn" class="btn btn-secondary w-100">Add Ingredient</button>
             </div>
             <div class="col-md-12">
-              <div id="meal-ingredients-list">
-                <!-- Ingredients will be listed here -->
-              </div>
+              <div id="meal-ingredients-list"></div>
             </div>
             <div class="col-md-3 d-flex align-items-end">
               <button type="submit" class="btn btn-primary w-100">Save Meal</button>
@@ -250,9 +248,7 @@
           </form>
         </div>
       </div>
-      <div id="meals-display">
-        <!-- Saved meals will be displayed here -->
-      </div>
+      <div id="meals-display"></div>
     </section>
     
     <!-- Body Weight Log Section -->
