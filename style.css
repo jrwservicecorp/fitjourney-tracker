@@ -1,4 +1,4 @@
-/* style.css - FitJourney Tracker - Peloton Inspired */
+/* style.css - FitJourney Tracker - Tesla/Peloton Inspired */
 
 /* Import a modern font */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
@@ -6,7 +6,7 @@
 /* Global Styles */
 body {
   font-family: 'Roboto', Arial, sans-serif;
-  background: #f6f6f6;
+  background-color: #f6f6f6;
   color: #333;
   margin: 0;
   padding: 0;
@@ -14,12 +14,13 @@ body {
 
 /* Header */
 header {
-  background: #222;
+  background: linear-gradient(135deg, #1a1a1a, #333);
   color: #fff;
   padding: 20px 0;
+  text-align: center;
 }
 header h1 {
-  font-size: 2.5em;
+  font-size: 2.8em;
   margin: 0;
   letter-spacing: 1px;
 }
@@ -27,41 +28,50 @@ header h1 {
 /* Navigation Menu */
 .navbar {
   margin-bottom: 20px;
+  text-align: center;
 }
 .navbar .btn-group .nav-btn {
-  font-weight: 500;
-  border-radius: 30px;
+  background: #fff;
+  color: #333;
+  border: 2px solid #007bff;
+  border-radius: 10px;
   padding: 10px 20px;
-  transition: background 0.3s, color 0.3s;
+  margin: 0 5px;
+  transition: background 0.3s, color 0.3s, transform 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
-.navbar .btn-group .nav-btn.active,
-.navbar .btn-group .nav-btn:hover {
+.navbar .btn-group .nav-btn:hover,
+.navbar .btn-group .nav-btn.active {
   background: #007bff;
   color: #fff;
+  transform: translateY(-2px);
 }
 
-/* Dashboard Titles */
+/* Section Headings */
 .dashboard-title {
   font-size: 1.8em;
   font-weight: 700;
   color: #007bff;
   margin-bottom: 20px;
+  text-transform: uppercase;
 }
 
-/* Cards */
-.card {
+/* Card / Tile Styles */
+.card, .tile {
   background: #fff;
   border: none;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 15px;
   margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 .card .card-title {
-  font-size: 1.4em;
+  font-size: 1.5em;
   font-weight: 700;
+  margin-bottom: 15px;
+  color: #1a1a1a;
   border-bottom: 2px solid #eee;
   padding-bottom: 10px;
-  margin-bottom: 15px;
 }
 
 /* Form Labels */
@@ -73,76 +83,30 @@ header h1 {
 /* USDA Search Results Styles */
 #usda-search-results .food-item {
   padding: 10px;
+  margin-bottom: 8px;
   border: 1px solid #ddd;
-  border-radius: 6px;
-  margin-bottom: 5px;
+  border-radius: 8px;
+  background: #fafafa;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.2s;
 }
 #usda-search-results .food-item:hover {
-  background-color: #f0f0f0;
+  background-color: #e6f2ff;
+  transform: scale(1.02);
 }
 
-/* Meal Builder Styles */
-#meal-ingredients-list {
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 6px;
-  min-height: 50px;
-  margin-top: 10px;
-}
-.meal-ingredient {
-  padding: 5px;
-  border-bottom: 1px solid #eee;
-}
-.meal-ingredient:last-child {
-  border-bottom: none;
-}
-
-/* Texture Background (optional) */
-body::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('images/texture.png') repeat;
-  opacity: 0.05;
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* Advanced Editor Modal */
-#comparison-editor-modal {
-  display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 650px;
-  transform: translate(-50%, -50%);
+/* Tile Layout for Data Display Areas */
+.tile {
   background: #fff;
+  border: 1px solid #ddd;
   border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-  z-index: 1000;
   padding: 20px;
-}
-#comparison-editor-modal .modal-content {
-  position: relative;
-}
-#comparison-editor-modal .modal-title {
-  font-size: 1.8em;
-  font-weight: 700;
-  color: #007bff;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
 /* Responsive */
 @media only screen and (max-width: 600px) {
-  .card {
-    margin: 10px auto;
-    padding: 15px;
-  }
   header h1 {
     font-size: 2em;
   }
@@ -150,7 +114,8 @@ body::after {
     padding: 8px 12px;
     font-size: 0.9em;
   }
-  #comparison-editor-modal {
-    width: 90%;
+  .card, .tile {
+    margin: 10px auto;
+    padding: 15px;
   }
 }
