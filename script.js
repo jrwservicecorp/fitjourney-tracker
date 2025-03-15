@@ -1,7 +1,7 @@
-/* script.js - FitJourney Tracker - Modern Edition - JS v3.4 */
+/* script.js - FitJourney Tracker - Modern Edition - JS v3.5 */
 
 // Set the app version
-const APP_VERSION = "v3.4";
+const APP_VERSION = "v3.5";
 // USDA FoodData Central API Key
 const USDA_API_KEY = "DBS7VaqKcIKES5QY36b8Cw8bdk80CHzoufoxjeh8";
 
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let dataLogs = [], nutritionLogs = [], photoLogs = [], meals = [];
   let editorCanvas, searchTimeout;
   
-  // Define keyword arrays for whole foods vs processed
+  // Keyword arrays for scoring adjustments
   const wholeFoodKeywords = ["poultry", "chicken breast", "chicken thigh", "drumstick", "wing", "fillet", "roast"];
   const processedKeywords = ["canned", "soup", "cold cuts", "pepperoni", "salami", "smoked"];
   
@@ -255,11 +255,12 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#meals-display").html(html);
   }
   
-  // USDA Search & Food Selection – Improved Results with prioritization for whole foods
+  // USDA Search & Food Selection – Improved Results with whole food prioritization
   $("#food-name").on("input", function() {
     clearTimeout(searchTimeout);
     const query = $(this).val().trim();
     if (!query) { $("#usda-search-results").empty(); currentUSDAFood = null; return; }
+    // Do not re-run search if the user is retyping the same name
     if (currentUSDAFood && query.toLowerCase() === currentUSDAFood.description.toLowerCase()) { return; }
     searchTimeout = setTimeout(function() {
       const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5`;
@@ -279,24 +280,29 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
               return;
             }
-            // Adjust scoring: bonus for whole food indicators, penalty for processed keywords and small serving sizes.
+            // Adjust scores: bonus for SR Legacy, whole-food keywords and larger serving sizes; penalty for processed keywords
             validFoods.forEach(food => {
               let bonus = 0;
+              // Bonus if dataType is "SR Legacy"
               if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
               let desc = (food.description || "").toLowerCase();
               let category = (food.foodCategory || "").toLowerCase();
+              // Extra bonus for descriptions that include whole food qualifiers
               wholeFoodKeywords.forEach(kw => {
                 if (desc.includes(kw) || category.includes(kw)) bonus += 50;
               });
+              // If description is exactly "chicken" (a generic term), apply a penalty
+              if (desc.trim() === "chicken") { bonus -= 50; }
+              // Penalty for processed keywords
               processedKeywords.forEach(kw => {
                 if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
               });
-              // Penalize very small serving sizes (< 50g) if numeric
+              // Penalize if serving size is very small (<50 g)
               let servingSizeNum = parseFloat(food.servingSize);
               if (!isNaN(servingSizeNum) && servingSizeNum < 50) bonus -= 50;
               food.adjustedScore = (food.score || 0) + bonus;
             });
-            // If "Show Only Whole Foods" toggle is checked, further filter out foods that do not include any whole-food keywords
+            // If "Show Only Whole Foods" toggle is checked, filter only those foods that contain whole-food keywords
             const onlyWhole = $("#whole-food-toggle").is(":checked");
             if (onlyWhole) {
               validFoods = validFoods.filter(food => {
@@ -514,7 +520,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#meals-display").html(html);
   }
   
-  // USDA Search & Food Selection – Improved Results with whole food prioritization
+  // USDA Search & Food Selection – Improved whole food prioritization
   $("#food-name").on("input", function() {
     clearTimeout(searchTimeout);
     const query = $(this).val().trim();
@@ -538,23 +544,29 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
               return;
             }
-            // Adjust scores: bonus for SR Legacy, whole food keywords and larger serving sizes; penalty for processed keywords
+            // Adjust scores: bonus for SR Legacy and whole-food keywords; penalty for generic descriptions and processed keywords.
             validFoods.forEach(food => {
               let bonus = 0;
+              // Bonus if dataType is "SR Legacy"
               if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
               let desc = (food.description || "").toLowerCase();
               let category = (food.foodCategory || "").toLowerCase();
+              // Bonus for whole-food qualifiers
               wholeFoodKeywords.forEach(kw => {
                 if (desc.includes(kw) || category.includes(kw)) bonus += 50;
               });
+              // If the description is exactly "chicken" (generic), apply a penalty
+              if (desc.trim() === "chicken") { bonus -= 50; }
+              // Penalty for processed keywords
               processedKeywords.forEach(kw => {
                 if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
               });
+              // Penalize very small serving sizes (<50 g)
               let servingSizeNum = parseFloat(food.servingSize);
               if (!isNaN(servingSizeNum) && servingSizeNum < 50) bonus -= 50;
               food.adjustedScore = (food.score || 0) + bonus;
             });
-            // If "Show Only Whole Foods" toggle is checked, filter only foods that include whole-food keywords
+            // If "Show Only Whole Foods" is checked, filter out foods without whole-food keywords
             const onlyWhole = $("#whole-food-toggle").is(":checked");
             if (onlyWhole) {
               validFoods = validFoods.filter(food => {
