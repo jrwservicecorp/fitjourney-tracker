@@ -1,7 +1,7 @@
-/* script.js - FitJourney Tracker - Modern Edition - JS v3.3 */
+/* script.js - FitJourney Tracker - Modern Edition - JS v3.4 */
 
 // Set the app version
-const APP_VERSION = "v3.3";
+const APP_VERSION = "v3.4";
 // USDA FoodData Central API Key
 const USDA_API_KEY = "DBS7VaqKcIKES5QY36b8Cw8bdk80CHzoufoxjeh8";
 
@@ -21,6 +21,10 @@ document.addEventListener("DOMContentLoaded", function () {
   
   let dataLogs = [], nutritionLogs = [], photoLogs = [], meals = [];
   let editorCanvas, searchTimeout;
+  
+  // Define keyword arrays for whole foods vs processed
+  const wholeFoodKeywords = ["poultry", "chicken breast", "chicken thigh", "drumstick", "wing", "fillet", "roast"];
+  const processedKeywords = ["canned", "soup", "cold cuts", "pepperoni", "salami", "smoked"];
   
   // Initialize Weight Chart
   const weightChartElement = document.getElementById('weightChart');
@@ -251,7 +255,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#meals-display").html(html);
   }
   
-  // USDA Search & Food Selection – Improved Results with extra details and prioritization for whole foods
+  // USDA Search & Food Selection – Improved Results with prioritization for whole foods
   $("#food-name").on("input", function() {
     clearTimeout(searchTimeout);
     const query = $(this).val().trim();
@@ -266,7 +270,7 @@ document.addEventListener("DOMContentLoaded", function () {
           console.log("USDA response:", data);
           let resultsHtml = "";
           if (data.foods && data.foods.length > 0) {
-            // Exclude foods with undesired serving units (e.g., IU)
+            // Filter out foods with undesired serving units (e.g., IU)
             let validFoods = data.foods.filter(food =>
               food.foodNutrients && food.foodNutrients.some(n => n.nutrientName === "Energy") &&
               !(food.servingSizeUnit && food.servingSizeUnit.toUpperCase() === "IU")
@@ -275,11 +279,7 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
               return;
             }
-            // Prioritize whole foods by adjusting the score:
-            // Give a bonus if dataType is "SR Legacy" or if foodCategory/description include keywords like "poultry", "breast", "thigh", "drumstick"
-            // Penalize if they include terms like "canned", "soup", "cold cuts", "pepperoni", "salami"
-            const wholeFoodKeywords = ["poultry", "chicken breast", "chicken thigh", "drumstick"];
-            const processedKeywords = ["canned", "soup", "cold cuts", "pepperoni", "salami"];
+            // Adjust scoring: bonus for whole food indicators, penalty for processed keywords and small serving sizes.
             validFoods.forEach(food => {
               let bonus = 0;
               if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
@@ -291,8 +291,24 @@ document.addEventListener("DOMContentLoaded", function () {
               processedKeywords.forEach(kw => {
                 if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
               });
+              // Penalize very small serving sizes (< 50g) if numeric
+              let servingSizeNum = parseFloat(food.servingSize);
+              if (!isNaN(servingSizeNum) && servingSizeNum < 50) bonus -= 50;
               food.adjustedScore = (food.score || 0) + bonus;
             });
+            // If "Show Only Whole Foods" toggle is checked, further filter out foods that do not include any whole-food keywords
+            const onlyWhole = $("#whole-food-toggle").is(":checked");
+            if (onlyWhole) {
+              validFoods = validFoods.filter(food => {
+                let desc = (food.description || "").toLowerCase();
+                let category = (food.foodCategory || "").toLowerCase();
+                return wholeFoodKeywords.some(kw => desc.includes(kw) || category.includes(kw));
+              });
+            }
+            if (validFoods.length === 0) {
+              $("#usda-search-results").html("<p>No whole food results found. Please refine your search or add a custom food.</p>");
+              return;
+            }
             // Sort by adjustedScore descending
             validFoods.sort((a, b) => b.adjustedScore - a.adjustedScore);
             validFoods.forEach(food => {
@@ -302,9 +318,8 @@ document.addEventListener("DOMContentLoaded", function () {
               })();
               const servingSize = food.servingSize ? food.servingSize : "N/A";
               const servingUnit = food.servingSizeUnit ? food.servingSizeUnit : "";
-              const foodEncoded = encodeURIComponent(JSON.stringify(food));
-              // Include brand information if available
               const brand = food.brandOwner ? `Brand: ${food.brandOwner}` : "";
+              const foodEncoded = encodeURIComponent(JSON.stringify(food));
               resultsHtml += `<div class="food-item" data-food="${foodEncoded}">
                 <strong>${food.description}</strong>
                 <br>Category: ${food.foodCategory || "N/A"} ${brand}
@@ -499,7 +514,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#meals-display").html(html);
   }
   
-  // USDA Search & Food Selection – Improved Results with prioritization for whole foods
+  // USDA Search & Food Selection – Improved Results with whole food prioritization
   $("#food-name").on("input", function() {
     clearTimeout(searchTimeout);
     const query = $(this).val().trim();
@@ -514,7 +529,7 @@ document.addEventListener("DOMContentLoaded", function () {
           console.log("USDA response:", data);
           let resultsHtml = "";
           if (data.foods && data.foods.length > 0) {
-            // Filter out foods with undesired serving unit "IU"
+            // Filter out foods with undesired serving units (e.g., IU)
             let validFoods = data.foods.filter(food =>
               food.foodNutrients && food.foodNutrients.some(n => n.nutrientName === "Energy") &&
               !(food.servingSizeUnit && food.servingSizeUnit.toUpperCase() === "IU")
@@ -523,11 +538,7 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
               return;
             }
-            // Prioritize whole foods by calculating an adjusted score.
-            // Bonus for dataType "SR Legacy" and if the foodCategory/description contain keywords for whole chicken cuts.
-            // Penalty for processed items such as "canned", "soup", "cold cuts", "pepperoni", "salami".
-            const wholeFoodKeywords = ["poultry", "chicken breast", "chicken thigh", "drumstick"];
-            const processedKeywords = ["canned", "soup", "cold cuts", "pepperoni", "salami"];
+            // Adjust scores: bonus for SR Legacy, whole food keywords and larger serving sizes; penalty for processed keywords
             validFoods.forEach(food => {
               let bonus = 0;
               if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
@@ -539,8 +550,23 @@ document.addEventListener("DOMContentLoaded", function () {
               processedKeywords.forEach(kw => {
                 if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
               });
+              let servingSizeNum = parseFloat(food.servingSize);
+              if (!isNaN(servingSizeNum) && servingSizeNum < 50) bonus -= 50;
               food.adjustedScore = (food.score || 0) + bonus;
             });
+            // If "Show Only Whole Foods" toggle is checked, filter only foods that include whole-food keywords
+            const onlyWhole = $("#whole-food-toggle").is(":checked");
+            if (onlyWhole) {
+              validFoods = validFoods.filter(food => {
+                let desc = (food.description || "").toLowerCase();
+                let category = (food.foodCategory || "").toLowerCase();
+                return wholeFoodKeywords.some(kw => desc.includes(kw) || category.includes(kw));
+              });
+            }
+            if (validFoods.length === 0) {
+              $("#usda-search-results").html("<p>No whole food results found. Please refine your search or add a custom food.</p>");
+              return;
+            }
             // Sort by adjustedScore descending
             validFoods.sort((a, b) => b.adjustedScore - a.adjustedScore);
             validFoods.forEach(food => {
