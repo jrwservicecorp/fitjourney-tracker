@@ -1,7 +1,7 @@
-/* script.js - FitJourney Tracker - Modern Edition - JS v3.2 */
+/* script.js - FitJourney Tracker - Modern Edition - JS v3.3 */
 
 // Set the app version
-const APP_VERSION = "v3.2";
+const APP_VERSION = "v3.3";
 // USDA FoodData Central API Key
 const USDA_API_KEY = "DBS7VaqKcIKES5QY36b8Cw8bdk80CHzoufoxjeh8";
 
@@ -10,32 +10,9 @@ let currentUSDAFood = null;
 // Global daily goals object
 let dailyGoals = { calories: 0, protein: 0, fat: 0, carbs: 0 };
 
-/**
- * Returns the nutrient value for a given nutrient name.
- */
 function getNutrientValue(nutrients, nutrientName) {
   const nutrient = nutrients.find(n => n.nutrientName === nutrientName);
   return nutrient ? nutrient.value : "N/A";
-}
-
-/**
- * Determines if a food item is generic.
- * We consider a food generic if it has no brand owner (or is labeled “Generic”) or its dataType is either "SR Legacy" or "Survey (FNDDS)".
- */
-function isGeneric(food) {
-  return (!food.brandOwner || food.brandOwner.trim() === "" || food.brandOwner.trim().toLowerCase() === "generic") ||
-         (food.dataType === "SR Legacy") ||
-         (food.dataType === "Survey (FNDDS)");
-}
-
-/**
- * Checks if the food description contains any preferred keywords.
- * Preferred keywords include "breast", "thigh", "drumstick", or "wing".
- */
-function hasPreferredKeyword(food) {
-  const preferredKeywords = ["breast", "thigh", "drumstick", "wing"];
-  const description = food.description.toLowerCase();
-  return preferredKeywords.some(keyword => description.includes(keyword));
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -55,9 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
       data: { datasets: [{ label: 'Weight (lbs)', data: [], borderColor: '#007bff', fill: false, tension: 0.2 }] },
       options: { responsive: true, scales: { x: { type: 'time', time: { unit: 'day' }, title: { display: true, text: 'Date' } }, y: { title: { display: true, text: 'Weight (lbs)' } } } }
     });
-  } else {
-    console.warn("Canvas 'weightChart' not found.");
-  }
+  } else { console.warn("Canvas 'weightChart' not found."); }
   
   // Initialize Nutrition Chart
   const nutritionChartElement = document.getElementById('nutritionChart');
@@ -69,9 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
       data: { labels: [], datasets: [{ label: 'Calories (kcal)', data: [], backgroundColor: '#28a745' }] },
       options: { responsive: true, scales: { x: { title: { display: true, text: 'Date' } }, y: { title: { display: true, text: 'Calories (kcal)' } } } }
     });
-  } else {
-    console.warn("Canvas 'nutritionChart' not found.");
-  }
+  } else { console.warn("Canvas 'nutritionChart' not found."); }
   
   // Load demo data if enabled
   const toggleDemo = document.getElementById("toggle-demo-data");
@@ -278,7 +251,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#meals-display").html(html);
   }
   
-  // USDA Search & Food Selection – Improved Results with extra details and generic-first prioritization
+  // USDA Search & Food Selection – Improved Results with extra details and prioritization for whole foods
   $("#food-name").on("input", function() {
     clearTimeout(searchTimeout);
     const query = $(this).val().trim();
@@ -302,33 +275,39 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
               return;
             }
-            // Sort: first by generic status (generic = 0, branded = 1),
-            // then prioritize items with preferred keywords (e.g., "breast", "thigh", etc.),
-            // then sort by USDA score descending.
-            validFoods.sort((a, b) => {
-              const aGeneric = isGeneric(a) ? 0 : 1;
-              const bGeneric = isGeneric(b) ? 0 : 1;
-              if (aGeneric !== bGeneric) return aGeneric - bGeneric;
-              const aPreferred = hasPreferredKeyword(a) ? 0 : 1;
-              const bPreferred = hasPreferredKeyword(b) ? 0 : 1;
-              if (aPreferred !== bPreferred) return aPreferred - bPreferred;
-              return b.score - a.score;
-            });
+            // Prioritize whole foods by adjusting the score:
+            // Give a bonus if dataType is "SR Legacy" or if foodCategory/description include keywords like "poultry", "breast", "thigh", "drumstick"
+            // Penalize if they include terms like "canned", "soup", "cold cuts", "pepperoni", "salami"
+            const wholeFoodKeywords = ["poultry", "chicken breast", "chicken thigh", "drumstick"];
+            const processedKeywords = ["canned", "soup", "cold cuts", "pepperoni", "salami"];
             validFoods.forEach(food => {
-              const energy = (() => {
-                const nutrient = food.foodNutrients.find(n => n.nutrientName === "Energy");
-                return nutrient ? nutrient.value : "N/A";
+              let bonus = 0;
+              if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
+              let desc = (food.description || "").toLowerCase();
+              let category = (food.foodCategory || "").toLowerCase();
+              wholeFoodKeywords.forEach(kw => {
+                if (desc.includes(kw) || category.includes(kw)) bonus += 50;
+              });
+              processedKeywords.forEach(kw => {
+                if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
+              });
+              food.adjustedScore = (food.score || 0) + bonus;
+            });
+            // Sort by adjustedScore descending
+            validFoods.sort((a, b) => b.adjustedScore - a.adjustedScore);
+            validFoods.forEach(food => {
+              const energy = (() => { 
+                const nutrient = food.foodNutrients.find(n => n.nutrientName === "Energy"); 
+                return nutrient ? nutrient.value : "N/A"; 
               })();
               const servingSize = food.servingSize ? food.servingSize : "N/A";
               const servingUnit = food.servingSizeUnit ? food.servingSizeUnit : "";
-              const brand = food.brandOwner ? food.brandOwner : "Generic";
-              const dataType = food.dataType ? food.dataType : "N/A";
               const foodEncoded = encodeURIComponent(JSON.stringify(food));
+              // Include brand information if available
+              const brand = food.brandOwner ? `Brand: ${food.brandOwner}` : "";
               resultsHtml += `<div class="food-item" data-food="${foodEncoded}">
                 <strong>${food.description}</strong>
-                <br>Category: ${food.foodCategory || "N/A"}
-                <br>Brand: ${brand}
-                <br>Type: ${dataType}
+                <br>Category: ${food.foodCategory || "N/A"} ${brand}
                 <br>Serving: ${servingSize} ${servingUnit}
                 <br>Calories: ${energy} kcal
               </div>`;
@@ -425,7 +404,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
   $("#add-custom-food-btn").on("click", function() { openCustomFoodEntry(); });
   
-  // Daily Goals Submission
+  // Daily Goals Submission and Progress Update
   document.getElementById("daily-goals-form").addEventListener("submit", function(e) {
     e.preventDefault();
     dailyGoals.calories = parseFloat(document.getElementById("goal-calories").value) || 0;
@@ -520,7 +499,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#meals-display").html(html);
   }
   
-  // USDA Search & Food Selection – Improved Results with extra details, generic-first prioritization, and preferred keyword sorting
+  // USDA Search & Food Selection – Improved Results with prioritization for whole foods
   $("#food-name").on("input", function() {
     clearTimeout(searchTimeout);
     const query = $(this).val().trim();
@@ -535,7 +514,7 @@ document.addEventListener("DOMContentLoaded", function () {
           console.log("USDA response:", data);
           let resultsHtml = "";
           if (data.foods && data.foods.length > 0) {
-            // Exclude foods with undesired serving units (e.g., IU)
+            // Filter out foods with undesired serving unit "IU"
             let validFoods = data.foods.filter(food =>
               food.foodNutrients && food.foodNutrients.some(n => n.nutrientName === "Energy") &&
               !(food.servingSizeUnit && food.servingSizeUnit.toUpperCase() === "IU")
@@ -544,18 +523,26 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
               return;
             }
-            // Sort: first by generic status (generic = 0, branded = 1),
-            // then prioritize items with preferred keywords (e.g., "breast", "thigh", etc.),
-            // then sort by USDA score descending.
-            validFoods.sort((a, b) => {
-              const aGeneric = isGeneric(a) ? 0 : 1;
-              const bGeneric = isGeneric(b) ? 0 : 1;
-              if (aGeneric !== bGeneric) return aGeneric - bGeneric;
-              const aPreferred = hasPreferredKeyword(a) ? 0 : 1;
-              const bPreferred = hasPreferredKeyword(b) ? 0 : 1;
-              if (aPreferred !== bPreferred) return aPreferred - bPreferred;
-              return b.score - a.score;
+            // Prioritize whole foods by calculating an adjusted score.
+            // Bonus for dataType "SR Legacy" and if the foodCategory/description contain keywords for whole chicken cuts.
+            // Penalty for processed items such as "canned", "soup", "cold cuts", "pepperoni", "salami".
+            const wholeFoodKeywords = ["poultry", "chicken breast", "chicken thigh", "drumstick"];
+            const processedKeywords = ["canned", "soup", "cold cuts", "pepperoni", "salami"];
+            validFoods.forEach(food => {
+              let bonus = 0;
+              if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
+              let desc = (food.description || "").toLowerCase();
+              let category = (food.foodCategory || "").toLowerCase();
+              wholeFoodKeywords.forEach(kw => {
+                if (desc.includes(kw) || category.includes(kw)) bonus += 50;
+              });
+              processedKeywords.forEach(kw => {
+                if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
+              });
+              food.adjustedScore = (food.score || 0) + bonus;
             });
+            // Sort by adjustedScore descending
+            validFoods.sort((a, b) => b.adjustedScore - a.adjustedScore);
             validFoods.forEach(food => {
               const energy = (() => { 
                 const nutrient = food.foodNutrients.find(n => n.nutrientName === "Energy"); 
@@ -563,14 +550,11 @@ document.addEventListener("DOMContentLoaded", function () {
               })();
               const servingSize = food.servingSize ? food.servingSize : "N/A";
               const servingUnit = food.servingSizeUnit ? food.servingSizeUnit : "";
-              const brand = food.brandOwner ? food.brandOwner : "Generic";
-              const dataType = food.dataType ? food.dataType : "N/A";
+              const brand = food.brandOwner ? `Brand: ${food.brandOwner}` : "";
               const foodEncoded = encodeURIComponent(JSON.stringify(food));
               resultsHtml += `<div class="food-item" data-food="${foodEncoded}">
                 <strong>${food.description}</strong>
-                <br>Category: ${food.foodCategory || "N/A"}
-                <br>Brand: ${brand}
-                <br>Type: ${dataType}
+                <br>Category: ${food.foodCategory || "N/A"} ${brand}
                 <br>Serving: ${servingSize} ${servingUnit}
                 <br>Calories: ${energy} kcal
               </div>`;
@@ -667,7 +651,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
   $("#add-custom-food-btn").on("click", function() { openCustomFoodEntry(); });
   
-  // Daily Goals Submission
+  // Daily Goals Submission and Progress Update
   document.getElementById("daily-goals-form").addEventListener("submit", function(e) {
     e.preventDefault();
     dailyGoals.calories = parseFloat(document.getElementById("goal-calories").value) || 0;
@@ -801,16 +785,12 @@ document.addEventListener("DOMContentLoaded", function () {
     if (startDate) filtered = filtered.filter(photo => new Date(photo.date) >= new Date(startDate));
     if (endDate) filtered = filtered.filter(photo => new Date(photo.date) <= new Date(endDate));
     if (filtered.length === 0) { gallery.html('<p class="placeholder">No photos match the selected date range.</p>'); }
-    else {
-      filtered.forEach(photo => {
-        gallery.append(`
+    else { filtered.forEach(photo => { gallery.append(`
           <div class="photo-entry">
             <img src="${photo.src}" alt="Progress Photo" class="img-fluid">
             <p>Date: ${photo.date}</p>
           </div>
-        `);
-      });
-    }
+        `); }); }
   });
   
   $("#clear-filter-btn").on("click", function() {
