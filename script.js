@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let editorStage, searchTimeout;
   
   // Advanced Editor globals
-  let activeImage = null; // currently selected image in advanced editor
+  let activeImage = null;
   let cropModeActive = false;
   let cropRect = null;
   
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
   // Load demo data if enabled
   const toggleDemo = document.getElementById("toggle-demo-data");
-  if (toggleDemo.checked && dataLogs.length === 0) {
+  if (toggleDemo && toggleDemo.checked && dataLogs.length === 0) {
     const demoData = [
       { date: '2023-01-01', weight: 200, waist: 34, hips: 36, chest: 40, calories: 2500 },
       { date: '2023-02-01', weight: 195, waist: 33.5, hips: 35.5, chest: 39, calories: 2450 },
@@ -260,7 +260,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#meals-display").html(html);
   }
   
-  // USDA Search & Food Selection – Improved whole food prioritization
+  // USDA Search & Food Selection
   $("#food-name").on("input", function() {
     clearTimeout(searchTimeout);
     const query = $(this).val().trim();
@@ -457,317 +457,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (percentage > 100) percentage = 100;
     progressBar.style.width = percentage + "%";
     progressBar.setAttribute("aria-valuenow", percentage);
-  }
-  
-  // Meal Builder functions
-  $("#add-ingredient-btn").on("click", function() {
-    const ingredientName = prompt("Enter ingredient name:");
-    if (!ingredientName) return;
-    const ingredientWeight = parseFloat(prompt("Enter weight (g):"));
-    const ingredientCalories = parseFloat(prompt("Enter calories:"));
-    const ingredientProtein = parseFloat(prompt("Enter protein (g):")) || 0;
-    const ingredientFat = parseFloat(prompt("Enter fat (g):")) || 0;
-    const ingredientCarbs = parseFloat(prompt("Enter carbs (g):")) || 0;
-    const ingredient = { name: ingredientName, weight: ingredientWeight, calories: ingredientCalories, protein: ingredientProtein, fat: ingredientFat, carbs: ingredientCarbs };
-    const ingredientHtml = `<div class="meal-ingredient">
-      <strong>${ingredient.name}</strong> - ${ingredient.weight}g, ${ingredient.calories} kcal (P: ${ingredient.protein}g, F: ${ingredient.fat}g, C: ${ingredient.carbs}g)
-    </div>`;
-    $("#meal-ingredients-list").append(ingredientHtml);
-    let currentIngredients = $("#meal-builder-form").data("ingredients") || [];
-    currentIngredients.push(ingredient);
-    $("#meal-builder-form").data("ingredients", currentIngredients);
-  });
-  
-  $("#meal-builder-form").on("submit", function(e) {
-    e.preventDefault();
-    const mealName = $("#meal-name").val();
-    const mealCategory = $("#meal-category-builder").val();
-    const ingredients = $("#meal-builder-form").data("ingredients") || [];
-    if (!mealName || ingredients.length === 0) { alert("Please provide a meal name and at least one ingredient."); return; }
-    let totalCalories = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
-    ingredients.forEach(ing => {
-      totalCalories += ing.calories;
-      totalProtein += ing.protein;
-      totalFat += ing.fat;
-      totalCarbs += ing.carbs;
-    });
-    const meal = { name: mealName, category: mealCategory, ingredients: ingredients, totals: { calories: totalCalories, protein: totalProtein, fat: totalFat, carbs: totalCarbs } };
-    meals.push(meal);
-    displayMeals();
-    $("#meal-builder-form").trigger("reset").removeData("ingredients");
-    $("#meal-ingredients-list").empty();
-  });
-  
-  function displayMeals() {
-    let html = "<h4>Your Meals</h4>";
-    meals.forEach(meal => {
-      html += `<div class="meal-entry">
-        <strong>${meal.name}</strong> (${meal.category})<br>
-        Calories: ${meal.totals.calories} kcal, Protein: ${meal.totals.protein}g, Fat: ${meal.totals.fat}g, Carbs: ${meal.totals.carbs}g
-        <br><em>Ingredients:</em>`;
-      meal.ingredients.forEach(ing => {
-        html += `<div class="meal-ingredient">
-          ${ing.name} - ${ing.weight}g, ${ing.calories} kcal
-        </div>`;
-      });
-      html += "</div><hr>";
-    });
-    $("#meals-display").html(html);
-  }
-  
-  // USDA Search & Food Selection – Improved whole food prioritization
-  $("#food-name").on("input", function() {
-    clearTimeout(searchTimeout);
-    const query = $(this).val().trim();
-    if (!query) { $("#usda-search-results").empty(); currentUSDAFood = null; return; }
-    if (currentUSDAFood && query.toLowerCase() === currentUSDAFood.description.toLowerCase()) { return; }
-    searchTimeout = setTimeout(function() {
-      const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5`;
-      console.log("USDA search query:", query);
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          console.log("USDA response:", data);
-          let resultsHtml = "";
-          if (data.foods && data.foods.length > 0) {
-            let validFoods = data.foods.filter(food =>
-              food.foodNutrients && food.foodNutrients.some(n => n.nutrientName === "Energy") &&
-              !(food.servingSizeUnit && food.servingSizeUnit.toUpperCase() === "IU")
-            );
-            if (validFoods.length === 0) {
-              $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
-              return;
-            }
-            validFoods.forEach(food => {
-              let bonus = 0;
-              if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
-              let desc = (food.description || "").toLowerCase();
-              let category = (food.foodCategory || "").toLowerCase();
-              wholeFoodKeywords.forEach(kw => {
-                if (desc.includes(kw) || category.includes(kw)) bonus += 50;
-              });
-              if (desc.trim() === "chicken") { bonus -= 100; }
-              processedKeywords.forEach(kw => {
-                if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
-              });
-              let servingSizeNum = parseFloat(food.servingSize);
-              if (!isNaN(servingSizeNum) && servingSizeNum < 50) bonus -= 50;
-              food.adjustedScore = (food.score || 0) + bonus;
-            });
-            const onlyWhole = $("#whole-food-toggle").is(":checked");
-            if (onlyWhole) {
-              validFoods = validFoods.filter(food => {
-                let desc = (food.description || "").toLowerCase();
-                let category = (food.foodCategory || "").toLowerCase();
-                return wholeFoodKeywords.some(kw => desc.includes(kw) || category.includes(kw));
-              });
-            }
-            if (validFoods.length === 0) {
-              $("#usda-search-results").html("<p>No whole food results found. Please refine your search or add a custom food.</p>");
-              return;
-            }
-            validFoods.sort((a, b) => b.adjustedScore - a.adjustedScore);
-            validFoods.forEach(food => {
-              const energy = (() => { 
-                const nutrient = food.foodNutrients.find(n => n.nutrientName === "Energy"); 
-                return nutrient ? nutrient.value : "N/A"; 
-              })();
-              const servingSize = food.servingSize ? food.servingSize : "N/A";
-              const servingUnit = food.servingSizeUnit ? food.servingSizeUnit : "";
-              const brand = food.brandOwner ? `Brand: ${food.brandOwner}` : "";
-              const foodEncoded = encodeURIComponent(JSON.stringify(food));
-              resultsHtml += `<div class="food-item" data-food="${foodEncoded}">
-                <strong>${food.description}</strong>
-                <br>Category: ${food.foodCategory || "N/A"} ${brand}
-                <br>Serving: ${servingSize} ${servingUnit}
-                <br>Calories: ${energy} kcal
-              </div>`;
-            });
-            resultsHtml += `<div class="food-item">
-                <strong>Add Custom Food</strong>
-              </div>`;
-            $("#usda-search-results").html(resultsHtml);
-          } else {
-            $("#usda-search-results").html("<p>No foods found. Please add custom food.</p>");
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching USDA food data:", error);
-          alert("Error fetching food data. Check the console for details.");
-        });
-    }, 300);
-  });
-  
-  // USDA food item click handler
-  $("#usda-search-results").on("click", ".food-item", function() {
-    if ($(this).text().trim().toLowerCase().includes("add custom food")) {
-      openCustomFoodEntry();
-      return;
-    }
-    try {
-      const foodString = $(this).closest(".food-item").attr("data-food");
-      if (!foodString) { openCustomFoodEntry(); return; }
-      const decoded = decodeURIComponent(foodString);
-      const foodData = JSON.parse(decoded);
-      console.log("Food selected:", foodData);
-      console.log("Nutrients:", foodData.foodNutrients);
-      const nutrients = Array.isArray(foodData.foodNutrients) ? foodData.foodNutrients : [];
-      currentUSDAFood = {
-        baseWeight: foodData.servingSize || 100,
-        servingSizeUnit: foodData.servingSizeUnit || "serving",
-        calories: parseFloat(getNutrientValue(nutrients, "Energy")) || 0,
-        protein: parseFloat(getNutrientValue(nutrients, "Protein")) || 0,
-        fat: parseFloat(getNutrientValue(nutrients, "Total lipid (fat)")) || 0,
-        carbs: parseFloat(getNutrientValue(nutrients, "Carbohydrate, by difference")) || 0,
-        foodMeasures: foodData.foodMeasures || []
-      };
-      $("#food-uom").empty();
-      $("#food-uom").append($("<option>").attr("data-conversion", 1).text(currentUSDAFood.servingSizeUnit + " (Default)"));
-      if (currentUSDAFood.foodMeasures.length > 0) {
-        currentUSDAFood.foodMeasures.forEach(measure => {
-          if (measure.gramWeight) {
-            $("#food-uom").append($("<option>")
-              .attr("data-conversion", measure.gramWeight)
-              .text(measure.modifier + " (" + measure.measureUnit + ", ~" + measure.gramWeight + "g)"));
-          }
-        });
-      }
-      $("#selected-uom-display").text("Selected Unit: " + currentUSDAFood.servingSizeUnit + " (Default)");
-      $("#food-quantity").val(1);
-      recalcNutrients();
-      $("#food-name").val(foodData.description);
-      $("#usda-search-results").empty();
-    } catch (error) {
-      console.error("Error parsing selected food:", error);
-    }
-  });
-  
-  $("#food-uom").on("change", function() {
-    let selectedText = $("#food-uom option:selected").text();
-    $("#selected-uom-display").text("Selected Unit: " + selectedText);
-    recalcNutrients();
-  });
-  
-  $("#food-quantity, #food-uom").on("input change", function() { recalcNutrients(); });
-  
-  function recalcNutrients() {
-    if (!currentUSDAFood) { console.log("No USDA food selected yet."); return; }
-    let quantity = parseFloat($("#food-quantity").val());
-    if (isNaN(quantity) || quantity <= 0) return;
-    let conversion = parseFloat($("#food-uom option:selected").attr("data-conversion")) || 1;
-    let computedWeight = quantity * conversion;
-    let multiplier = computedWeight / currentUSDAFood.baseWeight;
-    let newCalories = (currentUSDAFood.calories * multiplier).toFixed(2);
-    let newProtein = (currentUSDAFood.protein * multiplier).toFixed(2);
-    let newFat = (currentUSDAFood.fat * multiplier).toFixed(2);
-    let newCarbs = (currentUSDAFood.carbs * multiplier).toFixed(2);
-    $("#food-calories").val(newCalories);
-    $("#food-protein").val(newProtein);
-    $("#food-fat").val(newFat);
-    $("#food-carbs").val(newCarbs);
-    console.log("Recalculated nutrients based on quantity and unit:", { newCalories, newProtein, newFat, newCarbs });
-  }
-  
-  function openCustomFoodEntry() {
-    alert("Enter custom food details directly in the form.");
-    $("#usda-search-results").empty();
-  }
-  
-  $("#add-custom-food-btn").on("click", function() { openCustomFoodEntry(); });
-  
-  // Daily Goals Submission and Progress Update
-  document.getElementById("daily-goals-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    dailyGoals.calories = parseFloat(document.getElementById("goal-calories").value) || 0;
-    dailyGoals.protein = parseFloat(document.getElementById("goal-protein").value) || 0;
-    dailyGoals.fat = parseFloat(document.getElementById("goal-fat").value) || 0;
-    dailyGoals.carbs = parseFloat(document.getElementById("goal-carbs").value) || 0;
-    document.getElementById("goal-calories-display").textContent = dailyGoals.calories;
-    document.getElementById("goal-protein-display").textContent = dailyGoals.protein;
-    document.getElementById("goal-fat-display").textContent = dailyGoals.fat;
-    document.getElementById("goal-carbs-display").textContent = dailyGoals.carbs;
-    updateDailyGoalsProgress();
-  });
-  
-  function updateDailyGoalsProgress() {
-    const today = new Date().toISOString().split("T")[0];
-    const todaysLogs = nutritionLogs.filter(log => log.date === today);
-    const total = {
-      calories: todaysLogs.reduce((sum, log) => sum + log.calories, 0),
-      protein: todaysLogs.reduce((sum, log) => sum + log.protein, 0),
-      fat: todaysLogs.reduce((sum, log) => sum + log.fat, 0),
-      carbs: todaysLogs.reduce((sum, log) => sum + log.carbs, 0)
-    };
-    updateProgressBar("calories", total.calories, dailyGoals.calories);
-    updateProgressBar("protein", total.protein, dailyGoals.protein);
-    updateProgressBar("fat", total.fat, dailyGoals.fat);
-    updateProgressBar("carbs", total.carbs, dailyGoals.carbs);
-  }
-  
-  function updateProgressBar(nutrient, total, goal) {
-    const progressText = document.getElementById("progress-" + nutrient);
-    const progressBar = document.getElementById("progress-bar-" + nutrient);
-    progressText.textContent = total.toFixed(0);
-    let percentage = goal > 0 ? (total / goal) * 100 : 0;
-    if (percentage > 100) percentage = 100;
-    progressBar.style.width = percentage + "%";
-    progressBar.setAttribute("aria-valuenow", percentage);
-  }
-  
-  // Meal Builder functions
-  $("#add-ingredient-btn").on("click", function() {
-    const ingredientName = prompt("Enter ingredient name:");
-    if (!ingredientName) return;
-    const ingredientWeight = parseFloat(prompt("Enter weight (g):"));
-    const ingredientCalories = parseFloat(prompt("Enter calories:"));
-    const ingredientProtein = parseFloat(prompt("Enter protein (g):")) || 0;
-    const ingredientFat = parseFloat(prompt("Enter fat (g):")) || 0;
-    const ingredientCarbs = parseFloat(prompt("Enter carbs (g):")) || 0;
-    const ingredient = { name: ingredientName, weight: ingredientWeight, calories: ingredientCalories, protein: ingredientProtein, fat: ingredientFat, carbs: ingredientCarbs };
-    const ingredientHtml = `<div class="meal-ingredient">
-      <strong>${ingredient.name}</strong> - ${ingredient.weight}g, ${ingredient.calories} kcal (P: ${ingredient.protein}g, F: ${ingredient.fat}g, C: ${ingredient.carbs}g)
-    </div>`;
-    $("#meal-ingredients-list").append(ingredientHtml);
-    let currentIngredients = $("#meal-builder-form").data("ingredients") || [];
-    currentIngredients.push(ingredient);
-    $("#meal-builder-form").data("ingredients", currentIngredients);
-  });
-  
-  $("#meal-builder-form").on("submit", function(e) {
-    e.preventDefault();
-    const mealName = $("#meal-name").val();
-    const mealCategory = $("#meal-category-builder").val();
-    const ingredients = $("#meal-builder-form").data("ingredients") || [];
-    if (!mealName || ingredients.length === 0) { alert("Please provide a meal name and at least one ingredient."); return; }
-    let totalCalories = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
-    ingredients.forEach(ing => {
-      totalCalories += ing.calories;
-      totalProtein += ing.protein;
-      totalFat += ing.fat;
-      totalCarbs += ing.carbs;
-    });
-    const meal = { name: mealName, category: mealCategory, ingredients: ingredients, totals: { calories: totalCalories, protein: totalProtein, fat: totalFat, carbs: totalCarbs } };
-    meals.push(meal);
-    displayMeals();
-    $("#meal-builder-form").trigger("reset").removeData("ingredients");
-    $("#meal-ingredients-list").empty();
-  });
-  
-  function displayMeals() {
-    let html = "<h4>Your Meals</h4>";
-    meals.forEach(meal => {
-      html += `<div class="meal-entry">
-        <strong>${meal.name}</strong> (${meal.category})<br>
-        Calories: ${meal.totals.calories} kcal, Protein: ${meal.totals.protein}g, Fat: ${meal.totals.fat}g, Carbs: ${meal.totals.carbs}g
-        <br><em>Ingredients:</em>`;
-      meal.ingredients.forEach(ing => {
-        html += `<div class="meal-ingredient">
-          ${ing.name} - ${ing.weight}g, ${ing.calories} kcal
-        </div>`;
-      });
-      html += "</div><hr>";
-    });
-    $("#meals-display").html(html);
   }
   
   // Photo Upload & Comparison functions
@@ -839,6 +528,7 @@ document.addEventListener("DOMContentLoaded", function () {
     else { console.error("TwentyTwenty plugin failed to load."); }
   });
   
+  // Updated comparison update using flexbox container
   $("#tt-update").on("click", function() {
     console.log("Update comparison button clicked");
     const beforeIndex = parseInt($("#tt-before").val());
@@ -850,19 +540,19 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    // Force images to 50% width, left/right floated
-    const $beforeImg = $(`<img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before" style="float:left; width:50%;">`);
-    const $afterImg = $(`<img class="twentytwenty-after" src="${afterPhoto.src}" alt="After" style="float:right; width:50%;">`);
-    container.append($beforeImg, $afterImg);
-    $("<div style='clear:both;'></div>").appendTo(container);
-    container.find("img").css({ "max-height": "400px", "height": "auto" });
+    const beforeDiv = $(`<div class="comparison-image"><img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before"></div>`);
+    const afterDiv = $(`<div class="comparison-image"><img class="twentytwenty-after" src="${afterPhoto.src}" alt="After"></div>`);
+    const divider = $(`<div class="divider"></div>`);
+    container.append(beforeDiv, afterDiv, divider);
     setTimeout(function() {
-      container.twentytwenty();
+      if ($.fn.twentytwenty) {
+        container.twentytwenty();
+      }
       console.log("Comparison updated with before and after photos");
     }, 300);
   });
   
-  // Advanced Comparison Editor using Konva.js with enhanced tools
+  // Advanced Comparison Editor using Konva.js with improved image loading and container reflow
   $("#open-editor-btn").on("click", function() { openComparisonEditor(); });
   
   function openComparisonEditor() {
@@ -871,353 +561,93 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterIndex = parseInt($("#tt-after").val()) || 1;
     const beforePhoto = photoLogs[beforeIndex];
     const afterPhoto = photoLogs[afterIndex];
-    // Show the modal
-    document.getElementById("comparison-editor-modal").style.display = "block";
+    const modal = document.getElementById("comparison-editor-modal");
+    modal.style.display = "block";
     const containerEl = document.getElementById("comparison-editor-container");
     containerEl.style.width = "900px";
     containerEl.style.height = "600px";
-    $("#comparison-editor-container").empty();
-    
-    // Create two layers: one for images and overlays, one for fixed UI (frame & header)
+    containerEl.style.background = "none";
+    // Force reflow
+    const forcedWidth = containerEl.offsetWidth;
+    const forcedHeight = containerEl.offsetHeight;
+    containerEl.innerHTML = "";
     const stage = new Konva.Stage({
-      container: 'comparison-editor-container',
-      width: 900,
-      height: 600
-    });
-    const imageLayer = new Konva.Layer();
-    const uiLayer = new Konva.Layer();
-    stage.add(imageLayer);
-    stage.add(uiLayer);
-    
-    // Load before image into imageLayer: scale to fill height (600-50 header) and justify left
-    Konva.Image.fromURL(beforePhoto.src, function(img) {
-      const origWidth = img.image.width;
-      const origHeight = img.image.height;
-      const scale = (stage.height() - 50) / origHeight;
-      const newWidth = origWidth * scale;
-      img.setAttrs({
-        x: 0,
-        y: 50,
-        scaleX: scale,
-        scaleY: scale,
-        draggable: true
-      });
-      img.on("click", function() { activeImage = img; });
-      imageLayer.add(img);
-      imageLayer.draw();
+      container: "comparison-editor-container",
+      width: forcedWidth,
+      height: forcedHeight
     });
     
-    // Load after image into imageLayer: scale to fill height and justify right
-    Konva.Image.fromURL(afterPhoto.src, function(img) {
-      const origWidth = img.image.width;
-      const origHeight = img.image.height;
-      const scale = (stage.height() - 50) / origHeight;
-      const newWidth = origWidth * scale;
-      img.setAttrs({
-        x: stage.width() - newWidth,
-        y: 50,
-        scaleX: scale,
-        scaleY: scale,
-        draggable: true
-      });
-      img.on("click", function() { activeImage = img; });
-      imageLayer.add(img);
-      imageLayer.draw();
-    });
-    
-    // Add a divider line between images
-    const divider = new Konva.Rect({
-      x: 448, // a little inset from 450 for styling
-      y: 50,
-      width: 4,
-      height: stage.height() - 50,
-      fill: '#fff',
-      opacity: 0.8,
-      listening: false
-    });
-    uiLayer.add(divider);
-    
-    // UI Layer: Draw fixed header bar and frame
-    const uiBg = new Konva.Rect({
-      x: 0,
-      y: 0,
-      width: stage.width(),
-      height: stage.height(),
-      fillLinearGradientStartPoint: { x: 0, y: 0 },
-      fillLinearGradientEndPoint: { x: stage.width(), y: stage.height() },
-      fillLinearGradientColorStops: [0, '#000', 1, '#333'],
-      listening: false
-    });
-    uiLayer.add(uiBg);
-    
-    const headerBar = new Konva.Rect({
-      x: 0,
-      y: 0,
-      width: stage.width(),
-      height: 50,
-      fill: '#000',
-      listening: false
-    });
-    uiLayer.add(headerBar);
-    
-    const headerText = new Konva.Text({
-      x: 20,
-      y: 15,
-      text: "Powered by FitJourney Tracker",
-      fontSize: 20,
-      fontFamily: 'Montserrat',
-      fill: '#fff',
-      listening: false
-    });
-    uiLayer.add(headerText);
-    
-    // Frame border with checkered pattern applied only to the frame area
-    const frame = new Konva.Rect({
-      x: 0,
-      y: 0,
-      width: stage.width(),
-      height: stage.height(),
-      stroke: '#fff',
-      strokeWidth: 6,
-      fillPatternImage: (function(){
-        const canvas = document.createElement('canvas');
-        canvas.width = 10; canvas.height = 10;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'rgba(255,255,255,0.1)';
-        ctx.fillRect(0,0,10,10);
-        ctx.fillStyle = 'rgba(0,0,0,0.1)';
-        ctx.fillRect(0,0,5,5);
-        return canvas;
-      })(),
-      fillPatternRepeat: 'repeat',
-      listening: false
-    });
-    uiLayer.add(frame);
-    uiLayer.draw();
-    
-    // Save the stage reference globally
-    editorStage = stage;
-    activeImage = null;
-    cropModeActive = false;
-    cropRect = null;
-  }
-  
-  // Rotate active image
-  function rotateActiveImage(angleDelta) {
-    if (!activeImage) { alert("Please click on an image to select it."); return; }
-    activeImage.rotation(activeImage.rotation() + angleDelta);
-    activeImage.getLayer().draw();
-  }
-  
-  // Scale active image
-  function scaleActiveImage(factor) {
-    if (!activeImage) { alert("Please click on an image to select it."); return; }
-    activeImage.scaleX(activeImage.scaleX() * factor);
-    activeImage.scaleY(activeImage.scaleY() * factor);
-    activeImage.getLayer().draw();
-  }
-  
-  // Toggle crop mode for active image
-  function toggleCropMode() {
-    if (!activeImage) { alert("Please select an image to crop."); return; }
-    const layer = editorStage.getLayers()[0];
-    if (!cropModeActive) {
-      const bounds = activeImage.getClientRect();
-      cropRect = new Konva.Rect({
-        x: activeImage.x() + 10,
-        y: activeImage.y() + 10,
-        width: bounds.width - 20,
-        height: bounds.height - 20,
-        stroke: 'red',
-        dash: [4, 4],
-        draggable: true,
-        name: 'cropRect'
-      });
-      layer.add(cropRect);
-      layer.draw();
-      cropModeActive = true;
-      alert("Crop mode activated. Adjust the red rectangle, then click Crop again to apply.");
-    } else {
-      const imagePos = activeImage.position();
-      const rectPos = cropRect.position();
-      const cropX = rectPos.x - imagePos.x;
-      const cropY = rectPos.y - imagePos.y;
-      const cropWidth = cropRect.width();
-      const cropHeight = cropRect.height();
-      activeImage.crop({ x: cropX, y: cropY, width: cropWidth, height: cropHeight });
-      cropRect.destroy();
-      cropRect = null;
-      cropModeActive = false;
-      activeImage.getLayer().draw();
-      alert("Crop applied.");
+    // Set canvas context attribute willReadFrequently
+    const canvasEl = stage.container().querySelector("canvas");
+    if (canvasEl) {
+      canvasEl.getContext('2d', { willReadFrequently: true });
     }
-  }
-  
-  // Reset advanced editor
-  function resetEditor() {
-    if (editorStage) {
-      editorStage.destroy();
-      openComparisonEditor();
-    }
-  }
-  
-  // Add editable text overlay using Konva.IText (or fallback)
-  $("#add-text-btn").on("click", function() {
-    if (editorStage) {
-      const layer = editorStage.getLayers()[0];
-      const EditableText = (typeof Konva.IText === 'function') ? Konva.IText : Konva.Text;
-      const text = new EditableText({
-        x: 50,
-        y: 70,
-        text: 'New Overlay',
-        fontSize: 28,
-        fontFamily: 'Montserrat',
-        fill: '#fff',
-        draggable: true,
-        padding: 8,
-        editable: true
-      });
-      text.on("click", function() { this.enterEditing(); });
-      layer.add(text);
-      layer.draw();
-    }
-  });
-  
-  // Add data overlay using Konva.IText with a data selection option
-  $("#add-data-overlay-btn").on("click", function() {
-    if (editorStage) {
-      const layer = editorStage.getLayers()[0];
-      let overlayType = prompt("Enter data overlay type ('pie' or 'bar') or custom text:");
-      if (!overlayType) return;
-      if (overlayType.toLowerCase() === 'pie') {
-        const canvas = document.createElement('canvas');
-        canvas.width = 200; canvas.height = 200;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "#28a745";
-        ctx.beginPath();
-        ctx.moveTo(100,100);
-        ctx.arc(100,100,90,0,2*Math.PI*0.6);
-        ctx.fill();
-        ctx.fillStyle = "#dc3545";
-        ctx.beginPath();
-        ctx.moveTo(100,100);
-        ctx.arc(100,100,90,2*Math.PI*0.6,2*Math.PI);
-        ctx.fill();
-        const dataURL = canvas.toDataURL();
-        Konva.Image.fromURL(dataURL, function(img) {
-          img.setAttrs({
-            x: 100,
-            y: editorStage.height() - 220,
-            width: 200,
-            height: 200,
-            draggable: true
-          });
-          layer.add(img);
-          layer.draw();
+    
+    const layer = new Konva.Layer();
+    stage.add(layer);
+    
+    const loadImage = (src, callback) => {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.onload = function() {
+        callback(img);
+      };
+      img.onerror = function() {
+        console.error("Failed to load image: " + src);
+        alert("Failed to load one of the images. Please try again.");
+      };
+      img.src = src;
+    };
+    
+    loadImage(beforePhoto.src, function(beforeImg) {
+      loadImage(afterPhoto.src, function(afterImg) {
+        const beforeKonva = new Konva.Image({
+          x: 0,
+          y: 0,
+          image: beforeImg,
+          width: stage.width() / 2,
+          height: stage.height()
         });
-      } else if (overlayType.toLowerCase() === 'bar') {
-        const canvas = document.createElement('canvas');
-        canvas.width = 200; canvas.height = 200;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "#28a745";
-        ctx.fillRect(30, 100, 30, 80);
-        ctx.fillStyle = "#dc3545";
-        ctx.fillRect(80, 70, 30, 110);
-        ctx.fillStyle = "#ffc107";
-        ctx.fillRect(130, 120, 30, 60);
-        const dataURL = canvas.toDataURL();
-        Konva.Image.fromURL(dataURL, function(img) {
-          img.setAttrs({
-            x: 100,
-            y: editorStage.height() - 220,
-            width: 200,
-            height: 200,
-            draggable: true
-          });
-          layer.add(img);
-          layer.draw();
+        const afterKonva = new Konva.Image({
+          x: stage.width() / 2,
+          y: 0,
+          image: afterImg,
+          width: stage.width() / 2,
+          height: stage.height()
         });
-      } else {
-        const EditableText = (typeof Konva.IText === 'function') ? Konva.IText : Konva.Text;
-        const text = new EditableText({
-          x: 100,
-          y: editorStage.height() - 80,
-          text: overlayType,
-          fontSize: 24,
-          fontFamily: 'Montserrat',
-          fill: '#fff',
+        layer.add(beforeKonva);
+        layer.add(afterKonva);
+        
+        const divider = new Konva.Rect({
+          x: stage.width() / 2 - 1,
+          y: 0,
+          width: 2,
+          height: stage.height(),
+          fill: "white",
           draggable: true,
-          padding: 8,
-          editable: true
+          dragBoundFunc: function(pos) {
+            let newX = pos.x;
+            if (newX < 0) newX = 0;
+            if (newX > stage.width()) newX = stage.width();
+            return { x: newX, y: this.absolutePosition().y };
+          }
         });
-        text.on("click", function() { this.enterEditing(); });
-        layer.add(text);
+        layer.add(divider);
         layer.draw();
-      }
-    }
-  });
-  
-  // Toolbar button events
-  document.getElementById("rotate-left-btn")?.addEventListener("click", function() {
-    rotateActiveImage(-15);
-  });
-  document.getElementById("rotate-right-btn")?.addEventListener("click", function() {
-    rotateActiveImage(15);
-  });
-  document.getElementById("scale-up-btn")?.addEventListener("click", function() {
-    scaleActiveImage(1.1);
-  });
-  document.getElementById("scale-down-btn")?.addEventListener("click", function() {
-    scaleActiveImage(0.9);
-  });
-  document.getElementById("reset-editor-btn")?.addEventListener("click", function() {
-    resetEditor();
-  });
-  document.getElementById("crop-btn")?.addEventListener("click", function() {
-    toggleCropMode();
-  });
-  
-  // Save advanced editor changes and update main comparison area
-  $("#save-editor-btn").on("click", function() {
-    if (editorStage) {
-      const dataURL = editorStage.toDataURL({ pixelRatio: 2 });
-      const container = $("#twentytwenty-container");
-      container.empty();
-      const $editedImg = $(`<img src="${dataURL}" alt="Edited Comparison">`);
-      container.append($editedImg);
-      document.getElementById("comparison-editor-modal").style.display = "none";
-      editorStage.destroy();
-      editorStage = null;
-      console.log("Advanced editor changes saved to main comparison area");
-    }
-  });
-  
-  $("#close-comparison-editor").on("click", function() {
-    document.getElementById("comparison-editor-modal").style.display = "none";
-    if (editorStage) { editorStage.destroy(); editorStage = null; }
-  });
-  
-  $("#export-comparison-btn").on("click", function() {
-    if (editorStage) {
-      const dataURL = editorStage.toDataURL({ pixelRatio: 2 });
-      let link = document.createElement("a");
-      link.download = "comparison_for_instagram.png";
-      link.href = dataURL;
-      link.click();
-    }
-  });
-  
-  $("#export-report-btn").on("click", function() {
-    html2canvas(document.getElementById("main-app")).then(function(canvas) {
-      let link = document.createElement("a");
-      link.download = "fitjourney_report.png";
-      link.href = canvas.toDataURL();
-      link.click();
+        
+        divider.on("dragmove", function() {
+          const pos = divider.x();
+          beforeKonva.width(pos);
+          afterKonva.x(pos);
+          afterKonva.width(stage.width() - pos);
+          layer.batchDraw();
+        });
+      });
     });
-  });
+  }
   
-  $(".share-btn").on("click", function() {
-    const platform = $(this).data("platform");
-    alert("Sharing to " + platform + " (functionality to be implemented).");
+  // Close Advanced Editor Modal
+  $("#close-editor-btn").on("click", function() {
+    document.getElementById("comparison-editor-modal").style.display = "none";
   });
 });
