@@ -10,6 +10,9 @@ let currentUSDAFood = null;
 // Global daily goals object
 let dailyGoals = { calories: 0, protein: 0, fat: 0, carbs: 0 };
 
+// Global variable for selected text in the advanced editor
+let selectedTextNode = null;
+
 function getNutrientValue(nutrients, nutrientName) {
   const nutrient = nutrients.find(n => n.nutrientName === nutrientName);
   return nutrient ? nutrient.value : "N/A";
@@ -19,19 +22,15 @@ document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM fully loaded");
   document.getElementById("app-version").textContent = APP_VERSION;
   
-  // NAVIGATION MENU FUNCTIONALITY
+  // Navigation Menu
   const navButtons = document.querySelectorAll('.nav-btn');
   navButtons.forEach(button => {
     button.addEventListener('click', function() {
-      document.querySelectorAll('section.tile').forEach(section => {
-        section.style.display = 'none';
-      });
+      document.querySelectorAll('section.tile').forEach(section => section.style.display = 'none');
       const target = button.getAttribute('data-target');
       if (target) {
         const targetSection = document.querySelector(target);
-        if (targetSection) {
-          targetSection.style.display = 'block';
-        }
+        if (targetSection) { targetSection.style.display = 'block'; }
       }
       navButtons.forEach(btn => btn.classList.remove('active'));
       button.classList.add('active');
@@ -39,14 +38,11 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   
   let dataLogs = [], nutritionLogs = [], photoLogs = [], meals = [];
-  let editorStage, searchTimeout;
+  let searchTimeout;
   
   // Advanced Editor globals
-  let activeImage = null;
-  let cropModeActive = false;
   let cropRect = null;
   
-  // Keyword arrays for scoring adjustments
   const wholeFoodKeywords = ["poultry", "chicken breast", "chicken thigh", "drumstick", "wing", "fillet", "roast"];
   const processedKeywords = ["canned", "soup", "cold cuts", "pepperoni", "salami", "smoked"];
   
@@ -57,26 +53,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const weightCtx = weightChartElement.getContext('2d');
     weightChart = new Chart(weightCtx, {
       type: 'line',
-      data: {
-        datasets: [{
-          label: 'Weight (lbs)',
-          data: [],
-          borderColor: '#007bff',
-          fill: false,
-          tension: 0.2
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: { type: 'time', time: { unit: 'day' }, title: { display: true, text: 'Date' } },
-          y: { title: { display: true, text: 'Weight (lbs)' } }
-        }
-      }
+      data: { datasets: [{ label: 'Weight (lbs)', data: [], borderColor: '#007bff', fill: false, tension: 0.2 }] },
+      options: { responsive: true, scales: { x: { type: 'time', time: { unit: 'day' }, title: { display: true, text: 'Date' } }, y: { title: { display: true, text: 'Weight (lbs)' } } } }
     });
-  } else {
-    console.warn("Canvas 'weightChart' not found.");
-  }
+  } else { console.warn("Canvas 'weightChart' not found."); }
   
   // Initialize Nutrition Chart
   const nutritionChartElement = document.getElementById('nutritionChart');
@@ -85,27 +65,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const nutritionCtx = nutritionChartElement.getContext('2d');
     nutritionChart = new Chart(nutritionCtx, {
       type: 'bar',
-      data: {
-        labels: [],
-        datasets: [{
-          label: 'Calories (kcal)',
-          data: [],
-          backgroundColor: '#28a745'
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: { title: { display: true, text: 'Date' } },
-          y: { title: { display: true, text: 'Calories (kcal)' } }
-        }
-      }
+      data: { labels: [], datasets: [{ label: 'Calories (kcal)', data: [], backgroundColor: '#28a745' }] },
+      options: { responsive: true, scales: { x: { title: { display: true, text: 'Date' } }, y: { title: { display: true, text: 'Calories (kcal)' } } } }
     });
-  } else {
-    console.warn("Canvas 'nutritionChart' not found.");
-  }
+  } else { console.warn("Canvas 'nutritionChart' not found."); }
   
-  // Load demo data if enabled
+  // Load Demo Data if enabled
   const toggleDemo = document.getElementById("toggle-demo-data");
   if (toggleDemo && toggleDemo.checked && dataLogs.length === 0) {
     const demoData = [
@@ -137,10 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const hips = parseFloat(document.getElementById("hips-input").value) || null;
     const chest = parseFloat(document.getElementById("chest-input").value) || null;
     const calories = parseFloat(document.getElementById("calories-input").value) || null;
-    if (!weight || !date) {
-      alert("Please enter both weight and date.");
-      return;
-    }
+    if (!weight || !date) { alert("Please enter both weight and date."); return; }
     addDataLog({ date, weight, waist, hips, chest, calories });
     updateWeightChart();
     updateSummary();
@@ -164,10 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
   function updateSummary() {
     const summaryDiv = document.getElementById("weight-summary");
-    if (dataLogs.length === 0) {
-      summaryDiv.innerHTML = '<p class="placeholder">No weight data available.</p>';
-      return;
-    }
+    if (dataLogs.length === 0) { summaryDiv.innerHTML = '<p class="placeholder">No weight data available.</p>'; return; }
     const latest = dataLogs[dataLogs.length - 1];
     let html = `<p>Latest Weight: ${latest.weight} lbs on ${latest.date}</p>`;
     if (latest.waist) html += `<p>Waist: ${latest.waist} in</p>`;
@@ -178,25 +137,15 @@ document.addEventListener("DOMContentLoaded", function () {
   
   function updateRecentWeighIns() {
     const recentDiv = document.getElementById("recent-weighins");
-    if (dataLogs.length === 0) {
-      recentDiv.innerHTML = '<p class="placeholder">No weigh-ins recorded yet.</p>';
-      return;
-    }
+    if (dataLogs.length === 0) { recentDiv.innerHTML = '<p class="placeholder">No weigh-ins recorded yet.</p>'; return; }
     recentDiv.innerHTML = "";
     const recent = dataLogs.slice(-5).reverse();
-    recent.forEach(log => {
-      const p = document.createElement("p");
-      p.textContent = `${log.date}: ${log.weight} lbs`;
-      recentDiv.appendChild(p);
-    });
+    recent.forEach(log => { const p = document.createElement("p"); p.textContent = `${log.date}: ${log.weight} lbs`; recentDiv.appendChild(p); });
   }
   
   function updateCalorieSummary() {
     const calorieDiv = document.getElementById("calorie-summary");
-    if (dataLogs.length === 0) {
-      calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>';
-      return;
-    }
+    if (dataLogs.length === 0) { calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>'; return; }
     const recent = dataLogs.slice(-3);
     const avg = recent.reduce((sum, log) => sum + (log.calories || 0), 0) / recent.length;
     calorieDiv.innerHTML = `<p>Average Calories: ${Math.round(avg)} kcal</p>`;
@@ -207,10 +156,7 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
     const food = document.getElementById("food-name").value;
     let quantity = parseFloat(document.getElementById("food-quantity").value);
-    if (isNaN(quantity)) {
-      alert("Please enter a valid quantity.");
-      return;
-    }
+    if (isNaN(quantity)) { alert("Please enter a valid quantity."); return; }
     let conversion = parseFloat($("#food-uom option:selected").attr("data-conversion")) || 1;
     let computedWeight = quantity * conversion;
     const calories = parseFloat(document.getElementById("food-calories").value);
@@ -218,9 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const fat = parseFloat(document.getElementById("food-fat").value) || 0;
     const carbs = parseFloat(document.getElementById("food-carbs").value) || 0;
     let date = document.getElementById("nutrition-date").value;
-    if (!date) {
-      date = new Date().toISOString().split("T")[0];
-    }
+    if (!date) { date = new Date().toISOString().split("T")[0]; }
     const mealCategory = document.getElementById("meal-category").value;
     addNutritionLog({ food, quantity, computedWeight, calories, protein, fat, carbs, date, mealCategory });
     updateNutritionChart();
@@ -239,27 +183,15 @@ document.addEventListener("DOMContentLoaded", function () {
   function updateNutritionChart() {
     let dates = [], calValues = [];
     nutritionLogs.forEach(log => {
-      if (!dates.includes(log.date)) {
-        dates.push(log.date);
-        calValues.push(log.calories);
-      } else {
-        const idx = dates.indexOf(log.date);
-        calValues[idx] += log.calories;
-      }
+      if (!dates.includes(log.date)) { dates.push(log.date); calValues.push(log.calories); }
+      else { const idx = dates.indexOf(log.date); calValues[idx] += log.calories; }
     });
-    if (nutritionChart) {
-      nutritionChart.data.labels = dates;
-      nutritionChart.data.datasets[0].data = calValues;
-      nutritionChart.update();
-    }
+    if (nutritionChart) { nutritionChart.data.labels = dates; nutritionChart.data.datasets[0].data = calValues; nutritionChart.update(); }
   }
   
   function updateNutritionDisplay() {
     const displayDiv = document.getElementById("nutrition-log-display");
-    if (nutritionLogs.length === 0) {
-      displayDiv.innerHTML = '<p class="placeholder">No nutrition logs recorded yet.</p>';
-      return;
-    }
+    if (nutritionLogs.length === 0) { displayDiv.innerHTML = '<p class="placeholder">No nutrition logs recorded yet.</p>'; return; }
     let html = '<table class="table table-striped"><thead><tr><th>Date</th><th>Meal</th><th>Food</th><th>Quantity</th><th>Unit</th><th>Computed Weight (g)</th><th>Calories</th><th>Protein</th><th>Fat</th><th>Carbs</th></tr></thead><tbody>';
     nutritionLogs.forEach(log => {
       html += `<tr>
@@ -285,10 +217,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const mealName = $("#meal-name").val();
     const mealCategory = $("#meal-category-builder").val();
     const ingredients = $("#meal-builder-form").data("ingredients") || [];
-    if (!mealName || ingredients.length === 0) {
-      alert("Please provide a meal name and at least one ingredient.");
-      return;
-    }
+    if (!mealName || ingredients.length === 0) { alert("Please provide a meal name and at least one ingredient."); return; }
     let totalCalories = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
     ingredients.forEach(ing => {
       totalCalories += ing.calories;
@@ -342,14 +271,8 @@ document.addEventListener("DOMContentLoaded", function () {
   $("#food-name").on("input", function() {
     clearTimeout(searchTimeout);
     const query = $(this).val().trim();
-    if (!query) {
-      $("#usda-search-results").empty();
-      currentUSDAFood = null;
-      return;
-    }
-    if (currentUSDAFood && query.toLowerCase() === currentUSDAFood.description.toLowerCase()) {
-      return;
-    }
+    if (!query) { $("#usda-search-results").empty(); currentUSDAFood = null; return; }
+    if (currentUSDAFood && query.toLowerCase() === currentUSDAFood.description.toLowerCase()) { return; }
     searchTimeout = setTimeout(function() {
       const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5`;
       console.log("USDA search query:", query);
@@ -363,46 +286,25 @@ document.addEventListener("DOMContentLoaded", function () {
               food.foodNutrients && food.foodNutrients.some(n => n.nutrientName === "Energy") &&
               !(food.servingSizeUnit && food.servingSizeUnit.toUpperCase() === "IU")
             );
-            if (validFoods.length === 0) {
-              $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
-              return;
-            }
+            if (validFoods.length === 0) { $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>"); return; }
             validFoods.forEach(food => {
               let bonus = 0;
               if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
               let desc = (food.description || "").toLowerCase();
               let category = (food.foodCategory || "").toLowerCase();
-              wholeFoodKeywords.forEach(kw => {
-                if (desc.includes(kw) || category.includes(kw)) bonus += 50;
-              });
-              if (desc.trim() === "chicken") {
-                bonus -= 100;
-              }
-              processedKeywords.forEach(kw => {
-                if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
-              });
+              wholeFoodKeywords.forEach(kw => { if (desc.includes(kw) || category.includes(kw)) bonus += 50; });
+              if (desc.trim() === "chicken") { bonus -= 100; }
+              processedKeywords.forEach(kw => { if (desc.includes(kw) || category.includes(kw)) bonus -= 100; });
               let servingSizeNum = parseFloat(food.servingSize);
               if (!isNaN(servingSizeNum) && servingSizeNum < 50) bonus -= 50;
               food.adjustedScore = (food.score || 0) + bonus;
             });
             const onlyWhole = $("#whole-food-toggle").is(":checked");
-            if (onlyWhole) {
-              validFoods = validFoods.filter(food => {
-                let desc = (food.description || "").toLowerCase();
-                let category = (food.foodCategory || "").toLowerCase();
-                return wholeFoodKeywords.some(kw => desc.includes(kw) || category.includes(kw));
-              });
-            }
-            if (validFoods.length === 0) {
-              $("#usda-search-results").html("<p>No whole food results found. Please refine your search or add a custom food.</p>");
-              return;
-            }
+            if (onlyWhole) { validFoods = validFoods.filter(food => { let desc = (food.description || "").toLowerCase(); let category = (food.foodCategory || "").toLowerCase(); return wholeFoodKeywords.some(kw => desc.includes(kw) || category.includes(kw)); }); }
+            if (validFoods.length === 0) { $("#usda-search-results").html("<p>No whole food results found. Please refine your search or add a custom food.</p>"); return; }
             validFoods.sort((a, b) => b.adjustedScore - a.adjustedScore);
             validFoods.forEach(food => {
-              const energy = (() => {
-                const nutrient = food.foodNutrients.find(n => n.nutrientName === "Energy");
-                return nutrient ? nutrient.value : "N/A";
-              })();
+              const energy = (() => { const nutrient = food.foodNutrients.find(n => n.nutrientName === "Energy"); return nutrient ? nutrient.value : "N/A"; })();
               const servingSize = food.servingSize ? food.servingSize : "N/A";
               const servingUnit = food.servingSizeUnit ? food.servingSizeUnit : "";
               const brand = food.brandOwner ? `Brand: ${food.brandOwner}` : "";
@@ -414,9 +316,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <br>Calories: ${energy} kcal
               </div>`;
             });
-            resultsHtml += `<div class="food-item">
-                <strong>Add Custom Food</strong>
-              </div>`;
+            resultsHtml += `<div class="food-item"><strong>Add Custom Food</strong></div>`;
             $("#usda-search-results").html(resultsHtml);
           } else {
             $("#usda-search-results").html("<p>No foods found. Please add custom food.</p>");
@@ -431,16 +331,10 @@ document.addEventListener("DOMContentLoaded", function () {
   
   // USDA food item click handler
   $("#usda-search-results").on("click", ".food-item", function() {
-    if ($(this).text().trim().toLowerCase().includes("add custom food")) {
-      openCustomFoodEntry();
-      return;
-    }
+    if ($(this).text().trim().toLowerCase().includes("add custom food")) { openCustomFoodEntry(); return; }
     try {
       const foodString = $(this).closest(".food-item").attr("data-food");
-      if (!foodString) {
-        openCustomFoodEntry();
-        return;
-      }
+      if (!foodString) { openCustomFoodEntry(); return; }
       const decoded = decodeURIComponent(foodString);
       const foodData = JSON.parse(decoded);
       console.log("Food selected:", foodData);
@@ -471,9 +365,7 @@ document.addEventListener("DOMContentLoaded", function () {
       recalcNutrients();
       $("#food-name").val(foodData.description);
       $("#usda-search-results").empty();
-    } catch (error) {
-      console.error("Error parsing selected food:", error);
-    }
+    } catch (error) { console.error("Error parsing selected food:", error); }
   });
   
   $("#food-uom").on("change", function() {
@@ -482,15 +374,10 @@ document.addEventListener("DOMContentLoaded", function () {
     recalcNutrients();
   });
   
-  $("#food-quantity, #food-uom").on("input change", function() {
-    recalcNutrients();
-  });
+  $("#food-quantity, #food-uom").on("input change", function() { recalcNutrients(); });
   
   function recalcNutrients() {
-    if (!currentUSDAFood) {
-      console.log("No USDA food selected yet.");
-      return;
-    }
+    if (!currentUSDAFood) { console.log("No USDA food selected yet."); return; }
     let quantity = parseFloat($("#food-quantity").val());
     if (isNaN(quantity) || quantity <= 0) return;
     let conversion = parseFloat($("#food-uom option:selected").attr("data-conversion")) || 1;
@@ -512,9 +399,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#usda-search-results").empty();
   }
   
-  $("#add-custom-food-btn").on("click", function() {
-    openCustomFoodEntry();
-  });
+  $("#add-custom-food-btn").on("click", function() { openCustomFoodEntry(); });
   
   // Daily Goals Submission and Progress Update
   document.getElementById("daily-goals-form").addEventListener("submit", function(e) {
@@ -560,10 +445,7 @@ document.addEventListener("DOMContentLoaded", function () {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
     const dateInput = $("#photo-date").val();
-    if (!fileInput || !dateInput) {
-      alert("Please select a photo and date.");
-      return;
-    }
+    if (!fileInput || !dateInput) { alert("Please select a photo and date."); return; }
     const reader = new FileReader();
     reader.onload = function (e) {
       photoLogs.push({ src: e.target.result, date: dateInput });
@@ -577,10 +459,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function updatePhotoGallery() {
     const gallery = $("#photo-gallery");
     gallery.empty();
-    if (photoLogs.length === 0) {
-      gallery.html('<p class="placeholder">No photos uploaded yet.</p>');
-      return;
-    }
+    if (photoLogs.length === 0) { gallery.html('<p class="placeholder">No photos uploaded yet.</p>'); return; }
     photoLogs.forEach(photo => {
       gallery.append(`
         <div class="photo-entry">
@@ -597,24 +476,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const gallery = $("#photo-gallery");
     gallery.empty();
     let filtered = photoLogs;
-    if (startDate) {
-      filtered = filtered.filter(photo => new Date(photo.date) >= new Date(startDate));
-    }
-    if (endDate) {
-      filtered = filtered.filter(photo => new Date(photo.date) <= new Date(endDate));
-    }
-    if (filtered.length === 0) {
-      gallery.html('<p class="placeholder">No photos match the selected date range.</p>');
-    } else {
-      filtered.forEach(photo => {
-        gallery.append(`
+    if (startDate) { filtered = filtered.filter(photo => new Date(photo.date) >= new Date(startDate)); }
+    if (endDate) { filtered = filtered.filter(photo => new Date(photo.date) <= new Date(endDate)); }
+    if (filtered.length === 0) { gallery.html('<p class="placeholder">No photos match the selected date range.</p>'); }
+    else { filtered.forEach(photo => { gallery.append(`
           <div class="photo-entry">
             <img src="${photo.src}" alt="Progress Photo" class="img-fluid">
             <p>Date: ${photo.date}</p>
           </div>
-        `);
-      });
-    }
+        `); }); }
   });
   
   $("#clear-filter-btn").on("click", function() {
@@ -634,31 +504,19 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
   
-  // Main page comparison: use a flex layout so that each image occupies 50%
+  // Main Comparison: flex layout with two images and a 2px divider
   $("#tt-update").on("click", function() {
     console.log("Update comparison button clicked");
     const beforeIndex = parseInt($("#tt-before").val());
     const afterIndex = parseInt($("#tt-after").val());
-    console.log("Before index:", beforeIndex, "After index:", afterIndex);
-    if (isNaN(beforeIndex) || isNaN(afterIndex)) {
-      alert("Please select both before and after photos.");
-      return;
-    }
-    if (photoLogs.length === 0) {
-      alert("No photos available");
-      return;
-    }
+    if (isNaN(beforeIndex) || isNaN(afterIndex)) { alert("Please select both before and after photos."); return; }
+    if (photoLogs.length === 0) { alert("No photos available"); return; }
     const beforePhoto = photoLogs[beforeIndex];
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    // Create two divs for images (50% width each) and a 2px divider in between
-    const beforeDiv = $('<div class="comparison-image"></div>')
-      .css({ width: '50%', float: 'left' })
-      .append(`<img src="${beforePhoto.src}" alt="Before">`);
-    const afterDiv = $('<div class="comparison-image"></div>')
-      .css({ width: '50%', float: 'right' })
-      .append(`<img src="${afterPhoto.src}" alt="After">`);
+    const beforeDiv = $('<div class="comparison-image"></div>').css({ width: '50%', float: 'left' }).append(`<img src="${beforePhoto.src}" alt="Before">`);
+    const afterDiv = $('<div class="comparison-image"></div>').css({ width: '50%', float: 'right' }).append(`<img src="${afterPhoto.src}" alt="After">`);
     const divider = $('<div class="divider"></div>');
     container.append(beforeDiv, afterDiv, divider);
     console.log("Main comparison updated.");
@@ -669,11 +527,17 @@ document.addEventListener("DOMContentLoaded", function () {
     openComparisonEditor();
   });
   
+  // Function to clear overlays (text and data overlay) added to the editor
+  function clearOverlays(layer) {
+    // Remove all nodes that are not the base images, divider, frame, or cropping rectangle.
+    // For simplicity, assume nodes with a custom attribute "overlay" are added.
+    layer.getChildren(node => node.getAttr("overlay") === true).each(node => node.destroy());
+    layer.draw();
+  }
+  
+  // Advanced Editor function
   function openComparisonEditor() {
-    if (photoLogs.length < 2) {
-      alert("Please upload at least two photos and select them for comparison.");
-      return;
-    }
+    if (photoLogs.length < 2) { alert("Please upload at least two photos and select them for comparison."); return; }
     const beforeIndex = parseInt($("#tt-before").val()) || 0;
     const afterIndex = parseInt($("#tt-after").val()) || 1;
     const beforePhoto = photoLogs[beforeIndex];
@@ -695,26 +559,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     
     const canvasEl = stage.container().querySelector("canvas");
-    if (canvasEl) {
-      canvasEl.getContext('2d', { willReadFrequently: true });
-    }
+    if (canvasEl) { canvasEl.getContext('2d', { willReadFrequently: true }); }
     
     const layer = new Konva.Layer();
     stage.add(layer);
     
-    // Variables for cropping and overlay
-    let beforeKonva, afterKonva, croppingRect, transformer, frameRect;
-    
+    // Load images
     const loadImage = (src, callback) => {
       const img = new Image();
       img.crossOrigin = "Anonymous";
-      img.onload = function() {
-        callback(img);
-      };
-      img.onerror = function() {
-        console.error("Failed to load image: " + src);
-        alert("Failed to load one of the images. Please try again.");
-      };
+      img.onload = function() { callback(img); };
+      img.onerror = function() { console.error("Failed to load image: " + src); alert("Failed to load one of the images. Please try again."); };
       img.src = src;
     };
     
@@ -722,24 +577,12 @@ document.addEventListener("DOMContentLoaded", function () {
       loadImage(afterPhoto.src, function(afterImg) {
         const halfWidth = stage.width() / 2;
         const fullHeight = stage.height();
-        beforeKonva = new Konva.Image({
-          x: 0,
-          y: 0,
-          image: beforeImg,
-          width: halfWidth,
-          height: fullHeight
-        });
-        afterKonva = new Konva.Image({
-          x: halfWidth,
-          y: 0,
-          image: afterImg,
-          width: halfWidth,
-          height: fullHeight
-        });
+        const beforeKonva = new Konva.Image({ x: 0, y: 0, image: beforeImg, width: halfWidth, height: fullHeight });
+        const afterKonva = new Konva.Image({ x: halfWidth, y: 0, image: afterImg, width: halfWidth, height: fullHeight });
         layer.add(beforeKonva);
         layer.add(afterKonva);
         
-        // Create a thin draggable divider (2px) that adjusts the image widths
+        // Divider (2px) draggable to adjust split
         const divider = new Konva.Rect({
           x: halfWidth - 1,
           y: 0,
@@ -763,38 +606,14 @@ document.addEventListener("DOMContentLoaded", function () {
           layer.batchDraw();
         });
         
-        // --- Enhanced Frame ---
-        // Remove previous frame if exists, then draw a new one.
-        // Here we draw a minimalist frame: thin top/left/right borders and a thicker bottom border
-        // with a gradient and branding text partly overlapping the image.
+        // Enhanced Frame: Create borders with a checkered gradient feel
+        // For a modern minimalist look, we use thin top/left/right borders and a thicker bottom border.
         const frameGroup = new Konva.Group();
-        const thinBorder = 3;
-        const thickBorder = 10;
-        // Top border (thin)
-        const topBorder = new Konva.Rect({
-          x: 0,
-          y: 0,
-          width: stage.width(),
-          height: thinBorder,
-          fill: "#111"
-        });
-        // Left border (thin)
-        const leftBorder = new Konva.Rect({
-          x: 0,
-          y: 0,
-          width: thinBorder,
-          height: stage.height(),
-          fill: "#111"
-        });
-        // Right border (thin)
-        const rightBorder = new Konva.Rect({
-          x: stage.width() - thinBorder,
-          y: 0,
-          width: thinBorder,
-          height: stage.height(),
-          fill: "#111"
-        });
-        // Bottom border (thick with gradient)
+        const thinBorder = 5;
+        const thickBorder = 20;
+        const topBorder = new Konva.Rect({ x: 0, y: 0, width: stage.width(), height: thinBorder, fill: "#222" });
+        const leftBorder = new Konva.Rect({ x: 0, y: 0, width: thinBorder, height: stage.height(), fill: "#222" });
+        const rightBorder = new Konva.Rect({ x: stage.width() - thinBorder, y: 0, width: thinBorder, height: stage.height(), fill: "#222" });
         const bottomBorder = new Konva.Rect({
           x: 0,
           y: stage.height() - thickBorder,
@@ -802,12 +621,12 @@ document.addEventListener("DOMContentLoaded", function () {
           height: thickBorder,
           fillLinearGradientStartPoint: { x: 0, y: 0 },
           fillLinearGradientEndPoint: { x: stage.width(), y: 0 },
-          fillLinearGradientColorStops: [0, "#333", 0.5, "#d00", 1, "#333"]
+          fillLinearGradientColorStops: [0, "#444", 0.5, "#d00", 1, "#444"]
         });
-        // Branding text positioned partially over the bottom border and image
+        // Branding text placed in the bottom right; adjust so part overlaps the image
         const branding = new Konva.Text({
-          x: stage.width() - 220,
-          y: stage.height() - thickBorder - 30,
+          x: stage.width() - 240,
+          y: stage.height() - thickBorder - 40,
           text: "FitJourneyTracker",
           fontSize: 28,
           fontFamily: "Montserrat",
@@ -816,26 +635,29 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         frameGroup.add(topBorder, leftBorder, rightBorder, bottomBorder, branding);
         layer.add(frameGroup);
-        // --- End Enhanced Frame ---
+        layer.draw();
         
-        // "Show Data" button event: generate a Chart.js chart overlay and add it as an image overlay.
+        // "Show Data" button: Prompt for date range, generate a Chart.js chart from dataLogs (weight trends), convert to image and overlay.
         document.getElementById("show-data-btn").addEventListener("click", function() {
-          // Create a small chart canvas dynamically
-          const chartCanvas = document.createElement("canvas");
-          chartCanvas.width = 200;
-          chartCanvas.height = 100;
-          const ctx = chartCanvas.getContext("2d");
-          new Chart(ctx, {
+          const startDate = prompt("Enter start date (YYYY-MM-DD):");
+          const endDate = prompt("Enter end date (YYYY-MM-DD):");
+          if (!startDate || !endDate) { alert("Please enter valid dates."); return; }
+          // Filter dataLogs for weight data
+          const filteredData = dataLogs.filter(log => log.date >= startDate && log.date <= endDate);
+          if (filteredData.length === 0) { alert("No data in that range."); return; }
+          const labels = filteredData.map(log => log.date);
+          const weights = filteredData.map(log => log.weight);
+          
+          // Create a temporary canvas for the chart
+          const tempCanvas = document.createElement("canvas");
+          tempCanvas.width = 300;
+          tempCanvas.height = 150;
+          const tempCtx = tempCanvas.getContext("2d");
+          new Chart(tempCtx, {
             type: 'line',
             data: {
-              labels: ["Jan", "Feb", "Mar", "Apr", "May"],
-              datasets: [{
-                label: "Weight",
-                data: [200, 195, 190, 188, 185],
-                borderColor: "#007bff",
-                fill: false,
-                tension: 0.2
-              }]
+              labels: labels,
+              datasets: [{ label: "Weight", data: weights, borderColor: "#007bff", fill: false, tension: 0.2 }]
             },
             options: {
               responsive: false,
@@ -844,23 +666,36 @@ document.addEventListener("DOMContentLoaded", function () {
               scales: { x: { display: false }, y: { display: false } }
             }
           });
-          // Convert the chart canvas to data URL and add as a Konva.Image overlay
-          const overlayImage = new Konva.Image({
-            x: stage.width() / 2 - 100,
-            y: stage.height() / 2 - 50,
-            image: chartCanvas,
-            opacity: 0.8,
-            draggable: true
-          });
-          layer.add(overlayImage);
-          layer.draw();
+          
+          // Convert chart to image and overlay it
+          const dataURL = tempCanvas.toDataURL();
+          const dataImage = new Image();
+          dataImage.onload = function() {
+            const chartOverlay = new Konva.Image({
+              x: stage.width() / 2 - 150,
+              y: 20,
+              image: dataImage,
+              opacity: 0.8,
+              draggable: true
+            });
+            // Mark overlay for later deletion
+            chartOverlay.setAttr("overlay", true);
+            layer.add(chartOverlay);
+            layer.draw();
+          };
+          dataImage.src = dataURL;
         });
         
-        // Add Text Button: creates a new draggable text node
+        // "Clear Overlays" button: remove all overlay nodes (text and chart overlays)
+        document.getElementById("clear-overlays-btn").addEventListener("click", function() {
+          clearOverlays(layer);
+        });
+        
+        // Add Text Button: create a new draggable text node and set it as selected for editing
         document.getElementById("add-text-btn").addEventListener("click", function() {
           const customText = prompt("Enter custom text:");
           if (customText) {
-            const customTextNode = new Konva.Text({
+            const textNode = new Konva.Text({
               x: stage.width() / 2 - 50,
               y: stage.height() / 2,
               text: customText,
@@ -869,18 +704,25 @@ document.addEventListener("DOMContentLoaded", function () {
               fill: 'yellow',
               draggable: true
             });
-            layer.add(customTextNode);
+            textNode.on("click", function() { selectedTextNode = textNode; });
+            layer.add(textNode);
+            selectedTextNode = textNode;
             layer.draw();
           }
         });
         
-        // Edit Text Button: prompts to change the branding text in the frame
+        // Edit Text Button: if a text node is selected, prompt to change its properties
         document.getElementById("edit-text-btn").addEventListener("click", function() {
-          const newText = prompt("Enter new text for branding:", branding.text());
-          if (newText !== null) {
-            branding.text(newText);
-            layer.draw();
-          }
+          if (!selectedTextNode) { alert("Please select a text node by clicking on it."); return; }
+          const newText = prompt("Enter new text:", selectedTextNode.text());
+          if (newText !== null) { selectedTextNode.text(newText); }
+          const newColor = prompt("Enter new text color (CSS color):", selectedTextNode.fill());
+          if (newColor !== null) { selectedTextNode.fill(newColor); }
+          const newFontSize = prompt("Enter new font size (number):", selectedTextNode.fontSize());
+          if (newFontSize !== null) { selectedTextNode.fontSize(parseInt(newFontSize)); }
+          const newRotation = prompt("Enter new rotation (degrees):", selectedTextNode.rotation());
+          if (newRotation !== null) { selectedTextNode.rotation(parseFloat(newRotation)); }
+          layer.draw();
         });
         
         // Add a cropping rectangle over the before image
@@ -896,7 +738,7 @@ document.addEventListener("DOMContentLoaded", function () {
         layer.add(croppingRect);
         
         // Add a transformer for the cropping rectangle
-        transformer = new Konva.Transformer({
+        const transformer = new Konva.Transformer({
           nodes: [croppingRect],
           enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right']
         });
