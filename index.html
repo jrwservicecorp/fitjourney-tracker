@@ -49,28 +49,56 @@
 
   <!-- Main App Content -->
   <main id="main-app" class="container my-4">
-    <!-- Dashboard Section (content omitted for brevity – same as your current version) -->
+    <!-- Dashboard Section -->
     <section id="dashboard-section" class="tile">
       <h2 class="dashboard-title">Dashboard</h2>
-      <!-- Dashboard content here... -->
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-body">
+              <h3 class="card-title">Weight Chart</h3>
+              <!-- Ensure canvas exists -->
+              <canvas id="weightChart"></canvas>
+              <p id="chart-placeholder" class="text-muted mt-2">Start logging weight to see trends!</p>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="toggle-demo-data" checked />
+                <label class="form-check-label" for="toggle-demo-data">Show Demo Data</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Nutrition Chart -->
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-body">
+              <h3 class="card-title">Nutrition Chart</h3>
+              <!-- Ensure canvas exists -->
+              <canvas id="nutritionChart"></canvas>
+              <p id="nutrition-chart-placeholder" class="text-muted mt-2">Nutrition trends will appear here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Additional Dashboard Content (Summaries, Goals, etc.) -->
+      <!-- ... (Omitted for brevity; use your current content) ... -->
     </section>
     
-    <!-- Nutrition Log Section (content omitted for brevity) -->
+    <!-- Nutrition Log Section -->
     <section id="nutrition-section" class="tile" style="display:none;">
       <h2 class="dashboard-title">Nutrition Log</h2>
-      <!-- Nutrition log content here... -->
+      <!-- Your nutrition log content here -->
     </section>
     
-    <!-- Meal Builder Section (content omitted for brevity) -->
+    <!-- Meal Builder Section -->
     <section id="meal-builder-section" class="tile" style="display:none;">
       <h2 class="dashboard-title">Meal Builder</h2>
-      <!-- Meal builder content here... -->
+      <!-- Your meal builder content here -->
     </section>
     
-    <!-- Body Weight Log Section (content omitted for brevity) -->
+    <!-- Body Weight Log Section -->
     <section id="weight-section" class="tile" style="display:none;">
       <h2 class="dashboard-title">Body Weight Log</h2>
-      <!-- Body weight log content here... -->
+      <!-- Your body weight log content here -->
     </section>
     
     <!-- Media & Exports Section -->
@@ -157,7 +185,7 @@
         <button class="toolbar-btn" id="reset-crop-btn">Reset Crop</button>
         <button class="toolbar-btn" id="close-editor-btn">Close Editor</button>
       </div>
-      <!-- Data Options: drop downs for date range, radio buttons for data type, chart type -->
+      <!-- Data Options -->
       <div class="data-options">
         <div>
           <label>Data Type:</label>
@@ -187,7 +215,7 @@
         </div>
       </div>
       <div id="comparison-editor-container" class="comparison-editor-container">
-        <!-- Advanced editor content will be rendered here via Konva -->
+        <!-- Konva content will be rendered here -->
       </div>
     </div>
   </div>
