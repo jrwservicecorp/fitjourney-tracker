@@ -672,11 +672,51 @@ document.addEventListener("DOMContentLoaded", function () {
     openComparisonEditor();
   });
   
+  // Helper: Create checker pattern canvas for frame fill
+  function createCheckerPattern() {
+    const size = 10;
+    const patternCanvas = document.createElement("canvas");
+    patternCanvas.width = size * 2;
+    patternCanvas.height = size * 2;
+    const ctx = patternCanvas.getContext("2d");
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillRect(size, size, size, size);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(size, 0, size, size);
+    ctx.fillRect(0, size, size, size);
+    return patternCanvas;
+  }
+  
+  // Populate drop downs for data date ranges based on dataLogs
+  function populateDateSelects() {
+    const startSelect = document.getElementById("start-date-select");
+    const endSelect = document.getElementById("end-date-select");
+    startSelect.innerHTML = "";
+    endSelect.innerHTML = "";
+    // Get unique dates from dataLogs sorted ascending
+    const dates = [...new Set(dataLogs.map(d => d.date))].sort();
+    dates.forEach(date => {
+      const option1 = document.createElement("option");
+      option1.value = date;
+      option1.textContent = date;
+      startSelect.appendChild(option1);
+      
+      const option2 = document.createElement("option");
+      option2.value = date;
+      option2.textContent = date;
+      endSelect.appendChild(option2);
+    });
+  }
+  
   function openComparisonEditor() {
     if (photoLogs.length < 2) {
       alert("Please upload at least two photos and select them for comparison.");
       return;
     }
+    // Populate date drop downs with available dates from dataLogs
+    populateDateSelects();
+    
     const beforeIndex = parseInt($("#tt-before").val()) || 0;
     const afterIndex = parseInt($("#tt-after").val()) || 1;
     const beforePhoto = photoLogs[beforeIndex];
@@ -705,18 +745,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const layer = new Konva.Layer();
     stage.add(layer);
     
-    // Global variable for deletion / editing
+    // Reset selection
     selectedNode = null;
     
-    // Function to add selection on click for any node we add
+    // Make nodes selectable
     function makeSelectable(node) {
       node.on('click', function(evt) {
-        // Deselect previous node if any
         if (selectedNode && selectedNode !== node) {
           selectedNode.stroke(null);
         }
         selectedNode = node;
-        // Highlight selected node with yellow stroke
         node.stroke("yellow");
         node.strokeWidth(2);
         layer.draw();
@@ -761,7 +799,7 @@ document.addEventListener("DOMContentLoaded", function () {
         makeSelectable(beforeKonva);
         makeSelectable(afterKonva);
         
-        // Create a thin draggable divider (2px)
+        // Draggable divider (2px)
         const divider = new Konva.Rect({
           x: halfWidth - 1,
           y: 0,
@@ -786,64 +824,70 @@ document.addEventListener("DOMContentLoaded", function () {
           layer.batchDraw();
         });
         
-        // --- Enhanced Frame ---
-        // Build a minimalist frame with thin top, left, right borders and a thicker gradient bottom border.
-        // Branding text "FitJourneyTracker" is positioned in the bottom right, partly overlapping the image.
-        const frameGroup = new Konva.Group();
-        const thinBorder = 3;
-        const thickBorder = 12;
-        const stageWidth = stage.width();
-        const stageHeight = stage.height();
-        
+        // Always draw the frame using a black and white checker pattern.
+        const pattern = createCheckerPattern();
+        // Top border
         const topBorder = new Konva.Rect({
           x: 0,
           y: 0,
-          width: stageWidth,
-          height: thinBorder,
-          fill: "#111"
+          width: stage.width(),
+          height: 5,
+          fillPatternImage: pattern,
+          fillPatternRepeat: 'repeat'
         });
+        // Left border
         const leftBorder = new Konva.Rect({
           x: 0,
           y: 0,
-          width: thinBorder,
-          height: stageHeight,
-          fill: "#111"
+          width: 5,
+          height: stage.height(),
+          fillPatternImage: pattern,
+          fillPatternRepeat: 'repeat'
         });
+        // Right border
         const rightBorder = new Konva.Rect({
-          x: stageWidth - thinBorder,
+          x: stage.width() - 5,
           y: 0,
-          width: thinBorder,
-          height: stageHeight,
-          fill: "#111"
+          width: 5,
+          height: stage.height(),
+          fillPatternImage: pattern,
+          fillPatternRepeat: 'repeat'
         });
+        // Bottom border (thicker)
         const bottomBorder = new Konva.Rect({
           x: 0,
-          y: stageHeight - thickBorder,
-          width: stageWidth,
-          height: thickBorder,
-          fillLinearGradientStartPoint: { x: 0, y: 0 },
-          fillLinearGradientEndPoint: { x: stageWidth, y: 0 },
-          fillLinearGradientColorStops: [0, "#333", 0.5, "#d00", 1, "#333"]
+          y: stage.height() - 10,
+          width: stage.width(),
+          height: 10,
+          fillPatternImage: pattern,
+          fillPatternRepeat: 'repeat'
         });
+        // Branding text: placed partly overlapping the bottom border
         const branding = new Konva.Text({
-          x: stageWidth - 240,
-          y: stageHeight - thickBorder - 40,
+          x: stage.width() - 260,
+          y: stage.height() - 40,
           text: "FitJourneyTracker",
           fontSize: 28,
           fontFamily: "Montserrat",
           fill: "#fff",
           opacity: 0.9
         });
+        const frameGroup = new Konva.Group();
         frameGroup.add(topBorder, leftBorder, rightBorder, bottomBorder, branding);
         layer.add(frameGroup);
-        // --- End Enhanced Frame ---
         
         // "Show Data" button event:
-        // Prompt the user for a start and end date, then generate a Chart.js chart using weight trends.
+        // Instead of free text input, use the drop downs and radio buttons.
         document.getElementById("show-data-btn").addEventListener("click", function() {
-          const startDate = prompt("Enter start date (YYYY-MM-DD):", "2023-01-01");
-          const endDate = prompt("Enter end date (YYYY-MM-DD):", "2023-03-01");
-          if (!startDate || !endDate) return;
+          const startDate = document.getElementById("start-date-select").value;
+          const endDate = document.getElementById("end-date-select").value;
+          const dataType = document.querySelector('input[name="data-type"]:checked').value;
+          const chartType = document.getElementById("chart-type-select").value;
+          if (!startDate || !endDate) {
+            alert("Please select start and end dates from the drop downs.");
+            return;
+          }
+          // For demonstration, we only handle weight data here.
           const filteredData = dataLogs.filter(d => d.date >= startDate && d.date <= endDate);
           if (filteredData.length === 0) {
             alert("No data for that range.");
@@ -851,20 +895,23 @@ document.addEventListener("DOMContentLoaded", function () {
           }
           filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
           const labels = filteredData.map(d => d.date);
-          const weights = filteredData.map(d => d.weight);
-          // Create a temporary canvas for the chart
+          const values = filteredData.map(d => d.weight);
+          
+          // Create a temporary canvas for the chart based on selected chart type.
           const tempCanvas = document.createElement("canvas");
           tempCanvas.width = 300;
           tempCanvas.height = 150;
           const tempCtx = tempCanvas.getContext("2d");
-          new Chart(tempCtx, {
-            type: 'line',
+          
+          let chartConfig = {
+            type: chartType,
             data: {
               labels: labels,
               datasets: [{
                 label: 'Weight Trend',
-                data: weights,
+                data: values,
                 borderColor: "#007bff",
+                backgroundColor: "#007bff",
                 fill: false,
                 tension: 0.2
               }]
@@ -875,7 +922,14 @@ document.addEventListener("DOMContentLoaded", function () {
               plugins: { legend: { display: false } },
               scales: { x: { display: false }, y: { display: false } }
             }
-          });
+          };
+          // For pie chart, adjust dataset options
+          if(chartType === "pie"){
+            chartConfig.data.datasets[0].backgroundColor = ["#007bff", "#28a745", "#ffc107", "#dc3545"];
+          }
+          
+          new Chart(tempCtx, chartConfig);
+          
           setTimeout(function() {
             const dataURL = tempCanvas.toDataURL();
             const dataImage = new Image();
@@ -932,21 +986,15 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         });
         
-        // Edit Text Button: prompts to update the text, color, and rotation for the selected text node
+        // Edit Text Button: allows updating text, color, and rotation for selected text node
         document.getElementById("edit-text-btn").addEventListener("click", function() {
           if (selectedNode && selectedNode.className === 'Text') {
             const newText = prompt("Enter new text:", selectedNode.text());
-            if (newText !== null) {
-              selectedNode.text(newText);
-            }
+            if (newText !== null) { selectedNode.text(newText); }
             const newColor = prompt("Enter new color (e.g., #ff0):", selectedNode.fill());
-            if (newColor !== null) {
-              selectedNode.fill(newColor);
-            }
+            if (newColor !== null) { selectedNode.fill(newColor); }
             const newAngle = prompt("Enter rotation angle in degrees:", selectedNode.rotation());
-            if (newAngle !== null) {
-              selectedNode.rotation(parseFloat(newAngle));
-            }
+            if (newAngle !== null) { selectedNode.rotation(parseFloat(newAngle)); }
             layer.draw();
           } else {
             alert("Please select a text element to edit.");
