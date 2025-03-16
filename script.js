@@ -20,15 +20,12 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("app-version").textContent = APP_VERSION;
   
   // NAVIGATION MENU FUNCTIONALITY
-  // Add event listeners to nav buttons to hide all sections and display the target section
   const navButtons = document.querySelectorAll('.nav-btn');
   navButtons.forEach(button => {
     button.addEventListener('click', function() {
-      // Hide all sections with class "tile"
       document.querySelectorAll('section.tile').forEach(section => {
         section.style.display = 'none';
       });
-      // Show the target section based on the data-target attribute
       const target = button.getAttribute('data-target');
       if (target) {
         const targetSection = document.querySelector(target);
@@ -36,7 +33,6 @@ document.addEventListener("DOMContentLoaded", function () {
           targetSection.style.display = 'block';
         }
       }
-      // Update active state for nav buttons
       navButtons.forEach(btn => btn.classList.remove('active'));
       button.classList.add('active');
     });
@@ -575,7 +571,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 300);
   });
   
-  // Advanced Comparison Editor using Konva.js with improved image loading and container reflow
+  // Advanced Comparison Editor using Konva.js with cropping and data overlay
   $("#open-editor-btn").on("click", function() { openComparisonEditor(); });
   
   function openComparisonEditor() {
@@ -590,17 +586,16 @@ document.addEventListener("DOMContentLoaded", function () {
     containerEl.style.width = "900px";
     containerEl.style.height = "600px";
     containerEl.style.background = "none";
-    // Force reflow
     const forcedWidth = containerEl.offsetWidth;
     const forcedHeight = containerEl.offsetHeight;
     containerEl.innerHTML = "";
+    
     const stage = new Konva.Stage({
       container: "comparison-editor-container",
       width: forcedWidth,
       height: forcedHeight
     });
     
-    // Set canvas context attribute willReadFrequently
     const canvasEl = stage.container().querySelector("canvas");
     if (canvasEl) {
       canvasEl.getContext('2d', { willReadFrequently: true });
@@ -608,6 +603,9 @@ document.addEventListener("DOMContentLoaded", function () {
     
     const layer = new Konva.Layer();
     stage.add(layer);
+    
+    // Variables to hold Konva objects for cropping
+    let beforeKonva, afterKonva, croppingRect, transformer;
     
     const loadImage = (src, callback) => {
       const img = new Image();
@@ -624,14 +622,14 @@ document.addEventListener("DOMContentLoaded", function () {
     
     loadImage(beforePhoto.src, function(beforeImg) {
       loadImage(afterPhoto.src, function(afterImg) {
-        const beforeKonva = new Konva.Image({
+        beforeKonva = new Konva.Image({
           x: 0,
           y: 0,
           image: beforeImg,
           width: stage.width() / 2,
           height: stage.height()
         });
-        const afterKonva = new Konva.Image({
+        afterKonva = new Konva.Image({
           x: stage.width() / 2,
           y: 0,
           image: afterImg,
@@ -641,36 +639,81 @@ document.addEventListener("DOMContentLoaded", function () {
         layer.add(beforeKonva);
         layer.add(afterKonva);
         
+        // Create a proportionate draggable divider (80% of stage height, centered vertically)
+        const dividerHeight = stage.height() * 0.8;
+        const dividerY = (stage.height() - dividerHeight) / 2;
         const divider = new Konva.Rect({
           x: stage.width() / 2 - 1,
-          y: 0,
+          y: dividerY,
           width: 2,
-          height: stage.height(),
+          height: dividerHeight,
           fill: "white",
           draggable: true,
           dragBoundFunc: function(pos) {
             let newX = pos.x;
             if (newX < 0) newX = 0;
             if (newX > stage.width()) newX = stage.width();
-            return { x: newX, y: this.absolutePosition().y };
+            return { x: newX, y: dividerY };
           }
         });
         layer.add(divider);
-        layer.draw();
+        
+        // Create a dynamic text overlay displaying the percentage for the before image
+        const percentageText = new Konva.Text({
+          x: divider.x() - 30,
+          y: divider.y() - 25,
+          text: "Before: " + Math.round((divider.x()/stage.width())*100) + "%",
+          fontSize: 18,
+          fill: "white"
+        });
+        layer.add(percentageText);
         
         divider.on("dragmove", function() {
           const pos = divider.x();
           beforeKonva.width(pos);
           afterKonva.x(pos);
           afterKonva.width(stage.width() - pos);
+          percentageText.text("Before: " + Math.round((pos/stage.width())*100) + "%");
+          percentageText.x(pos - 30);
           layer.batchDraw();
         });
-      });
-    });
-  }
-  
-  // Close Advanced Editor Modal
-  $("#close-editor-btn").on("click", function() {
-    document.getElementById("comparison-editor-modal").style.display = "none";
-  });
-});
+        
+        // Add a cropping rectangle over the before image
+        croppingRect = new Konva.Rect({
+          x: beforeKonva.x(),
+          y: beforeKonva.y(),
+          width: beforeKonva.width(),
+          height: beforeKonva.height(),
+          stroke: 'red',
+          dash: [4, 4],
+          draggable: true
+        });
+        layer.add(croppingRect);
+        
+        // Add a transformer for the cropping rectangle
+        transformer = new Konva.Transformer({
+          nodes: [croppingRect],
+          enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+        });
+        layer.add(transformer);
+        layer.draw();
+        
+        // Crop button event: set crop on before image based on cropping rectangle
+        document.getElementById("crop-btn").addEventListener("click", function() {
+          const rectPos = croppingRect.absolutePosition();
+          const imagePos = beforeKonva.absolutePosition();
+          const cropX = rectPos.x - imagePos.x;
+          const cropY = rectPos.y - imagePos.y;
+          const cropWidth = croppingRect.width() * croppingRect.scaleX();
+          const cropHeight = croppingRect.height() * croppingRect.scaleY();
+          beforeKonva.crop({ x: cropX, y: cropY, width: cropWidth, height: cropHeight });
+          beforeKonva.width(cropWidth);
+          beforeKonva.height(cropHeight);
+          layer.draw();
+          // Remove cropping rectangle and transformer after applying crop
+          croppingRect.destroy();
+          transformer.destroy();
+          layer.draw();
+        });
+        
+        // Reset Crop button event: restore original before image dimensions and re-add cropping rectangl
