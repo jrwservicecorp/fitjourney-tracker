@@ -57,10 +57,26 @@ document.addEventListener("DOMContentLoaded", function () {
     const weightCtx = weightChartElement.getContext('2d');
     weightChart = new Chart(weightCtx, {
       type: 'line',
-      data: { datasets: [{ label: 'Weight (lbs)', data: [], borderColor: '#007bff', fill: false, tension: 0.2 }] },
-      options: { responsive: true, scales: { x: { type: 'time', time: { unit: 'day' }, title: { display: true, text: 'Date' } }, y: { title: { display: true, text: 'Weight (lbs)' } } } }
+      data: {
+        datasets: [{
+          label: 'Weight (lbs)',
+          data: [],
+          borderColor: '#007bff',
+          fill: false,
+          tension: 0.2
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { type: 'time', time: { unit: 'day' }, title: { display: true, text: 'Date' } },
+          y: { title: { display: true, text: 'Weight (lbs)' } }
+        }
+      }
     });
-  } else { console.warn("Canvas 'weightChart' not found."); }
+  } else {
+    console.warn("Canvas 'weightChart' not found.");
+  }
   
   // Initialize Nutrition Chart
   const nutritionChartElement = document.getElementById('nutritionChart');
@@ -69,10 +85,25 @@ document.addEventListener("DOMContentLoaded", function () {
     const nutritionCtx = nutritionChartElement.getContext('2d');
     nutritionChart = new Chart(nutritionCtx, {
       type: 'bar',
-      data: { labels: [], datasets: [{ label: 'Calories (kcal)', data: [], backgroundColor: '#28a745' }] },
-      options: { responsive: true, scales: { x: { title: { display: true, text: 'Date' } }, y: { title: { display: true, text: 'Calories (kcal)' } } } }
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Calories (kcal)',
+          data: [],
+          backgroundColor: '#28a745'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { title: { display: true, text: 'Date' } },
+          y: { title: { display: true, text: 'Calories (kcal)' } }
+        }
+      }
     });
-  } else { console.warn("Canvas 'nutritionChart' not found."); }
+  } else {
+    console.warn("Canvas 'nutritionChart' not found.");
+  }
   
   // Load demo data if enabled
   const toggleDemo = document.getElementById("toggle-demo-data");
@@ -106,7 +137,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const hips = parseFloat(document.getElementById("hips-input").value) || null;
     const chest = parseFloat(document.getElementById("chest-input").value) || null;
     const calories = parseFloat(document.getElementById("calories-input").value) || null;
-    if (!weight || !date) { alert("Please enter both weight and date."); return; }
+    if (!weight || !date) {
+      alert("Please enter both weight and date.");
+      return;
+    }
     addDataLog({ date, weight, waist, hips, chest, calories });
     updateWeightChart();
     updateSummary();
@@ -130,7 +164,10 @@ document.addEventListener("DOMContentLoaded", function () {
   
   function updateSummary() {
     const summaryDiv = document.getElementById("weight-summary");
-    if (dataLogs.length === 0) { summaryDiv.innerHTML = '<p class="placeholder">No weight data available.</p>'; return; }
+    if (dataLogs.length === 0) {
+      summaryDiv.innerHTML = '<p class="placeholder">No weight data available.</p>';
+      return;
+    }
     const latest = dataLogs[dataLogs.length - 1];
     let html = `<p>Latest Weight: ${latest.weight} lbs on ${latest.date}</p>`;
     if (latest.waist) html += `<p>Waist: ${latest.waist} in</p>`;
@@ -141,7 +178,10 @@ document.addEventListener("DOMContentLoaded", function () {
   
   function updateRecentWeighIns() {
     const recentDiv = document.getElementById("recent-weighins");
-    if (dataLogs.length === 0) { recentDiv.innerHTML = '<p class="placeholder">No weigh-ins recorded yet.</p>'; return; }
+    if (dataLogs.length === 0) {
+      recentDiv.innerHTML = '<p class="placeholder">No weigh-ins recorded yet.</p>';
+      return;
+    }
     recentDiv.innerHTML = "";
     const recent = dataLogs.slice(-5).reverse();
     recent.forEach(log => {
@@ -153,7 +193,10 @@ document.addEventListener("DOMContentLoaded", function () {
   
   function updateCalorieSummary() {
     const calorieDiv = document.getElementById("calorie-summary");
-    if (dataLogs.length === 0) { calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>'; return; }
+    if (dataLogs.length === 0) {
+      calorieDiv.innerHTML = '<p class="placeholder">No calorie data available.</p>';
+      return;
+    }
     const recent = dataLogs.slice(-3);
     const avg = recent.reduce((sum, log) => sum + (log.calories || 0), 0) / recent.length;
     calorieDiv.innerHTML = `<p>Average Calories: ${Math.round(avg)} kcal</p>`;
@@ -164,7 +207,10 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
     const food = document.getElementById("food-name").value;
     let quantity = parseFloat(document.getElementById("food-quantity").value);
-    if (isNaN(quantity)) { alert("Please enter a valid quantity."); return; }
+    if (isNaN(quantity)) {
+      alert("Please enter a valid quantity.");
+      return;
+    }
     let conversion = parseFloat($("#food-uom option:selected").attr("data-conversion")) || 1;
     let computedWeight = quantity * conversion;
     const calories = parseFloat(document.getElementById("food-calories").value);
@@ -172,7 +218,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const fat = parseFloat(document.getElementById("food-fat").value) || 0;
     const carbs = parseFloat(document.getElementById("food-carbs").value) || 0;
     let date = document.getElementById("nutrition-date").value;
-    if (!date) { date = new Date().toISOString().split("T")[0]; }
+    if (!date) {
+      date = new Date().toISOString().split("T")[0];
+    }
     const mealCategory = document.getElementById("meal-category").value;
     addNutritionLog({ food, quantity, computedWeight, calories, protein, fat, carbs, date, mealCategory });
     updateNutritionChart();
@@ -191,8 +239,13 @@ document.addEventListener("DOMContentLoaded", function () {
   function updateNutritionChart() {
     let dates = [], calValues = [];
     nutritionLogs.forEach(log => {
-      if (!dates.includes(log.date)) { dates.push(log.date); calValues.push(log.calories); }
-      else { const idx = dates.indexOf(log.date); calValues[idx] += log.calories; }
+      if (!dates.includes(log.date)) {
+        dates.push(log.date);
+        calValues.push(log.calories);
+      } else {
+        const idx = dates.indexOf(log.date);
+        calValues[idx] += log.calories;
+      }
     });
     if (nutritionChart) {
       nutritionChart.data.labels = dates;
@@ -203,7 +256,10 @@ document.addEventListener("DOMContentLoaded", function () {
   
   function updateNutritionDisplay() {
     const displayDiv = document.getElementById("nutrition-log-display");
-    if (nutritionLogs.length === 0) { displayDiv.innerHTML = '<p class="placeholder">No nutrition logs recorded yet.</p>'; return; }
+    if (nutritionLogs.length === 0) {
+      displayDiv.innerHTML = '<p class="placeholder">No nutrition logs recorded yet.</p>';
+      return;
+    }
     let html = '<table class="table table-striped"><thead><tr><th>Date</th><th>Meal</th><th>Food</th><th>Quantity</th><th>Unit</th><th>Computed Weight (g)</th><th>Calories</th><th>Protein</th><th>Fat</th><th>Carbs</th></tr></thead><tbody>';
     nutritionLogs.forEach(log => {
       html += `<tr>
@@ -229,7 +285,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const mealName = $("#meal-name").val();
     const mealCategory = $("#meal-category-builder").val();
     const ingredients = $("#meal-builder-form").data("ingredients") || [];
-    if (!mealName || ingredients.length === 0) { alert("Please provide a meal name and at least one ingredient."); return; }
+    if (!mealName || ingredients.length === 0) {
+      alert("Please provide a meal name and at least one ingredient.");
+      return;
+    }
     let totalCalories = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
     ingredients.forEach(ing => {
       totalCalories += ing.calories;
@@ -283,8 +342,14 @@ document.addEventListener("DOMContentLoaded", function () {
   $("#food-name").on("input", function() {
     clearTimeout(searchTimeout);
     const query = $(this).val().trim();
-    if (!query) { $("#usda-search-results").empty(); currentUSDAFood = null; return; }
-    if (currentUSDAFood && query.toLowerCase() === currentUSDAFood.description.toLowerCase()) { return; }
+    if (!query) {
+      $("#usda-search-results").empty();
+      currentUSDAFood = null;
+      return;
+    }
+    if (currentUSDAFood && query.toLowerCase() === currentUSDAFood.description.toLowerCase()) {
+      return;
+    }
     searchTimeout = setTimeout(function() {
       const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5`;
       console.log("USDA search query:", query);
@@ -370,7 +435,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     try {
       const foodString = $(this).closest(".food-item").attr("data-food");
-      if (!foodString) { openCustomFoodEntry(); return; }
+      if (!foodString) {
+        openCustomFoodEntry();
+        return;
+      }
       const decoded = decodeURIComponent(foodString);
       const foodData = JSON.parse(decoded);
       console.log("Food selected:", foodData);
@@ -412,10 +480,15 @@ document.addEventListener("DOMContentLoaded", function () {
     recalcNutrients();
   });
   
-  $("#food-quantity, #food-uom").on("input change", function() { recalcNutrients(); });
+  $("#food-quantity, #food-uom").on("input change", function() {
+    recalcNutrients();
+  });
   
   function recalcNutrients() {
-    if (!currentUSDAFood) { console.log("No USDA food selected yet."); return; }
+    if (!currentUSDAFood) {
+      console.log("No USDA food selected yet.");
+      return;
+    }
     let quantity = parseFloat($("#food-quantity").val());
     if (isNaN(quantity) || quantity <= 0) return;
     let conversion = parseFloat($("#food-uom option:selected").attr("data-conversion")) || 1;
@@ -437,7 +510,9 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#usda-search-results").empty();
   }
   
-  $("#add-custom-food-btn").on("click", function() { openCustomFoodEntry(); });
+  $("#add-custom-food-btn").on("click", function() {
+    openCustomFoodEntry();
+  });
   
   // Daily Goals Submission and Progress Update
   document.getElementById("daily-goals-form").addEventListener("submit", function(e) {
@@ -483,7 +558,10 @@ document.addEventListener("DOMContentLoaded", function () {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
     const dateInput = $("#photo-date").val();
-    if (!fileInput || !dateInput) { alert("Please select a photo and date."); return; }
+    if (!fileInput || !dateInput) {
+      alert("Please select a photo and date.");
+      return;
+    }
     const reader = new FileReader();
     reader.onload = function (e) {
       photoLogs.push({ src: e.target.result, date: dateInput });
@@ -497,7 +575,10 @@ document.addEventListener("DOMContentLoaded", function () {
   function updatePhotoGallery() {
     const gallery = $("#photo-gallery");
     gallery.empty();
-    if (photoLogs.length === 0) { gallery.html('<p class="placeholder">No photos uploaded yet.</p>'); return; }
+    if (photoLogs.length === 0) {
+      gallery.html('<p class="placeholder">No photos uploaded yet.</p>');
+      return;
+    }
     photoLogs.forEach(photo => {
       gallery.append(`
         <div class="photo-entry">
@@ -514,15 +595,24 @@ document.addEventListener("DOMContentLoaded", function () {
     const gallery = $("#photo-gallery");
     gallery.empty();
     let filtered = photoLogs;
-    if (startDate) filtered = filtered.filter(photo => new Date(photo.date) >= new Date(startDate));
-    if (endDate) filtered = filtered.filter(photo => new Date(photo.date) <= new Date(endDate));
-    if (filtered.length === 0) { gallery.html('<p class="placeholder">No photos match the selected date range.</p>'); }
-    else { filtered.forEach(photo => { gallery.append(`
+    if (startDate) {
+      filtered = filtered.filter(photo => new Date(photo.date) >= new Date(startDate));
+    }
+    if (endDate) {
+      filtered = filtered.filter(photo => new Date(photo.date) <= new Date(endDate));
+    }
+    if (filtered.length === 0) {
+      gallery.html('<p class="placeholder">No photos match the selected date range.</p>');
+    } else {
+      filtered.forEach(photo => {
+        gallery.append(`
           <div class="photo-entry">
             <img src="${photo.src}" alt="Progress Photo" class="img-fluid">
             <p>Date: ${photo.date}</p>
           </div>
-        `); }); }
+        `);
+      });
+    }
   });
   
   $("#clear-filter-btn").on("click", function() {
@@ -543,8 +633,11 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   
   $(document).ready(function () {
-    if ($.fn.twentytwenty) { $("#twentytwenty-container").twentytwenty(); }
-    else { console.error("TwentyTwenty plugin failed to load."); }
+    if ($.fn.twentytwenty) {
+      $("#twentytwenty-container").twentytwenty();
+    } else {
+      console.error("TwentyTwenty plugin failed to load.");
+    }
   });
   
   // Updated comparison update using flexbox container
@@ -553,8 +646,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const beforeIndex = parseInt($("#tt-before").val());
     const afterIndex = parseInt($("#tt-after").val());
     console.log("Before index:", beforeIndex, "After index:", afterIndex);
-    if (isNaN(beforeIndex) || isNaN(afterIndex)) { alert("Please select both before and after photos."); return; }
-    if (photoLogs.length === 0) { alert("No photos available"); return; }
+    if (isNaN(beforeIndex) || isNaN(afterIndex)) {
+      alert("Please select both before and after photos.");
+      return;
+    }
+    if (photoLogs.length === 0) {
+      alert("No photos available");
+      return;
+    }
     const beforePhoto = photoLogs[beforeIndex];
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
@@ -571,11 +670,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 300);
   });
   
-  // Advanced Comparison Editor using Konva.js with cropping and data overlay
-  $("#open-editor-btn").on("click", function() { openComparisonEditor(); });
+  // Advanced Comparison Editor using Konva.js with cropping and dynamic overlay
+  $("#open-editor-btn").on("click", function() {
+    openComparisonEditor();
+  });
   
   function openComparisonEditor() {
-    if (photoLogs.length < 2) { alert("Please upload at least two photos and select them for comparison."); return; }
+    if (photoLogs.length < 2) {
+      alert("Please upload at least two photos and select them for comparison.");
+      return;
+    }
     const beforeIndex = parseInt($("#tt-before").val()) || 0;
     const afterIndex = parseInt($("#tt-after").val()) || 1;
     const beforePhoto = photoLogs[beforeIndex];
@@ -604,7 +708,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const layer = new Konva.Layer();
     stage.add(layer);
     
-    // Variables to hold Konva objects for cropping
+    // Variables for cropping and overlay
     let beforeKonva, afterKonva, croppingRect, transformer;
     
     const loadImage = (src, callback) => {
@@ -658,7 +762,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         layer.add(divider);
         
-        // Create a dynamic text overlay displaying the percentage for the before image
+        // Add dynamic percentage text overlay for before image
         const percentageText = new Konva.Text({
           x: divider.x() - 30,
           y: divider.y() - 25,
@@ -693,12 +797,12 @@ document.addEventListener("DOMContentLoaded", function () {
         // Add a transformer for the cropping rectangle
         transformer = new Konva.Transformer({
           nodes: [croppingRect],
-          enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+          enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right']
         });
         layer.add(transformer);
         layer.draw();
         
-        // Crop button event: set crop on before image based on cropping rectangle
+        // Crop button event
         document.getElementById("crop-btn").addEventListener("click", function() {
           const rectPos = croppingRect.absolutePosition();
           const imagePos = beforeKonva.absolutePosition();
@@ -710,10 +814,43 @@ document.addEventListener("DOMContentLoaded", function () {
           beforeKonva.width(cropWidth);
           beforeKonva.height(cropHeight);
           layer.draw();
-          // Remove cropping rectangle and transformer after applying crop
+          // Remove cropping rectangle and transformer after cropping
           croppingRect.destroy();
           transformer.destroy();
           layer.draw();
         });
         
-        // Reset Crop button event: restore original before image dimensions and re-add cropping rectangl
+        // Reset Crop button event
+        document.getElementById("reset-crop-btn").addEventListener("click", function() {
+          beforeKonva.crop({ x: 0, y: 0, width: beforeImg.width, height: beforeImg.height });
+          beforeKonva.width(stage.width() / 2);
+          beforeKonva.height(stage.height());
+          if (croppingRect) { croppingRect.destroy(); }
+          if (transformer) { transformer.destroy(); }
+          croppingRect = new Konva.Rect({
+            x: beforeKonva.x(),
+            y: beforeKonva.y(),
+            width: beforeKonva.width(),
+            height: beforeKonva.height(),
+            stroke: 'red',
+            dash: [4, 4],
+            draggable: true
+          });
+          layer.add(croppingRect);
+          transformer = new Konva.Transformer({
+            nodes: [croppingRect],
+            enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right']
+          });
+          layer.add(transformer);
+          layer.draw();
+        });
+        
+      });
+    });
+  }
+  
+  // Close Advanced Editor Modal
+  $("#close-editor-btn").on("click", function() {
+    document.getElementById("comparison-editor-modal").style.display = "none";
+  });
+});
