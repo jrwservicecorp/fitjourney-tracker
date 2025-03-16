@@ -711,12 +711,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // Function to add selection on click for any node we add
     function makeSelectable(node) {
       node.on('click', function(evt) {
-        // Deselect previous
+        // Deselect previous node if any
         if (selectedNode && selectedNode !== node) {
           selectedNode.stroke(null);
         }
         selectedNode = node;
-        // Highlight the selected node with a stroke (if applicable)
+        // Highlight selected node with yellow stroke
         node.stroke("yellow");
         node.strokeWidth(2);
         layer.draw();
@@ -787,15 +787,14 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         
         // --- Enhanced Frame ---
-        // Build a minimalist, high-contrast frame
-        // Top, left, right borders are thin; bottom border is thicker with a gradient
+        // Build a minimalist frame with thin top, left, right borders and a thicker gradient bottom border.
+        // Branding text "FitJourneyTracker" is positioned in the bottom right, partly overlapping the image.
         const frameGroup = new Konva.Group();
         const thinBorder = 3;
         const thickBorder = 12;
         const stageWidth = stage.width();
         const stageHeight = stage.height();
         
-        // Top border (thin)
         const topBorder = new Konva.Rect({
           x: 0,
           y: 0,
@@ -803,7 +802,6 @@ document.addEventListener("DOMContentLoaded", function () {
           height: thinBorder,
           fill: "#111"
         });
-        // Left border (thin)
         const leftBorder = new Konva.Rect({
           x: 0,
           y: 0,
@@ -811,7 +809,6 @@ document.addEventListener("DOMContentLoaded", function () {
           height: stageHeight,
           fill: "#111"
         });
-        // Right border (thin)
         const rightBorder = new Konva.Rect({
           x: stageWidth - thinBorder,
           y: 0,
@@ -819,7 +816,6 @@ document.addEventListener("DOMContentLoaded", function () {
           height: stageHeight,
           fill: "#111"
         });
-        // Bottom border (thick with gradient)
         const bottomBorder = new Konva.Rect({
           x: 0,
           y: stageHeight - thickBorder,
@@ -829,8 +825,6 @@ document.addEventListener("DOMContentLoaded", function () {
           fillLinearGradientEndPoint: { x: stageWidth, y: 0 },
           fillLinearGradientColorStops: [0, "#333", 0.5, "#d00", 1, "#333"]
         });
-        // Branding text positioned in the bottom right,
-        // partly overlapping the bottom border and the image
         const branding = new Konva.Text({
           x: stageWidth - 240,
           y: stageHeight - thickBorder - 40,
@@ -845,18 +839,16 @@ document.addEventListener("DOMContentLoaded", function () {
         // --- End Enhanced Frame ---
         
         // "Show Data" button event:
-        // Prompt the user for a date range, then generate a Chart.js chart using weight trends from dataLogs.
+        // Prompt the user for a start and end date, then generate a Chart.js chart using weight trends.
         document.getElementById("show-data-btn").addEventListener("click", function() {
           const startDate = prompt("Enter start date (YYYY-MM-DD):", "2023-01-01");
           const endDate = prompt("Enter end date (YYYY-MM-DD):", "2023-03-01");
           if (!startDate || !endDate) return;
-          // Filter dataLogs for dates within range (assuming date strings in YYYY-MM-DD)
           const filteredData = dataLogs.filter(d => d.date >= startDate && d.date <= endDate);
           if (filteredData.length === 0) {
             alert("No data for that range.");
             return;
           }
-          // Sort filtered data by date
           filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
           const labels = filteredData.map(d => d.date);
           const weights = filteredData.map(d => d.weight);
@@ -884,7 +876,6 @@ document.addEventListener("DOMContentLoaded", function () {
               scales: { x: { display: false }, y: { display: false } }
             }
           });
-          // After chart is rendered, convert to image and add overlay
           setTimeout(function() {
             const dataURL = tempCanvas.toDataURL();
             const dataImage = new Image();
@@ -907,13 +898,58 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         
         // Delete Element button event:
-        document.getElementById("delete-btn").addEventListener("click", function() {
-          if (selectedNode) {
-            selectedNode.destroy();
-            selectedNode = null;
+        const deleteBtn = document.getElementById("delete-btn");
+        if (deleteBtn) {
+          deleteBtn.addEventListener("click", function() {
+            if (selectedNode) {
+              selectedNode.destroy();
+              selectedNode = null;
+              layer.draw();
+            } else {
+              alert("No element selected.");
+            }
+          });
+        } else {
+          console.error("delete-btn element not found.");
+        }
+        
+        // Add Text Button: creates a new draggable text node
+        document.getElementById("add-text-btn").addEventListener("click", function() {
+          const customText = prompt("Enter custom text:");
+          if (customText) {
+            const customTextNode = new Konva.Text({
+              x: stage.width() / 2 - 50,
+              y: stage.height() / 2,
+              text: customText,
+              fontSize: 24,
+              fontFamily: 'Montserrat',
+              fill: 'yellow',
+              draggable: true
+            });
+            layer.add(customTextNode);
+            makeSelectable(customTextNode);
+            layer.draw();
+          }
+        });
+        
+        // Edit Text Button: prompts to update the text, color, and rotation for the selected text node
+        document.getElementById("edit-text-btn").addEventListener("click", function() {
+          if (selectedNode && selectedNode.className === 'Text') {
+            const newText = prompt("Enter new text:", selectedNode.text());
+            if (newText !== null) {
+              selectedNode.text(newText);
+            }
+            const newColor = prompt("Enter new color (e.g., #ff0):", selectedNode.fill());
+            if (newColor !== null) {
+              selectedNode.fill(newColor);
+            }
+            const newAngle = prompt("Enter rotation angle in degrees:", selectedNode.rotation());
+            if (newAngle !== null) {
+              selectedNode.rotation(parseFloat(newAngle));
+            }
             layer.draw();
           } else {
-            alert("No element selected.");
+            alert("Please select a text element to edit.");
           }
         });
         
