@@ -6,7 +6,7 @@
 body {
   font-family: 'Montserrat', sans-serif;
   background-color: #f6f6f6;
-  color: #333;
+  color: #eee;
   margin: 0;
   padding: 0;
 }
@@ -31,13 +31,13 @@ header h1 {
 }
 .navbar .btn-group .nav-btn {
   background: #fff;
-  color: #333;
+  color: #000;
   border: 2px solid #000;
   border-radius: 10px;
   padding: 10px 20px;
   margin: 0 5px;
   transition: background 0.3s, color 0.3s, transform 0.2s;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 .navbar .btn-group .nav-btn:hover,
 .navbar .btn-group .nav-btn.active {
@@ -57,44 +57,45 @@ header h1 {
 
 /* Card / Tile Styles */
 .card, .tile {
-  background: #fff;
+  background: #222;
   border: none;
   border-radius: 12px;
   padding: 15px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 .card .card-title {
   font-size: 1.5em;
   font-weight: 700;
   margin-bottom: 15px;
-  color: #000;
-  border-bottom: 2px solid #eee;
+  color: #fff;
+  border-bottom: 2px solid #444;
   padding-bottom: 10px;
 }
 
 /* Form Labels */
 .form-label.form-header {
   font-weight: 600;
-  color: #555;
+  color: #ccc;
 }
 
 /* USDA Search Results */
 #usda-search-results .food-item {
   padding: 10px;
   margin-bottom: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid #444;
   border-radius: 8px;
-  background: #fafafa;
+  background: #333;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
+  color: #fff;
 }
 #usda-search-results .food-item:hover {
-  background-color: #e0e0e0;
+  background-color: #555;
   transform: scale(1.02);
 }
 
-/* Modal and Advanced Editor Styles */
+/* Advanced Editor Modal */
 .modal {
   display: none;
   position: fixed;
@@ -104,17 +105,17 @@ header h1 {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(0,0,0,0.75);
+  background-color: rgba(0,0,0,0.85);
 }
 .modal-content {
-  background: #222;
-  margin: 5% auto;
+  background: #111;
+  margin: 3% auto;
   padding: 0;
   border: none;
   width: 950px;
   max-width: 95%;
   border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.8);
 }
 .modal-toolbar {
   background: #000;
@@ -142,15 +143,27 @@ header h1 {
 
 /* Advanced Editor Stage Container */
 #comparison-editor-container {
-  width: 100%;
+  width: 900px;
   height: 600px;
+  position: relative;
+  background: linear-gradient(135deg, #000, #333);
+}
+
+/* Frame Divider (checkered border applied only to frame) */
+.frame-divider {
+  position: absolute;
+  top: 50px;
+  left: 450px;
+  width: 2px;
+  height: 550px;
   background: repeating-linear-gradient(
     45deg,
-    #000,
-    #000 10px,
-    #333 10px,
-    #333 20px
+    rgba(255,255,255,0.2),
+    rgba(255,255,255,0.2) 5px,
+    rgba(0,0,0,0.2) 5px,
+    rgba(0,0,0,0.2) 10px
   );
+  pointer-events: none;
 }
 
 /* Footer */
@@ -159,6 +172,7 @@ footer {
   padding: 15px 0;
   text-align: center;
   font-size: 0.9em;
+  color: #000;
 }
 
 /* Responsive */
@@ -166,5 +180,5 @@ footer {
   header h1 { font-size: 2em; }
   .navbar .btn-group .nav-btn { padding: 8px 12px; font-size: 0.9em; }
   .card, .tile { margin: 10px auto; padding: 15px; }
-  #comparison-editor-container { height: 400px; }
+  #comparison-editor-container { width: 100%; height: 400px; }
 }
