@@ -8,7 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
   <!-- Bootstrap CSS -->
   <link href="libs/bootstrap/bootstrap.min.css" rel="stylesheet" />
+  <!-- Custom Styles -->
   <link rel="stylesheet" href="style.css" />
+  <!-- TwentyTwenty CSS -->
   <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css" />
   
   <!-- Local Libraries -->
@@ -47,10 +49,10 @@
   </nav>
 
   <main id="main-app" class="container my-4">
-    <!-- Dashboard Section (full content from your current version) -->
+    <!-- Dashboard Section -->
     <section id="dashboard-section" class="tile">
-      <!-- Dashboard content such as charts, summaries, and daily goals -->
       <h2 class="dashboard-title">Dashboard</h2>
+      <!-- Dashboard content (charts, summaries, daily goals, etc.) -->
       <!-- Weight Chart -->
       <div class="row">
         <div class="col-md-6 mb-4">
@@ -158,7 +160,6 @@
     <!-- Nutrition Log Section -->
     <section id="nutrition-section" class="tile" style="display:none;">
       <h2 class="dashboard-title">Nutrition Log</h2>
-      <!-- Whole Food Toggle -->
       <div class="form-check mb-3">
         <input class="form-check-input" type="checkbox" id="whole-food-toggle" />
         <label class="form-check-label" for="whole-food-toggle">Show Only Whole Foods</label>
@@ -170,7 +171,6 @@
               <label for="food-name" class="form-label form-header">Food Name</label>
               <input id="food-name" type="text" class="form-control" placeholder="e.g., Oatmeal" required />
             </div>
-            <!-- Quantity & Unit fields -->
             <div class="col-md-2">
               <label for="food-quantity" class="form-label form-header">Quantity</label>
               <input id="food-quantity" type="number" step="any" class="form-control" placeholder="e.g., 1" required />
@@ -365,73 +365,36 @@
             <button id="tt-update" class="btn btn-primary">Update Comparison</button>
             <button id="open-editor-btn" class="btn btn-outline-secondary ms-2">Open Advanced Editor</button>
           </div>
-          <div id="twentytwenty-container" class="twentytwenty-container">
-            <!-- Force images to display side-by-side (50% each) -->
-            <img class="twentytwenty-before" src="https://placehold.co/300x400?text=Before" alt="Before" style="float:left; width:50%;" />
-            <img class="twentytwenty-after" src="https://placehold.co/300x400?text=After" alt="After" style="float:right; width:50%;" />
-            <div style="clear:both;"></div>
+          <div id="twentytwenty-container" class="comparison-container">
+            <div class="comparison-image">
+              <img class="twentytwenty-before" src="https://placehold.co/300x400?text=Before" alt="Before">
+            </div>
+            <div class="comparison-image">
+              <img class="twentytwenty-after" src="https://placehold.co/300x400?text=After" alt="After">
+            </div>
+            <div class="divider"></div>
           </div>
         </div>
       </div>
-      
-      <!-- Export Report & Social Share -->
-      <div class="card mb-4" id="export-section">
-        <div class="card-body">
-          <h3 class="card-title">Export Options</h3>
-          <button id="export-report-btn" class="btn btn-success">Export Report as Image</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-body">
-          <h3 class="card-title">Share Your Progress</h3>
-          <button class="share-btn btn btn-outline-primary me-2" data-platform="Facebook">Share on Facebook</button>
-          <button class="share-btn btn btn-outline-info me-2" data-platform="Twitter">Share on Twitter</button>
-          <button class="share-btn btn btn-outline-danger" data-platform="Instagram">Share on Instagram</button>
-        </div>
-      </div>
     </section>
-    
-    <!-- Advanced Comparison Editor Modal -->
-    <div id="comparison-editor-modal" class="modal">
-      <div class="modal-content">
-        <div class="modal-toolbar">
-          <button id="rotate-left-btn" class="toolbar-btn">⟲</button>
-          <button id="rotate-right-btn" class="toolbar-btn">⟲</button>
-          <button id="scale-up-btn" class="toolbar-btn">＋</button>
-          <button id="scale-down-btn" class="toolbar-btn">－</button>
-          <button id="crop-btn" class="toolbar-btn">Crop</button>
-          <button id="reset-editor-btn" class="toolbar-btn">Reset</button>
-          <button id="add-text-btn" class="toolbar-btn">Add Text</button>
-          <button id="add-data-overlay-btn" class="toolbar-btn">Add Data</button>
-          <button id="export-comparison-btn" class="toolbar-btn">Export</button>
-          <button id="close-comparison-editor" class="toolbar-btn close-btn">Close</button>
-        </div>
-        <div id="comparison-editor-container"></div>
-      </div>
-    </div>
   </main>
   
-  <footer class="bg-light">
-    <div class="container text-center">
-      <p>&copy; 2025 FitJourney Tracker</p>
+  <!-- Advanced Editor Modal -->
+  <div id="comparison-editor-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-toolbar">
+        <button class="toolbar-btn" id="close-editor-btn">Close Editor</button>
+      </div>
+      <div id="comparison-editor-container" class="comparison-editor-container">
+        <!-- Advanced editor content will be rendered here via Konva -->
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 FitJourney Tracker. All rights reserved.</p>
     </div>
   </footer>
-  
-  <!-- Bootstrap Bundle with Popper -->
-  <script src="libs/bootstrap/bootstrap.bundle.min.js"></script>
-  
-  <!-- Inline Navigation Script -->
-  <script>
-    document.querySelectorAll(".nav-btn").forEach(function(btn) {
-      btn.addEventListener("click", function () {
-        const target = this.getAttribute("data-target");
-        document.querySelectorAll("section").forEach(function(sec) { sec.style.display = "none"; });
-        document.querySelector(target).style.display = "block";
-        document.querySelectorAll(".nav-btn").forEach(function(b) { b.classList.remove("active"); });
-        this.classList.add("active");
-      });
-    });
-    document.querySelector("#dashboard-section").style.display = "block";
-  </script>
 </body>
 </html>
