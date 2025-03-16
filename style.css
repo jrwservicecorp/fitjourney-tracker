@@ -50,7 +50,7 @@ header h1 {
 .dashboard-title {
   font-size: 1.8em;
   font-weight: 700;
-  color: #000;
+  color: #fff; /* White text for contrast */
   margin-bottom: 20px;
   text-transform: uppercase;
 }
@@ -137,9 +137,6 @@ header h1 {
 .toolbar-btn:hover {
   background: #666;
 }
-.close-btn {
-  background: #b00;
-}
 
 /* Advanced Editor Stage Container */
 .comparison-editor-container {
@@ -150,7 +147,7 @@ header h1 {
   overflow: hidden;
 }
 
-/* Frame for advanced editor (if applied) */
+/* Frame Border (for advanced editor) */
 .frame-border {
   position: absolute;
   top: 0;
@@ -205,4 +202,22 @@ footer {
   background: #fff;
   z-index: 10;
   transform: translateX(-1px);
+}
+
+/* Gallery Grid for Uploaded Images */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.gallery .photo-entry {
+  background: #333;
+  padding: 5px;
+  border-radius: 8px;
+  text-align: center;
+}
+.gallery .photo-entry img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
 }
