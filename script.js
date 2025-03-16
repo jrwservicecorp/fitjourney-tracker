@@ -375,7 +375,9 @@ document.addEventListener("DOMContentLoaded", function () {
               wholeFoodKeywords.forEach(kw => {
                 if (desc.includes(kw) || category.includes(kw)) bonus += 50;
               });
-              if (desc.trim() === "chicken") { bonus -= 100; }
+              if (desc.trim() === "chicken") {
+                bonus -= 100;
+              }
               processedKeywords.forEach(kw => {
                 if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
               });
@@ -397,9 +399,9 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             validFoods.sort((a, b) => b.adjustedScore - a.adjustedScore);
             validFoods.forEach(food => {
-              const energy = (() => { 
-                const nutrient = food.foodNutrients.find(n => n.nutrientName === "Energy"); 
-                return nutrient ? nutrient.value : "N/A"; 
+              const energy = (() => {
+                const nutrient = food.foodNutrients.find(n => n.nutrientName === "Energy");
+                return nutrient ? nutrient.value : "N/A";
               })();
               const servingSize = food.servingSize ? food.servingSize : "N/A";
               const servingUnit = food.servingSizeUnit ? food.servingSizeUnit : "";
@@ -766,7 +768,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const percentageText = new Konva.Text({
           x: divider.x() - 30,
           y: divider.y() - 25,
-          text: "Before: " + Math.round((divider.x()/stage.width())*100) + "%",
+          text: "Before: " + Math.round((divider.x() / stage.width()) * 100) + "%",
           fontSize: 18,
           fill: "white"
         });
@@ -777,7 +779,7 @@ document.addEventListener("DOMContentLoaded", function () {
           beforeKonva.width(pos);
           afterKonva.x(pos);
           afterKonva.width(stage.width() - pos);
-          percentageText.text("Before: " + Math.round((pos/stage.width())*100) + "%");
+          percentageText.text("Before: " + Math.round((pos / stage.width()) * 100) + "%");
           percentageText.x(pos - 30);
           layer.batchDraw();
         });
@@ -845,6 +847,7 @@ document.addEventListener("DOMContentLoaded", function () {
           layer.draw();
         });
         
+        layer.draw();
       });
     });
   }
