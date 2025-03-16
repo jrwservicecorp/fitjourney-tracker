@@ -635,14 +635,11 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   
   $(document).ready(function () {
-    if ($.fn.twentytwenty) {
-      $("#twentytwenty-container").twentytwenty();
-    } else {
-      console.error("TwentyTwenty plugin failed to load.");
-    }
+    // For the main page comparison, we rely on our own flex layout – remove TwentyTwenty init
+    // If needed, you can reinitialize it with custom settings here.
   });
   
-  // Updated comparison update using flexbox container
+  // Updated main comparison: Do not use TwentyTwenty so that the divider remains a thin 2px line.
   $("#tt-update").on("click", function() {
     console.log("Update comparison button clicked");
     const beforeIndex = parseInt($("#tt-before").val());
@@ -664,15 +661,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterDiv = $('<div class="comparison-image"></div>').append(`<img src="${afterPhoto.src}" alt="After">`);
     const divider = $('<div class="divider"></div>');
     container.append(beforeDiv, afterDiv, divider);
-    setTimeout(function() {
-      if ($.fn.twentytwenty) {
-        container.twentytwenty();
-      }
-      console.log("Comparison updated with before and after photos");
-    }, 300);
+    // No TwentyTwenty init here – our CSS and layout should handle it.
+    console.log("Main comparison updated.");
   });
   
-  // Advanced Comparison Editor using Konva.js with enhanced controls
+  // Advanced Editor using Konva.js with enhanced controls
   $("#open-editor-btn").on("click", function() {
     openComparisonEditor();
   });
@@ -764,39 +757,46 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         layer.add(divider);
         
-        // Dynamic percentage text overlay for before image
-        const percentageText = new Konva.Text({
-          x: divider.x() - 30,
-          y: divider.y() - 25,
-          text: "Before: " + Math.round((divider.x() / stage.width()) * 100) + "%",
-          fontSize: 18,
-          fill: "white"
-        });
-        layer.add(percentageText);
+        // Remove the percentage text overlay (do not add it)
         
+        // Add watermark text overlay inside the frame (initially hidden if no frame applied)
+        const watermark = new Konva.Text({
+          x: 10,
+          y: stage.height() - 40,
+          text: "Powered by FitJourney",
+          fontSize: 22,
+          fontFamily: 'Montserrat',
+          fill: 'white',
+          opacity: 0.8
+        });
+        layer.add(watermark);
+        
+        // "Show Data Overlay" button event: overlay some site data (example text here)
+        document.getElementById("show-data-btn").addEventListener("click", function() {
+          const dataOverlay = new Konva.Text({
+            x: stage.width() / 2 - 100,
+            y: stage.height() / 2 - 20,
+            text: "Site Data Overlay",
+            fontSize: 26,
+            fontFamily: 'Montserrat',
+            fill: 'cyan',
+            opacity: 0.8,
+            draggable: true
+          });
+          layer.add(dataOverlay);
+          layer.draw();
+        });
+        
+        // Divider drag event to update images
         divider.on("dragmove", function() {
           const pos = divider.x();
           beforeKonva.width(pos);
           afterKonva.x(pos);
           afterKonva.width(stage.width() - pos);
-          percentageText.text("Before: " + Math.round((pos / stage.width()) * 100) + "%");
-          percentageText.x(pos - 30);
           layer.batchDraw();
         });
         
-        // Add a default watermark at the bottom
-        const watermark = new Konva.Text({
-          x: 10,
-          y: stage.height() - 30,
-          text: "Fit Journey Tracker",
-          fontSize: 20,
-          fontFamily: 'Montserrat',
-          fill: 'white',
-          opacity: 0.7
-        });
-        layer.add(watermark);
-        
-        // Apply Frame Button: Adds a gradient frame overlay
+        // Apply Frame Button: adds a heavy, patterned frame with a gradient effect
         document.getElementById("apply-frame-btn").addEventListener("click", function() {
           if (frameRect) {
             frameRect.destroy();
@@ -806,17 +806,17 @@ document.addEventListener("DOMContentLoaded", function () {
             y: 0,
             width: stage.width(),
             height: stage.height(),
-            strokeWidth: 10,
+            strokeWidth: 12,
             strokeLinearGradientStartPoint: { x: 0, y: 0 },
             strokeLinearGradientEndPoint: { x: stage.width(), y: stage.height() },
-            strokeLinearGradientColorStops: [0, 'gold', 1, 'red'],
+            strokeLinearGradientColorStops: [0, '#888', 0.5, '#fff', 1, '#888'],
             listening: false
           });
           layer.add(frameRect);
           layer.draw();
         });
         
-        // Reset Frame Button: Removes the frame overlay
+        // Reset Frame Button: removes the frame overlay
         document.getElementById("reset-frame-btn").addEventListener("click", function() {
           if (frameRect) {
             frameRect.destroy();
