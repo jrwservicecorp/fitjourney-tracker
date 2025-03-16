@@ -1,7 +1,7 @@
-/* script.js - FitJourney Tracker - Modern Edition - JS v3.7.0 */
+/* script.js - FitJourney Tracker - Modern Edition - JS v3.7.1 */
 
 // Set the app version
-const APP_VERSION = "v3.7.0";
+const APP_VERSION = "v3.7.1";
 // USDA FoodData Central API Key
 const USDA_API_KEY = "DBS7VaqKcIKES5QY36b8Cw8bdk80CHzoufoxjeh8";
 
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let editorStage, searchTimeout;
   
   // Advanced Editor globals
-  let activeImage = null; // currently selected image in the editor
+  let activeImage = null; // currently selected image in the advanced editor
   let cropModeActive = false;
   let cropRect = null;
   
@@ -284,7 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
               return;
             }
-            // Adjust scores: bonus for SR Legacy and whole-food keywords; penalty for generic "chicken" and processed keywords; small serving sizes get a penalty.
+            // Adjust scores for whole food prioritization
             validFoods.forEach(food => {
               let bonus = 0;
               if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
@@ -301,7 +301,6 @@ document.addEventListener("DOMContentLoaded", function () {
               if (!isNaN(servingSizeNum) && servingSizeNum < 50) bonus -= 50;
               food.adjustedScore = (food.score || 0) + bonus;
             });
-            // If "Show Only Whole Foods" toggle is checked, filter out foods without whole-food keywords
             const onlyWhole = $("#whole-food-toggle").is(":checked");
             if (onlyWhole) {
               validFoods = validFoods.filter(food => {
@@ -314,7 +313,6 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No whole food results found. Please refine your search or add a custom food.</p>");
               return;
             }
-            // Sort by adjustedScore descending
             validFoods.sort((a, b) => b.adjustedScore - a.adjustedScore);
             validFoods.forEach(food => {
               const energy = (() => { 
@@ -534,7 +532,6 @@ document.addEventListener("DOMContentLoaded", function () {
           console.log("USDA response:", data);
           let resultsHtml = "";
           if (data.foods && data.foods.length > 0) {
-            // Filter out foods with undesired serving units (e.g., IU)
             let validFoods = data.foods.filter(food =>
               food.foodNutrients && food.foodNutrients.some(n => n.nutrientName === "Energy") &&
               !(food.servingSizeUnit && food.servingSizeUnit.toUpperCase() === "IU")
@@ -543,7 +540,6 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
               return;
             }
-            // Adjust scores: bonus for SR Legacy and whole-food keywords; penalty for generic "chicken" and processed keywords; small serving sizes get a penalty.
             validFoods.forEach(food => {
               let bonus = 0;
               if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
@@ -560,7 +556,6 @@ document.addEventListener("DOMContentLoaded", function () {
               if (!isNaN(servingSizeNum) && servingSizeNum < 50) bonus -= 50;
               food.adjustedScore = (food.score || 0) + bonus;
             });
-            // If "Show Only Whole Foods" toggle is checked, filter out foods without whole-food keywords
             const onlyWhole = $("#whole-food-toggle").is(":checked");
             if (onlyWhole) {
               validFoods = validFoods.filter(food => {
@@ -573,7 +568,6 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No whole food results found. Please refine your search or add a custom food.</p>");
               return;
             }
-            // Sort by adjustedScore descending
             validFoods.sort((a, b) => b.adjustedScore - a.adjustedScore);
             validFoods.forEach(food => {
               const energy = (() => { 
@@ -778,7 +772,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#meals-display").html(html);
   }
   
-  // Photo Upload & Comparison functions remain unchanged...
+  // Photo Upload & Comparison functions (retain your previous functionality)
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
@@ -882,76 +876,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     // Show the modal
     document.getElementById("comparison-editor-modal").style.display = "block";
+    const containerEl = document.getElementById("comparison-editor-container");
+    containerEl.style.width = "900px";
+    containerEl.style.height = "600px";
     $("#comparison-editor-container").empty();
     
-    // Create a larger Konva stage (900x600) for better editing
+    // Create two layers: one for images and overlays, one for UI (frame & header)
     const stage = new Konva.Stage({
       container: 'comparison-editor-container',
       width: 900,
       height: 600
     });
-    const layer = new Konva.Layer();
-    stage.add(layer);
+    const imageLayer = new Konva.Layer();
+    const uiLayer = new Konva.Layer();
+    stage.add(imageLayer);
+    stage.add(uiLayer);
     
-    // Add a background gradient with noise texture (simulate with dotted pattern)
-    const bg = new Konva.Rect({
-      x: 0,
-      y: 0,
-      width: stage.width(),
-      height: stage.height(),
-      fillLinearGradientStartPoint: { x: 0, y: 0 },
-      fillLinearGradientEndPoint: { x: stage.width(), y: stage.height() },
-      fillLinearGradientColorStops: [0, '#000', 1, '#444'],
-      // For noise effect, we can overlay a semi-transparent dotted pattern using a pattern fill (this example uses a simple data URI)
-      fillPatternImage: (function(){
-        const canvas = document.createElement('canvas');
-        canvas.width = 10; canvas.height = 10;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'rgba(255,255,255,0.05)';
-        ctx.fillRect(0,0,10,10);
-        ctx.fillStyle = 'rgba(0,0,0,0.05)';
-        ctx.fillRect(0,0,5,5);
-        return canvas;
-      })(),
-      fillPatternRepeat: 'repeat',
-      listening: false
-    });
-    layer.add(bg);
-    
-    // Add a frame border
-    const frame = new Konva.Rect({
-      x: 0,
-      y: 0,
-      width: stage.width(),
-      height: stage.height(),
-      stroke: '#fff',
-      strokeWidth: 6,
-      listening: false
-    });
-    layer.add(frame);
-    
-    // Add a header bar for branding
-    const headerBar = new Konva.Rect({
-      x: 0,
-      y: 0,
-      width: stage.width(),
-      height: 50,
-      fill: '#111',
-      listening: false
-    });
-    layer.add(headerBar);
-    const headerText = new Konva.Text({
-      x: 20,
-      y: 15,
-      text: "Powered by FitJourney Tracker",
-      fontSize: 20,
-      fontFamily: 'Montserrat',
-      fill: '#fff',
-      listening: false
-    });
-    layer.add(headerText);
-    
-    // Load and add before image: scale to fill height (600-50 header) and justify left
+    // Load before image into imageLayer: scale to height (600-50 header) and justify left
     Konva.Image.fromURL(beforePhoto.src, function(img) {
       const origWidth = img.image.width;
       const origHeight = img.image.height;
@@ -965,11 +906,11 @@ document.addEventListener("DOMContentLoaded", function () {
         draggable: true
       });
       img.on("click", function() { activeImage = img; });
-      layer.add(img);
-      layer.draw();
+      imageLayer.add(img);
+      imageLayer.draw();
     });
     
-    // Load and add after image: scale to fill height (600-50 header) and justify right
+    // Load after image into imageLayer: scale to height and justify right
     Konva.Image.fromURL(afterPhoto.src, function(img) {
       const origWidth = img.image.width;
       const origHeight = img.image.height;
@@ -983,9 +924,67 @@ document.addEventListener("DOMContentLoaded", function () {
         draggable: true
       });
       img.on("click", function() { activeImage = img; });
-      layer.add(img);
-      layer.draw();
+      imageLayer.add(img);
+      imageLayer.draw();
     });
+    
+    // UI Layer: Draw background gradient with noise, header bar, and frame
+    const uiBg = new Konva.Rect({
+      x: 0,
+      y: 0,
+      width: stage.width(),
+      height: stage.height(),
+      fillLinearGradientStartPoint: { x: 0, y: 0 },
+      fillLinearGradientEndPoint: { x: stage.width(), y: stage.height() },
+      fillLinearGradientColorStops: [0, '#000', 1, '#333'],
+      fillPatternImage: (function(){
+        const canvas = document.createElement('canvas');
+        canvas.width = 10; canvas.height = 10;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'rgba(255,255,255,0.05)';
+        ctx.fillRect(0,0,10,10);
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.fillRect(0,0,5,5);
+        return canvas;
+      })(),
+      fillPatternRepeat: 'repeat',
+      listening: false
+    });
+    uiLayer.add(uiBg);
+    
+    // Add header bar
+    const headerBar = new Konva.Rect({
+      x: 0,
+      y: 0,
+      width: stage.width(),
+      height: 50,
+      fill: '#000',
+      listening: false
+    });
+    uiLayer.add(headerBar);
+    const headerText = new Konva.Text({
+      x: 20,
+      y: 15,
+      text: "Powered by FitJourney Tracker",
+      fontSize: 20,
+      fontFamily: 'Montserrat',
+      fill: '#fff',
+      listening: false
+    });
+    uiLayer.add(headerText);
+    
+    // Add frame border
+    const frame = new Konva.Rect({
+      x: 0,
+      y: 0,
+      width: stage.width(),
+      height: stage.height(),
+      stroke: '#fff',
+      strokeWidth: 6,
+      listening: false
+    });
+    uiLayer.add(frame);
+    uiLayer.draw();
     
     editorStage = stage;
     activeImage = null;
@@ -1008,12 +1007,11 @@ document.addEventListener("DOMContentLoaded", function () {
     activeImage.getLayer().draw();
   }
   
-  // Toggle crop mode on active image
+  // Toggle crop mode for active image
   function toggleCropMode() {
     if (!activeImage) { alert("Please select an image to crop."); return; }
     const layer = editorStage.getLayers()[0];
     if (!cropModeActive) {
-      // Enter crop mode: create a cropping rectangle over the active image
       const bounds = activeImage.getClientRect();
       cropRect = new Konva.Rect({
         x: activeImage.x() + 10,
@@ -1030,7 +1028,6 @@ document.addEventListener("DOMContentLoaded", function () {
       cropModeActive = true;
       alert("Crop mode activated. Adjust the red rectangle, then click Crop again to apply.");
     } else {
-      // Apply crop based on cropRect
       const imagePos = activeImage.position();
       const rectPos = cropRect.position();
       const cropX = rectPos.x - imagePos.x;
@@ -1038,7 +1035,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const cropWidth = cropRect.width();
       const cropHeight = cropRect.height();
       activeImage.crop({ x: cropX, y: cropY, width: cropWidth, height: cropHeight });
-      // Optionally, update image dimensions (here we leave scaling as is)
       cropRect.destroy();
       cropRect = null;
       cropModeActive = false;
@@ -1047,7 +1043,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
   
-  // Reset editor (reload images)
+  // Reset advanced editor
   function resetEditor() {
     if (editorStage) {
       editorStage.destroy();
@@ -1055,11 +1051,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
   
-  // Add editable text overlay using Konva.IText
+  // Add editable text overlay using Konva.IText with fallback
   $("#add-text-btn").on("click", function() {
     if (editorStage) {
       const layer = editorStage.getLayers()[0];
-      const text = new Konva.IText({
+      const EditableText = (typeof Konva.IText === 'function') ? Konva.IText : Konva.Text;
+      const text = new EditableText({
         x: 50,
         y: 70,
         text: 'New Overlay',
@@ -1067,21 +1064,21 @@ document.addEventListener("DOMContentLoaded", function () {
         fontFamily: 'Montserrat',
         fill: '#fff',
         draggable: true,
-        padding: 8,
-        editable: true
+        padding: 8
       });
       layer.add(text);
       layer.draw();
     }
   });
   
-  // Add data overlay (for numeric trends, measurements, etc.)
+  // Add data overlay using Konva.IText with fallback
   $("#add-data-overlay-btn").on("click", function() {
     if (editorStage) {
       const layer = editorStage.getLayers()[0];
       const overlayText = prompt("Enter data overlay text (e.g., 'Start: 200 lbs | End: 190 lbs')");
       if (overlayText) {
-        const dataOverlay = new Konva.IText({
+        const EditableText = (typeof Konva.IText === 'function') ? Konva.IText : Konva.Text;
+        const dataOverlay = new EditableText({
           x: 100,
           y: editorStage.height() - 80,
           text: overlayText,
@@ -1089,8 +1086,7 @@ document.addEventListener("DOMContentLoaded", function () {
           fontFamily: 'Montserrat',
           fill: '#fff',
           draggable: true,
-          padding: 8,
-          editable: true
+          padding: 8
         });
         layer.add(dataOverlay);
         layer.draw();
@@ -1126,7 +1122,7 @@ document.addEventListener("DOMContentLoaded", function () {
       container.empty();
       const $editedImg = $(`<img src="${dataURL}" alt="Edited Comparison">`);
       container.append($editedImg);
-      $("#comparison-editor-modal").hide();
+      $("#comparison-editor-modal").style.display = "none";
       editorStage.destroy();
       editorStage = null;
       console.log("Advanced editor changes saved to main comparison area");
@@ -1134,7 +1130,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   
   $("#close-comparison-editor").on("click", function() {
-    $("#comparison-editor-modal").hide();
+    document.getElementById("comparison-editor-modal").style.display = "none";
     if (editorStage) { editorStage.destroy(); editorStage = null; }
   });
   
