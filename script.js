@@ -634,12 +634,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
   
-  $(document).ready(function () {
-    // For the main page comparison, we rely on our own flex layout – remove TwentyTwenty init
-    // If needed, you can reinitialize it with custom settings here.
-  });
-  
-  // Updated main comparison: Do not use TwentyTwenty so that the divider remains a thin 2px line.
+  // Main page comparison: use a flex layout so that each image takes 50%
   $("#tt-update").on("click", function() {
     console.log("Update comparison button clicked");
     const beforeIndex = parseInt($("#tt-before").val());
@@ -657,11 +652,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    const beforeDiv = $('<div class="comparison-image"></div>').append(`<img src="${beforePhoto.src}" alt="Before">`);
-    const afterDiv = $('<div class="comparison-image"></div>').append(`<img src="${afterPhoto.src}" alt="After">`);
+    // Create two divs for images with 50% width each and a 2px divider in between
+    const beforeDiv = $('<div class="comparison-image"></div>').css({ width: '50%', float: 'left' }).append(`<img src="${beforePhoto.src}" alt="Before">`);
+    const afterDiv = $('<div class="comparison-image"></div>').css({ width: '50%', float: 'right' }).append(`<img src="${afterPhoto.src}" alt="After">`);
     const divider = $('<div class="divider"></div>');
     container.append(beforeDiv, afterDiv, divider);
-    // No TwentyTwenty init here – our CSS and layout should handle it.
     console.log("Main comparison updated.");
   });
   
@@ -721,73 +716,41 @@ document.addEventListener("DOMContentLoaded", function () {
     
     loadImage(beforePhoto.src, function(beforeImg) {
       loadImage(afterPhoto.src, function(afterImg) {
+        const halfWidth = stage.width() / 2;
+        const fullHeight = stage.height();
         beforeKonva = new Konva.Image({
           x: 0,
           y: 0,
           image: beforeImg,
-          width: stage.width() / 2,
-          height: stage.height()
+          width: halfWidth,
+          height: fullHeight
         });
         afterKonva = new Konva.Image({
-          x: stage.width() / 2,
+          x: halfWidth,
           y: 0,
           image: afterImg,
-          width: stage.width() / 2,
-          height: stage.height()
+          width: halfWidth,
+          height: fullHeight
         });
         layer.add(beforeKonva);
         layer.add(afterKonva);
         
-        // Create a proportionate draggable divider (80% of stage height, centered vertically)
-        const dividerHeight = stage.height() * 0.8;
-        const dividerY = (stage.height() - dividerHeight) / 2;
+        // Create a thin divider (2px) that is draggable and sits between the images
         const divider = new Konva.Rect({
-          x: stage.width() / 2 - 1,
-          y: dividerY,
+          x: halfWidth - 1,
+          y: 0,
           width: 2,
-          height: dividerHeight,
+          height: fullHeight,
           fill: "white",
           draggable: true,
           dragBoundFunc: function(pos) {
             let newX = pos.x;
-            if (newX < 0) newX = 0;
-            if (newX > stage.width()) newX = stage.width();
-            return { x: newX, y: dividerY };
+            if (newX < 50) newX = 50;
+            if (newX > stage.width() - 50) newX = stage.width() - 50;
+            return { x: newX, y: 0 };
           }
         });
         layer.add(divider);
-        
-        // Remove the percentage text overlay (do not add it)
-        
-        // Add watermark text overlay inside the frame (initially hidden if no frame applied)
-        const watermark = new Konva.Text({
-          x: 10,
-          y: stage.height() - 40,
-          text: "Powered by FitJourney",
-          fontSize: 22,
-          fontFamily: 'Montserrat',
-          fill: 'white',
-          opacity: 0.8
-        });
-        layer.add(watermark);
-        
-        // "Show Data Overlay" button event: overlay some site data (example text here)
-        document.getElementById("show-data-btn").addEventListener("click", function() {
-          const dataOverlay = new Konva.Text({
-            x: stage.width() / 2 - 100,
-            y: stage.height() / 2 - 20,
-            text: "Site Data Overlay",
-            fontSize: 26,
-            fontFamily: 'Montserrat',
-            fill: 'cyan',
-            opacity: 0.8,
-            draggable: true
-          });
-          layer.add(dataOverlay);
-          layer.draw();
-        });
-        
-        // Divider drag event to update images
         divider.on("dragmove", function() {
           const pos = divider.x();
           beforeKonva.width(pos);
@@ -796,30 +759,120 @@ document.addEventListener("DOMContentLoaded", function () {
           layer.batchDraw();
         });
         
-        // Apply Frame Button: adds a heavy, patterned frame with a gradient effect
-        document.getElementById("apply-frame-btn").addEventListener("click", function() {
-          if (frameRect) {
-            frameRect.destroy();
-          }
-          frameRect = new Konva.Rect({
+        // --- Enhanced Frame ---
+        // Remove any existing frame if needed, then build a new frame group.
+        const frameGroup = new Konva.Group();
+        const frameThickness = 20;
+        // Top border: split into two segments with a break in the middle showing "///"
+        const topSegmentLeft = new Konva.Rect({
+          x: 0,
+          y: 0,
+          width: stage.width()/2 - 40,
+          height: frameThickness,
+          fill: 'grey'
+        });
+        const topSegmentRight = new Konva.Rect({
+          x: stage.width()/2 + 40,
+          y: 0,
+          width: stage.width()/2 - 40,
+          height: frameThickness,
+          fill: 'grey'
+        });
+        const topBreak = new Konva.Text({
+          x: stage.width()/2 - 35,
+          y: 0,
+          text: "///",
+          fontSize: 18,
+          fontFamily: "monospace",
+          fill: "white"
+        });
+        // Bottom border
+        const bottomBorder = new Konva.Rect({
+          x: 0,
+          y: stage.height() - frameThickness,
+          width: stage.width(),
+          height: frameThickness,
+          fill: 'grey'
+        });
+        // Left border
+        const leftBorder = new Konva.Rect({
+          x: 0,
+          y: 0,
+          width: frameThickness,
+          height: stage.height(),
+          fill: 'grey'
+        });
+        // Right border
+        const rightBorder = new Konva.Rect({
+          x: stage.width() - frameThickness,
+          y: 0,
+          width: frameThickness,
+          height: stage.height(),
+          fill: 'grey'
+        });
+        // Center watermark text on the frame
+        const frameWatermark = new Konva.Text({
+          x: stage.width()/2 - 100,
+          y: stage.height()/2 - 20,
+          text: "FitJourneyTracker",
+          fontSize: 32,
+          fontFamily: "Montserrat",
+          fill: "#eee",
+          opacity: 0.9
+        });
+        frameGroup.add(topSegmentLeft, topBreak, topSegmentRight, bottomBorder, leftBorder, rightBorder, frameWatermark);
+        layer.add(frameGroup);
+        // --- End Enhanced Frame ---
+        
+        // "Show Data Overlay" button event: add a sample overlay (here a semi-transparent chart area)
+        document.getElementById("show-data-btn").addEventListener("click", function() {
+          const overlayGroup = new Konva.Group({
+            x: stage.width() / 2 - 100,
+            y: stage.height() / 2 - 50,
+            opacity: 0.8
+          });
+          const overlayRect = new Konva.Rect({
             x: 0,
             y: 0,
-            width: stage.width(),
-            height: stage.height(),
-            strokeWidth: 12,
-            strokeLinearGradientStartPoint: { x: 0, y: 0 },
-            strokeLinearGradientEndPoint: { x: stage.width(), y: stage.height() },
-            strokeLinearGradientColorStops: [0, '#888', 0.5, '#fff', 1, '#888'],
-            listening: false
+            width: 200,
+            height: 100,
+            fill: "black"
           });
-          layer.add(frameRect);
+          const overlayText = new Konva.Text({
+            x: 10,
+            y: 35,
+            text: "Data Chart\nPlaceholder",
+            fontSize: 18,
+            fill: "lime"
+          });
+          overlayGroup.add(overlayRect, overlayText);
+          layer.add(overlayGroup);
           layer.draw();
         });
         
-        // Reset Frame Button: removes the frame overlay
-        document.getElementById("reset-frame-btn").addEventListener("click", function() {
-          if (frameRect) {
-            frameRect.destroy();
+        // Add Text Button: creates a new draggable text node
+        document.getElementById("add-text-btn").addEventListener("click", function() {
+          const customText = prompt("Enter custom text:");
+          if (customText) {
+            const customTextNode = new Konva.Text({
+              x: stage.width() / 2 - 50,
+              y: stage.height() / 2,
+              text: customText,
+              fontSize: 24,
+              fontFamily: 'Montserrat',
+              fill: 'yellow',
+              draggable: true
+            });
+            layer.add(customTextNode);
+            layer.draw();
+          }
+        });
+        
+        // Edit Text Button: for demo, prompt to change the watermark text in the frame
+        document.getElementById("edit-text-btn").addEventListener("click", function() {
+          const newText = prompt("Enter new text for frame watermark:", frameWatermark.text());
+          if (newText !== null) {
+            frameWatermark.text(newText);
             layer.draw();
           }
         });
@@ -842,49 +895,6 @@ document.addEventListener("DOMContentLoaded", function () {
           enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right']
         });
         layer.add(transformer);
-        layer.draw();
-        
-        // Crop button event: crop before image using cropping rectangle
-        document.getElementById("crop-btn").addEventListener("click", function() {
-          const rectPos = croppingRect.absolutePosition();
-          const imagePos = beforeKonva.absolutePosition();
-          const cropX = rectPos.x - imagePos.x;
-          const cropY = rectPos.y - imagePos.y;
-          const cropWidth = croppingRect.width() * croppingRect.scaleX();
-          const cropHeight = croppingRect.height() * croppingRect.scaleY();
-          beforeKonva.crop({ x: cropX, y: cropY, width: cropWidth, height: cropHeight });
-          beforeKonva.width(cropWidth);
-          beforeKonva.height(cropHeight);
-          layer.draw();
-          croppingRect.destroy();
-          transformer.destroy();
-          layer.draw();
-        });
-        
-        // Reset Crop button event: restore original before image and re-add cropping rectangle
-        document.getElementById("reset-crop-btn").addEventListener("click", function() {
-          beforeKonva.crop({ x: 0, y: 0, width: beforeImg.width, height: beforeImg.height });
-          beforeKonva.width(stage.width() / 2);
-          beforeKonva.height(stage.height());
-          if (croppingRect) { croppingRect.destroy(); }
-          if (transformer) { transformer.destroy(); }
-          croppingRect = new Konva.Rect({
-            x: beforeKonva.x(),
-            y: beforeKonva.y(),
-            width: beforeKonva.width(),
-            height: beforeKonva.height(),
-            stroke: 'red',
-            dash: [4, 4],
-            draggable: true
-          });
-          layer.add(croppingRect);
-          transformer = new Konva.Transformer({
-            nodes: [croppingRect],
-            enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right']
-          });
-          layer.add(transformer);
-          layer.draw();
-        });
         
         layer.draw();
       });
