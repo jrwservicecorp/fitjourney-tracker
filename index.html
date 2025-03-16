@@ -28,6 +28,7 @@
   <script src="script.js" defer></script>
 </head>
 <body>
+  <!-- Header -->
   <header>
     <div class="container text-center">
       <h1>FitJourney Tracker</h1>
@@ -48,12 +49,12 @@
     </div>
   </nav>
 
+  <!-- Main App Content -->
   <main id="main-app" class="container my-4">
     <!-- Dashboard Section -->
     <section id="dashboard-section" class="tile">
       <h2 class="dashboard-title">Dashboard</h2>
-      <!-- Dashboard content (charts, summaries, daily goals, etc.) -->
-      <!-- Weight Chart -->
+      <!-- Dashboard Content: Charts, Summaries, Daily Goals -->
       <div class="row">
         <div class="col-md-6 mb-4">
           <div class="card">
@@ -79,7 +80,7 @@
           </div>
         </div>
       </div>
-      <!-- Summaries -->
+      <!-- Weight and Calorie Summaries -->
       <div class="row">
         <div class="col-md-6 mb-3">
           <div class="card" id="weight-summary">
@@ -383,6 +384,8 @@
   <div id="comparison-editor-modal" class="modal">
     <div class="modal-content">
       <div class="modal-toolbar">
+        <button class="toolbar-btn" id="crop-btn">Crop</button>
+        <button class="toolbar-btn" id="reset-crop-btn">Reset Crop</button>
         <button class="toolbar-btn" id="close-editor-btn">Close Editor</button>
       </div>
       <div id="comparison-editor-container" class="comparison-editor-container">
@@ -391,6 +394,7 @@
     </div>
   </div>
   
+  <!-- Footer -->
   <footer>
     <div class="container">
       <p>&copy; 2025 FitJourney Tracker. All rights reserved.</p>
