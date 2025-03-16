@@ -132,25 +132,30 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   
   // Data Log Submission
-  document.getElementById("data-log-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const weight = parseFloat(document.getElementById("weight-input").value);
-    const date = document.getElementById("date-input").value;
-    const waist = parseFloat(document.getElementById("waist-input").value) || null;
-    const hips = parseFloat(document.getElementById("hips-input").value) || null;
-    const chest = parseFloat(document.getElementById("chest-input").value) || null;
-    const calories = parseFloat(document.getElementById("calories-input").value) || null;
-    if (!weight || !date) {
-      alert("Please enter both weight and date.");
-      return;
-    }
-    addDataLog({ date, weight, waist, hips, chest, calories });
-    updateWeightChart();
-    updateSummary();
-    updateRecentWeighIns();
-    updateCalorieSummary();
-    this.reset();
-  });
+  const dataLogForm = document.getElementById("data-log-form");
+  if(dataLogForm){
+    dataLogForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const weight = parseFloat(document.getElementById("weight-input").value);
+      const date = document.getElementById("date-input").value;
+      const waist = parseFloat(document.getElementById("waist-input").value) || null;
+      const hips = parseFloat(document.getElementById("hips-input").value) || null;
+      const chest = parseFloat(document.getElementById("chest-input").value) || null;
+      const calories = parseFloat(document.getElementById("calories-input").value) || null;
+      if (!weight || !date) {
+        alert("Please enter both weight and date.");
+        return;
+      }
+      addDataLog({ date, weight, waist, hips, chest, calories });
+      updateWeightChart();
+      updateSummary();
+      updateRecentWeighIns();
+      updateCalorieSummary();
+      this.reset();
+    });
+  } else {
+    console.error("data-log-form not found.");
+  }
   
   function addDataLog(log) {
     dataLogs.push(log);
@@ -206,32 +211,37 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   
   // Nutrition Log Submission
-  document.getElementById("nutrition-log-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const food = document.getElementById("food-name").value;
-    let quantity = parseFloat(document.getElementById("food-quantity").value);
-    if (isNaN(quantity)) {
-      alert("Please enter a valid quantity.");
-      return;
-    }
-    let conversion = parseFloat($("#food-uom option:selected").attr("data-conversion")) || 1;
-    let computedWeight = quantity * conversion;
-    const calories = parseFloat(document.getElementById("food-calories").value);
-    const protein = parseFloat(document.getElementById("food-protein").value) || 0;
-    const fat = parseFloat(document.getElementById("food-fat").value) || 0;
-    const carbs = parseFloat(document.getElementById("food-carbs").value) || 0;
-    let date = document.getElementById("nutrition-date").value;
-    if (!date) {
-      date = new Date().toISOString().split("T")[0];
-    }
-    const mealCategory = document.getElementById("meal-category").value;
-    addNutritionLog({ food, quantity, computedWeight, calories, protein, fat, carbs, date, mealCategory });
-    updateNutritionChart();
-    updateNutritionDisplay();
-    updateDailyGoalsProgress();
-    this.reset();
-    currentUSDAFood = null;
-  });
+  const nutritionLogForm = document.getElementById("nutrition-log-form");
+  if(nutritionLogForm){
+    nutritionLogForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const food = document.getElementById("food-name").value;
+      let quantity = parseFloat(document.getElementById("food-quantity").value);
+      if (isNaN(quantity)) {
+        alert("Please enter a valid quantity.");
+        return;
+      }
+      let conversion = parseFloat($("#food-uom option:selected").attr("data-conversion")) || 1;
+      let computedWeight = quantity * conversion;
+      const calories = parseFloat(document.getElementById("food-calories").value);
+      const protein = parseFloat(document.getElementById("food-protein").value) || 0;
+      const fat = parseFloat(document.getElementById("food-fat").value) || 0;
+      const carbs = parseFloat(document.getElementById("food-carbs").value) || 0;
+      let date = document.getElementById("nutrition-date").value;
+      if (!date) {
+        date = new Date().toISOString().split("T")[0];
+      }
+      const mealCategory = document.getElementById("meal-category").value;
+      addNutritionLog({ food, quantity, computedWeight, calories, protein, fat, carbs, date, mealCategory });
+      updateNutritionChart();
+      updateNutritionDisplay();
+      updateDailyGoalsProgress();
+      this.reset();
+      currentUSDAFood = null;
+    });
+  } else {
+    console.error("nutrition-log-form not found.");
+  }
   
   function addNutritionLog(log) {
     nutritionLogs.push(log);
@@ -520,18 +530,23 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   
   // Daily Goals Submission and Progress Update
-  document.getElementById("daily-goals-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    dailyGoals.calories = parseFloat(document.getElementById("goal-calories").value) || 0;
-    dailyGoals.protein = parseFloat(document.getElementById("goal-protein").value) || 0;
-    dailyGoals.fat = parseFloat(document.getElementById("goal-fat").value) || 0;
-    dailyGoals.carbs = parseFloat(document.getElementById("goal-carbs").value) || 0;
-    document.getElementById("goal-calories-display").textContent = dailyGoals.calories;
-    document.getElementById("goal-protein-display").textContent = dailyGoals.protein;
-    document.getElementById("goal-fat-display").textContent = dailyGoals.fat;
-    document.getElementById("goal-carbs-display").textContent = dailyGoals.carbs;
-    updateDailyGoalsProgress();
-  });
+  const dailyGoalsForm = document.getElementById("daily-goals-form");
+  if(dailyGoalsForm){
+    dailyGoalsForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      dailyGoals.calories = parseFloat(document.getElementById("goal-calories").value) || 0;
+      dailyGoals.protein = parseFloat(document.getElementById("goal-protein").value) || 0;
+      dailyGoals.fat = parseFloat(document.getElementById("goal-fat").value) || 0;
+      dailyGoals.carbs = parseFloat(document.getElementById("goal-carbs").value) || 0;
+      document.getElementById("goal-calories-display").textContent = dailyGoals.calories;
+      document.getElementById("goal-protein-display").textContent = dailyGoals.protein;
+      document.getElementById("goal-fat-display").textContent = dailyGoals.fat;
+      document.getElementById("goal-carbs-display").textContent = dailyGoals.carbs;
+      updateDailyGoalsProgress();
+    });
+  } else {
+    console.error("daily-goals-form not found.");
+  }
   
   function updateDailyGoalsProgress() {
     const today = new Date().toISOString().split("T")[0];
@@ -655,7 +670,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    // Create two divs for images (50% width each) and a 2px divider in between
+    // Create two divs for images (50% each) and a 2px divider
     const beforeDiv = $('<div class="comparison-image"></div>')
       .css({ width: '50%', float: 'left' })
       .append(`<img src="${beforePhoto.src}" alt="Before">`);
@@ -672,7 +687,7 @@ document.addEventListener("DOMContentLoaded", function () {
     openComparisonEditor();
   });
   
-  // Helper: Create checker pattern canvas for frame fill
+  // Helper: Create a checker pattern for the frame fill
   function createCheckerPattern() {
     const size = 10;
     const patternCanvas = document.createElement("canvas");
@@ -688,13 +703,13 @@ document.addEventListener("DOMContentLoaded", function () {
     return patternCanvas;
   }
   
-  // Populate drop downs for data date ranges based on dataLogs
+  // Populate date selects based on available data
   function populateDateSelects() {
     const startSelect = document.getElementById("start-date-select");
     const endSelect = document.getElementById("end-date-select");
+    if(!startSelect || !endSelect) return;
     startSelect.innerHTML = "";
     endSelect.innerHTML = "";
-    // Get unique dates from dataLogs sorted ascending
     const dates = [...new Set(dataLogs.map(d => d.date))].sort();
     dates.forEach(date => {
       const option1 = document.createElement("option");
@@ -714,7 +729,6 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Please upload at least two photos and select them for comparison.");
       return;
     }
-    // Populate date drop downs with available dates from dataLogs
     populateDateSelects();
     
     const beforeIndex = parseInt($("#tt-before").val()) || 0;
@@ -748,7 +762,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // Reset selection
     selectedNode = null;
     
-    // Make nodes selectable
     function makeSelectable(node) {
       node.on('click', function(evt) {
         if (selectedNode && selectedNode !== node) {
@@ -762,7 +775,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
     
-    // Load images for before and after
+    // Load before and after images
     const loadImage = (src, callback) => {
       const img = new Image();
       img.crossOrigin = "Anonymous";
@@ -799,7 +812,7 @@ document.addEventListener("DOMContentLoaded", function () {
         makeSelectable(beforeKonva);
         makeSelectable(afterKonva);
         
-        // Draggable divider (2px)
+        // Draggable divider
         const divider = new Konva.Rect({
           x: halfWidth - 1,
           y: 0,
@@ -824,9 +837,8 @@ document.addEventListener("DOMContentLoaded", function () {
           layer.batchDraw();
         });
         
-        // Always draw the frame using a black and white checker pattern.
+        // Always draw the frame using a checker pattern
         const pattern = createCheckerPattern();
-        // Top border
         const topBorder = new Konva.Rect({
           x: 0,
           y: 0,
@@ -835,7 +847,6 @@ document.addEventListener("DOMContentLoaded", function () {
           fillPatternImage: pattern,
           fillPatternRepeat: 'repeat'
         });
-        // Left border
         const leftBorder = new Konva.Rect({
           x: 0,
           y: 0,
@@ -844,7 +855,6 @@ document.addEventListener("DOMContentLoaded", function () {
           fillPatternImage: pattern,
           fillPatternRepeat: 'repeat'
         });
-        // Right border
         const rightBorder = new Konva.Rect({
           x: stage.width() - 5,
           y: 0,
@@ -853,7 +863,6 @@ document.addEventListener("DOMContentLoaded", function () {
           fillPatternImage: pattern,
           fillPatternRepeat: 'repeat'
         });
-        // Bottom border (thicker)
         const bottomBorder = new Konva.Rect({
           x: 0,
           y: stage.height() - 10,
@@ -862,7 +871,6 @@ document.addEventListener("DOMContentLoaded", function () {
           fillPatternImage: pattern,
           fillPatternRepeat: 'repeat'
         });
-        // Branding text: placed partly overlapping the bottom border
         const branding = new Konva.Text({
           x: stage.width() - 260,
           y: stage.height() - 40,
@@ -876,8 +884,7 @@ document.addEventListener("DOMContentLoaded", function () {
         frameGroup.add(topBorder, leftBorder, rightBorder, bottomBorder, branding);
         layer.add(frameGroup);
         
-        // "Show Data" button event:
-        // Instead of free text input, use the drop downs and radio buttons.
+        // "Show Data" event using drop-downs and radio buttons
         document.getElementById("show-data-btn").addEventListener("click", function() {
           const startDate = document.getElementById("start-date-select").value;
           const endDate = document.getElementById("end-date-select").value;
@@ -887,7 +894,7 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Please select start and end dates from the drop downs.");
             return;
           }
-          // For demonstration, we only handle weight data here.
+          // For demonstration, only weight data is charted.
           const filteredData = dataLogs.filter(d => d.date >= startDate && d.date <= endDate);
           if (filteredData.length === 0) {
             alert("No data for that range.");
@@ -897,7 +904,6 @@ document.addEventListener("DOMContentLoaded", function () {
           const labels = filteredData.map(d => d.date);
           const values = filteredData.map(d => d.weight);
           
-          // Create a temporary canvas for the chart based on selected chart type.
           const tempCanvas = document.createElement("canvas");
           tempCanvas.width = 300;
           tempCanvas.height = 150;
@@ -923,7 +929,6 @@ document.addEventListener("DOMContentLoaded", function () {
               scales: { x: { display: false }, y: { display: false } }
             }
           };
-          // For pie chart, adjust dataset options
           if(chartType === "pie"){
             chartConfig.data.datasets[0].backgroundColor = ["#007bff", "#28a745", "#ffc107", "#dc3545"];
           }
@@ -951,7 +956,7 @@ document.addEventListener("DOMContentLoaded", function () {
           }, 500);
         });
         
-        // Delete Element button event:
+        // Delete Element event
         const deleteBtn = document.getElementById("delete-btn");
         if (deleteBtn) {
           deleteBtn.addEventListener("click", function() {
@@ -963,11 +968,9 @@ document.addEventListener("DOMContentLoaded", function () {
               alert("No element selected.");
             }
           });
-        } else {
-          console.error("delete-btn element not found.");
         }
         
-        // Add Text Button: creates a new draggable text node
+        // Add Text event
         document.getElementById("add-text-btn").addEventListener("click", function() {
           const customText = prompt("Enter custom text:");
           if (customText) {
@@ -986,7 +989,7 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         });
         
-        // Edit Text Button: allows updating text, color, and rotation for selected text node
+        // Edit Text event
         document.getElementById("edit-text-btn").addEventListener("click", function() {
           if (selectedNode && selectedNode.className === 'Text') {
             const newText = prompt("Enter new text:", selectedNode.text());
@@ -1001,7 +1004,7 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         });
         
-        // Add a cropping rectangle over the before image
+        // Cropping rectangle over before image
         croppingRect = new Konva.Rect({
           x: beforeKonva.x(),
           y: beforeKonva.y(),
@@ -1014,7 +1017,6 @@ document.addEventListener("DOMContentLoaded", function () {
         layer.add(croppingRect);
         makeSelectable(croppingRect);
         
-        // Add a transformer for the cropping rectangle
         transformer = new Konva.Transformer({
           nodes: [croppingRect],
           enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right']
@@ -1027,7 +1029,12 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   
   // Close Advanced Editor Modal
-  $("#close-editor-btn").on("click", function() {
-    document.getElementById("comparison-editor-modal").style.display = "none";
-  });
+  const closeEditorBtn = document.getElementById("close-editor-btn");
+  if(closeEditorBtn){
+    closeEditorBtn.addEventListener("click", function() {
+      document.getElementById("comparison-editor-modal").style.display = "none";
+    });
+  } else {
+    console.error("close-editor-btn not found.");
+  }
 });
