@@ -660,9 +660,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    const beforeDiv = $(`<div class="comparison-image"><img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before"></div>`);
-    const afterDiv = $(`<div class="comparison-image"><img class="twentytwenty-after" src="${afterPhoto.src}" alt="After"></div>`);
-    const divider = $(`<div class="divider"></div>`);
+    const beforeDiv = $('<div class="comparison-image"></div>').append(`<img src="${beforePhoto.src}" alt="Before">`);
+    const afterDiv = $('<div class="comparison-image"></div>').append(`<img src="${afterPhoto.src}" alt="After">`);
+    const divider = $('<div class="divider"></div>');
     container.append(beforeDiv, afterDiv, divider);
     setTimeout(function() {
       if ($.fn.twentytwenty) {
@@ -672,7 +672,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 300);
   });
   
-  // Advanced Comparison Editor using Konva.js with cropping and dynamic overlay
+  // Advanced Comparison Editor using Konva.js with cropping and enhanced controls
   $("#open-editor-btn").on("click", function() {
     openComparisonEditor();
   });
@@ -711,7 +711,7 @@ document.addEventListener("DOMContentLoaded", function () {
     stage.add(layer);
     
     // Variables for cropping and overlay
-    let beforeKonva, afterKonva, croppingRect, transformer;
+    let beforeKonva, afterKonva, croppingRect, transformer, frameRect;
     
     const loadImage = (src, callback) => {
       const img = new Image();
@@ -784,6 +784,78 @@ document.addEventListener("DOMContentLoaded", function () {
           layer.batchDraw();
         });
         
+        // Add a default watermark text overlay
+        const watermark = new Konva.Text({
+          x: 10,
+          y: stage.height() - 30,
+          text: "Fit Journey Tracker",
+          fontSize: 20,
+          fontFamily: 'Montserrat',
+          fill: 'white',
+          opacity: 0.7
+        });
+        layer.add(watermark);
+        
+        // Advanced Editor: Additional Controls
+        
+        // Add Text Button: Prompts for custom text and adds it
+        document.getElementById("add-text-btn").addEventListener("click", function() {
+          const customText = prompt("Enter custom text:");
+          if (customText) {
+            const customTextNode = new Konva.Text({
+              x: stage.width() / 2,
+              y: stage.height() / 2,
+              text: customText,
+              fontSize: 24,
+              fontFamily: 'Montserrat',
+              fill: 'yellow',
+              draggable: true
+            });
+            layer.add(customTextNode);
+            layer.draw();
+          }
+        });
+        
+        // Edit Text Button: Edits the watermark text (for simplicity)
+        document.getElementById("edit-text-btn").addEventListener("click", function() {
+          const newText = prompt("Enter new text for watermark:", watermark.text());
+          if (newText !== null) {
+            watermark.text(newText);
+            layer.draw();
+          }
+        });
+        
+        // Apply Frame Button: Adds a gradient frame overlay
+        let frameAdded = false;
+        document.getElementById("apply-frame-btn").addEventListener("click", function() {
+          if (frameRect) {
+            frameRect.destroy();
+          }
+          frameRect = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: stage.width(),
+            height: stage.height(),
+            strokeWidth: 10,
+            strokeLinearGradientStartPoint: { x: 0, y: 0 },
+            strokeLinearGradientEndPoint: { x: stage.width(), y: stage.height() },
+            strokeLinearGradientColorStops: [0, 'gold', 1, 'red'],
+            listening: false
+          });
+          layer.add(frameRect);
+          layer.draw();
+          frameAdded = true;
+        });
+        
+        // Reset Frame Button: Removes the frame overlay
+        document.getElementById("reset-frame-btn").addEventListener("click", function() {
+          if (frameRect) {
+            frameRect.destroy();
+            layer.draw();
+            frameAdded = false;
+          }
+        });
+        
         // Add a cropping rectangle over the before image
         croppingRect = new Konva.Rect({
           x: beforeKonva.x(),
@@ -804,7 +876,7 @@ document.addEventListener("DOMContentLoaded", function () {
         layer.add(transformer);
         layer.draw();
         
-        // Crop button event
+        // Crop button event: Crop before image based on cropping rectangle
         document.getElementById("crop-btn").addEventListener("click", function() {
           const rectPos = croppingRect.absolutePosition();
           const imagePos = beforeKonva.absolutePosition();
@@ -816,13 +888,12 @@ document.addEventListener("DOMContentLoaded", function () {
           beforeKonva.width(cropWidth);
           beforeKonva.height(cropHeight);
           layer.draw();
-          // Remove cropping rectangle and transformer after cropping
           croppingRect.destroy();
           transformer.destroy();
           layer.draw();
         });
         
-        // Reset Crop button event
+        // Reset Crop button event: Restore original before image dimensions and re-add cropping rectangle
         document.getElementById("reset-crop-btn").addEventListener("click", function() {
           beforeKonva.crop({ x: 0, y: 0, width: beforeImg.width, height: beforeImg.height });
           beforeKonva.width(stage.width() / 2);
