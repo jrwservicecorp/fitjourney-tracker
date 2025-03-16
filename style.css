@@ -105,9 +105,28 @@ header h1 {
   box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
+/* Modal for Advanced Comparison Editor */
+#comparison-editor-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 680px;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  z-index: 1000;
+  padding: 20px;
+}
+#comparison-editor-modal .modal-content {
+  position: relative;
+}
+
 /* Responsive */
 @media only screen and (max-width: 600px) {
   header h1 { font-size: 2em; }
   .navbar .btn-group .nav-btn { padding: 8px 12px; font-size: 0.9em; }
   .card, .tile { margin: 10px auto; padding: 15px; }
+  #comparison-editor-modal { width: 90%; }
 }
