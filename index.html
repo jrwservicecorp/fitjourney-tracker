@@ -16,7 +16,8 @@
   <script src="libs/luxon/luxon.min.js"></script>
   <script src="libs/chartjs/chart.min.js"></script>
   <script src="libs/chartjs-adapter-luxon/chartjs-adapter-luxon.min.js"></script>
-  <script src="libs/fabric/fabric.min.js"></script>
+  <!-- Instead of Fabric.js, we now load Konva.js -->
+  <script src="libs/konva/konva.min.js"></script>
   <script src="libs/html2canvas/html2canvas.min.js"></script>
   
   <!-- Main Script File -->
@@ -357,10 +358,8 @@
             <button id="tt-update" class="btn btn-primary">Update Comparison</button>
             <button id="open-editor-btn" class="btn btn-outline-secondary ms-2">Open Advanced Editor</button>
           </div>
-          <div id="twentytwenty-container" class="twentytwenty-container">
-            <img class="twentytwenty-before" src="https://placehold.co/300x400?text=Before" alt="Before">
-            <img class="twentytwenty-after" src="https://placehold.co/300x400?text=After" alt="After">
-          </div>
+          <!-- For Konva.js, we use a div container -->
+          <div id="comparisonCanvasContainer" style="width:600px; height:400px;"></div>
         </div>
       </div>
       <div class="card mb-4" id="export-section">
@@ -379,12 +378,13 @@
       </div>
     </section>
     
-    <!-- Advanced Comparison Editor Modal -->
+    <!-- Advanced Comparison Editor Modal using Konva.js -->
     <div id="comparison-editor-modal">
       <div class="modal-content">
         <button id="close-comparison-editor" class="btn btn-sm btn-danger float-end">Close</button>
         <h3 class="modal-title">Advanced Comparison Editor</h3>
-        <canvas id="comparisonCanvas" width="600" height="400"></canvas>
+        <!-- Instead of a canvas, we use a div container for Konva -->
+        <div id="comparisonEditorContainer" style="width:600px; height:400px;"></div>
         <div class="editor-controls mt-3">
           <button id="add-text-btn" class="btn btn-secondary me-2">Add Text Overlay</button>
           <button id="save-editor-btn" class="btn btn-primary me-2">Save Changes</button>
