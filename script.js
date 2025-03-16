@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let editorStage, searchTimeout;
   
   // Advanced Editor globals
-  let activeImage = null; // currently selected image in the advanced editor
+  let activeImage = null; // currently selected image in advanced editor
   let cropModeActive = false;
   let cropRect = null;
   
@@ -275,7 +275,6 @@ document.addEventListener("DOMContentLoaded", function () {
           console.log("USDA response:", data);
           let resultsHtml = "";
           if (data.foods && data.foods.length > 0) {
-            // Filter out foods with undesired serving units (e.g., IU)
             let validFoods = data.foods.filter(food =>
               food.foodNutrients && food.foodNutrients.some(n => n.nutrientName === "Energy") &&
               !(food.servingSizeUnit && food.servingSizeUnit.toUpperCase() === "IU")
@@ -284,7 +283,6 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
               return;
             }
-            // Adjust scores for whole food prioritization
             validFoods.forEach(food => {
               let bonus = 0;
               if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
@@ -772,7 +770,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#meals-display").html(html);
   }
   
-  // Photo Upload & Comparison functions (retain your previous functionality)
+  // Photo Upload & Comparison functions
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
@@ -852,17 +850,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    const $beforeImg = $(`<img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before">`);
-    const $afterImg = $(`<img class="twentytwenty-after" src="${afterPhoto.src}" alt="After">`);
+    // Force images to 50% width, left/right floated
+    const $beforeImg = $(`<img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before" style="float:left; width:50%;">`);
+    const $afterImg = $(`<img class="twentytwenty-after" src="${afterPhoto.src}" alt="After" style="float:right; width:50%;">`);
     container.append($beforeImg, $afterImg);
-    container.find("img").css({ "max-width": "100%", "height": "auto" });
-    let loadedCount = 0;
-    container.find("img").each(function() {
-      $(this).on("load", function() {
-        loadedCount++;
-        if (loadedCount === 2) { container.twentytwenty(); console.log("Comparison updated with before and after photos"); }
-      });
-    });
+    $("<div style='clear:both;'></div>").appendTo(container);
+    container.find("img").css({ "max-height": "400px", "height": "auto" });
+    setTimeout(function() {
+      container.twentytwenty();
+      console.log("Comparison updated with before and after photos");
+    }, 300);
   });
   
   // Advanced Comparison Editor using Konva.js with enhanced tools
@@ -881,7 +878,7 @@ document.addEventListener("DOMContentLoaded", function () {
     containerEl.style.height = "600px";
     $("#comparison-editor-container").empty();
     
-    // Create two layers: one for images and overlays, one for UI (frame & header)
+    // Create two layers: one for images and overlays, one for fixed UI (frame & header)
     const stage = new Konva.Stage({
       container: 'comparison-editor-container',
       width: 900,
@@ -892,7 +889,7 @@ document.addEventListener("DOMContentLoaded", function () {
     stage.add(imageLayer);
     stage.add(uiLayer);
     
-    // Load before image into imageLayer: scale to height (600-50 header) and justify left
+    // Load before image into imageLayer: scale to fill height (600-50 header) and justify left
     Konva.Image.fromURL(beforePhoto.src, function(img) {
       const origWidth = img.image.width;
       const origHeight = img.image.height;
@@ -910,7 +907,7 @@ document.addEventListener("DOMContentLoaded", function () {
       imageLayer.draw();
     });
     
-    // Load after image into imageLayer: scale to height and justify right
+    // Load after image into imageLayer: scale to fill height and justify right
     Konva.Image.fromURL(afterPhoto.src, function(img) {
       const origWidth = img.image.width;
       const origHeight = img.image.height;
@@ -928,7 +925,19 @@ document.addEventListener("DOMContentLoaded", function () {
       imageLayer.draw();
     });
     
-    // UI Layer: Draw background gradient with noise, header bar, and frame
+    // Add a divider line between images
+    const divider = new Konva.Rect({
+      x: 448, // a little inset from 450 for styling
+      y: 50,
+      width: 4,
+      height: stage.height() - 50,
+      fill: '#fff',
+      opacity: 0.8,
+      listening: false
+    });
+    uiLayer.add(divider);
+    
+    // UI Layer: Draw fixed header bar and frame
     const uiBg = new Konva.Rect({
       x: 0,
       y: 0,
@@ -937,22 +946,10 @@ document.addEventListener("DOMContentLoaded", function () {
       fillLinearGradientStartPoint: { x: 0, y: 0 },
       fillLinearGradientEndPoint: { x: stage.width(), y: stage.height() },
       fillLinearGradientColorStops: [0, '#000', 1, '#333'],
-      fillPatternImage: (function(){
-        const canvas = document.createElement('canvas');
-        canvas.width = 10; canvas.height = 10;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'rgba(255,255,255,0.05)';
-        ctx.fillRect(0,0,10,10);
-        ctx.fillStyle = 'rgba(0,0,0,0.05)';
-        ctx.fillRect(0,0,5,5);
-        return canvas;
-      })(),
-      fillPatternRepeat: 'repeat',
       listening: false
     });
     uiLayer.add(uiBg);
     
-    // Add header bar
     const headerBar = new Konva.Rect({
       x: 0,
       y: 0,
@@ -962,6 +959,7 @@ document.addEventListener("DOMContentLoaded", function () {
       listening: false
     });
     uiLayer.add(headerBar);
+    
     const headerText = new Konva.Text({
       x: 20,
       y: 15,
@@ -973,7 +971,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     uiLayer.add(headerText);
     
-    // Add frame border
+    // Frame border with checkered pattern applied only to the frame area
     const frame = new Konva.Rect({
       x: 0,
       y: 0,
@@ -981,11 +979,23 @@ document.addEventListener("DOMContentLoaded", function () {
       height: stage.height(),
       stroke: '#fff',
       strokeWidth: 6,
+      fillPatternImage: (function(){
+        const canvas = document.createElement('canvas');
+        canvas.width = 10; canvas.height = 10;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.fillRect(0,0,10,10);
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(0,0,5,5);
+        return canvas;
+      })(),
+      fillPatternRepeat: 'repeat',
       listening: false
     });
     uiLayer.add(frame);
     uiLayer.draw();
     
+    // Save the stage reference globally
     editorStage = stage;
     activeImage = null;
     cropModeActive = false;
@@ -1051,7 +1061,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
   
-  // Add editable text overlay using Konva.IText with fallback
+  // Add editable text overlay using Konva.IText (or fallback)
   $("#add-text-btn").on("click", function() {
     if (editorStage) {
       const layer = editorStage.getLayers()[0];
@@ -1064,31 +1074,84 @@ document.addEventListener("DOMContentLoaded", function () {
         fontFamily: 'Montserrat',
         fill: '#fff',
         draggable: true,
-        padding: 8
+        padding: 8,
+        editable: true
       });
+      text.on("click", function() { this.enterEditing(); });
       layer.add(text);
       layer.draw();
     }
   });
   
-  // Add data overlay using Konva.IText with fallback
+  // Add data overlay using Konva.IText with a data selection option
   $("#add-data-overlay-btn").on("click", function() {
     if (editorStage) {
       const layer = editorStage.getLayers()[0];
-      const overlayText = prompt("Enter data overlay text (e.g., 'Start: 200 lbs | End: 190 lbs')");
-      if (overlayText) {
+      let overlayType = prompt("Enter data overlay type ('pie' or 'bar') or custom text:");
+      if (!overlayType) return;
+      if (overlayType.toLowerCase() === 'pie') {
+        const canvas = document.createElement('canvas');
+        canvas.width = 200; canvas.height = 200;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = "#28a745";
+        ctx.beginPath();
+        ctx.moveTo(100,100);
+        ctx.arc(100,100,90,0,2*Math.PI*0.6);
+        ctx.fill();
+        ctx.fillStyle = "#dc3545";
+        ctx.beginPath();
+        ctx.moveTo(100,100);
+        ctx.arc(100,100,90,2*Math.PI*0.6,2*Math.PI);
+        ctx.fill();
+        const dataURL = canvas.toDataURL();
+        Konva.Image.fromURL(dataURL, function(img) {
+          img.setAttrs({
+            x: 100,
+            y: editorStage.height() - 220,
+            width: 200,
+            height: 200,
+            draggable: true
+          });
+          layer.add(img);
+          layer.draw();
+        });
+      } else if (overlayType.toLowerCase() === 'bar') {
+        const canvas = document.createElement('canvas');
+        canvas.width = 200; canvas.height = 200;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = "#28a745";
+        ctx.fillRect(30, 100, 30, 80);
+        ctx.fillStyle = "#dc3545";
+        ctx.fillRect(80, 70, 30, 110);
+        ctx.fillStyle = "#ffc107";
+        ctx.fillRect(130, 120, 30, 60);
+        const dataURL = canvas.toDataURL();
+        Konva.Image.fromURL(dataURL, function(img) {
+          img.setAttrs({
+            x: 100,
+            y: editorStage.height() - 220,
+            width: 200,
+            height: 200,
+            draggable: true
+          });
+          layer.add(img);
+          layer.draw();
+        });
+      } else {
         const EditableText = (typeof Konva.IText === 'function') ? Konva.IText : Konva.Text;
-        const dataOverlay = new EditableText({
+        const text = new EditableText({
           x: 100,
           y: editorStage.height() - 80,
-          text: overlayText,
+          text: overlayType,
           fontSize: 24,
           fontFamily: 'Montserrat',
           fill: '#fff',
           draggable: true,
-          padding: 8
+          padding: 8,
+          editable: true
         });
-        layer.add(dataOverlay);
+        text.on("click", function() { this.enterEditing(); });
+        layer.add(text);
         layer.draw();
       }
     }
@@ -1122,7 +1185,7 @@ document.addEventListener("DOMContentLoaded", function () {
       container.empty();
       const $editedImg = $(`<img src="${dataURL}" alt="Edited Comparison">`);
       container.append($editedImg);
-      $("#comparison-editor-modal").style.display = "none";
+      document.getElementById("comparison-editor-modal").style.display = "none";
       editorStage.destroy();
       editorStage = null;
       console.log("Advanced editor changes saved to main comparison area");
