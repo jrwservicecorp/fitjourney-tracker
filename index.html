@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FitJourney Tracker - Modern Fitness Edition</title>
+  <!-- Google Font: Montserrat -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <!-- Bootstrap CSS -->
   <link href="libs/bootstrap/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -16,7 +18,7 @@
   <script src="libs/luxon/luxon.min.js"></script>
   <script src="libs/chartjs/chart.min.js"></script>
   <script src="libs/chartjs-adapter-luxon/chartjs-adapter-luxon.min.js"></script>
-  <!-- Load Konva from unpkg instead of jsdelivr -->
+  <!-- Load Konva from unpkg -->
   <script src="https://unpkg.com/konva@8.3.5/konva.min.js"></script>
   <script src="libs/html2canvas/html2canvas.min.js"></script>
   
@@ -27,7 +29,6 @@
   <header>
     <div class="container text-center">
       <h1>FitJourney Tracker</h1>
-      <!-- App version set dynamically -->
       <p>App Version: <span id="app-version"></span></p>
     </div>
   </header>
@@ -380,18 +381,22 @@
       </div>
     </section>
     
-    <!-- Advanced Comparison Editor Modal using Konva.js -->
-    <div id="comparison-editor-modal">
+    <!-- Advanced Comparison Editor Modal -->
+    <div id="comparison-editor-modal" class="modal">
       <div class="modal-content">
-        <button id="close-comparison-editor" class="btn btn-sm btn-danger float-end">Close</button>
-        <h3 class="modal-title">Advanced Comparison Editor</h3>
-        <!-- Container for Konva stage -->
-        <div id="comparison-editor-container"></div>
-        <div class="editor-controls mt-3">
-          <button id="add-text-btn" class="btn btn-secondary me-2">Add Text Overlay</button>
-          <button id="save-editor-btn" class="btn btn-primary me-2">Save Changes</button>
-          <button id="export-comparison-btn" class="btn btn-success">Export for Instagram</button>
+        <div class="modal-toolbar">
+          <button id="rotate-left-btn" class="toolbar-btn">⟲</button>
+          <button id="rotate-right-btn" class="toolbar-btn">⟳</button>
+          <button id="scale-up-btn" class="toolbar-btn">＋</button>
+          <button id="scale-down-btn" class="toolbar-btn">－</button>
+          <button id="crop-btn" class="toolbar-btn">Crop</button>
+          <button id="reset-editor-btn" class="toolbar-btn">Reset</button>
+          <button id="add-text-btn" class="toolbar-btn">Add Text</button>
+          <button id="add-data-overlay-btn" class="toolbar-btn">Add Data</button>
+          <button id="export-comparison-btn" class="toolbar-btn">Export</button>
+          <button id="close-comparison-editor" class="toolbar-btn close-btn">Close</button>
         </div>
+        <div id="comparison-editor-container"></div>
       </div>
     </div>
   </main>
