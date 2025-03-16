@@ -105,13 +105,14 @@ header h1 {
   box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
-/* Modal for Advanced Comparison Editor */
+/* Advanced Editor Modal (Konva) */
 #comparison-editor-modal {
   display: none;
   position: fixed;
   top: 50%;
   left: 50%;
-  width: 680px;
+  width: 750px;
+  max-width: 90%;
   transform: translate(-50%, -50%);
   background: #fff;
   border-radius: 12px;
@@ -122,11 +123,24 @@ header h1 {
 #comparison-editor-modal .modal-content {
   position: relative;
 }
+#comparison-editor-modal .modal-title {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: #007bff;
+  margin-bottom: 10px;
+}
+/* Container for Konva stage */
+#comparison-editor-container {
+  width: 100%;
+  height: 400px;
+  background: #f7f7f7;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+}
 
 /* Responsive */
 @media only screen and (max-width: 600px) {
   header h1 { font-size: 2em; }
   .navbar .btn-group .nav-btn { padding: 8px 12px; font-size: 0.9em; }
   .card, .tile { margin: 10px auto; padding: 15px; }
-  #comparison-editor-modal { width: 90%; }
 }
