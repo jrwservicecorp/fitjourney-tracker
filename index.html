@@ -54,7 +54,6 @@
     <!-- Dashboard Section -->
     <section id="dashboard-section" class="tile">
       <h2 class="dashboard-title">Dashboard</h2>
-      <!-- Dashboard Content: Charts, Summaries, Daily Goals -->
       <div class="row">
         <div class="col-md-6 mb-4">
           <div class="card">
@@ -326,10 +325,8 @@
               <button id="upload-photo-btn" type="submit" class="btn btn-primary w-100">Upload Photo</button>
             </div>
           </form>
-          <div id="photo-gallery" class="gallery mt-3">
-            <p class="placeholder">No photos uploaded yet.</p>
-          </div>
-          <button id="clear-photos-btn" class="btn btn-link" style="display:none;">Clear All Photos</button>
+          <div id="photo-gallery" class="gallery mt-3"></div>
+          <!-- Gallery grid -->
         </div>
       </div>
       
@@ -384,7 +381,6 @@
   <div id="comparison-editor-modal" class="modal">
     <div class="modal-content">
       <div class="modal-toolbar">
-        <!-- Advanced editor toolbar with additional controls -->
         <button class="toolbar-btn" id="add-text-btn">Add Text</button>
         <button class="toolbar-btn" id="edit-text-btn">Edit Text</button>
         <button class="toolbar-btn" id="apply-frame-btn">Apply Frame</button>
