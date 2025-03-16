@@ -138,6 +138,21 @@ header h1 {
   background: #666;
 }
 
+/* Data Options in Advanced Editor */
+.data-options {
+  background: #222;
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+}
+.data-options label {
+  margin-right: 5px;
+}
+.data-options select {
+  margin: 0 10px;
+}
+
 /* Advanced Editor Stage Container */
 .comparison-editor-container {
   width: 900px;
