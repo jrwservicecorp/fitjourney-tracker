@@ -1,7 +1,7 @@
-/* script.js - FitJourney Tracker - Modern Edition - JS v3.6.5 */
+/* script.js - FitJourney Tracker - Modern Edition - JS v3.6.7 */
 
 // Set the app version
-const APP_VERSION = "v3.6.5";
+const APP_VERSION = "v3.6.7";
 // USDA FoodData Central API Key
 const USDA_API_KEY = "DBS7VaqKcIKES5QY36b8Cw8bdk80CHzoufoxjeh8";
 
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("app-version").textContent = APP_VERSION;
   
   let dataLogs = [], nutritionLogs = [], photoLogs = [], meals = [];
-  let editorStage, searchTimeout;
+  let editorStage, searchTimeout, transformer = null;
   
   // Keyword arrays for scoring adjustments
   const wholeFoodKeywords = ["poultry", "chicken breast", "chicken thigh", "drumstick", "wing", "fillet", "roast"];
@@ -1126,6 +1126,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   
   // Advanced Comparison Editor using Konva.js
+  // The advanced editor now includes a transformer for scaling/rotating, and tools for cropping and resetting transforms.
   $("#open-editor-btn").on("click", function() { openComparisonEditor(); });
   
   function openComparisonEditor() {
@@ -1134,13 +1135,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterIndex = parseInt($("#tt-after").val()) || 1;
     const beforePhoto = photoLogs[beforeIndex];
     const afterPhoto = photoLogs[afterIndex];
-    // Use DOM element to set display style for the modal
+    // Show the advanced editor modal
     document.getElementById("comparison-editor-modal").style.display = "block";
-    
-    // Clear any existing stage in the container
     $("#comparison-editor-container").empty();
     
-    // Create Konva stage in the container (700x400)
+    // Create Konva stage (700x400)
     const stage = new Konva.Stage({
       container: 'comparison-editor-container',
       width: 700,
@@ -1149,38 +1148,47 @@ document.addEventListener("DOMContentLoaded", function () {
     const layer = new Konva.Layer();
     stage.add(layer);
     
-    // Add a frame rectangle around the stage
+    // Add a frame group: a rectangle frame plus a separate group for branding so that these are not draggable
+    const frameGroup = new Konva.Group({ listening: false });
     const frame = new Konva.Rect({
       x: 0,
       y: 0,
       width: stage.width(),
       height: stage.height(),
       stroke: '#007bff',
-      strokeWidth: 4,
+      strokeWidth: 4
+    });
+    frameGroup.add(frame);
+    // Instead of plain text, create a branded panel at the bottom as part of the frame
+    const brandPanel = new Konva.Rect({
+      x: stage.width() - 240,
+      y: stage.height() - 40,
+      width: 240,
+      height: 40,
+      fill: '#007bff',
+      opacity: 0.8,
+      cornerRadius: 5,
       listening: false
     });
-    layer.add(frame);
-    
-    // Add branding text in the bottom-right corner
+    frameGroup.add(brandPanel);
     const brandText = new Konva.Text({
-      x: stage.width() - 220,
-      y: stage.height() - 30,
+      x: stage.width() - 230,
+      y: stage.height() - 28,
       text: "Powered by FitJourney Tracker",
       fontSize: 16,
       fontFamily: 'Calibri',
-      fill: '#007bff'
+      fill: '#fff',
+      listening: false
     });
-    layer.add(brandText);
+    frameGroup.add(brandText);
+    layer.add(frameGroup);
     
-    // Define margin and available width for each image
-    const margin = 20;
-    const availableWidth = (stage.width() - margin) / 2;
-    
-    // Load and add before image on the left
+    // Load before image: scale to height 400 and justify far left
     Konva.Image.fromURL(beforePhoto.src, function(img) {
-      const originalWidth = img.width();
-      const originalHeight = img.height();
-      let scale = Math.min(availableWidth / originalWidth, stage.height() / originalHeight);
+      let origWidth = img.image.width;
+      let origHeight = img.image.height;
+      let scale = 400 / origHeight;
+      let newWidth = origWidth * scale;
       img.setAttrs({
         x: 0,
         y: 0,
@@ -1192,13 +1200,14 @@ document.addEventListener("DOMContentLoaded", function () {
       layer.draw();
     });
     
-    // Load and add after image on the right
+    // Load after image: scale to height 400 and justify far right
     Konva.Image.fromURL(afterPhoto.src, function(img) {
-      const originalWidth = img.width();
-      const originalHeight = img.height();
-      let scale = Math.min(availableWidth / originalWidth, stage.height() / originalHeight);
+      let origWidth = img.image.width;
+      let origHeight = img.image.height;
+      let scale = 400 / origHeight;
+      let newWidth = origWidth * scale;
       img.setAttrs({
-        x: availableWidth + margin,
+        x: stage.width() - newWidth,
         y: 0,
         scaleX: scale,
         scaleY: scale,
@@ -1208,15 +1217,69 @@ document.addEventListener("DOMContentLoaded", function () {
       layer.draw();
     });
     
-    // Save the stage reference globally for further editing
+    // Initialize transformer for editing objects
+    transformer = new Konva.Transformer({
+      nodes: [],
+      rotateEnabled: true,
+      enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+      borderDash: [4, 4]
+    });
+    layer.add(transformer);
+    
+    // Add stage click listener to attach transformer to clicked image objects
+    stage.on('click tap', function (e) {
+      if (e.target === stage || e.target === frame || e.target === brandPanel || e.target === brandText) {
+        transformer.nodes([]);
+        layer.draw();
+        return;
+      }
+      if (e.target && e.target !== transformer) {
+        transformer.nodes([e.target]);
+        layer.draw();
+      }
+    });
+    
+    // Save stage globally for further editing
     editorStage = stage;
   }
+  
+  // Crop Selected: set the clip region of the selected object to its bounding box
+  $("#crop-selected-btn").on("click", function() {
+    if (!transformer || transformer.nodes().length === 0) {
+      alert("Please select an image to crop.");
+      return;
+    }
+    let node = transformer.nodes()[0];
+    let box = node.getClientRect({ skipTransform: false });
+    node.clipFunc(function(ctx) {
+      ctx.rect(0, 0, box.width, box.height);
+    });
+    node.cache();
+    node.getLayer().draw();
+    alert("Crop applied to selected image.");
+  });
+  
+  // Reset Transform: remove clipping and reset transformation on selected object
+  $("#reset-transform-btn").on("click", function() {
+    if (!transformer || transformer.nodes().length === 0) {
+      alert("Please select an image to reset.");
+      return;
+    }
+    let node = transformer.nodes()[0];
+    node.clipFunc(null);
+    node.rotation(0);
+    node.scale({ x: 1, y: 1 });
+    node.position({ x: 0, y: 0 });
+    node.getLayer().draw();
+    alert("Transform reset.");
+  });
   
   // Add editable text overlay using Konva.IText
   $("#add-text-btn").on("click", function() {
     if (editorStage) {
       const layer = editorStage.getLayers()[0];
-      const text = new Konva.IText({
+      const EditableText = (typeof Konva.IText === 'function') ? Konva.IText : Konva.Text;
+      const text = new EditableText({
         x: 50,
         y: 50,
         text: 'New Overlay',
@@ -1224,21 +1287,21 @@ document.addEventListener("DOMContentLoaded", function () {
         fontFamily: 'Calibri',
         fill: '#333',
         draggable: true,
-        padding: 5,
-        editable: true
+        padding: 5
       });
       layer.add(text);
       layer.draw();
     }
   });
   
-  // New: Add Data Overlay button event (requires a button with id "add-data-overlay-btn" in your HTML)
+  // Add Data Overlay (for body weight, trends, etc.)
   $("#add-data-overlay-btn").on("click", function() {
     if (editorStage) {
       const layer = editorStage.getLayers()[0];
+      const EditableText = (typeof Konva.IText === 'function') ? Konva.IText : Konva.Text;
       const overlayText = prompt("Enter data overlay text (e.g., 'Start: 200 lbs, End: 190 lbs')");
       if (overlayText) {
-        const dataOverlay = new Konva.IText({
+        const dataOverlay = new EditableText({
           x: 100,
           y: editorStage.height() - 60,
           text: overlayText,
@@ -1246,8 +1309,7 @@ document.addEventListener("DOMContentLoaded", function () {
           fontFamily: 'Calibri',
           fill: '#007bff',
           draggable: true,
-          padding: 5,
-          editable: true
+          padding: 5
         });
         layer.add(dataOverlay);
         layer.draw();
@@ -1255,7 +1317,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
   
-  // Save editor changes and update main comparison area
+  // Save advanced editor changes and update main comparison area
   $("#save-editor-btn").on("click", function() {
     if (editorStage) {
       const dataURL = editorStage.toDataURL({ pixelRatio: 2 });
@@ -1266,13 +1328,14 @@ document.addEventListener("DOMContentLoaded", function () {
       $("#comparison-editor-modal").hide();
       editorStage.destroy();
       editorStage = null;
+      transformer = null;
       console.log("Advanced editor changes saved to main comparison area");
     }
   });
   
   $("#close-comparison-editor").on("click", function() {
     $("#comparison-editor-modal").hide();
-    if (editorStage) { editorStage.destroy(); editorStage = null; }
+    if (editorStage) { editorStage.destroy(); editorStage = null; transformer = null; }
   });
   
   $("#export-comparison-btn").on("click", function() {
