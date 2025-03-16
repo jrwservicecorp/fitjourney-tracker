@@ -142,27 +142,22 @@ header h1 {
 }
 
 /* Advanced Editor Stage Container */
-#comparison-editor-container {
+.comparison-editor-container {
   width: 900px;
   height: 600px;
   position: relative;
-  background: linear-gradient(135deg, #000, #333);
+  background: #000;  /* Remove gradient if not needed */
+  overflow: hidden;
 }
 
-/* Frame Divider (checkered border applied only to frame) */
+/* Frame Divider for Advanced Editor */
 .frame-divider {
   position: absolute;
-  top: 50px;
-  left: 450px;
+  top: 0;
+  bottom: 0;
+  left: 50%;
   width: 2px;
-  height: 550px;
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(255,255,255,0.2),
-    rgba(255,255,255,0.2) 5px,
-    rgba(0,0,0,0.2) 5px,
-    rgba(0,0,0,0.2) 10px
-  );
+  background: #fff;
   pointer-events: none;
 }
 
@@ -180,5 +175,34 @@ footer {
   header h1 { font-size: 2em; }
   .navbar .btn-group .nav-btn { padding: 8px 12px; font-size: 0.9em; }
   .card, .tile { margin: 10px auto; padding: 15px; }
-  #comparison-editor-container { width: 100%; height: 400px; }
+  .comparison-editor-container { width: 100%; height: 400px; }
+}
+
+/* Updated styles for Side-by-Side Comparison */
+.comparison-container {
+  display: flex;
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.comparison-container .comparison-image {
+  flex: 1;
+  overflow: hidden;
+}
+.comparison-container .comparison-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.comparison-container .divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: #fff;
+  z-index: 10;
+  transform: translateX(-1px);
 }
