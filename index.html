@@ -10,8 +10,8 @@
   <link href="libs/bootstrap/bootstrap.min.css" rel="stylesheet" />
   <!-- Custom Styles -->
   <link rel="stylesheet" href="style.css" />
-  <!-- TwentyTwenty CSS -->
-  <link rel="stylesheet" href="libs/twentytwenty/twentytwenty.css" />
+  <!-- TwentyTwenty CSS (only used if needed) -->
+  <!-- (Not used in main comparison now) -->
   
   <!-- Local Libraries -->
   <script src="libs/jquery/jquery.min.js"></script>
@@ -325,8 +325,8 @@
               <button id="upload-photo-btn" type="submit" class="btn btn-primary w-100">Upload Photo</button>
             </div>
           </form>
-          <div id="photo-gallery" class="gallery mt-3"></div>
-          <!-- Gallery grid -->
+          <!-- Gallery Grid -->
+          <div id="photo-gallery" class="gallery"></div>
         </div>
       </div>
       
@@ -385,6 +385,7 @@
         <button class="toolbar-btn" id="edit-text-btn">Edit Text</button>
         <button class="toolbar-btn" id="apply-frame-btn">Apply Frame</button>
         <button class="toolbar-btn" id="reset-frame-btn">Reset Frame</button>
+        <button class="toolbar-btn" id="show-data-btn">Show Data Overlay</button>
         <button class="toolbar-btn" id="crop-btn">Crop</button>
         <button class="toolbar-btn" id="reset-crop-btn">Reset Crop</button>
         <button class="toolbar-btn" id="close-editor-btn">Close Editor</button>
