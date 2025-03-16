@@ -19,6 +19,29 @@ document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM fully loaded");
   document.getElementById("app-version").textContent = APP_VERSION;
   
+  // NAVIGATION MENU FUNCTIONALITY
+  // Add event listeners to nav buttons to hide all sections and display the target section
+  const navButtons = document.querySelectorAll('.nav-btn');
+  navButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      // Hide all sections with class "tile"
+      document.querySelectorAll('section.tile').forEach(section => {
+        section.style.display = 'none';
+      });
+      // Show the target section based on the data-target attribute
+      const target = button.getAttribute('data-target');
+      if (target) {
+        const targetSection = document.querySelector(target);
+        if (targetSection) {
+          targetSection.style.display = 'block';
+        }
+      }
+      // Update active state for nav buttons
+      navButtons.forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+    });
+  });
+  
   let dataLogs = [], nutritionLogs = [], photoLogs = [], meals = [];
   let editorStage, searchTimeout;
   
