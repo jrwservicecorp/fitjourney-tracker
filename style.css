@@ -176,7 +176,7 @@ header h1 {
   transform: translateX(-1px);
 }
 
-/* Gallery Grid for Uploaded Images */
+/* Gallery Grid */
 .gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -192,6 +192,21 @@ header h1 {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
+}
+
+/* Optional: Additional styling for a subtle drop shadow on images */
+.comparison-image img,
+.gallery .photo-entry img {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Footer */
+footer {
+  background: #f6f6f6;
+  padding: 15px 0;
+  text-align: center;
+  font-size: 0.9em;
+  color: #000;
 }
 
 /* Responsive */
