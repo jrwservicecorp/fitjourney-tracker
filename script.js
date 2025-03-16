@@ -634,7 +634,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
   
-  // Main page comparison: use a flex layout so that each image takes 50%
+  // Main page comparison: use a flex layout so that each image occupies 50%
   $("#tt-update").on("click", function() {
     console.log("Update comparison button clicked");
     const beforeIndex = parseInt($("#tt-before").val());
@@ -652,9 +652,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    // Create two divs for images with 50% width each and a 2px divider in between
-    const beforeDiv = $('<div class="comparison-image"></div>').css({ width: '50%', float: 'left' }).append(`<img src="${beforePhoto.src}" alt="Before">`);
-    const afterDiv = $('<div class="comparison-image"></div>').css({ width: '50%', float: 'right' }).append(`<img src="${afterPhoto.src}" alt="After">`);
+    // Create two divs for images (50% width each) and a 2px divider in between
+    const beforeDiv = $('<div class="comparison-image"></div>')
+      .css({ width: '50%', float: 'left' })
+      .append(`<img src="${beforePhoto.src}" alt="Before">`);
+    const afterDiv = $('<div class="comparison-image"></div>')
+      .css({ width: '50%', float: 'right' })
+      .append(`<img src="${afterPhoto.src}" alt="After">`);
     const divider = $('<div class="divider"></div>');
     container.append(beforeDiv, afterDiv, divider);
     console.log("Main comparison updated.");
@@ -735,7 +739,7 @@ document.addEventListener("DOMContentLoaded", function () {
         layer.add(beforeKonva);
         layer.add(afterKonva);
         
-        // Create a thin divider (2px) that is draggable and sits between the images
+        // Create a thin draggable divider (2px) that adjusts the image widths
         const divider = new Konva.Rect({
           x: halfWidth - 1,
           y: 0,
@@ -760,93 +764,95 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         
         // --- Enhanced Frame ---
-        // Remove any existing frame if needed, then build a new frame group.
+        // Remove previous frame if exists, then draw a new one.
+        // Here we draw a minimalist frame: thin top/left/right borders and a thicker bottom border
+        // with a gradient and branding text partly overlapping the image.
         const frameGroup = new Konva.Group();
-        const frameThickness = 20;
-        // Top border: split into two segments with a break in the middle showing "///"
-        const topSegmentLeft = new Konva.Rect({
+        const thinBorder = 3;
+        const thickBorder = 10;
+        // Top border (thin)
+        const topBorder = new Konva.Rect({
           x: 0,
           y: 0,
-          width: stage.width()/2 - 40,
-          height: frameThickness,
-          fill: 'grey'
-        });
-        const topSegmentRight = new Konva.Rect({
-          x: stage.width()/2 + 40,
-          y: 0,
-          width: stage.width()/2 - 40,
-          height: frameThickness,
-          fill: 'grey'
-        });
-        const topBreak = new Konva.Text({
-          x: stage.width()/2 - 35,
-          y: 0,
-          text: "///",
-          fontSize: 18,
-          fontFamily: "monospace",
-          fill: "white"
-        });
-        // Bottom border
-        const bottomBorder = new Konva.Rect({
-          x: 0,
-          y: stage.height() - frameThickness,
           width: stage.width(),
-          height: frameThickness,
-          fill: 'grey'
+          height: thinBorder,
+          fill: "#111"
         });
-        // Left border
+        // Left border (thin)
         const leftBorder = new Konva.Rect({
           x: 0,
           y: 0,
-          width: frameThickness,
+          width: thinBorder,
           height: stage.height(),
-          fill: 'grey'
+          fill: "#111"
         });
-        // Right border
+        // Right border (thin)
         const rightBorder = new Konva.Rect({
-          x: stage.width() - frameThickness,
+          x: stage.width() - thinBorder,
           y: 0,
-          width: frameThickness,
+          width: thinBorder,
           height: stage.height(),
-          fill: 'grey'
+          fill: "#111"
         });
-        // Center watermark text on the frame
-        const frameWatermark = new Konva.Text({
-          x: stage.width()/2 - 100,
-          y: stage.height()/2 - 20,
+        // Bottom border (thick with gradient)
+        const bottomBorder = new Konva.Rect({
+          x: 0,
+          y: stage.height() - thickBorder,
+          width: stage.width(),
+          height: thickBorder,
+          fillLinearGradientStartPoint: { x: 0, y: 0 },
+          fillLinearGradientEndPoint: { x: stage.width(), y: 0 },
+          fillLinearGradientColorStops: [0, "#333", 0.5, "#d00", 1, "#333"]
+        });
+        // Branding text positioned partially over the bottom border and image
+        const branding = new Konva.Text({
+          x: stage.width() - 220,
+          y: stage.height() - thickBorder - 30,
           text: "FitJourneyTracker",
-          fontSize: 32,
+          fontSize: 28,
           fontFamily: "Montserrat",
-          fill: "#eee",
+          fill: "#fff",
           opacity: 0.9
         });
-        frameGroup.add(topSegmentLeft, topBreak, topSegmentRight, bottomBorder, leftBorder, rightBorder, frameWatermark);
+        frameGroup.add(topBorder, leftBorder, rightBorder, bottomBorder, branding);
         layer.add(frameGroup);
         // --- End Enhanced Frame ---
         
-        // "Show Data Overlay" button event: add a sample overlay (here a semi-transparent chart area)
+        // "Show Data" button event: generate a Chart.js chart overlay and add it as an image overlay.
         document.getElementById("show-data-btn").addEventListener("click", function() {
-          const overlayGroup = new Konva.Group({
+          // Create a small chart canvas dynamically
+          const chartCanvas = document.createElement("canvas");
+          chartCanvas.width = 200;
+          chartCanvas.height = 100;
+          const ctx = chartCanvas.getContext("2d");
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+              datasets: [{
+                label: "Weight",
+                data: [200, 195, 190, 188, 185],
+                borderColor: "#007bff",
+                fill: false,
+                tension: 0.2
+              }]
+            },
+            options: {
+              responsive: false,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { x: { display: false }, y: { display: false } }
+            }
+          });
+          // Convert the chart canvas to data URL and add as a Konva.Image overlay
+          const overlayImage = new Konva.Image({
             x: stage.width() / 2 - 100,
             y: stage.height() / 2 - 50,
-            opacity: 0.8
+            image: chartCanvas,
+            opacity: 0.8,
+            draggable: true
           });
-          const overlayRect = new Konva.Rect({
-            x: 0,
-            y: 0,
-            width: 200,
-            height: 100,
-            fill: "black"
-          });
-          const overlayText = new Konva.Text({
-            x: 10,
-            y: 35,
-            text: "Data Chart\nPlaceholder",
-            fontSize: 18,
-            fill: "lime"
-          });
-          overlayGroup.add(overlayRect, overlayText);
-          layer.add(overlayGroup);
+          layer.add(overlayImage);
           layer.draw();
         });
         
@@ -868,11 +874,11 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         });
         
-        // Edit Text Button: for demo, prompt to change the watermark text in the frame
+        // Edit Text Button: prompts to change the branding text in the frame
         document.getElementById("edit-text-btn").addEventListener("click", function() {
-          const newText = prompt("Enter new text for frame watermark:", frameWatermark.text());
+          const newText = prompt("Enter new text for branding:", branding.text());
           if (newText !== null) {
-            frameWatermark.text(newText);
+            branding.text(newText);
             layer.draw();
           }
         });
