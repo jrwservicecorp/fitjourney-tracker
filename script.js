@@ -1,7 +1,7 @@
-/* script.js - FitJourney Tracker - Modern Edition - JS v3.5 */
+/* script.js - FitJourney Tracker - Modern Edition - JS v3.6 */
 
 // Set the app version
-const APP_VERSION = "v3.5";
+const APP_VERSION = "v3.6";
 // USDA FoodData Central API Key
 const USDA_API_KEY = "DBS7VaqKcIKES5QY36b8Cw8bdk80CHzoufoxjeh8";
 
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("app-version").textContent = APP_VERSION;
   
   let dataLogs = [], nutritionLogs = [], photoLogs = [], meals = [];
-  let editorCanvas, searchTimeout;
+  let editorStage, searchTimeout;
   
   // Keyword arrays for scoring adjustments
   const wholeFoodKeywords = ["poultry", "chicken breast", "chicken thigh", "drumstick", "wing", "fillet", "roast"];
@@ -255,12 +255,11 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#meals-display").html(html);
   }
   
-  // USDA Search & Food Selection – Improved Results with whole food prioritization
+  // USDA Search & Food Selection – Improved whole food prioritization
   $("#food-name").on("input", function() {
     clearTimeout(searchTimeout);
     const query = $(this).val().trim();
     if (!query) { $("#usda-search-results").empty(); currentUSDAFood = null; return; }
-    // Do not re-run search if the user is retyping the same name
     if (currentUSDAFood && query.toLowerCase() === currentUSDAFood.description.toLowerCase()) { return; }
     searchTimeout = setTimeout(function() {
       const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5`;
@@ -280,29 +279,25 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
               return;
             }
-            // Adjust scores: bonus for SR Legacy, whole-food keywords and larger serving sizes; penalty for processed keywords
+            // Adjust scores: bonus for SR Legacy, whole-food keywords; penalty for generic "chicken" and processed keywords; small serving sizes get a penalty.
             validFoods.forEach(food => {
               let bonus = 0;
-              // Bonus if dataType is "SR Legacy"
               if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
               let desc = (food.description || "").toLowerCase();
               let category = (food.foodCategory || "").toLowerCase();
-              // Extra bonus for descriptions that include whole food qualifiers
               wholeFoodKeywords.forEach(kw => {
                 if (desc.includes(kw) || category.includes(kw)) bonus += 50;
               });
-              // If description is exactly "chicken" (a generic term), apply a penalty
-              if (desc.trim() === "chicken") { bonus -= 50; }
-              // Penalty for processed keywords
+              // If description is exactly "chicken", penalize heavily
+              if (desc.trim() === "chicken") bonus -= 100;
               processedKeywords.forEach(kw => {
                 if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
               });
-              // Penalize if serving size is very small (<50 g)
               let servingSizeNum = parseFloat(food.servingSize);
               if (!isNaN(servingSizeNum) && servingSizeNum < 50) bonus -= 50;
               food.adjustedScore = (food.score || 0) + bonus;
             });
-            // If "Show Only Whole Foods" toggle is checked, filter only those foods that contain whole-food keywords
+            // If "Show Only Whole Foods" toggle is checked, filter out foods without whole-food keywords
             const onlyWhole = $("#whole-food-toggle").is(":checked");
             if (onlyWhole) {
               validFoods = validFoods.filter(food => {
@@ -544,29 +539,24 @@ document.addEventListener("DOMContentLoaded", function () {
               $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
               return;
             }
-            // Adjust scores: bonus for SR Legacy and whole-food keywords; penalty for generic descriptions and processed keywords.
+            // Adjust scores: bonus for SR Legacy and whole-food keywords; penalty for generic "chicken" and processed keywords; small serving sizes get a penalty.
             validFoods.forEach(food => {
               let bonus = 0;
-              // Bonus if dataType is "SR Legacy"
               if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
               let desc = (food.description || "").toLowerCase();
               let category = (food.foodCategory || "").toLowerCase();
-              // Bonus for whole-food qualifiers
               wholeFoodKeywords.forEach(kw => {
                 if (desc.includes(kw) || category.includes(kw)) bonus += 50;
               });
-              // If the description is exactly "chicken" (generic), apply a penalty
-              if (desc.trim() === "chicken") { bonus -= 50; }
-              // Penalty for processed keywords
+              if (desc.trim() === "chicken") { bonus -= 100; }
               processedKeywords.forEach(kw => {
                 if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
               });
-              // Penalize very small serving sizes (<50 g)
               let servingSizeNum = parseFloat(food.servingSize);
               if (!isNaN(servingSizeNum) && servingSizeNum < 50) bonus -= 50;
               food.adjustedScore = (food.score || 0) + bonus;
             });
-            // If "Show Only Whole Foods" is checked, filter out foods without whole-food keywords
+            // If "Show Only Whole Foods" toggle is checked, filter only those foods that contain whole-food keywords
             const onlyWhole = $("#whole-food-toggle").is(":checked");
             if (onlyWhole) {
               validFoods = validFoods.filter(food => {
@@ -784,7 +774,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#meals-display").html(html);
   }
   
-  // Photo Upload & Comparison functions
+  // Photo Upload & Comparison functions remain unchanged...
   $("#photo-upload-form").on("submit", function (event) {
     event.preventDefault();
     const fileInput = $("#photo-upload")[0].files[0];
@@ -877,6 +867,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
   
+  // Advanced Comparison Editor using Konva.js
   $("#open-editor-btn").on("click", function() { openComparisonEditor(); });
   
   function openComparisonEditor() {
@@ -886,48 +877,89 @@ document.addEventListener("DOMContentLoaded", function () {
     const beforePhoto = photoLogs[beforeIndex];
     const afterPhoto = photoLogs[afterIndex];
     $("#comparison-editor-modal").show();
-    editorCanvas = new fabric.Canvas('comparisonCanvas', { backgroundColor: '#f7f7f7', selection: true });
-    editorCanvas.clear();
-    fabric.Image.fromURL(beforePhoto.src, function(img) {
-      img.set({ left: 0, top: 0, scaleX: 0.5, scaleY: 0.5, selectable: true });
-      editorCanvas.add(img);
+    
+    // Clear any existing stage
+    $("#comparison-editor-container").empty();
+    // Create Konva stage in the container
+    const stage = new Konva.Stage({
+      container: 'comparison-editor-container',
+      width: 700,
+      height: 400
     });
-    fabric.Image.fromURL(afterPhoto.src, function(img) {
-      img.set({ left: 300, top: 0, scaleX: 0.5, scaleY: 0.5, selectable: true });
-      editorCanvas.add(img);
+    const layer = new Konva.Layer();
+    stage.add(layer);
+    
+    // Load and add before image on the left
+    Konva.Image.fromURL(beforePhoto.src, function(img) {
+      img.setAttrs({
+        x: 0,
+        y: 0,
+        width: 350,
+        height: 400,
+        draggable: true
+      });
+      layer.add(img);
+      layer.draw();
     });
+    
+    // Load and add after image on the right
+    Konva.Image.fromURL(afterPhoto.src, function(img) {
+      img.setAttrs({
+        x: 350,
+        y: 0,
+        width: 350,
+        height: 400,
+        draggable: true
+      });
+      layer.add(img);
+      layer.draw();
+    });
+    
+    // Save the stage reference globally for further editing
+    editorStage = stage;
   }
   
+  // Add text overlay using Konva
   $("#add-text-btn").on("click", function() {
-    if (editorCanvas) {
-      const text = new fabric.IText('New Overlay', { left: 50, top: 50, fill: '#333', fontSize: 20 });
-      editorCanvas.add(text);
-      editorCanvas.setActiveObject(text);
+    if (editorStage) {
+      const layer = editorStage.getLayers()[0];
+      const text = new Konva.Text({
+        x: 50,
+        y: 50,
+        text: 'New Overlay',
+        fontSize: 24,
+        fontFamily: 'Calibri',
+        fill: '#333',
+        draggable: true
+      });
+      layer.add(text);
+      layer.draw();
     }
   });
   
+  // Save editor changes and update main comparison area
   $("#save-editor-btn").on("click", function() {
-    if (editorCanvas) {
-      const dataURL = editorCanvas.toDataURL({ format: 'png' });
+    if (editorStage) {
+      const dataURL = editorStage.toDataURL({ pixelRatio: 2 });
       const container = $("#twentytwenty-container");
       container.empty();
       const $editedImg = $(`<img src="${dataURL}" alt="Edited Comparison">`);
       container.append($editedImg);
       $("#comparison-editor-modal").hide();
-      editorCanvas.dispose();
-      editorCanvas = null;
+      editorStage.destroy();
+      editorStage = null;
       console.log("Advanced editor changes saved to main comparison area");
     }
   });
   
   $("#close-comparison-editor").on("click", function() {
     $("#comparison-editor-modal").hide();
-    if (editorCanvas) { editorCanvas.dispose(); editorCanvas = null; }
+    if (editorStage) { editorStage.destroy(); editorStage = null; }
   });
   
   $("#export-comparison-btn").on("click", function() {
-    if (editorCanvas) {
-      const dataURL = editorCanvas.toDataURL({ format: 'png' });
+    if (editorStage) {
+      const dataURL = editorStage.toDataURL({ pixelRatio: 2 });
       let link = document.createElement("a");
       link.download = "comparison_for_instagram.png";
       link.href = dataURL;
