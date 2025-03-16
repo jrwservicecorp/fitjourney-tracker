@@ -138,7 +138,7 @@ header h1 {
   background: #666;
 }
 
-/* Data Options in Advanced Editor */
+/* Data Options */
 .data-options {
   background: #222;
   color: #fff;
@@ -209,7 +209,7 @@ header h1 {
   border-radius: 4px;
 }
 
-/* Optional: Drop shadow for images */
+/* Drop shadow for images */
 .comparison-image img,
 .gallery .photo-entry img {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
