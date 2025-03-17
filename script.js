@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let editorStage, searchTimeout;
   
   // Advanced Editor globals
-  let activeImage = null; // currently selected image in the advanced editor
+  let activeImage = null; // currently selected image in advanced editor
   let cropModeActive = false;
   let cropRect = null;
   
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   } else { console.warn("Canvas 'nutritionChart' not found."); }
   
-  // ----------------- Demo Data (if enabled) -----------------
+  // ----------------- Demo Data -----------------
   const toggleDemo = document.getElementById("toggle-demo-data");
   if (toggleDemo.checked && dataLogs.length === 0) {
     const demoData = [
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
     updateDailyGoalsProgress();
   }
   
-  // ----------------- Data Logging -----------------
+  // ----------------- Data Log Submission -----------------
   document.getElementById("data-log-form").addEventListener("submit", function(e) {
     e.preventDefault();
     const weight = parseFloat(document.getElementById("weight-input").value);
@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
     calorieDiv.innerHTML = `<p>Average Calories: ${Math.round(avg)} kcal</p>`;
   }
   
-  // ----------------- Nutrition Logging -----------------
+  // ----------------- Nutrition Log Submission -----------------
   document.getElementById("nutrition-log-form").addEventListener("submit", function(e) {
     e.preventDefault();
     const food = document.getElementById("food-name").value;
@@ -242,6 +242,514 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentIngredients = $("#meal-builder-form").data("ingredients") || [];
     currentIngredients.push(ingredient);
     $("#meal-builder-form").data("ingredients", currentIngredients);
+  });
+  
+  function displayMeals() {
+    let html = "<h4>Your Meals</h4>";
+    meals.forEach(meal => {
+      html += `<div class="meal-entry">
+        <strong>${meal.name}</strong> (${meal.category})<br>
+        Calories: ${meal.totals.calories} kcal, Protein: ${meal.totals.protein}g, Fat: ${meal.totals.fat}g, Carbs: ${meal.totals.carbs}g
+        <br><em>Ingredients:</em>`;
+      meal.ingredients.forEach(ing => {
+        html += `<div class="meal-ingredient">
+          ${ing.name} - ${ing.weight}g, ${ing.calories} kcal
+        </div>`;
+      });
+      html += "</div><hr>";
+    });
+    $("#meals-display").html(html);
+  }
+  
+  // ----------------- USDA Search & Food Selection -----------------
+  $("#food-name").on("input", function() {
+    clearTimeout(searchTimeout);
+    const query = $(this).val().trim();
+    if (!query) { $("#usda-search-results").empty(); currentUSDAFood = null; return; }
+    if (currentUSDAFood && query.toLowerCase() === currentUSDAFood.description.toLowerCase()) { return; }
+    searchTimeout = setTimeout(function() {
+      const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5`;
+      console.log("USDA search query:", query);
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          console.log("USDA response:", data);
+          let resultsHtml = "";
+          if (data.foods && data.foods.length > 0) {
+            let validFoods = data.foods.filter(food =>
+              food.foodNutrients && food.foodNutrients.some(n => n.nutrientName === "Energy") &&
+              !(food.servingSizeUnit && food.servingSizeUnit.toUpperCase() === "IU")
+            );
+            if (validFoods.length === 0) {
+              $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
+              return;
+            }
+            validFoods.forEach(food => {
+              let bonus = 0;
+              if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
+              let desc = (food.description || "").toLowerCase();
+              let category = (food.foodCategory || "").toLowerCase();
+              wholeFoodKeywords.forEach(kw => {
+                if (desc.includes(kw) || category.includes(kw)) bonus += 50;
+              });
+              if (desc.trim() === "chicken") { bonus -= 100; }
+              processedKeywords.forEach(kw => {
+                if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
+              });
+              let servingSizeNum = parseFloat(food.servingSize);
+              if (!isNaN(servingSizeNum) && servingSizeNum < 50) bonus -= 50;
+              food.adjustedScore = (food.score || 0) + bonus;
+            });
+            const onlyWhole = $("#whole-food-toggle").is(":checked");
+            if (onlyWhole) {
+              validFoods = validFoods.filter(food => {
+                let desc = (food.description || "").toLowerCase();
+                let category = (food.foodCategory || "").toLowerCase();
+                return wholeFoodKeywords.some(kw => desc.includes(kw) || category.includes(kw));
+              });
+            }
+            if (validFoods.length === 0) {
+              $("#usda-search-results").html("<p>No whole food results found. Please refine your search or add a custom food.</p>");
+              return;
+            }
+            validFoods.sort((a, b) => b.adjustedScore - a.adjustedScore);
+            validFoods.forEach(food => {
+              const energy = (() => { 
+                const nutrient = food.foodNutrients.find(n => n.nutrientName === "Energy"); 
+                return nutrient ? nutrient.value : "N/A"; 
+              })();
+              const servingSize = food.servingSize ? food.servingSize : "N/A";
+              const servingUnit = food.servingSizeUnit ? food.servingSizeUnit : "";
+              const brand = food.brandOwner ? `Brand: ${food.brandOwner}` : "";
+              const foodEncoded = encodeURIComponent(JSON.stringify(food));
+              resultsHtml += `<div class="food-item" data-food="${foodEncoded}">
+                <strong>${food.description}</strong>
+                <br>Category: ${food.foodCategory || "N/A"} ${brand}
+                <br>Serving: ${servingSize} ${servingUnit}
+                <br>Calories: ${energy} kcal
+              </div>`;
+            });
+            resultsHtml += `<div class="food-item">
+                <strong>Add Custom Food</strong>
+              </div>`;
+            $("#usda-search-results").html(resultsHtml);
+          } else {
+            $("#usda-search-results").html("<p>No foods found. Please add custom food.</p>");
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching USDA food data:", error);
+          alert("Error fetching food data. Check the console for details.");
+        });
+    }, 300);
+  });
+  
+  $("#usda-search-results").on("click", ".food-item", function() {
+    if ($(this).text().trim().toLowerCase().includes("add custom food")) {
+      openCustomFoodEntry();
+      return;
+    }
+    try {
+      const foodString = $(this).closest(".food-item").attr("data-food");
+      if (!foodString) { openCustomFoodEntry(); return; }
+      const decoded = decodeURIComponent(foodString);
+      const foodData = JSON.parse(decoded);
+      console.log("Food selected:", foodData);
+      console.log("Nutrients:", foodData.foodNutrients);
+      const nutrients = Array.isArray(foodData.foodNutrients) ? foodData.foodNutrients : [];
+      currentUSDAFood = {
+        baseWeight: foodData.servingSize || 100,
+        servingSizeUnit: foodData.servingSizeUnit || "serving",
+        calories: parseFloat(getNutrientValue(nutrients, "Energy")) || 0,
+        protein: parseFloat(getNutrientValue(nutrients, "Protein")) || 0,
+        fat: parseFloat(getNutrientValue(nutrients, "Total lipid (fat)")) || 0,
+        carbs: parseFloat(getNutrientValue(nutrients, "Carbohydrate, by difference")) || 0,
+        foodMeasures: foodData.foodMeasures || []
+      };
+      $("#food-uom").empty();
+      $("#food-uom").append($("<option>").attr("data-conversion", 1).text(currentUSDAFood.servingSizeUnit + " (Default)"));
+      if (currentUSDAFood.foodMeasures.length > 0) {
+        currentUSDAFood.foodMeasures.forEach(measure => {
+          if (measure.gramWeight) {
+            $("#food-uom").append($("<option>")
+              .attr("data-conversion", measure.gramWeight)
+              .text(measure.modifier + " (" + measure.measureUnit + ", ~" + measure.gramWeight + "g)"));
+          }
+        });
+      }
+      $("#selected-uom-display").text("Selected Unit: " + currentUSDAFood.servingSizeUnit + " (Default)");
+      $("#food-quantity").val(1);
+      recalcNutrients();
+      $("#food-name").val(foodData.description);
+      $("#usda-search-results").empty();
+    } catch (error) {
+      console.error("Error parsing selected food:", error);
+    }
+  });
+  
+  $("#food-uom").on("change", function() {
+    let selectedText = $("#food-uom option:selected").text();
+    $("#selected-uom-display").text("Selected Unit: " + selectedText);
+    recalcNutrients();
+  });
+  
+  $("#food-quantity, #food-uom").on("input change", function() { recalcNutrients(); });
+  
+  function recalcNutrients() {
+    if (!currentUSDAFood) { console.log("No USDA food selected yet."); return; }
+    let quantity = parseFloat($("#food-quantity").val());
+    if (isNaN(quantity) || quantity <= 0) return;
+    let conversion = parseFloat($("#food-uom option:selected").attr("data-conversion")) || 1;
+    let computedWeight = quantity * conversion;
+    let multiplier = computedWeight / currentUSDAFood.baseWeight;
+    let newCalories = (currentUSDAFood.calories * multiplier).toFixed(2);
+    let newProtein = (currentUSDAFood.protein * multiplier).toFixed(2);
+    let newFat = (currentUSDAFood.fat * multiplier).toFixed(2);
+    let newCarbs = (currentUSDAFood.carbs * multiplier).toFixed(2);
+    $("#food-calories").val(newCalories);
+    $("#food-protein").val(newProtein);
+    $("#food-fat").val(newFat);
+    $("#food-carbs").val(newCarbs);
+    console.log("Recalculated nutrients based on quantity and unit:", { newCalories, newProtein, newFat, newCarbs });
+  }
+  
+  function openCustomFoodEntry() {
+    alert("Enter custom food details directly in the form.");
+    $("#usda-search-results").empty();
+  }
+  
+  $("#add-custom-food-btn").on("click", function() { openCustomFoodEntry(); });
+  
+  // ----------------- Daily Goals -----------------
+  document.getElementById("daily-goals-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    dailyGoals.calories = parseFloat(document.getElementById("goal-calories").value) || 0;
+    dailyGoals.protein = parseFloat(document.getElementById("goal-protein").value) || 0;
+    dailyGoals.fat = parseFloat(document.getElementById("goal-fat").value) || 0;
+    dailyGoals.carbs = parseFloat(document.getElementById("goal-carbs").value) || 0;
+    document.getElementById("goal-calories-display").textContent = dailyGoals.calories;
+    document.getElementById("goal-protein-display").textContent = dailyGoals.protein;
+    document.getElementById("goal-fat-display").textContent = dailyGoals.fat;
+    document.getElementById("goal-carbs-display").textContent = dailyGoals.carbs;
+    updateDailyGoalsProgress();
+  });
+  
+  function updateDailyGoalsProgress() {
+    const today = new Date().toISOString().split("T")[0];
+    const todaysLogs = nutritionLogs.filter(log => log.date === today);
+    const total = {
+      calories: todaysLogs.reduce((sum, log) => sum + log.calories, 0),
+      protein: todaysLogs.reduce((sum, log) => sum + log.protein, 0),
+      fat: todaysLogs.reduce((sum, log) => sum + log.fat, 0),
+      carbs: todaysLogs.reduce((sum, log) => sum + log.carbs, 0)
+    };
+    updateProgressBar("calories", total.calories, dailyGoals.calories);
+    updateProgressBar("protein", total.protein, dailyGoals.protein);
+    updateProgressBar("fat", total.fat, dailyGoals.fat);
+    updateProgressBar("carbs", total.carbs, dailyGoals.carbs);
+  }
+  
+  function updateProgressBar(nutrient, total, goal) {
+    const progressText = document.getElementById("progress-" + nutrient);
+    const progressBar = document.getElementById("progress-bar-" + nutrient);
+    progressText.textContent = total.toFixed(0);
+    let percentage = goal > 0 ? (total / goal) * 100 : 0;
+    if (percentage > 100) percentage = 100;
+    progressBar.style.width = percentage + "%";
+    progressBar.setAttribute("aria-valuenow", percentage);
+  }
+  
+  // ----------------- Meal Builder -----------------
+  $("#add-ingredient-btn").on("click", function() {
+    const ingredientName = prompt("Enter ingredient name:");
+    if (!ingredientName) return;
+    const ingredientWeight = parseFloat(prompt("Enter weight (g):"));
+    const ingredientCalories = parseFloat(prompt("Enter calories:"));
+    const ingredientProtein = parseFloat(prompt("Enter protein (g):")) || 0;
+    const ingredientFat = parseFloat(prompt("Enter fat (g):")) || 0;
+    const ingredientCarbs = parseFloat(prompt("Enter carbs (g):")) || 0;
+    const ingredient = { name: ingredientName, weight: ingredientWeight, calories: ingredientCalories, protein: ingredientProtein, fat: ingredientFat, carbs: ingredientCarbs };
+    const ingredientHtml = `<div class="meal-ingredient">
+      <strong>${ingredient.name}</strong> - ${ingredient.weight}g, ${ingredient.calories} kcal (P: ${ingredient.protein}g, F: ${ingredient.fat}g, C: ${ingredient.carbs}g)
+    </div>`;
+    $("#meal-ingredients-list").append(ingredientHtml);
+    let currentIngredients = $("#meal-builder-form").data("ingredients") || [];
+    currentIngredients.push(ingredient);
+    $("#meal-builder-form").data("ingredients", currentIngredients);
+  });
+  
+  $("#meal-builder-form").on("submit", function(e) {
+    e.preventDefault();
+    const mealName = $("#meal-name").val();
+    const mealCategory = $("#meal-category-builder").val();
+    const ingredients = $("#meal-builder-form").data("ingredients") || [];
+    if (!mealName || ingredients.length === 0) { alert("Please provide a meal name and at least one ingredient."); return; }
+    let totalCalories = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
+    ingredients.forEach(ing => {
+      totalCalories += ing.calories;
+      totalProtein += ing.protein;
+      totalFat += ing.fat;
+      totalCarbs += ing.carbs;
+    });
+    const meal = { name: mealName, category: mealCategory, ingredients: ingredients, totals: { calories: totalCalories, protein: totalProtein, fat: totalFat, carbs: totalCarbs } };
+    meals.push(meal);
+    displayMeals();
+    $("#meal-builder-form").trigger("reset").removeData("ingredients");
+    $("#meal-ingredients-list").empty();
+  });
+  
+  function displayMeals() {
+    let html = "<h4>Your Meals</h4>";
+    meals.forEach(meal => {
+      html += `<div class="meal-entry">
+        <strong>${meal.name}</strong> (${meal.category})<br>
+        Calories: ${meal.totals.calories} kcal, Protein: ${meal.totals.protein}g, Fat: ${meal.totals.fat}g, Carbs: ${meal.totals.carbs}g
+        <br><em>Ingredients:</em>`;
+      meal.ingredients.forEach(ing => {
+        html += `<div class="meal-ingredient">
+          ${ing.name} - ${ing.weight}g, ${ing.calories} kcal
+        </div>`;
+      });
+      html += "</div><hr>";
+    });
+    $("#meals-display").html(html);
+  }
+  
+  // ----------------- USDA Search & Food Selection -----------------
+  $("#food-name").on("input", function() {
+    clearTimeout(searchTimeout);
+    const query = $(this).val().trim();
+    if (!query) { $("#usda-search-results").empty(); currentUSDAFood = null; return; }
+    if (currentUSDAFood && query.toLowerCase() === currentUSDAFood.description.toLowerCase()) { return; }
+    searchTimeout = setTimeout(function() {
+      const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5`;
+      console.log("USDA search query:", query);
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          console.log("USDA response:", data);
+          let resultsHtml = "";
+          if (data.foods && data.foods.length > 0) {
+            let validFoods = data.foods.filter(food =>
+              food.foodNutrients && food.foodNutrients.some(n => n.nutrientName === "Energy") &&
+              !(food.servingSizeUnit && food.servingSizeUnit.toUpperCase() === "IU")
+            );
+            if (validFoods.length === 0) {
+              $("#usda-search-results").html("<p>No valid foods found. Please add custom food.</p>");
+              return;
+            }
+            validFoods.forEach(food => {
+              let bonus = 0;
+              if (food.dataType && food.dataType.toLowerCase() === "sr legacy") bonus += 100;
+              let desc = (food.description || "").toLowerCase();
+              let category = (food.foodCategory || "").toLowerCase();
+              wholeFoodKeywords.forEach(kw => {
+                if (desc.includes(kw) || category.includes(kw)) bonus += 50;
+              });
+              if (desc.trim() === "chicken") { bonus -= 100; }
+              processedKeywords.forEach(kw => {
+                if (desc.includes(kw) || category.includes(kw)) bonus -= 100;
+              });
+              let servingSizeNum = parseFloat(food.servingSize);
+              if (!isNaN(servingSizeNum) && servingSizeNum < 50) bonus -= 50;
+              food.adjustedScore = (food.score || 0) + bonus;
+            });
+            const onlyWhole = $("#whole-food-toggle").is(":checked");
+            if (onlyWhole) {
+              validFoods = validFoods.filter(food => {
+                let desc = (food.description || "").toLowerCase();
+                let category = (food.foodCategory || "").toLowerCase();
+                return wholeFoodKeywords.some(kw => desc.includes(kw) || category.includes(kw));
+              });
+            }
+            if (validFoods.length === 0) {
+              $("#usda-search-results").html("<p>No whole food results found. Please refine your search or add a custom food.</p>");
+              return;
+            }
+            validFoods.sort((a, b) => b.adjustedScore - a.adjustedScore);
+            validFoods.forEach(food => {
+              const energy = (() => { 
+                const nutrient = food.foodNutrients.find(n => n.nutrientName === "Energy"); 
+                return nutrient ? nutrient.value : "N/A"; 
+              })();
+              const servingSize = food.servingSize ? food.servingSize : "N/A";
+              const servingUnit = food.servingSizeUnit ? food.servingSizeUnit : "";
+              const brand = food.brandOwner ? `Brand: ${food.brandOwner}` : "";
+              const foodEncoded = encodeURIComponent(JSON.stringify(food));
+              resultsHtml += `<div class="food-item" data-food="${foodEncoded}">
+                <strong>${food.description}</strong>
+                <br>Category: ${food.foodCategory || "N/A"} ${brand}
+                <br>Serving: ${servingSize} ${servingUnit}
+                <br>Calories: ${energy} kcal
+              </div>`;
+            });
+            resultsHtml += `<div class="food-item">
+                <strong>Add Custom Food</strong>
+              </div>`;
+            $("#usda-search-results").html(resultsHtml);
+          } else {
+            $("#usda-search-results").html("<p>No foods found. Please add custom food.</p>");
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching USDA food data:", error);
+          alert("Error fetching food data. Check the console for details.");
+        });
+    }, 300);
+  });
+  
+  $("#usda-search-results").on("click", ".food-item", function() {
+    if ($(this).text().trim().toLowerCase().includes("add custom food")) {
+      openCustomFoodEntry();
+      return;
+    }
+    try {
+      const foodString = $(this).closest(".food-item").attr("data-food");
+      if (!foodString) { openCustomFoodEntry(); return; }
+      const decoded = decodeURIComponent(foodString);
+      const foodData = JSON.parse(decoded);
+      console.log("Food selected:", foodData);
+      console.log("Nutrients:", foodData.foodNutrients);
+      const nutrients = Array.isArray(foodData.foodNutrients) ? foodData.foodNutrients : [];
+      currentUSDAFood = {
+        baseWeight: foodData.servingSize || 100,
+        servingSizeUnit: foodData.servingSizeUnit || "serving",
+        calories: parseFloat(getNutrientValue(nutrients, "Energy")) || 0,
+        protein: parseFloat(getNutrientValue(nutrients, "Protein")) || 0,
+        fat: parseFloat(getNutrientValue(nutrients, "Total lipid (fat)")) || 0,
+        carbs: parseFloat(getNutrientValue(nutrients, "Carbohydrate, by difference")) || 0,
+        foodMeasures: foodData.foodMeasures || []
+      };
+      $("#food-uom").empty();
+      $("#food-uom").append($("<option>").attr("data-conversion", 1).text(currentUSDAFood.servingSizeUnit + " (Default)"));
+      if (currentUSDAFood.foodMeasures.length > 0) {
+        currentUSDAFood.foodMeasures.forEach(measure => {
+          if (measure.gramWeight) {
+            $("#food-uom").append($("<option>")
+              .attr("data-conversion", measure.gramWeight)
+              .text(measure.modifier + " (" + measure.measureUnit + ", ~" + measure.gramWeight + "g)"));
+          }
+        });
+      }
+      $("#selected-uom-display").text("Selected Unit: " + currentUSDAFood.servingSizeUnit + " (Default)");
+      $("#food-quantity").val(1);
+      recalcNutrients();
+      $("#food-name").val(foodData.description);
+      $("#usda-search-results").empty();
+    } catch (error) {
+      console.error("Error parsing selected food:", error);
+    }
+  });
+  
+  $("#food-uom").on("change", function() {
+    let selectedText = $("#food-uom option:selected").text();
+    $("#selected-uom-display").text("Selected Unit: " + selectedText);
+    recalcNutrients();
+  });
+  
+  $("#food-quantity, #food-uom").on("input change", function() { recalcNutrients(); });
+  
+  function recalcNutrients() {
+    if (!currentUSDAFood) { console.log("No USDA food selected yet."); return; }
+    let quantity = parseFloat($("#food-quantity").val());
+    if (isNaN(quantity) || quantity <= 0) return;
+    let conversion = parseFloat($("#food-uom option:selected").attr("data-conversion")) || 1;
+    let computedWeight = quantity * conversion;
+    let multiplier = computedWeight / currentUSDAFood.baseWeight;
+    let newCalories = (currentUSDAFood.calories * multiplier).toFixed(2);
+    let newProtein = (currentUSDAFood.protein * multiplier).toFixed(2);
+    let newFat = (currentUSDAFood.fat * multiplier).toFixed(2);
+    let newCarbs = (currentUSDAFood.carbs * multiplier).toFixed(2);
+    $("#food-calories").val(newCalories);
+    $("#food-protein").val(newProtein);
+    $("#food-fat").val(newFat);
+    $("#food-carbs").val(newCarbs);
+    console.log("Recalculated nutrients based on quantity and unit:", { newCalories, newProtein, newFat, newCarbs });
+  }
+  
+  function openCustomFoodEntry() {
+    alert("Enter custom food details directly in the form.");
+    $("#usda-search-results").empty();
+  }
+  
+  $("#add-custom-food-btn").on("click", function() { openCustomFoodEntry(); });
+  
+  // ----------------- Daily Goals -----------------
+  document.getElementById("daily-goals-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    dailyGoals.calories = parseFloat(document.getElementById("goal-calories").value) || 0;
+    dailyGoals.protein = parseFloat(document.getElementById("goal-protein").value) || 0;
+    dailyGoals.fat = parseFloat(document.getElementById("goal-fat").value) || 0;
+    dailyGoals.carbs = parseFloat(document.getElementById("goal-carbs").value) || 0;
+    document.getElementById("goal-calories-display").textContent = dailyGoals.calories;
+    document.getElementById("goal-protein-display").textContent = dailyGoals.protein;
+    document.getElementById("goal-fat-display").textContent = dailyGoals.fat;
+    document.getElementById("goal-carbs-display").textContent = dailyGoals.carbs;
+    updateDailyGoalsProgress();
+  });
+  
+  function updateDailyGoalsProgress() {
+    const today = new Date().toISOString().split("T")[0];
+    const todaysLogs = nutritionLogs.filter(log => log.date === today);
+    const total = {
+      calories: todaysLogs.reduce((sum, log) => sum + log.calories, 0),
+      protein: todaysLogs.reduce((sum, log) => sum + log.protein, 0),
+      fat: todaysLogs.reduce((sum, log) => sum + log.fat, 0),
+      carbs: todaysLogs.reduce((sum, log) => sum + log.carbs, 0)
+    };
+    updateProgressBar("calories", total.calories, dailyGoals.calories);
+    updateProgressBar("protein", total.protein, dailyGoals.protein);
+    updateProgressBar("fat", total.fat, dailyGoals.fat);
+    updateProgressBar("carbs", total.carbs, dailyGoals.carbs);
+  }
+  
+  function updateProgressBar(nutrient, total, goal) {
+    const progressText = document.getElementById("progress-" + nutrient);
+    const progressBar = document.getElementById("progress-bar-" + nutrient);
+    progressText.textContent = total.toFixed(0);
+    let percentage = goal > 0 ? (total / goal) * 100 : 0;
+    if (percentage > 100) percentage = 100;
+    progressBar.style.width = percentage + "%";
+    progressBar.setAttribute("aria-valuenow", percentage);
+  }
+  
+  // ----------------- Meal Builder -----------------
+  $("#add-ingredient-btn").on("click", function() {
+    const ingredientName = prompt("Enter ingredient name:");
+    if (!ingredientName) return;
+    const ingredientWeight = parseFloat(prompt("Enter weight (g):"));
+    const ingredientCalories = parseFloat(prompt("Enter calories:"));
+    const ingredientProtein = parseFloat(prompt("Enter protein (g):")) || 0;
+    const ingredientFat = parseFloat(prompt("Enter fat (g):")) || 0;
+    const ingredientCarbs = parseFloat(prompt("Enter carbs (g):")) || 0;
+    const ingredient = { name: ingredientName, weight: ingredientWeight, calories: ingredientCalories, protein: ingredientProtein, fat: ingredientFat, carbs: ingredientCarbs };
+    const ingredientHtml = `<div class="meal-ingredient">
+      <strong>${ingredient.name}</strong> - ${ingredient.weight}g, ${ingredient.calories} kcal (P: ${ingredient.protein}g, F: ${ingredient.fat}g, C: ${ingredient.carbs}g)
+    </div>`;
+    $("#meal-ingredients-list").append(ingredientHtml);
+    let currentIngredients = $("#meal-builder-form").data("ingredients") || [];
+    currentIngredients.push(ingredient);
+    $("#meal-builder-form").data("ingredients", currentIngredients);
+  });
+  
+  $("#meal-builder-form").on("submit", function(e) {
+    e.preventDefault();
+    const mealName = $("#meal-name").val();
+    const mealCategory = $("#meal-category-builder").val();
+    const ingredients = $("#meal-builder-form").data("ingredients") || [];
+    if (!mealName || ingredients.length === 0) { alert("Please provide a meal name and at least one ingredient."); return; }
+    let totalCalories = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
+    ingredients.forEach(ing => {
+      totalCalories += ing.calories;
+      totalProtein += ing.protein;
+      totalFat += ing.fat;
+      totalCarbs += ing.carbs;
+    });
+    const meal = { name: mealName, category: mealCategory, ingredients: ingredients, totals: { calories: totalCalories, protein: totalProtein, fat: totalFat, carbs: totalCarbs } };
+    meals.push(meal);
+    displayMeals();
+    $("#meal-builder-form").trigger("reset").removeData("ingredients");
+    $("#meal-ingredients-list").empty();
   });
   
   function displayMeals() {
@@ -621,10 +1129,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const containerEl = document.getElementById("comparison-editor-container");
     containerEl.style.width = "900px";
     containerEl.style.height = "600px";
-    // Clear container (if needed)
     containerEl.innerHTML = "";
     
-    // Create a new Konva stage
+    // Create Konva stage with two layers: imageLayer and uiLayer
     const stage = new Konva.Stage({
       container: 'comparison-editor-container',
       width: 900,
@@ -635,10 +1142,14 @@ document.addEventListener("DOMContentLoaded", function () {
     stage.add(imageLayer);
     stage.add(uiLayer);
     
-    // Use a counter to check both images load
+    // Load both images and ensure they are drawn before adding UI
     let imagesLoaded = 0;
+    function checkDraw() {
+      imagesLoaded++;
+      if (imagesLoaded === 2) imageLayer.draw();
+    }
     
-    // Load before image (left-justified)
+    // Load before image (left justified)
     Konva.Image.fromURL(beforePhoto.src, function(img) {
       const origWidth = img.image.width;
       const origHeight = img.image.height;
@@ -653,11 +1164,10 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       img.on("click", function() { activeImage = img; });
       imageLayer.add(img);
-      imagesLoaded++;
-      if (imagesLoaded === 2) imageLayer.draw();
+      checkDraw();
     });
     
-    // Load after image (right-justified)
+    // Load after image (right justified)
     Konva.Image.fromURL(afterPhoto.src, function(img) {
       const origWidth = img.image.width;
       const origHeight = img.image.height;
@@ -672,11 +1182,10 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       img.on("click", function() { activeImage = img; });
       imageLayer.add(img);
-      imagesLoaded++;
-      if (imagesLoaded === 2) imageLayer.draw();
+      checkDraw();
     });
     
-    // Add a divider between the images in UI layer
+    // Add a divider line in the UI layer
     const divider = new Konva.Rect({
       x: 448,
       y: 50,
@@ -688,7 +1197,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     uiLayer.add(divider);
     
-    // UI Layer: Add background gradient, header bar and text
+    // Add UI elements (background, header, frame)
     const uiBg = new Konva.Rect({
       x: 0,
       y: 0,
@@ -722,7 +1231,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     uiLayer.add(headerText);
     
-    // Frame border with checkered pattern
     const frame = new Konva.Rect({
       x: 0,
       y: 0,
@@ -833,7 +1341,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
   
-  // Add data overlay using Konva.IText with a choice for placeholder charts or custom text
+  // Add data overlay using Konva.IText with option for placeholder chart or custom text
   $("#add-data-overlay-btn").on("click", function() {
     if (editorStage) {
       const layer = editorStage.getLayers()[0];
@@ -971,7 +1479,7 @@ document.addEventListener("DOMContentLoaded", function () {
     alert("Sharing to " + platform + " (functionality to be implemented).");
   });
   
-  // Helper functions for advanced editor: rotate, scale
+  // Helper functions for advanced editor: rotate and scale active image
   function rotateActiveImage(angleDelta) {
     if (!activeImage) { alert("Please click on an image to select it."); return; }
     activeImage.rotation(activeImage.rotation() + angleDelta);
