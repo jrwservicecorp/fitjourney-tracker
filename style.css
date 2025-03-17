@@ -149,7 +149,7 @@ header h1 {
   background: linear-gradient(135deg, #000, #333);
 }
 
-/* Frame Divider (checkered border applied only to frame) */
+/* Divider (for advanced editor) */
 .frame-divider {
   position: absolute;
   top: 50px;
@@ -162,6 +162,23 @@ header h1 {
     rgba(255,255,255,0.2) 5px,
     rgba(0,0,0,0.2) 5px,
     rgba(0,0,0,0.2) 10px
+  );
+  pointer-events: none;
+}
+
+/* Checkered frame for advanced editor (applied over UI layer) */
+.checkered-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 900px;
+  height: 600px;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,0.1),
+    rgba(255,255,255,0.1) 10px,
+    rgba(0,0,0,0.1) 10px,
+    rgba(0,0,0,0.1) 20px
   );
   pointer-events: none;
 }
