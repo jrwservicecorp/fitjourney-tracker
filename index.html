@@ -57,7 +57,6 @@
           <div class="card">
             <div class="card-body">
               <h3 class="card-title">Weight Chart</h3>
-              <!-- Ensure canvas exists -->
               <canvas id="weightChart"></canvas>
               <p id="chart-placeholder" class="text-muted mt-2">Start logging weight to see trends!</p>
               <div class="form-check">
@@ -72,33 +71,52 @@
           <div class="card">
             <div class="card-body">
               <h3 class="card-title">Nutrition Chart</h3>
-              <!-- Ensure canvas exists -->
               <canvas id="nutritionChart"></canvas>
               <p id="nutrition-chart-placeholder" class="text-muted mt-2">Nutrition trends will appear here.</p>
             </div>
           </div>
         </div>
       </div>
-      <!-- Additional Dashboard Content (Summaries, Goals, etc.) -->
-      <!-- ... (Omitted for brevity; use your current content) ... -->
+      <!-- Summaries -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <!-- Ensure the weight-summary element exists -->
+          <div class="card" id="weight-summary">
+            <div class="card-body">
+              <h3 class="card-title">Weight Summary</h3>
+              <p class="placeholder">No weight data available.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="card" id="calorie-summary">
+            <div class="card-body">
+              <h3 class="card-title">Calorie Summary</h3>
+              <p class="placeholder">No calorie data available.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Daily Goals & Progress -->
+      <!-- (Omitted for brevity – use your current content) -->
     </section>
     
     <!-- Nutrition Log Section -->
     <section id="nutrition-section" class="tile" style="display:none;">
       <h2 class="dashboard-title">Nutrition Log</h2>
-      <!-- Your nutrition log content here -->
+      <!-- Nutrition log content -->
     </section>
     
     <!-- Meal Builder Section -->
     <section id="meal-builder-section" class="tile" style="display:none;">
       <h2 class="dashboard-title">Meal Builder</h2>
-      <!-- Your meal builder content here -->
+      <!-- Meal builder content -->
     </section>
     
     <!-- Body Weight Log Section -->
     <section id="weight-section" class="tile" style="display:none;">
       <h2 class="dashboard-title">Body Weight Log</h2>
-      <!-- Your body weight log content here -->
+      <!-- Body weight log content -->
     </section>
     
     <!-- Media & Exports Section -->
