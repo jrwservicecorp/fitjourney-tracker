@@ -163,15 +163,13 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Data logs:", dataLogs);
   }
   
-  function updateWeightChart() {
-    if (weightChart) {
-      weightChart.data.datasets[0].data = dataLogs.map(log => ({ x: log.date, y: log.weight }));
-      weightChart.update();
-    }
-  }
-  
+  // Updated updateSummary: check element exists before setting innerHTML
   function updateSummary() {
     const summaryDiv = document.getElementById("weight-summary");
+    if (!summaryDiv) {
+      console.warn("weight-summary element not found.");
+      return;
+    }
     if (dataLogs.length === 0) {
       summaryDiv.innerHTML = '<p class="placeholder">No weight data available.</p>';
       return;
@@ -652,12 +650,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
   
-  // Main page comparison: use a flex layout so that each image occupies 50%
+  // Main page comparison: use flex layout so each image occupies 50%
   $("#tt-update").on("click", function() {
     console.log("Update comparison button clicked");
     const beforeIndex = parseInt($("#tt-before").val());
     const afterIndex = parseInt($("#tt-after").val());
-    console.log("Before index:", beforeIndex, "After index:", afterIndex);
     if (isNaN(beforeIndex) || isNaN(afterIndex)) {
       alert("Please select both before and after photos.");
       return;
@@ -670,7 +667,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    // Create two divs for images (50% each) and a 2px divider
     const beforeDiv = $('<div class="comparison-image"></div>')
       .css({ width: '50%', float: 'left' })
       .append(`<img src="${beforePhoto.src}" alt="Before">`);
@@ -682,12 +678,11 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Main comparison updated.");
   });
   
-  // Advanced Editor using Konva.js with enhanced controls
+  // Advanced Editor using Konva with enhanced controls
   $("#open-editor-btn").on("click", function() {
     openComparisonEditor();
   });
   
-  // Helper: Create a checker pattern for the frame fill
   function createCheckerPattern() {
     const size = 10;
     const patternCanvas = document.createElement("canvas");
@@ -703,7 +698,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return patternCanvas;
   }
   
-  // Populate date selects based on available data
   function populateDateSelects() {
     const startSelect = document.getElementById("start-date-select");
     const endSelect = document.getElementById("end-date-select");
@@ -730,7 +724,6 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     populateDateSelects();
-    
     const beforeIndex = parseInt($("#tt-before").val()) || 0;
     const afterIndex = parseInt($("#tt-after").val()) || 1;
     const beforePhoto = photoLogs[beforeIndex];
@@ -759,7 +752,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const layer = new Konva.Layer();
     stage.add(layer);
     
-    // Reset selection
     selectedNode = null;
     
     function makeSelectable(node) {
@@ -775,7 +767,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
     
-    // Load before and after images
     const loadImage = (src, callback) => {
       const img = new Image();
       img.crossOrigin = "Anonymous";
@@ -812,7 +803,6 @@ document.addEventListener("DOMContentLoaded", function () {
         makeSelectable(beforeKonva);
         makeSelectable(afterKonva);
         
-        // Draggable divider
         const divider = new Konva.Rect({
           x: halfWidth - 1,
           y: 0,
@@ -837,7 +827,7 @@ document.addEventListener("DOMContentLoaded", function () {
           layer.batchDraw();
         });
         
-        // Always draw the frame using a checker pattern
+        // Draw the frame using a checker pattern
         const pattern = createCheckerPattern();
         const topBorder = new Konva.Rect({
           x: 0,
@@ -884,7 +874,7 @@ document.addEventListener("DOMContentLoaded", function () {
         frameGroup.add(topBorder, leftBorder, rightBorder, bottomBorder, branding);
         layer.add(frameGroup);
         
-        // "Show Data" event using drop-downs and radio buttons
+        // "Show Data" event using drop-downs & radio buttons
         document.getElementById("show-data-btn").addEventListener("click", function() {
           const startDate = document.getElementById("start-date-select").value;
           const endDate = document.getElementById("end-date-select").value;
@@ -894,7 +884,6 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Please select start and end dates from the drop downs.");
             return;
           }
-          // For demonstration, only weight data is charted.
           const filteredData = dataLogs.filter(d => d.date >= startDate && d.date <= endDate);
           if (filteredData.length === 0) {
             alert("No data for that range.");
