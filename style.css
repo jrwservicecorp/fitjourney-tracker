@@ -146,10 +146,11 @@ header h1 {
   width: 900px;
   height: 600px;
   position: relative;
-  background: linear-gradient(135deg, #000, #333);
+  /* Removed full background fill so images are visible */
+  background: transparent;
 }
 
-/* Divider (for advanced editor) */
+/* Divider in Advanced Editor */
 .frame-divider {
   position: absolute;
   top: 50px;
@@ -166,20 +167,16 @@ header h1 {
   pointer-events: none;
 }
 
-/* Checkered frame for advanced editor (applied over UI layer) */
+/* Frame Border for Advanced Editor (outline only) */
 .checkered-frame {
   position: absolute;
   top: 0;
   left: 0;
   width: 900px;
   height: 600px;
-  background-image: repeating-linear-gradient(
-    45deg,
-    rgba(255,255,255,0.1),
-    rgba(255,255,255,0.1) 10px,
-    rgba(0,0,0,0.1) 10px,
-    rgba(0,0,0,0.1) 20px
-  );
+  border: 6px solid #fff;
+  /* No fill so the images below show through */
+  background: transparent;
   pointer-events: none;
 }
 
