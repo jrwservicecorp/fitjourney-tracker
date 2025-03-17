@@ -50,7 +50,7 @@ header h1 {
 .dashboard-title {
   font-size: 1.8em;
   font-weight: 700;
-  color: #fff;
+  color: #000;
   margin-bottom: 20px;
   text-transform: uppercase;
 }
@@ -137,82 +137,33 @@ header h1 {
 .toolbar-btn:hover {
   background: #666;
 }
-
-/* Data Options */
-.data-options {
-  background: #222;
-  color: #fff;
-  padding: 10px;
-  text-align: center;
-  font-size: 14px;
-}
-.data-options label {
-  margin-right: 5px;
-}
-.data-options select {
-  margin: 0 10px;
+.close-btn {
+  background: #b00;
 }
 
 /* Advanced Editor Stage Container */
-.comparison-editor-container {
+#comparison-editor-container {
   width: 900px;
   height: 600px;
   position: relative;
-  background: #000;
-  overflow: hidden;
+  background: linear-gradient(135deg, #000, #333);
 }
 
-/* Main Comparison Container */
-.comparison-container {
-  display: flex;
-  position: relative;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  overflow: hidden;
-}
-.comparison-container .comparison-image {
-  flex: 1;
-  overflow: hidden;
-}
-.comparison-container .comparison-image img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-.comparison-container .divider {
+/* Frame Divider (checkered border applied only to frame) */
+.frame-divider {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
+  top: 50px;
+  left: 450px;
   width: 2px;
-  background: #fff;
-  z-index: 10;
-  transform: translateX(-1px);
-}
-
-/* Gallery Grid */
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 10px;
-}
-.gallery .photo-entry {
-  background: #333;
-  padding: 5px;
-  border-radius: 8px;
-  text-align: center;
-}
-.gallery .photo-entry img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 4px;
-}
-
-/* Drop shadow for images */
-.comparison-image img,
-.gallery .photo-entry img {
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  height: 550px;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,0.2),
+    rgba(255,255,255,0.2) 5px,
+    rgba(0,0,0,0.2) 5px,
+    rgba(0,0,0,0.2) 10px
+  );
+  pointer-events: none;
 }
 
 /* Footer */
@@ -229,5 +180,5 @@ footer {
   header h1 { font-size: 2em; }
   .navbar .btn-group .nav-btn { padding: 8px 12px; font-size: 0.9em; }
   .card, .tile { margin: 10px auto; padding: 15px; }
-  .comparison-editor-container { width: 100%; height: 400px; }
+  #comparison-editor-container { width: 100%; height: 400px; }
 }
