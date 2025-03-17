@@ -2371,12 +2371,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const afterPhoto = photoLogs[afterIndex];
     const container = $("#twentytwenty-container");
     container.empty();
-    // Place images side-by-side using inline styles
-    const $beforeImg = $(`<img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before" style="float:left; width:50%;">`);
-    const $afterImg = $(`<img class="twentytwenty-after" src="${afterPhoto.src}" alt="After" style="float:right; width:50%;">`);
+    // Use flex container styling from CSS for side-by-side display
+    const $beforeImg = $(`<img class="twentytwenty-before" src="${beforePhoto.src}" alt="Before">`);
+    const $afterImg = $(`<img class="twentytwenty-after" src="${afterPhoto.src}" alt="After">`);
     container.append($beforeImg, $afterImg);
-    $("<div style='clear:both;'></div>").appendTo(container);
-    container.find("img").css({ "max-height": "400px", "height": "auto" });
     setTimeout(function() {
       container.twentytwenty();
       console.log("Comparison updated with before and after photos");
@@ -2395,67 +2393,52 @@ document.addEventListener("DOMContentLoaded", function () {
     // Show modal
     document.getElementById("comparison-editor-modal").style.display = "block";
     const containerEl = document.getElementById("comparison-editor-container");
-    // For mobile responsiveness, set stage dimensions dynamically
     const stageWidth = containerEl.offsetWidth;
     const stageHeight = containerEl.offsetHeight;
     containerEl.innerHTML = "";
     
-    // Create Konva stage with two layers: imageLayer and uiLayer
+    // Create Konva stage
     const stage = new Konva.Stage({
       container: 'comparison-editor-container',
       width: stageWidth,
       height: stageHeight
     });
-    const imageLayer = new Konva.Layer();
-    const uiLayer = new Konva.Layer();
-    stage.add(imageLayer);
-    stage.add(uiLayer);
+    const layer = new Konva.Layer();
+    stage.add(layer);
     
-    // Calculate available width for each image (half of stage width)
+    // Calculate half width
     const halfWidth = stageWidth / 2;
-    // Load left image (before)
+    
+    // Load left (before) image: scale to fit left half and center vertically (with header height 50px)
     Konva.Image.fromURL(beforePhoto.src, function(img) {
       const origW = img.image.width;
       const origH = img.image.height;
-      // Scale to fit within halfWidth and stageHeight minus header (50px)
-      const scaleFactor = Math.min(halfWidth / origW, (stageHeight - 50) / origH);
-      const newW = origW * scaleFactor;
-      const newH = origH * scaleFactor;
-      img.setAttrs({
-        x: 0,
-        y: 50,
-        width: newW,
-        height: newH,
-        scaleX: 1,
-        scaleY: 1,
-        draggable: true
-      });
+      const scale = Math.min(halfWidth / origW, (stageHeight - 50) / origH);
+      const newW = origW * scale;
+      const newH = origH * scale;
+      const x = (halfWidth - newW) / 2;
+      const y = 50 + ((stageHeight - 50 - newH) / 2);
+      img.setAttrs({ x: x, y: y, width: newW, height: newH, draggable: true });
       img.on("click", function() { activeImage = img; });
-      imageLayer.add(img);
-      imageLayer.draw();
-      addEditorUI(uiLayer, stage);
+      layer.add(img);
+      layer.draw();
+      addEditorUI(layer, stage);
     });
     
-    // Load right image (after)
+    // Load right (after) image: scale to fit right half and center vertically
     Konva.Image.fromURL(afterPhoto.src, function(img) {
       const origW = img.image.width;
       const origH = img.image.height;
-      const scaleFactor = Math.min(halfWidth / origW, (stageHeight - 50) / origH);
-      const newW = origW * scaleFactor;
-      const newH = origH * scaleFactor;
-      img.setAttrs({
-        x: stageWidth - newW,
-        y: 50,
-        width: newW,
-        height: newH,
-        scaleX: 1,
-        scaleY: 1,
-        draggable: true
-      });
+      const scale = Math.min(halfWidth / origW, (stageHeight - 50) / origH);
+      const newW = origW * scale;
+      const newH = origH * scale;
+      const x = halfWidth + (halfWidth - newW) / 2;
+      const y = 50 + ((stageHeight - 50 - newH) / 2);
+      img.setAttrs({ x: x, y: y, width: newW, height: newH, draggable: true });
       img.on("click", function() { activeImage = img; });
-      imageLayer.add(img);
-      imageLayer.draw();
-      addEditorUI(uiLayer, stage);
+      layer.add(img);
+      layer.draw();
+      addEditorUI(layer, stage);
     });
     
     editorStage = stage;
@@ -2466,7 +2449,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
   // Add UI overlays in advanced editor: divider, header, frame
   function addEditorUI(uiLayer, stage) {
-    // Divider line
+    // Divider line in the middle
     const divider = new Konva.Rect({
       x: stage.width() / 2 - 2,
       y: 50,
@@ -2530,7 +2513,7 @@ document.addEventListener("DOMContentLoaded", function () {
     activeImage.getLayer().draw();
   }
   
-  // Toggle crop mode
+  // Toggle crop mode for active image
   function toggleCropMode() {
     if (!activeImage) { alert("Please select an image to crop."); return; }
     const layer = editorStage.getLayers()[0];
@@ -2574,7 +2557,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
   
-  // Add editable text overlay (using Konva.IText if available)
+  // Add editable text overlay using Konva.IText (if available)
   $("#add-text-btn").on("click", function() {
     if (editorStage) {
       const layer = editorStage.getLayers()[0];
@@ -2596,7 +2579,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
   
-  // Add data overlay (placeholder: pie or bar chart or custom text)
+  // Add data overlay (placeholder: pie chart, bar chart, or custom text)
   $("#add-data-overlay-btn").on("click", function() {
     if (editorStage) {
       const layer = editorStage.getLayers()[0];
