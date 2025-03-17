@@ -95,11 +95,24 @@ header h1 {
   transform: scale(1.02);
 }
 
-/* Photo Upload: Ensure file input is clickable on mobile */
+/* Photo Upload: Ensure file input is clickable */
 .photo-upload input[type="file"] {
   pointer-events: auto;
   position: relative;
   z-index: 10;
+}
+
+/* Main Side-by-Side Comparison Container */
+.twentytwenty-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  margin: 0 auto;
+}
+.twentytwenty-container img {
+  width: 48%;
+  object-fit: cover;
 }
 
 /* Advanced Editor Modal */
@@ -153,7 +166,7 @@ header h1 {
   width: 900px;
   height: 600px;
   position: relative;
-  background: #333; /* dark background so images stand out */
+  background: #333;
   border: 4px dashed #777;
   box-shadow: inset 0 0 10px rgba(255,255,255,0.2);
 }
@@ -161,10 +174,10 @@ header h1 {
 /* Divider in Advanced Editor */
 .frame-divider {
   position: absolute;
-  top: 50;
+  top: 50px;
   left: 448px;
   width: 4px;
-  height: 550px;
+  height: calc(100% - 50px);
   background: repeating-linear-gradient(
     45deg,
     rgba(255,255,255,0.3),
@@ -175,7 +188,7 @@ header h1 {
   pointer-events: none;
 }
 
-/* Frame Border for Advanced Editor (outline only) */
+/* Frame Border for Advanced Editor */
 .checkered-frame {
   position: absolute;
   top: 0;
@@ -196,10 +209,12 @@ footer {
   color: #000;
 }
 
-/* Responsive adjustments */
+/* Responsive */
 @media only screen and (max-width: 600px) {
   header h1 { font-size: 2em; }
   .navbar .btn-group .nav-btn { padding: 8px 12px; font-size: 0.9em; }
   .card, .tile { margin: 10px auto; padding: 15px; }
   #comparison-editor-container { width: 100%; height: 400px; }
+  .twentytwenty-container { flex-direction: column; }
+  .twentytwenty-container img { width: 100%; margin-bottom: 10px; }
 }
