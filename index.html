@@ -26,6 +26,7 @@
   <script src="script.js" defer></script>
 </head>
 <body>
+  <!-- Header -->
   <header>
     <div class="container text-center">
       <h1>FitJourney Tracker</h1>
@@ -46,13 +47,14 @@
     </div>
   </nav>
 
+  <!-- Main Application Content -->
   <main id="main-app" class="container my-4">
-    <!-- Dashboard Section (full content from your current version) -->
+    <!-- Dashboard Section -->
     <section id="dashboard-section" class="tile">
-      <!-- Dashboard content such as charts, summaries, and daily goals -->
+      <!-- (Your full dashboard content – charts, summaries, daily goals – goes here.) -->
       <h2 class="dashboard-title">Dashboard</h2>
-      <!-- Weight Chart -->
       <div class="row">
+        <!-- Weight Chart -->
         <div class="col-md-6 mb-4">
           <div class="card">
             <div class="card-body">
@@ -77,7 +79,7 @@
           </div>
         </div>
       </div>
-      <!-- Summaries -->
+      <!-- Summaries and Daily Goals -->
       <div class="row">
         <div class="col-md-6 mb-3">
           <div class="card" id="weight-summary">
@@ -155,7 +157,7 @@
       </div>
     </section>
     
-    <!-- Nutrition Log Section -->
+    <!-- Nutrition Log Section with USDA Search -->
     <section id="nutrition-section" class="tile" style="display:none;">
       <h2 class="dashboard-title">Nutrition Log</h2>
       <!-- Whole Food Toggle -->
@@ -366,7 +368,7 @@
             <button id="open-editor-btn" class="btn btn-outline-secondary ms-2">Open Advanced Editor</button>
           </div>
           <div id="twentytwenty-container" class="twentytwenty-container">
-            <!-- Force images to display side-by-side (50% each) -->
+            <!-- Images forced side-by-side -->
             <img class="twentytwenty-before" src="https://placehold.co/300x400?text=Before" alt="Before" style="float:left; width:50%;" />
             <img class="twentytwenty-after" src="https://placehold.co/300x400?text=After" alt="After" style="float:right; width:50%;" />
             <div style="clear:both;"></div>
@@ -411,6 +413,7 @@
     </div>
   </main>
   
+  <!-- Footer -->
   <footer class="bg-light">
     <div class="container text-center">
       <p>&copy; 2025 FitJourney Tracker</p>
